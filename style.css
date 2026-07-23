@@ -266,3 +266,142 @@ body {
     background: #162b4d;
 
 }
+
+/* ======================
+   CHAT AREA
+====================== */
+
+#chat-box {
+
+    flex: 1;
+
+    margin: 0 20px;
+
+    padding: 20px;
+
+    background: #07101f;
+
+    border-radius: 15px;
+
+    overflow-y: auto;
+
+    border: 1px solid #1c2d4a;
+
+}
+
+
+
+/* BOT MESSAGE */
+
+.bot-message {
+
+    background: #142641;
+
+    color: white;
+
+    padding: 15px;
+
+    border-radius: 12px;
+
+    max-width: 75%;
+
+    margin-bottom: 15px;
+
+    line-height: 1.5;
+
+}
+
+
+
+/* USER MESSAGE (for JavaScript later) */
+
+.user-message {
+
+    background: #1683ff;
+
+    color: white;
+
+    padding: 15px;
+
+    border-radius: 12px;
+
+    max-width: 75%;
+
+    margin-left: auto;
+
+    margin-bottom: 15px;
+
+}
+
+
+
+/* ======================
+   INPUT AREA
+====================== */
+
+
+.input-area {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 20px;
+
+}
+
+
+.input-area input {
+
+    flex: 1;
+
+    background: #101f38;
+
+    color: white;
+
+    border: 1px solid #29446b;
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    font-size: 15px;
+
+    outline: none;
+
+}
+
+
+
+.input-area button {
+
+    border: none;
+
+    cursor: pointer;
+
+    border-radius: 10px;
+
+    padding: 12px 15px;
+
+    background: #1683ff;
+
+    color: white;
+
+}
+
+
+.attach-btn,
+#voice-btn {
+
+    background: #132542 !important;
+
+}
+
+
+#send-btn:hover {
+
+    background: #006de8;
+
+}
