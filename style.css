@@ -1,8 +1,4 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     background: #000;
@@ -22,47 +18,43 @@ body {
     text-align: center;
 }
 
-/* Header */
 .header {
-    margin-bottom: 40px;
+    margin-bottom: 50px;
 }
 
 .logo {
-    width: 90px;
-    height: 90px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
 }
 
 .header h1 {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 600;
 }
 
-/* Quick Actions */
 .quick-actions {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 50px;
+    gap: 14px;
+    margin-bottom: 60px;
 }
 
 .action-btn {
     background: #1f1f1f;
     color: white;
     border: none;
-    padding: 16px 20px;
+    padding: 18px;
     border-radius: 16px;
     font-size: 17px;
     cursor: pointer;
-    transition: 0.3s;
 }
 
 .action-btn:hover {
     background: #2a2a2a;
 }
 
-/* Input */
 .input-wrapper {
     display: flex;
     gap: 10px;
@@ -78,21 +70,20 @@ body {
     outline: none;
     color: white;
     font-size: 17px;
-    padding: 14px 20px;
+    padding: 16px 20px;
 }
 
 #send-btn {
     background: #1683ff;
     color: white;
     border: none;
-    padding: 0 32px;
+    padding: 0 34px;
     border-radius: 9999px;
     font-size: 16px;
     cursor: pointer;
 }
 
-/* Mobile */
 @media (max-width: 600px) {
-    .container { padding: 15px; }
-    .logo { width: 70px; height: 70px; }
+    .logo { width: 80px; height: 80px; }
+    .header h1 { font-size: 30px; }
 }
