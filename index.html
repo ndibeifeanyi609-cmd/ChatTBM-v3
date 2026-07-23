@@ -3,29 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>ChatTBM</title>
-       <link rel="icon" type="image/png" href="IMG_4365.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="IMG_4365.png">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="app">
 
-    <!-- Main Content Only (No big sidebar) -->
+    <!-- Main Content -->
     <main class="main">
 
         <!-- Welcome Screen -->
-<section class="welcome" id="welcome-screen">
-    <img src="IMG_4365.png" class="hero-logo" alt="ChatTBM Logo">
-    
-    <h1>ChatTBM</h1>
-    <p>Your AI Content Assistant for Captions, Scripts & Viral Ideas</p>
+        <section class="welcome" id="welcome-screen">
 
-    <div class="prompt-cards">
-        <div class="card" data-prompt="Create a viral caption for my latest video">✍️ Create a viral caption</div>
-        <div class="card" data-prompt="Give me 5 viral video ideas for Instagram Reels">🎬 Generate video ideas</div>
-        <div class="card" data-prompt="Write a fire Instagram post about personal growth">📱 Write social media posts</div>
-    </div>
-</section>
+            <img src="IMG_4365.png" class="hero-logo" alt="ChatTBM Logo">
+
+            <h1>ChatTBM</h1>
+
+            <p>Your AI Content Assistant for Captions, Scripts & Viral Ideas</p>
+
+            <div class="prompt-cards">
+
+                <div class="card" data-prompt="Create a viral caption for my latest video">
+                    ✍️ Create a viral caption
+                </div>
+
+                <div class="card" data-prompt="Give me 5 viral video ideas for Instagram Reels">
+                    🎬 Generate video ideas
+                </div>
+
+                <div class="card" data-prompt="Write a fire Instagram post about personal growth">
+                    📱 Write social media posts
+                </div>
+
+            </div>
+
+        </section>
 
         <!-- Chat Area -->
         <section class="chat-container" id="chat-container">
@@ -34,17 +54,24 @@
 
         <!-- Input Area -->
         <div class="input-area">
-            <input 
+
+            <input
                 type="text"
                 id="user-input"
                 placeholder="Ask anything..."
             >
-            <button id="send-btn">Send</button>
+
+            <button id="send-btn">
+                Send
+            </button>
+
         </div>
 
     </main>
+
 </div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
