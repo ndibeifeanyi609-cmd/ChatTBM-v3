@@ -10,38 +10,12 @@ body {
 
 .app { display: flex; height: 100vh; }
 
-/* Minimal Sidebar */
-.sidebar {
-    width: 70px;
-    background: #081326;
+/* Main Area */
+.main {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 20px 10px;
-    border-right: 1px solid #1c2d4a;
 }
-
-.brand h2 {
-    color: #2da8ff;
-    font-size: 18px;
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    margin-bottom: 40px;
-}
-
-.new-chat-btn {
-    background: #1683ff;
-    color: white;
-    border: none;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-/* Main */
-.main { flex: 1; display: flex; flex-direction: column; }
 
 /* Welcome */
 .welcome {
@@ -51,11 +25,21 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 20px;
+    padding: 40px 20px;
 }
 
-.welcome h2 { font-size: 32px; margin-bottom: 12px; }
-.welcome p { color: #b8c7dc; max-width: 460px; margin-bottom: 40px; }
+.welcome h1 {
+    font-size: 42px;
+    color: #2da8ff;
+    margin-bottom: 12px;
+}
+
+.welcome p {
+    color: #b8c7dc;
+    font-size: 17px;
+    max-width: 500px;
+    margin-bottom: 50px;
+}
 
 .prompt-cards {
     display: flex;
@@ -66,47 +50,51 @@ body {
 
 .card {
     background: #101f38;
-    padding: 18px 24px;
+    padding: 20px 26px;
     border-radius: 16px;
     cursor: pointer;
-    min-width: 220px;
-    transition: 0.3s;
+    min-width: 240px;
+    transition: all 0.3s;
+    font-size: 16px;
 }
 
 .card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
     background: #162b4d;
 }
 
-/* Chat */
+/* Chat Area */
 .chat-container {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
     display: none;
+    background: #07101f;
 }
 
 #chat-box {
-    max-width: 800px;
+    max-width: 780px;
     margin: 0 auto;
 }
 
 .bot-message, .user-message {
     padding: 16px 20px;
     border-radius: 18px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     max-width: 75%;
+    line-height: 1.5;
 }
 
 .bot-message { background: #142641; }
 .user-message { background: #1683ff; margin-left: auto; }
 
-/* Input - Grok Style */
+/* Input - Very Grok-like */
 .input-area {
-    padding: 20px;
+    padding: 20px 30px;
     background: #050b18;
     border-top: 1px solid #1c2d4a;
     display: flex;
+    align-items: center;
     gap: 12px;
 }
 
@@ -125,14 +113,22 @@ body {
     background: #1683ff;
     color: white;
     border: none;
-    padding: 0 28px;
+    padding: 0 32px;
     border-radius: 9999px;
-    cursor: pointer;
+    height: 52px;
     font-size: 16px;
+    cursor: pointer;
 }
 
-/* Responsive */
+/* Scrollbar */
+#chat-box::-webkit-scrollbar { width: 6px; }
+#chat-box::-webkit-scrollbar-thumb {
+    background: #1683ff;
+    border-radius: 10px;
+}
+
+/* Mobile */
 @media (max-width: 768px) {
-    .sidebar { width: 60px; }
-    .brand h2 { font-size: 16px; }
+    .welcome h1 { font-size: 34px; }
+    .card { min-width: 100%; }
 }
