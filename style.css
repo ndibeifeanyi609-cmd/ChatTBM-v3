@@ -120,13 +120,13 @@ header h1 {
 
 
 
-.welcome h2 {
+.welcome p {
 
-    font-size: 42px;
-    font-weight: 700;
+    color: #aaa;
+    font-size: 20px;
+    max-width: 500px;
 
 }
-
 
 
 .welcome p {
