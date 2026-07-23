@@ -9,35 +9,26 @@
 </head>
 <body>
 
-<div class="app">
-    <main class="main">
-
-        <!-- Welcome -->
-        <section class="welcome" id="welcome-screen">
-            <img src="IMG_4365.png" class="hero-logo" alt="ChatTBM Logo">
+    <div class="container">
+        <!-- Logo -->
+        <div class="header">
+            <img src="IMG_4365.png" alt="ChatTBM" class="logo">
             <h1>ChatTBM</h1>
-            <p>Your AI Content Assistant for Captions, Scripts & Viral Ideas</p>
-
-            <div class="prompt-cards">
-                <div class="card" data-prompt="Create a viral caption for my latest video">✍️ Create a viral caption</div>
-                <div class="card" data-prompt="Give me 5 viral video ideas for Instagram Reels">🎬 Generate video ideas</div>
-                <div class="card" data-prompt="Write a fire Instagram post about personal growth">📱 Write social media posts</div>
-            </div>
-        </section>
-
-        <!-- Chat -->
-        <section class="chat-container" id="chat-container">
-            <div id="chat-box"></div>
-        </section>
-
-        <!-- Input -->
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Ask anything...">
-            <button id="send-btn">Send</button>
         </div>
 
-    </main>
-</div>
+        <!-- Quick Action Buttons -->
+        <div class="quick-actions">
+            <button class="action-btn">✍️ Create a viral caption</button>
+            <button class="action-btn">🎬 Generate video ideas</button>
+            <button class="action-btn">📱 Write social media posts</button>
+        </div>
+
+        <!-- Big Input -->
+        <div class="input-wrapper">
+            <input type="text" id="user-input" placeholder="Ask anything..." autocomplete="off">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
 
 <script src="script.js"></script>
 </body>
