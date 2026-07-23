@@ -3,38 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatTBM - AI Content Assistant</title>
+    <title>ChatTBM</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="app">
 
-    <!-- Sidebar -->
+    <!-- Minimal Sidebar -->
     <aside class="sidebar">
         <div class="brand">
-            <img src="ChatTBM-Logo.png" alt="ChatTBM Logo">
             <h2>ChatTBM</h2>
         </div>
-
-        <button class="new-chat-btn">
-            + New Chat
-        </button>
-
-        <nav class="menu">
-            <button>💬 Chats</button>
-            <button>⚙ Settings</button>
-        </nav>
+        <button class="new-chat-btn">+ New Chat</button>
     </aside>
 
-    <!-- Main Area -->
+    <!-- Main Content -->
     <main class="main">
 
-        <!-- Welcome Screen -->
+        <!-- Welcome -->
         <section class="welcome" id="welcome-screen">
-            <img src="ChatTBM-Logo.png" class="hero-logo" alt="ChatTBM">
             <h2>Welcome to ChatTBM</h2>
-            <p>Create captions, scripts, social posts and viral content ideas with AI.</p>
+            <p>Your AI Content Assistant for Captions, Scripts & Viral Ideas</p>
 
             <div class="prompt-cards">
                 <div class="card" data-prompt="Create a viral caption for my latest video">✍️ Create a viral caption</div>
@@ -48,17 +38,13 @@
             <div id="chat-box"></div>
         </section>
 
-        <!-- Input Area -->
+        <!-- Input -->
         <div class="input-area">
-            <button class="attach-btn">📎</button>
-            
             <input 
                 type="text"
                 id="user-input"
                 placeholder="Ask anything..."
             >
-            
-            <button id="voice-btn">🎤</button>
             <button id="send-btn">Send</button>
         </div>
 
