@@ -1,1 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ChatTBM v3</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ===========================
+         Sidebar
+    ============================ -->
+
+    <aside id="sidebar" class="sidebar">
+
+        <div class="sidebar-header">
+
+            <img src="08AD4FA9-71D7-4B6E-BC1A-0C293EA7E5F7.png"
+                 class="sidebar-logo"
+                 alt="ChatTBM Logo">
+
+            <h2>ChatTBM</h2>
+
+        </div>
+
+        <button onclick="newChat()">
+            ➕ New Chat
+        </button>
+
+        <button onclick="clearChat()">
+            🗑 Clear Chat
+        </button>
+
+        <button onclick="downloadChat()">
+            📄 Download Chat
+        </button>
+
+        <button onclick="shareChat()">
+            📤 Share Chat
+        </button>
+
+        <button onclick="openSettings()">
+            ⚙️ Settings
+        </button>
+
+        <button onclick="showProfile()">
+            👤 Profile
+        </button>
+
+        <button onclick="logoutUser()">
+            🚪 Logout
+        </button>
+
+        <div class="sidebar-history">
+
+            <h3>Recent Chats</h3>
+
+            <div id="history-list">
+
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- ===========================
+         Main Screen
+    ============================ -->
+
+    <main class="main">
+
+        <!-- Top Bar -->
+
+        <header class="topbar">
+
+            <button
+                class="menu-btn"
+                onclick="toggleSidebar()">
+
+                ☰
+
+            </button>
+
+            <div class="topbar-brand">
+
+                <img
+                    src="08AD4FA9-71D7-4B6E-BC1A-0C293EA7E5F7.png"
+                    class="top-logo"
+                    alt="Logo">
+
+                <span>
+
+                    ChatTBM
+
+                </span>
+
+            </div>
+
+        </header>
+
+        <!-- Welcome Screen -->
+
+        <section id="welcome-screen"
+                 class="welcome-screen">
+
+            <img
+                src="08AD4FA9-71D7-4B6E-BC1A-0C293EA7E5F7.png"
+                class="welcome-logo"
+                alt="ChatTBM">
+
+            <h1>
+
+                Welcome to ChatTBM
+
+            </h1>
+
+            <p>
+
+                Your AI Content Assistant
+
+            </p>
