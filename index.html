@@ -126,3 +126,366 @@
                 Your AI Content Assistant
 
             </p>
+
+                    </section>
+
+        <!-- ===========================
+             Prompt Cards
+        ============================ -->
+
+        <section class="prompt-section">
+
+            <button class="prompt-card"
+                onclick="quickMessage('Create a viral caption')">
+
+                <span class="emoji">✍️</span>
+
+                <h3>Caption</h3>
+
+                <p>Create engaging social media captions.</p>
+
+            </button>
+
+            <button class="prompt-card"
+                onclick="quickMessage('Write a short video script')">
+
+                <span class="emoji">🎬</span>
+
+                <h3>Video Script</h3>
+
+                <p>Generate short and powerful scripts.</p>
+
+            </button>
+
+            <button class="prompt-card"
+                onclick="quickMessage('Generate hashtags')">
+
+                <span class="emoji">#️⃣</span>
+
+                <h3>Hashtags</h3>
+
+                <p>Find trending hashtags instantly.</p>
+
+            </button>
+
+            <button class="prompt-card"
+                onclick="quickMessage('Create an advert')">
+
+                <span class="emoji">📢</span>
+
+                <h3>Advert</h3>
+
+                <p>Create high-converting advertisements.</p>
+
+            </button>
+
+        </section>
+
+        <!-- ===========================
+             Chat Area
+        ============================ -->
+
+        <section class="chat-container">
+
+            <div id="chat-box">
+
+            </div>
+
+        </section>
+
+                <!-- ===========================
+             AI Typing Indicator
+        ============================ -->
+
+        <div id="loading" class="typing-indicator">
+
+            <div class="typing-dot"></div>
+
+            <div class="typing-dot"></div>
+
+            <div class="typing-dot"></div>
+
+        </div>
+
+        <!-- ===========================
+             Bottom Input Area
+        ============================ -->
+
+        <div class="input-wrapper">
+
+            <button
+                class="icon-btn"
+                onclick="startVoice()"
+                title="Voice">
+
+                🎤
+
+            </button>
+
+            <input
+                type="text"
+                id="user-input"
+                placeholder="Ask ChatTBM anything...">
+
+            <button
+                class="icon-btn"
+                onclick="openAttachment()"
+                title="Attachment">
+
+                ➕
+
+            </button>
+
+            <button
+                id="send-btn"
+                onclick="sendMessage()">
+
+                ➜
+
+            </button>
+
+        </div>
+
+        <!-- ===========================
+             Bottom Toolbar
+        ============================ -->
+
+        <div class="bottom-tools">
+
+            <button onclick="quickMessage('Create a caption')">
+
+                ✍️ Caption
+
+            </button>
+
+            <button onclick="quickMessage('Write a video script')">
+
+                🎬 Script
+
+            </button>
+
+            <button onclick="quickMessage('Generate hashtags')">
+
+                #️⃣ Hashtags
+
+            </button>
+
+            <button onclick="quickMessage('Create an advert')">
+
+                📢 Advert
+
+            </button>
+
+        </div>
+
+                <!-- ===========================
+             Login Modal
+        ============================ -->
+
+        <div id="loginModal" class="modal">
+
+            <div class="modal-content">
+
+                <h2>Welcome Back</h2>
+
+                <p>Login to your ChatTBM account.</p>
+
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="Email Address">
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Password">
+
+                <button onclick="loginUser()">
+
+                    Login
+
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    onclick="closeLogin()">
+
+                    Cancel
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- ===========================
+             Signup Modal
+        ============================ -->
+
+        <div id="signupModal" class="modal">
+
+            <div class="modal-content">
+
+                <h2>Create Account</h2>
+
+                <p>Join ChatTBM today.</p>
+
+                <input
+                    type="text"
+                    id="signupName"
+                    placeholder="Full Name">
+
+                <input
+                    type="email"
+                    id="signupEmail"
+                    placeholder="Email Address">
+
+                <input
+                    type="password"
+                    id="signupPassword"
+                    placeholder="Password">
+
+                <button onclick="signupUser()">
+
+                    Create Account
+
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    onclick="closeSignup()">
+
+                    Cancel
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- ===========================
+             Settings Modal
+        ============================ -->
+
+        <div id="settingsModal" class="modal">
+
+            <div class="modal-content">
+
+                <h2>Settings</h2>
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Username">
+
+                <button onclick="saveUsername()">
+
+                    Save Username
+
+                </button>
+
+                <button onclick="toggleTheme()">
+
+                    🌙 Toggle Theme
+
+                </button>
+
+                <button onclick="clearAllData()">
+
+                    🗑 Delete All Data
+
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    onclick="closeSettings()">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+                <!-- ===========================
+             Profile Card
+        ============================ -->
+
+        <div class="profile-card">
+
+            <img
+                src="08AD4FA9-71D7-4B6E-BC1A-0C293EA7E5F7.png"
+                class="profile-logo"
+                alt="ChatTBM">
+
+            <h3 id="profile-name">
+
+                Guest User
+
+            </h3>
+
+            <p>
+
+                Your AI Content Assistant for Captions,
+                Scripts & Viral Ideas.
+
+            </p>
+
+        </div>
+
+        <!-- ===========================
+             Extra Tools
+        ============================ -->
+
+        <div class="extra-buttons">
+
+            <button onclick="backupChat()">
+
+                💾 Backup
+
+            </button>
+
+            <button onclick="restoreBackup()">
+
+                ♻️ Restore
+
+            </button>
+
+            <button onclick="showVersion()">
+
+                ℹ️ Version
+
+            </button>
+
+        </div>
+
+        <!-- ===========================
+             Footer
+        ============================ -->
+
+        <footer class="footer">
+
+            <p>
+
+                ChatTBM v3.0 Demo
+
+            </p>
+
+            <p>
+
+                Built with ❤️ for Content Creators
+
+            </p>
+
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
