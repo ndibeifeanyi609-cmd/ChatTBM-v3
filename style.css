@@ -405,3 +405,164 @@ body {
     background: #006de8;
 
 }
+
+/* ======================
+   SCROLLBAR
+====================== */
+
+#chat-box::-webkit-scrollbar {
+
+    width: 6px;
+
+}
+
+
+#chat-box::-webkit-scrollbar-thumb {
+
+    background: #1683ff;
+
+    border-radius: 10px;
+
+}
+
+
+
+/* ======================
+   MOBILE RESPONSIVE
+====================== */
+
+
+@media (max-width: 768px) {
+
+
+    body {
+
+        overflow: hidden;
+
+    }
+
+
+    .app {
+
+        flex-direction: column;
+
+    }
+
+
+    .sidebar {
+
+        width: 100%;
+
+        height: auto;
+
+        flex-direction: row;
+
+        align-items: center;
+
+        padding: 10px;
+
+        gap: 10px;
+
+    }
+
+
+    .brand {
+
+        margin-bottom: 0;
+
+        flex: 1;
+
+    }
+
+
+    .brand h2 {
+
+        font-size: 18px;
+
+    }
+
+
+    .new-chat-btn {
+
+        margin-bottom: 0;
+
+        padding: 10px;
+
+        font-size: 13px;
+
+    }
+
+
+    .menu {
+
+        display: none;
+
+    }
+
+
+    .top-bar {
+
+        padding: 15px;
+
+    }
+
+
+    .top-bar h1 {
+
+        font-size: 24px;
+
+    }
+
+
+    .welcome {
+
+        padding: 20px 10px;
+
+    }
+
+
+    .hero-logo {
+
+        width: 80px;
+
+        height: 80px;
+
+    }
+
+
+    .welcome h2 {
+
+        font-size: 22px;
+
+    }
+
+
+    .card {
+
+        width: 100%;
+
+    }
+
+
+    #chat-box {
+
+        margin: 10px;
+
+    }
+
+
+    .input-area {
+
+        padding: 10px;
+
+    }
+
+
+    .input-area input {
+
+        padding: 12px;
+
+    }
+
+
+}
