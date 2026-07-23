@@ -1,305 +1,98 @@
-/* =================================
-   ChatTBM v3.0 - Simple AI Interface
-================================= */
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-
-html,
 body {
-    width: 100%;
-    height: 100%;
-}
-
-
-body {
-
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-
-    background: #050505;
-
+    background: #000;
     color: white;
-
-    overflow: hidden;
-
-}
-
-
-
-/* App Container */
-
-.app {
-
-    width: 100%;
-
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     height: 100vh;
-
     display: flex;
-
-    flex-direction: column;
-
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
-
+.container {
+    width: 100%;
+    max-width: 620px;
+    padding: 20px;
+    text-align: center;
+}
 
 /* Header */
-
-header {
-
-    width: 100%;
-
-    height: 75px;
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 10px;
-
-    border-bottom: 1px solid #222;
-
+.header {
+    margin-bottom: 40px;
 }
-
-
 
 .logo {
-
-    width: 32px;
-
-    height: 32px;
-
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
-
-    object-fit: contain;
-
+    margin-bottom: 12px;
 }
 
-
-
-header h1 {
-    font-size: 30px;
-    font-weight: 900;
-    letter-spacing: -0.5px;
+.header h1 {
+    font-size: 32px;
+    font-weight: 600;
 }
 
-
-/* Chat Area */
-
-#chat-box {
-
-    flex: 1;
-
-    width: 100%;
-
-    overflow-y: auto;
-
-    padding: 25px 20px;
-
-}
-
-
-
-/* Welcome */
-
-.welcome {
-
-    height: 100%;
-
+/* Quick Actions */
+.quick-actions {
     display: flex;
-
     flex-direction: column;
-
-    justify-content: center;
-
-    align-items: center;
-
-    text-align: center;
-
-    padding: 20px;
-
+    gap: 12px;
+    margin-bottom: 50px;
 }
 
-
-
-.welcome h2 {
-
-    font-size: 42px;
-
-    font-weight: 700;
-
-    margin-bottom: 15px;
-
+.action-btn {
+    background: #1f1f1f;
+    color: white;
+    border: none;
+    padding: 16px 20px;
+    border-radius: 16px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-
-
-.welcome p {
-
-    color: #aaa;
-
-    font-size: 20px;
-
-    max-width: 600px;
-
+.action-btn:hover {
+    background: #2a2a2a;
 }
 
-
-
-/* Messages */
-
-.user-message {
-
-    background: #2563eb;
-
-    max-width: 75%;
-
-    margin: 10px 0 10px auto;
-
-    padding: 14px 18px;
-
-    border-radius: 18px;
-
-}
-
-
-
-.bot-message {
-
-    background: #1c1c1c;
-
-    max-width: 75%;
-
-    margin: 10px auto 10px 0;
-
-    padding: 14px 18px;
-
-    border-radius: 18px;
-
-}
-
-
-
-/* Input Area */
-
-.input-area {
-
-    width: 100%;
-
-    padding: 15px 20px;
-
+/* Input */
+.input-wrapper {
     display: flex;
-
     gap: 10px;
-
-    border-top: 1px solid #222;
-
-    background: #050505;
-
+    background: #1f1f1f;
+    border-radius: 9999px;
+    padding: 8px;
 }
-
-
 
 #user-input {
-
     flex: 1;
-
-    height: 55px;
-
-    border-radius: 30px;
-
-    border: 1px solid #333;
-
-    background: #111;
-
-    color: white;
-
-    padding: 0 20px;
-
-    font-size: 16px;
-
+    background: transparent;
+    border: none;
     outline: none;
-
+    color: white;
+    font-size: 17px;
+    padding: 14px 20px;
 }
-
-
-
-#user-input::placeholder {
-
-    color: #777;
-
-}
-
-
 
 #send-btn {
-
-    width: 85px;
-
-    height: 55px;
-
-    border-radius: 30px;
-
+    background: #1683ff;
+    color: white;
     border: none;
-
-    background: white;
-
-    color: black;
-
+    padding: 0 32px;
+    border-radius: 9999px;
     font-size: 16px;
-
-    font-weight: bold;
-
     cursor: pointer;
-
 }
 
-
-
 /* Mobile */
-
-@media(max-width:600px){
-
-
-    header h1 {
-
-        font-size: 24px;
-
-    }
-
-
-    .welcome h2 {
-
-        font-size: 32px;
-
-    }
-
-
-    .welcome p {
-
-        font-size: 17px;
-
-    }
-
-
-    .logo {
-
-        width: 30px;
-
-        height: 30px;
-
-    }
-
-
-    #send-btn {
-
-        width: 75px;
-
-    }
-
+@media (max-width: 600px) {
+    .container { padding: 15px; }
+    .logo { width: 70px; height: 70px; }
 }
