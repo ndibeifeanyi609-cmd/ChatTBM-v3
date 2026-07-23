@@ -3,19 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>ChatTBM - AI Content Assistant</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="app">
 
     <!-- Sidebar -->
     <aside class="sidebar">
-
         <div class="brand">
             <img src="ChatTBM-Logo.png" alt="ChatTBM Logo">
             <h2>ChatTBM</h2>
@@ -26,126 +22,49 @@
         </button>
 
         <nav class="menu">
-
-            <button>
-                💬 Chats
-            </button>
-
-            <button>
-                👤 Profile
-            </button>
-
-            <button>
-                ⚙ Settings
-            </button>
-
-            <button>
-                💾 Backup
-            </button>
-
+            <button>💬 Chats</button>
+            <button>⚙ Settings</button>
         </nav>
-
     </aside>
-
 
     <!-- Main Area -->
     <main class="main">
 
-        <header class="top-bar">
-
-            <h1>
-                ChatTBM
-            </h1>
-
-            <p>
-                Your AI Content Assistant for Captions, Scripts & Viral Ideas
-            </p>
-
-        </header>
-
-
         <!-- Welcome Screen -->
-
-        <section class="welcome">
-
-            <img 
-            src="ChatTBM-Logo.png" 
-            class="hero-logo"
-            alt="ChatTBM">
-
-            <h2>
-                Welcome to ChatTBM
-            </h2>
-
-            <p>
-                Create captions, scripts, social posts and viral content ideas with AI.
-            </p>
-
+        <section class="welcome" id="welcome-screen">
+            <img src="ChatTBM-Logo.png" class="hero-logo" alt="ChatTBM">
+            <h2>Welcome to ChatTBM</h2>
+            <p>Create captions, scripts, social posts and viral content ideas with AI.</p>
 
             <div class="prompt-cards">
-
-                <div class="card">
-                    ✍️ Create a viral caption
-                </div>
-
-                <div class="card">
-                    🎬 Generate video ideas
-                </div>
-
-                <div class="card">
-                    📱 Write social media posts
-                </div>
-
+                <div class="card" data-prompt="Create a viral caption for my latest video">✍️ Create a viral caption</div>
+                <div class="card" data-prompt="Give me 5 viral video ideas for Instagram Reels">🎬 Generate video ideas</div>
+                <div class="card" data-prompt="Write a fire Instagram post about personal growth">📱 Write social media posts</div>
             </div>
-
         </section>
-
 
         <!-- Chat Area -->
-
-        <section id="chat-box">
-
-            <div class="bot-message">
-                Hello 👋 I am ChatTBM. How can I help you create content today?
-            </div>
-
+        <section class="chat-container" id="chat-container">
+            <div id="chat-box"></div>
         </section>
 
-
         <!-- Input Area -->
-
         <div class="input-area">
-
-            <button class="attach-btn">
-                📎
-            </button>
-
-
+            <button class="attach-btn">📎</button>
+            
             <input 
-            type="text"
-            id="user-input"
-            placeholder="Ask ChatTBM anything..."
+                type="text"
+                id="user-input"
+                placeholder="Ask anything..."
             >
-
-
-            <button id="voice-btn">
-                🎤
-            </button>
-
-
-            <button id="send-btn">
-                Send
-            </button>
-
+            
+            <button id="voice-btn">🎤</button>
+            <button id="send-btn">Send</button>
         </div>
 
-
     </main>
-
 </div>
 
-
 <script src="script.js"></script>
-
 </body>
 </html>
