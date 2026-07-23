@@ -18,14 +18,12 @@ body {
 }
 
 /* Welcome */
-.welcome {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 40px 20px;
+.hero-logo {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    object-fit: cover;
 }
 
 .welcome h1 {
