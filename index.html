@@ -5,38 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatTBM</title>
     <link rel="icon" href="IMG_4365.png" type="image/png">
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #000;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .main-logo {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+        }
+        .action-btn {
+            background: #1f1f1f;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background: #2a2a2a;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="container">
-        <!-- Top Left Small Logo + Name -->
-        <div class="top-bar">
-            <div class="top-logo">
-                <img src="IMG_4365.png" alt="ChatTBM">
-                <span>ChatTBM</span>
-            </div>
+    <div class="w-full max-w-lg mx-auto text-center">
+        <!-- Top Bar -->
+        <div class="flex items-center gap-3 absolute top-6 left-6">
+            <img src="IMG_4365.png" alt="ChatTBM" class="w-8 h-8 rounded-full">
+            <span class="text-xl font-semibold">ChatTBM</span>
         </div>
 
-        <!-- Big Central Logo (No Text Below) -->
-        <div class="main-logo-container">
-            <img src="IMG_4365.png" alt="ChatTBM" class="main-logo">
+        <!-- Big Logo -->
+        <div class="mt-20 mb-12">
+            <img src="IMG_4365.png" alt="ChatTBM" class="main-logo mx-auto">
         </div>
 
         <!-- Quick Actions -->
-        <div class="quick-actions">
-            <button class="action-btn">✍️ Create a viral caption</button>
-            <button class="action-btn">🎬 Generate video ideas</button>
-            <button class="action-btn">📱 Write social media posts</button>
+        <div class="space-y-4 mb-12">
+            <button class="action-btn w-full text-left px-6 py-5 rounded-2xl text-lg flex items-center gap-4">
+                ✍️ Create a viral caption
+            </button>
+            <button class="action-btn w-full text-left px-6 py-5 rounded-2xl text-lg flex items-center gap-4">
+                🎬 Generate video ideas
+            </button>
+            <button class="action-btn w-full text-left px-6 py-5 rounded-2xl text-lg flex items-center gap-4">
+                📱 Write social media posts
+            </button>
         </div>
 
         <!-- Input -->
-        <div class="input-wrapper">
-            <input type="text" id="user-input" placeholder="Ask anything..." autocomplete="off">
-            <button id="send-btn">Send</button>
+        <div class="flex gap-3 bg-[#1f1f1f] rounded-full p-2">
+            <input type="text" id="user-input" 
+                   class="flex-1 bg-transparent px-6 py-4 outline-none text-lg" 
+                   placeholder="Ask anything...">
+            <button id="send-btn" 
+                    class="bg-blue-600 hover:bg-blue-700 px-10 py-4 rounded-full font-semibold">
+                Send
+            </button>
         </div>
     </div>
 
-<script src="script.js"></script>
+<script>
+    const input = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    sendBtn.addEventListener("click", () => {
+        const text = input.value.trim();
+        if (text) {
+            alert("You said: " + text + "\n\n(Real AI coming soon!)");
+            input.value = "";
+        }
+    });
+
+    input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendBtn.click();
+    });
+</script>
+
 </body>
 </html>
