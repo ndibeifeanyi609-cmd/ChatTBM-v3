@@ -4,136 +4,214 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatTBM</title>
-   <link rel="icon" type="image/png" href="IMG_4397.png">
-<link rel="apple-touch-icon" href="IMG_4397.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="IMG_4397.png">
+    <link rel="apple-touch-icon" href="IMG_4397.png">
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        body { background: #000; color: white; }
-        .main-logo { width: 160px; height: 160px; border-radius: 9999px; }
-        .action-btn {
-            background: #1f1f1f;
-            transition: all 0.2s;
+        body{
+            background:#000;
+            color:white;
+            font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
         }
-        .action-btn:hover {
-            background: #2a2a2a;
-            transform: translateY(-1px);
+
+        .main-logo{
+            width:130px;
+            height:130px;
+            border-radius:9999px;
+        }
+
+        .action-btn{
+            background:#1f1f1f;
+            transition:.2s;
+        }
+
+        .action-btn:hover{
+            background:#2b2b2b;
+            transform:translateY(-2px);
+        }
+
+        .icon-btn{
+            width:52px;
+            height:52px;
+            border-radius:9999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            transition:.2s;
         }
     </style>
+
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
 
- <div class="flex items-center justify-between mb-10">
+<body class="min-h-screen">
 
-   <!-- Header -->
-<div class="flex items-center justify-between mb-10">
+<div class="max-w-lg mx-auto px-5 py-6">
 
-    <!-- Left: Logo -->
+<!-- Header -->
+<div class="flex items-center justify-between mb-12">
+
     <div class="flex items-center gap-3">
-        <img src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-             alt="ChatTBM"
-             class="w-9 h-9 rounded-full">
 
-        <span class="text-2xl font-bold">ChatTBM</span>
+        <img
+        src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+        class="w-9 h-9 rounded-full">
+
+        <h1 class="text-3xl font-bold">
+            ChatTBM
+        </h1>
+
     </div>
 
-    <!-- Right: Sign In -->
-    <button id="signin-btn"
-        class="px-4 py-2 text-sm rounded-full border border-gray-600 hover:border-blue-500 hover:bg-gray-900 transition">
+    <button
+        onclick="window.location.href='signin.html'"
+        class="px-4 py-2 border border-gray-600 rounded-full hover:border-blue-500 transition">
         Sign In
     </button>
 
 </div>
 
-    <!-- Right -->
-    <div class="flex items-center gap-2">
+<!-- Center Logo -->
 
-        <button
-            class="text-sm px-3 py-2 border border-gray-600 rounded-full hover:border-blue-500">
-            Sign In
-        </button>
+<div class="flex justify-center mb-12">
 
-        <button
-            class="text-sm px-3 py-2 bg-blue-600 rounded-full hover:bg-blue-700">
-            Sign Up
-        </button>
-
-    </div>
+<img
+src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+class="main-logo">
 
 </div>
 
-    <!-- Right: Authentication -->
-    <div class="flex items-center gap-3">
+<!-- Quick Actions -->
 
-        <button id="signin-btn"
-            class="px-4 py-2 rounded-full bg-transparent border border-gray-600 hover:border-blue-500 transition">
-            Sign In
-        </button>
+<div class="space-y-5">
 
-        <button id="signup-btn"
-            class="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 transition">
-            Sign Up
-        </button>
+<button class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
+✍️ Create a viral caption
+</button>
 
-    </div>
+<button class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
+🎬 Generate video ideas
+</button>
+
+<button class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
+📱 Write social media posts
+</button>
 
 </div>
 
-        <!-- Quick Actions -->
-        <div class="space-y-4 mb-12">
-            <button class="action-btn w-full text-left px-6 py-5 rounded-3xl text-[17px] flex items-center gap-4">
-                ✍️ Create a viral caption
-            </button>
-            <button class="action-btn w-full text-left px-6 py-5 rounded-3xl text-[17px] flex items-center gap-4">
-                🎬 Generate video ideas
-            </button>
-            <button class="action-btn w-full text-left px-6 py-5 rounded-3xl text-[17px] flex items-center gap-4">
-                📱 Write social media posts
-            </button>
-        </div>
+<!-- Input Bar -->
 
-        <!-- Input with + Button -->
-        <div class="flex items-center gap-3 bg-[#1f1f1f] rounded-full p-2">
-            <button onclick="alert('New chat or attachment coming soon!')" 
-                    class="w-12 h-12 flex items-center justify-center text-2xl hover:bg-gray-800 rounded-full transition">
-                +
-            </button>
-            
-            <input type="text" id="user-input"
-       class="flex-1 bg-transparent px-4 py-4 outline-none text-[17px]"
-       placeholder="Ask anything...">
+<div class="mt-12 bg-[#1f1f1f] rounded-full flex items-center p-2">
 
-<div class="flex items-center gap-2">
+<button
+class="icon-btn hover:bg-gray-700">
++
+</button>
 
-    <button id="voice-btn"
-        class="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-xl transition"
-        title="Voice Input">
-        🎤
-    </button>
+<input
+id="user-input"
+type="text"
+placeholder="Ask anything..."
+class="flex-1 bg-transparent px-4 outline-none text-lg">
 
-    <button id="send-btn"
-        class="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-xl transition"
-        title="Send">
-        ➤
-    </button>
+<!-- Voice Button -->
+<button
+id="voice-btn"
+class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl"
+title="Voice Input">
+🎤
+</button>
+
+<!-- Send Button -->
+<button
+id="send-btn"
+class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2"
+title="Send">
+➤
+</button>
+
+</div>
 
 </div>
 
 <script>
-    const input = document.getElementById("user-input");
-    const sendBtn = document.getElementById("send-btn");
 
-    function sendMessage() {
-        const text = input.value.trim();
-        if (text) {
-            alert("You said: " + text + "\n\n(Real AI responses coming soon!)");
-            input.value = "";
-        }
+const input = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+const voiceBtn = document.getElementById("voice-btn");
+
+function sendMessage(){
+
+    const text = input.value.trim();
+
+    if(text==="") return;
+
+    alert("You said:\n\n"+text+"\n\n(Real AI responses coming soon!)");
+
+    input.value="";
+
+}
+
+sendBtn.addEventListener("click",sendMessage);
+
+input.addEventListener("keypress",(e)=>{
+
+    if(e.key==="Enter"){
+
+        sendMessage();
+
     }
 
-    sendBtn.addEventListener("click", sendMessage);
-    input.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") sendMessage();
-    });
+});
+
+if("webkitSpeechRecognition" in window || "SpeechRecognition" in window){
+
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+const recognition=new SpeechRecognition();
+
+recognition.lang="en-US";
+
+recognition.interimResults=false;
+
+recognition.continuous=false;
+
+voiceBtn.addEventListener("click",()=>{
+
+recognition.start();
+
+voiceBtn.textContent="🎙️";
+
+});
+
+recognition.onresult=(event)=>{
+
+input.value=event.results[0][0].transcript;
+
+voiceBtn.textContent="🎤";
+
+};
+
+recognition.onend=()=>{
+
+voiceBtn.textContent="🎤";
+
+};
+
+}else{
+
+voiceBtn.addEventListener("click",()=>{
+
+alert("Voice input is not supported on this browser.");
+
+});
+
+}
+
 </script>
 
 </body>
