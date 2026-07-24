@@ -55,23 +55,18 @@
 <!-- Header -->
 <div class="flex items-center justify-between mb-12">
 
- <!-- Hero -->
+    <div class="flex items-center gap-3">
 
-<div class="text-center mb-12">
+        <img
+        src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+        class="w-9 h-9 rounded-full">
 
-    <img
-    src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-    class="main-logo mx-auto">
+        <h1 class="text-3xl font-bold">
+            ChatTBM
+        </h1>
 
-    <h2 class="text-3xl font-bold mt-6">
-        Welcome to ChatTBM
-    </h2>
+    </div>
 
-    <p class="text-gray-400 mt-3 text-lg">
-        Your AI Content Assistant for captions, scripts, ideas and productivity.
-    </p>
-
-</div>
     <button
         onclick="window.location.href='signin.html'"
         class="px-4 py-2 border border-gray-600 rounded-full hover:border-blue-500 transition">
@@ -220,4 +215,110 @@ alert("Voice input is not supported on this browser.");
 </script>
 
 </body>
+</html>
+
+<!-- Voice Button -->
+
+<button
+id="voice-btn"
+class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl"
+title="Voice Input">
+
+🎤
+
+</button>
+
+<!-- Send Button -->
+
+<button
+id="send-btn"
+class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2"
+title="Send">
+
+➤
+
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+const input = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+const voiceBtn = document.getElementById("voice-btn");
+
+function sendMessage(){
+
+const text=input.value.trim();
+
+if(text==="") return;
+
+alert("You said:\n\n"+text+"\n\nReal AI responses will appear here once your API is connected.");
+
+input.value="";
+
+}
+
+sendBtn.addEventListener("click",sendMessage);
+
+input.addEventListener("keydown",(e)=>{
+
+if(e.key==="Enter"){
+
+sendMessage();
+
+}
+
+});
+
+if("webkitSpeechRecognition" in window || "SpeechRecognition" in window){
+
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+const recognition=new SpeechRecognition();
+
+recognition.lang="en-US";
+
+recognition.interimResults=false;
+
+recognition.continuous=false;
+
+voiceBtn.addEventListener("click",()=>{
+
+voiceBtn.innerHTML="🎙️";
+
+recognition.start();
+
+});
+
+recognition.onresult=(event)=>{
+
+input.value=event.results[0][0].transcript;
+
+voiceBtn.innerHTML="🎤";
+
+};
+
+recognition.onend=()=>{
+
+voiceBtn.innerHTML="🎤";
+
+};
+
+}else{
+
+voiceBtn.addEventListener("click",()=>{
+
+alert("Voice input is not supported on this browser.");
+
+});
+
+}
+
+</script>
+
+</body>
+
 </html>
