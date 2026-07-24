@@ -22,17 +22,33 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="w-full max-w-lg mx-auto">
-        <!-- Top Small Logo -->
-        <div class="flex items-center gap-3 mb-12">
-            <img src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png" alt="ChatTBM" class="w-9 h-9 rounded-full">
-            <span class="text-2xl font-semibold">ChatTBM</span>
-        </div>
+  <div class="flex items-center justify-between mb-12">
 
-        <!-- Big Logo -->
-        <div class="flex justify-center mb-12">
-            <img src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png" alt="ChatTBM" class="main-logo">
-        </div>
+    <!-- Left: Logo -->
+    <div class="flex items-center gap-3">
+        <img src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+             alt="ChatTBM"
+             class="w-9 h-9 rounded-full">
+
+        <span class="text-2xl font-bold">ChatTBM</span>
+    </div>
+
+    <!-- Right: Authentication -->
+    <div class="flex items-center gap-3">
+
+        <button id="signin-btn"
+            class="px-4 py-2 rounded-full bg-transparent border border-gray-600 hover:border-blue-500 transition">
+            Sign In
+        </button>
+
+        <button id="signup-btn"
+            class="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 transition">
+            Sign Up
+        </button>
+
+    </div>
+
+</div>
 
         <!-- Quick Actions -->
         <div class="space-y-4 mb-12">
