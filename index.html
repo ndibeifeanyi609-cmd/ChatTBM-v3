@@ -54,19 +54,25 @@
                 +
             </button>
             
-            <input type="text" id="user-input" 
-                   class="flex-1 bg-transparent px-4 py-4 outline-none text-[17px]" 
-                   placeholder="Ask anything...">
-            
-           <div class="flex items-center gap-2">
-    <button id="send-btn"
-    class="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-2xl transition">
-    ➤
-</button>
+            <input type="text" id="user-input"
+       class="flex-1 bg-transparent px-4 py-4 outline-none text-[17px]"
+       placeholder="Ask anything...">
 
- 
-        </div>
-    </div>
+<div class="flex items-center gap-2">
+
+    <button id="voice-btn"
+        class="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-xl transition"
+        title="Voice Input">
+        🎤
+    </button>
+
+    <button id="send-btn"
+        class="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-xl transition"
+        title="Send">
+        ➤
+    </button>
+
+</div>
 
 <script>
     const input = document.getElementById("user-input");
