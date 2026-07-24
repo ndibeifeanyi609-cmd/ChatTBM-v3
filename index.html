@@ -1,324 +1,74 @@
+Done pasted this code 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatTBM</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In - ChatTBM</title>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="IMG_4397.png">
-    <link rel="apple-touch-icon" href="IMG_4397.png">
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" type="image/png" href="IMG_4397.png">
+<link rel="apple-touch-icon" href="IMG_4397.png">
 
-    <style>
-        body{
-            background:#000;
-            color:white;
-            font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-        }
-
-        .main-logo{
-            width:130px;
-            height:130px;
-            border-radius:9999px;
-        }
-
-        .action-btn{
-            background:#1f1f1f;
-            transition:.2s;
-        }
-
-        .action-btn:hover{
-            background:#2b2b2b;
-            transform:translateY(-2px);
-        }
-
-        .icon-btn{
-            width:52px;
-            height:52px;
-            border-radius:9999px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            transition:.2s;
-        }
-    </style>
+<style>
+body{
+    background:#000;
+    color:#fff;
+}
+</style>
 
 </head>
 
-<body class="min-h-screen">
+<body class="flex items-center justify-center min-h-screen p-6">
 
-<div class="max-w-lg mx-auto px-5 py-6">
+<div class="w-full max-w-sm">
 
-<!-- Header -->
-<div class="flex items-center justify-between mb-12">
+<div class="text-center mb-10">
 
-    <div class="flex items-center gap-3">
+<img src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+class="w-20 h-20 mx-auto mb-4 rounded-full">
 
-        <img
-        src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-        class="w-9 h-9 rounded-full">
+<h1 class="text-3xl font-bold">
+Welcome Back
+</h1>
 
-        <h1 class="text-3xl font-bold">
-            ChatTBM
-        </h1>
-
-    </div>
-
-    <button
-        onclick="window.location.href='signin.html'"
-        class="px-4 py-2 border border-gray-600 rounded-full hover:border-blue-500 transition">
-        Sign In
-    </button>
+<p class="text-gray-400 mt-2">
+Sign in to ChatTBM
+</p>
 
 </div>
-
-<!-- Center Logo -->
-
-<div class="flex justify-center mb-12">
-
-<img
-src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-class="main-logo">
-
-</div>
-
-<!-- Quick Actions -->
-
-<div class="space-y-5">
-
-<button class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
-✍️ Create a viral caption
-</button>
-
-<button class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
-🎬 Generate video ideas
-</button>
-
-<button class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
-📱 Write social media posts
-</button>
-
-</div>
-
-<!-- Input Bar -->
-
-<div class="mt-12 bg-[#1f1f1f] rounded-full flex items-center p-2">
-
-<button
-class="icon-btn hover:bg-gray-700">
-+
-</button>
 
 <input
-id="user-input"
-type="text"
-placeholder="Ask anything..."
-class="flex-1 bg-transparent px-4 outline-none text-lg">
+type="email"
+placeholder="Email"
+class="w-full bg-[#1f1f1f] rounded-xl p-4 mb-4 outline-none">
 
-<!-- Voice Button -->
+<input
+type="password"
+placeholder="Password"
+class="w-full bg-[#1f1f1f] rounded-xl p-4 mb-6 outline-none">
+
 <button
-id="voice-btn"
-class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl"
-title="Voice Input">
-🎤
+class="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-4 font-semibold">
+Sign In
 </button>
 
-<!-- Send Button -->
-<button
-id="send-btn"
-class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2"
-title="Send">
-➤
-</button>
+<p class="text-center mt-6 text-gray-400">
+
+Don't have an account?
+
+<a href="signup.html"
+class="text-blue-500">
+
+Create Account
+
+</a>
+
+</p>
 
 </div>
-
-</div>
-
-<script>
-
-const input = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-const voiceBtn = document.getElementById("voice-btn");
-
-function sendMessage(){
-
-    const text = input.value.trim();
-
-    if(text==="") return;
-
-    alert("You said:\n\n"+text+"\n\n(Real AI responses coming soon!)");
-
-    input.value="";
-
-}
-
-sendBtn.addEventListener("click",sendMessage);
-
-input.addEventListener("keypress",(e)=>{
-
-    if(e.key==="Enter"){
-
-        sendMessage();
-
-    }
-
-});
-
-if("webkitSpeechRecognition" in window || "SpeechRecognition" in window){
-
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-
-const recognition=new SpeechRecognition();
-
-recognition.lang="en-US";
-
-recognition.interimResults=false;
-
-recognition.continuous=false;
-
-voiceBtn.addEventListener("click",()=>{
-
-recognition.start();
-
-voiceBtn.textContent="🎙️";
-
-});
-
-recognition.onresult=(event)=>{
-
-input.value=event.results[0][0].transcript;
-
-voiceBtn.textContent="🎤";
-
-};
-
-recognition.onend=()=>{
-
-voiceBtn.textContent="🎤";
-
-};
-
-}else{
-
-voiceBtn.addEventListener("click",()=>{
-
-alert("Voice input is not supported on this browser.");
-
-});
-
-}
-
-</script>
 
 </body>
-</html>
-
-<!-- Voice Button -->
-
-<button
-id="voice-btn"
-class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl"
-title="Voice Input">
-
-🎤
-
-</button>
-
-<!-- Send Button -->
-
-<button
-id="send-btn"
-class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2"
-title="Send">
-
-➤
-
-</button>
-
-</div>
-
-</div>
-
-<script>
-
-const input = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-const voiceBtn = document.getElementById("voice-btn");
-
-function sendMessage(){
-
-const text=input.value.trim();
-
-if(text==="") return;
-
-alert("You said:\n\n"+text+"\n\nReal AI responses will appear here once your API is connected.");
-
-input.value="";
-
-}
-
-sendBtn.addEventListener("click",sendMessage);
-
-input.addEventListener("keydown",(e)=>{
-
-if(e.key==="Enter"){
-
-sendMessage();
-
-}
-
-});
-
-if("webkitSpeechRecognition" in window || "SpeechRecognition" in window){
-
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-
-const recognition=new SpeechRecognition();
-
-recognition.lang="en-US";
-
-recognition.interimResults=false;
-
-recognition.continuous=false;
-
-voiceBtn.addEventListener("click",()=>{
-
-voiceBtn.innerHTML="🎙️";
-
-recognition.start();
-
-});
-
-recognition.onresult=(event)=>{
-
-input.value=event.results[0][0].transcript;
-
-voiceBtn.innerHTML="🎤";
-
-};
-
-recognition.onend=()=>{
-
-voiceBtn.innerHTML="🎤";
-
-};
-
-}else{
-
-voiceBtn.addEventListener("click",()=>{
-
-alert("Voice input is not supported on this browser.");
-
-});
-
-}
-
-</script>
-
-</body>
-
 </html>
