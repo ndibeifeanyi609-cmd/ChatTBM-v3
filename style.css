@@ -24,9 +24,7 @@
 }
 
 .main-logo {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    display: block;
-    margin: 0 auto;
+    width: 110px;
+    height: 110px;
+    border-radius: 9999px;
 }
