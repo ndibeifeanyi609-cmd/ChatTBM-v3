@@ -117,3 +117,102 @@ id="user-input"
 type="text"
 placeholder="Ask anything..."
 class="flex-1 bg-transparent px-4 outline-none text-lg">
+
+    <!-- Voice Button -->
+<button
+id="voice-btn"
+class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl"
+title="Voice Input">
+🎤
+</button>
+
+<!-- Send Button -->
+<button
+id="send-btn"
+class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2"
+title="Send">
+➤
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+const input = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+const voiceBtn = document.getElementById("voice-btn");
+
+function sendMessage(){
+
+    const text = input.value.trim();
+
+    if(text==="") return;
+
+    alert("You said:\n\n"+text+"\n\n(Real AI responses coming soon!)");
+
+    input.value="";
+
+}
+
+sendBtn.addEventListener("click",sendMessage);
+
+input.addEventListener("keypress",(e)=>{
+
+    if(e.key==="Enter"){
+
+        sendMessage();
+
+    }
+
+});
+
+if("webkitSpeechRecognition" in window || "SpeechRecognition" in window){
+
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+const recognition=new SpeechRecognition();
+
+recognition.lang="en-US";
+
+recognition.interimResults=false;
+
+recognition.continuous=false;
+
+voiceBtn.addEventListener("click",()=>{
+
+recognition.start();
+
+voiceBtn.textContent="🎙️";
+
+});
+
+recognition.onresult=(event)=>{
+
+input.value=event.results[0][0].transcript;
+
+voiceBtn.textContent="🎤";
+
+};
+
+recognition.onend=()=>{
+
+voiceBtn.textContent="🎤";
+
+};
+
+}else{
+
+voiceBtn.addEventListener("click",()=>{
+
+alert("Voice input is not supported on this browser.");
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
