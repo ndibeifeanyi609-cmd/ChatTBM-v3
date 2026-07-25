@@ -1,7 +1,12 @@
-constconst userInput = document.getElementById("user-input");
+const input = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
 const voiceBtn = document.getElementById("voice-btn");
+const chatBox = document.getElementById("chat-box");
 
-if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+// =============================
+// Voice Recognition
+// =============================
+if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
 
     const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -34,36 +39,36 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 
 }
 
+// =============================
+// Send Message
+// =============================
 function sendMessage() {
 
     const text = input.value.trim();
 
     if (text === "") return;
 
-    const chatBox = document.getElementById("chat-box");
-
     // Show chat area
     chatBox.classList.remove("hidden");
 
     // User message
     chatBox.innerHTML += `
-        <div class="flex justify-end">
+        <div class="flex justify-end mb-3">
             <div class="bg-blue-600 text-white px-4 py-3 rounded-2xl max-w-[80%]">
                 ${text}
             </div>
         </div>
     `;
 
-    // Clear input
     input.value = "";
 
     // Thinking bubble
     const thinking = document.createElement("div");
 
     thinking.innerHTML = `
-        <div class="flex justify-start">
+        <div class="flex justify-start mb-3">
             <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-                🤖 <strong>ChatTBM</strong><br>
+                🤖 <strong>ChatTBM</strong><br><br>
                 Thinking...
             </div>
         </div>
@@ -73,14 +78,29 @@ function sendMessage() {
 
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Fake AI reply
+    // Fake AI Response
     setTimeout(() => {
 
         thinking.innerHTML = `
-            <div class="flex justify-start">
+            <div class="flex justify-start mb-3">
                 <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
                     🤖 <strong>ChatTBM</strong><br><br>
-                    Thanks for your message! I'm currently running in demo mode. Once my AI API is connected, I'll provide real intelligent responses.
+                    Hello! 👋
+
+                    I'm ChatTBM.
+
+                    My AI brain is not connected yet because we're still waiting for the API.
+
+                    Right now I'm running in Demo Mode.
+
+                    Once the API is connected I'll be able to generate:
+
+                    • Viral captions
+                    • Video scripts
+                    • Business ideas
+                    • Social media posts
+                    • Marketing content
+                    • Much more...
                 </div>
             </div>
         `;
@@ -90,8 +110,18 @@ function sendMessage() {
     }, 1000);
 
 }
-userInput.addEventListener("keypress", (e) => {
+
+// =============================
+// Events
+// =============================
+sendBtn.addEventListener("click", sendMessage);
+
+input.addEventListener("keypress", (e) => {
+
     if (e.key === "Enter") {
-        sendBtn.click();
+
+        sendMessage();
+
     }
+
 });
