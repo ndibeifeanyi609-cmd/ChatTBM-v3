@@ -136,64 +136,6 @@ if (uploadBtn && fileInput) {
 
 }
 
-// =============================
-// Creator Tools
-// =============================
-
-function creatorTool(tool){
-
-    let text="";
-
-    switch(tool){
-
-        case "captionTemplates":
-            text="Caption Templates";
-            break;
-
-        case "hashtags":
-            text="Hashtag Generator";
-            break;
-
-        case "hooks":
-            text="Hook Generator";
-            break;
-
-        case "cta":
-            text="CTA Generator";
-            break;
-
-        case "bio":
-            text="Bio Generator";
-            break;
-
-        case "username":
-            text="Username Ideas";
-            break;
-
-        case "ideas":
-            text="Viral Content Ideas";
-            break;
-
-        case "calendar":
-            text="Content Calendar";
-            break;
-
-        default:
-            text="Creator Tool";
-
-    }
-
-    input.value=text;
-
-    sendMessage();
-
-}
-
-// =============================
-// Voice Recognition
-// =============================
-
-if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
 
     const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
