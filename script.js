@@ -12,9 +12,91 @@ const uploadBtn = document.getElementById("upload-btn");
 const fileInput = document.getElementById("file-input");
 
 // =============================
-// Creator Tool State
+// Creator Tools
 // =============================
 
+function creatorTool(tool){
+
+    ...
+}
+
+// =============================
+// AI Video Studio
+// =============================
+
+function videoTool(tool){
+
+    chatBox.classList.remove("hidden");
+
+    let message="";
+
+    switch(tool){
+
+        case "create":
+
+            message="🎥 Let's create your AI video.\n\nQuestion 1 of 5:\n\nWhat is your video about?";
+
+            break;
+
+        case "script":
+
+            message="🎬 What topic do you want the video script to cover?";
+
+            break;
+
+        case "image":
+
+            message="🖼️ Describe the image you want to generate for your video.";
+
+            break;
+
+        case "scene":
+
+            message="🎞️ What story or product should I turn into scenes?";
+
+            break;
+
+        case "voice":
+
+            message="🎙️ What should the voice-over say?";
+
+            break;
+
+        case "youtube":
+
+            message="📺 What is your YouTube video topic?";
+
+            break;
+
+        case "reels":
+
+            message="🎵 What is your Reel or TikTok about?";
+
+            break;
+
+    }
+
+    chatBox.innerHTML += `
+    <div class="flex justify-start mb-3">
+        <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
+            🤖 <strong>ChatTBM</strong><br><br>
+            ${message}
+        </div>
+    </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+}
+
+// =============================
+// Voice Recognition
+// =============================
+
+if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+
+    ...
+}
 let activeTool = null;
 let toolStep = 0;
 let toolData = {};
