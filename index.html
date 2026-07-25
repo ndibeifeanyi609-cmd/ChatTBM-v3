@@ -147,15 +147,59 @@ const input = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 const voiceBtn = document.getElementById("voice-btn");
 
-function sendMessage(){
+function sendMessage() {
 
     const text = input.value.trim();
 
-    if(text==="") return;
+    if (text === "") return;
 
-    alert("You said:\n\n"+text+"\n\n(Real AI responses coming soon!)");
+    const chatBox = document.getElementById("chat-box");
 
-    input.value="";
+    chatBox.classList.remove("hidden");
+
+    chatBox.innerHTML += `
+        <div class="flex justify-end mb-3">
+            <div class="bg-blue-600 text-white px-4 py-3 rounded-2xl max-w-[80%]">
+                ${text}
+            </div>
+        </div>
+    `;
+
+    input.value = "";
+
+    const thinking = document.createElement("div");
+
+    thinking.innerHTML = `
+        <div class="flex justify-start mb-3">
+            <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
+                🤖 <strong>ChatTBM</strong><br><br>
+                Thinking...
+            </div>
+        </div>
+    `;
+
+    chatBox.appendChild(thinking);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    setTimeout(() => {
+
+        thinking.innerHTML = `
+            <div class="flex justify-start mb-3">
+                <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
+                    🤖 <strong>ChatTBM</strong><br><br>
+                    Hello! 👋 I'm ChatTBM.
+
+                    I'm currently running in Demo Mode.
+
+                    When my AI API is connected, I'll answer your questions with real AI responses.
+                </div>
+            </div>
+        `;
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    }, 1000);
 
 }
 
