@@ -101,7 +101,11 @@ function sendMessage() {
 
         reply = "💼 Business Ideas:\n• Social Media Agency\n• AI Content Creation\n• Digital Marketing Services";
 
-    } else if (message.includes("who are you")) {
+} else if (
+    message.includes("who are you") ||
+    message.includes("what are you") ||
+    message.includes("who created you")
+) {
 
         reply = "🤖 I'm ChatTBM, your AI Content Assistant. I help create captions, scripts, marketing content and much more.";
 
