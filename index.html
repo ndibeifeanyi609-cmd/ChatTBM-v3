@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ChatTBM</title>
 
 <link rel="icon" type="image/png" href="IMG_4397.png">
@@ -88,71 +89,15 @@ class="main-logo">
 
 </div>
 
-<!-- Creator Tools -->
+<!-- Quick Action Buttons -->
 
-<div class="mt-12">
-
-<h2 class="text-xl font-bold mb-5">
-🚀 Creator Tools
-</h2>
-
-<div class="space-y-4">
+<div class="space-y-5">
 
 <button
-onclick="creatorTool('caption')"
-class="action-btn w-full rounded-3xl text-left px-6 py-4 text-lg">
-✍️ Caption Templates
-</button>
-
-<button
-onclick="creatorTool('hashtag')"
-class="action-btn w-full rounded-3xl text-left px-6 py-4 text-lg">
-#️⃣ Hashtag Generator
-</button>
-
-<button
-onclick="creatorTool('hook')"
-class="action-btn w-full rounded-3xl text-left px-6 py-4 text-lg">
-🎯 Hook Generator
-</button>
-
-<button
-onclick="creatorTool('cta')"
-class="action-btn w-full rounded-3xl text-left px-6 py-4 text-lg">
-📢 CTA Generator
-</button>
-
-<button
-onclick="creatorTool('bio')"
-class="action-btn w-full rounded-3xl text-left px-6 py-4 text-lg">
-👤 Bio Generator
-</button>
-
-<button
-onclick="creatorTool('username')"
-class="action-btn w-full rounded-3xl text-left px-6 py-4 text-lg">
-🔥 Username Ideas
-</button>
-
-<button
-onclick="creatorTool('ideas')"
-class="action-btn w-full rounded-3xl text-left px-6 py-4 text-lg">
-💡 Viral Content Ideas
-</button>
-
-<button
-onclick="creatorTool('calendar')"
-class="action-btn w-full rounded-3xl text-left px-6 py-4 text-lg">
-📅 Content Calendar
-</button>
-
-</div>
-
-</div>
 id="caption-btn"
 class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
 
-✍️ Create a viral caption
+✍️ Create a Viral Caption
 
 </button>
 
@@ -160,7 +105,7 @@ class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
 id="video-btn"
 class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
 
-🎬 Generate video ideas
+🎬 Generate Video Ideas
 
 </button>
 
@@ -168,9 +113,89 @@ class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
 id="post-btn"
 class="action-btn w-full rounded-3xl text-left px-6 py-5 text-lg">
 
-📱 Write social media posts
+📱 Write Social Media Posts
 
 </button>
+
+</div>
+
+<!-- Creator Tools -->
+
+<div class="mt-12">
+
+<h2 class="text-xl font-bold mb-5">
+
+🚀 Creator Tools
+
+</h2>
+
+<div class="space-y-4">
+
+<button
+onclick="creatorTool('captionTemplates')"
+class="action-btn w-full rounded-3xl text-left px-6 py-4">
+
+✍️ Caption Templates
+
+</button>
+
+<button
+onclick="creatorTool('hashtags')"
+class="action-btn w-full rounded-3xl text-left px-6 py-4">
+
+#️⃣ Hashtag Generator
+
+</button>
+
+<button
+onclick="creatorTool('hooks')"
+class="action-btn w-full rounded-3xl text-left px-6 py-4">
+
+🎯 Hook Generator
+
+</button>
+
+<button
+onclick="creatorTool('cta')"
+class="action-btn w-full rounded-3xl text-left px-6 py-4">
+
+📢 CTA Generator
+
+</button>
+
+<button
+onclick="creatorTool('bio')"
+class="action-btn w-full rounded-3xl text-left px-6 py-4">
+
+👤 Bio Generator
+
+</button>
+
+<button
+onclick="creatorTool('username')"
+class="action-btn w-full rounded-3xl text-left px-6 py-4">
+
+🔥 Username Ideas
+
+</button>
+
+<button
+onclick="creatorTool('ideas')"
+class="action-btn w-full rounded-3xl text-left px-6 py-4">
+
+💡 Viral Content Ideas
+
+</button>
+
+<button
+onclick="creatorTool('calendar')"
+class="action-btn w-full rounded-3xl text-left px-6 py-4">
+
+📅 Content Calendar
+
+</button>
+
+</div>
 
 </div>
 
@@ -186,197 +211,52 @@ class="hidden mt-8 space-y-4 max-h-[420px] overflow-y-auto">
 
 <div class="mt-12 bg-[#1f1f1f] rounded-full flex items-center p-2">
 
-    <button class="icon-btn hover:bg-gray-700">
+    <!-- File Upload Button -->
+    <button
+        id="upload-btn"
+        class="icon-btn hover:bg-gray-700"
+        title="Upload File">
+
         +
+
     </button>
 
+    <!-- Hidden File Input -->
+    <input
+        type="file"
+        id="file-input"
+        hidden>
+
+    <!-- User Input -->
     <input
         id="user-input"
         type="text"
         placeholder="Ask anything..."
         class="flex-1 bg-transparent px-4 outline-none text-lg">
 
+    <!-- Voice Button -->
     <button
         id="voice-btn"
         class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl"
         title="Voice Input">
+
         🎤
+
     </button>
 
+    <!-- Send Button -->
     <button
         id="send-btn"
         class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2"
         title="Send">
+
         ➤
+
     </button>
 
 </div>
 
 </div>
-
-<script>
-
-const input = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-const voiceBtn = document.getElementById("voice-btn");
-const chatBox = document.getElementById("chat-box");
-
-// Voice Recognition
-
-if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-
-    const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    const recognition = new SpeechRecognition();
-
-    recognition.lang = "en-US";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    voiceBtn.addEventListener("click", () => {
-        recognition.start();
-        voiceBtn.textContent = "🎙️";
-    });
-
-    recognition.onresult = (event) => {
-        input.value = event.results[0][0].transcript;
-        voiceBtn.textContent = "🎤";
-    };
-
-    recognition.onend = () => {
-        voiceBtn.textContent = "🎤";
-    };
-
-} else {
-
-    voiceBtn.addEventListener("click", () => {
-        alert("Voice input is not supported on this browser.");
-    });
-
-}
-
-// Send Message
-
-function sendMessage() {
-
-    const text = input.value.trim();
-
-    if (text === "") return;
-
-    chatBox.classList.remove("hidden");
-
-    chatBox.innerHTML += `
-        <div class="flex justify-end mb-3">
-            <div class="bg-blue-600 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-                ${text}
-            </div>
-        </div>
-    `;
-
-    input.value = "";
-
-    const thinking = document.createElement("div");
-
-    thinking.innerHTML = `
-        <div class="flex justify-start mb-3">
-            <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-                🤖 <strong>ChatTBM</strong><br><br>
-                Thinking...
-            </div>
-        </div>
-    `;
-
-    chatBox.appendChild(thinking);
-
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    setTimeout(() => {
-
-        let reply = "";
-        const message = text.toLowerCase();
-
-        if (message.includes("hello") || message.includes("hi")) {
-
-            reply = "👋 Hello! Welcome to ChatTBM. How can I help you today?";
-
-        } else if (message.includes("caption")) {
-
-            reply = "✍️ Sample Caption:\n\nDream big. Stay consistent. Success follows action. 🚀";
-
-        } else if (message.includes("video")) {
-
-            reply = "🎬 Here are three video ideas:\n\n1. A day in your business.\n2. 5 quick tips.\n3. Behind the scenes.";
-
-        } else if (message.includes("social media")) {
-
-            reply = "📱 Sample Social Media Post:\n\nConsistency beats perfection. Show up every day and your audience will grow. 🚀";
-
-        } else if (message.includes("script")) {
-
-            reply = "🎬 Sample Script:\n\nStart with a powerful hook, tell a story, then finish with a call to action.";
-
-        } else if (message.includes("business")) {
-
-            reply = "💼 Business Ideas:\n• Social Media Agency\n• AI Content Creation\n• Digital Marketing";
-
-        } else if (
-            message.includes("who are you") ||
-            message.includes("what are you") ||
-            message.includes("who created you")
-        ) {
-
-            reply = "🤖 I'm ChatTBM, your AI Content Assistant built to help with captions, scripts, marketing and content creation.";
-
-        } else {
-
-            reply = "😊 I'm still running in Demo Mode. Once my AI API is connected, I'll provide real AI responses.";
-
-        }
-
-        thinking.innerHTML = `
-            <div class="flex justify-start mb-3">
-                <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-                    🤖 <strong>ChatTBM</strong><br><br>
-                    ${reply}
-                </div>
-            </div>
-        `;
-
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-    }, 1000);
-
-}
-
-// Events
-
-sendBtn.addEventListener("click", sendMessage);
-
-input.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        sendMessage();
-    }
-});
-
-// Quick Action Buttons
-
-document.getElementById("caption-btn").addEventListener("click", () => {
-    input.value = "Create a viral caption";
-    sendMessage();
-});
-
-document.getElementById("video-btn").addEventListener("click", () => {
-    input.value = "Generate video ideas";
-    sendMessage();
-});
-
-document.getElementById("post-btn").addEventListener("click", () => {
-    input.value = "Write social media posts";
-    sendMessage();
-});
-
-</script>
 
 </body>
 </html>
