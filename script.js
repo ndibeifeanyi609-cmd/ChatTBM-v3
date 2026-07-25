@@ -81,34 +81,48 @@ function sendMessage() {
     // Fake AI Response
     setTimeout(() => {
 
-        thinking.innerHTML = `
-            <div class="flex justify-start mb-3">
-                <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-                    🤖 <strong>ChatTBM</strong><br><br>
-                    Hello! 👋
+    let reply = "";
 
-                    I'm ChatTBM.
+    const message = text.toLowerCase();
 
-                    My AI brain is not connected yet because we're still waiting for the API.
+    if (message.includes("hello") || message.includes("hi")) {
 
-                    Right now I'm running in Demo Mode.
+        reply = "👋 Hello! Welcome to ChatTBM. How can I help you today?";
 
-                    Once the API is connected I'll be able to generate:
+    } else if (message.includes("caption")) {
 
-                    • Viral captions
-                    • Video scripts
-                    • Business ideas
-                    • Social media posts
-                    • Marketing content
-                    • Much more...
-                </div>
+        reply = "✍️ Sample Caption:\n\nDream big. Stay consistent. Success follows action. 🚀";
+
+    } else if (message.includes("script")) {
+
+        reply = "🎬 Sample Script:\n\nHook your audience in the first 3 seconds, tell a compelling story, then end with a clear call to action.";
+
+    } else if (message.includes("business")) {
+
+        reply = "💼 Business Ideas:\n• Social Media Agency\n• AI Content Creation\n• Digital Marketing Services";
+
+    } else if (message.includes("who are you")) {
+
+        reply = "🤖 I'm ChatTBM, your AI Content Assistant. I help create captions, scripts, marketing content and much more.";
+
+    } else {
+
+        reply = "😊 I'm still in Demo Mode. Once my AI API is connected, I'll provide intelligent answers to your questions.";
+
+    }
+
+    thinking.innerHTML = `
+        <div class="flex justify-start mb-3">
+            <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
+                🤖 <strong>ChatTBM</strong><br><br>
+                ${reply}
             </div>
-        `;
+        </div>
+    `;
 
-        chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    }, 1000);
-
+}, 1000);
 }
 
 // =============================
