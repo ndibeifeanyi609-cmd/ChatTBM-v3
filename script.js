@@ -143,3 +143,22 @@ input.addEventListener("keypress", (e) => {
     }
 
 });
+
+// =============================
+// Quick Action Buttons
+// =============================
+
+document.getElementById("caption-btn").addEventListener("click", () => {
+    input.value = "Create a viral caption";
+    sendMessage();
+});
+
+document.getElementById("video-btn").addEventListener("click", () => {
+    input.value = "Generate video ideas";
+    sendMessage();
+});
+
+document.getElementById("post-btn").addEventListener("click", () => {
+    input.value = "Write social media posts";
+    sendMessage();
+});
