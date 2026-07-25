@@ -1,6 +1,6 @@
 // =============================
-// ChatTBM V3.2
-// Core Variables
+// ChatTBM V3.5 Demo AI Engine
+// Core Setup
 // =============================
 
 const input = document.getElementById("user-input");
@@ -11,47 +11,100 @@ const chatBox = document.getElementById("chat-box");
 const uploadBtn = document.getElementById("upload-btn");
 const fileInput = document.getElementById("file-input");
 
+
 // =============================
-// Tool State
+// AI Tool State
 // =============================
 
 let activeTool = null;
 let toolStep = 0;
 let toolData = {};
 
+
 // =============================
-// Upload Button
+// ChatTBM Message Display
 // =============================
 
-if (uploadBtn && fileInput) {
+function addBotMessage(message){
 
-    uploadBtn.addEventListener("click", () => {
+    chatBox.classList.remove("hidden");
+
+    chatBox.innerHTML += `
+    <div class="flex justify-start mb-3">
+
+        <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
+
+        🤖 <strong>ChatTBM</strong>
+        <br><br>
+
+        ${message.replace(/\n/g,"<br>")}
+
+        </div>
+
+    </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+}
+
+
+function addUserMessage(message){
+
+    chatBox.classList.remove("hidden");
+
+    chatBox.innerHTML += `
+    <div class="flex justify-end mb-3">
+
+        <div class="bg-blue-600 text-white px-4 py-3 rounded-2xl max-w-[80%]">
+
+        ${message}
+
+        </div>
+
+    </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+}
+
+
+// =============================
+// File Upload
+// =============================
+
+if(uploadBtn && fileInput){
+
+    uploadBtn.addEventListener("click",()=>{
+
         fileInput.click();
+
     });
 
-    fileInput.addEventListener("change", () => {
 
-        if (fileInput.files.length > 0) {
+    fileInput.addEventListener("change",()=>{
 
-            const file = fileInput.files[0];
 
-            chatBox.classList.remove("hidden");
+        if(fileInput.files.length > 0){
 
-            chatBox.innerHTML += `
-            <div class="flex justify-start mb-3">
-                <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-                    📎 <strong>File Selected</strong><br><br>
-                    ${file.name}
-                </div>
-            </div>
-            `;
+            let file=fileInput.files[0];
 
-            chatBox.scrollTop = chatBox.scrollHeight;
+
+            addBotMessage(
+            `📎 File Selected
+
+${file.name}
+
+I can help you create content from this file.`
+            );
+
         }
 
     });
 
 }
+
 
 // =============================
 // Creator Tools
@@ -59,104 +112,204 @@ if (uploadBtn && fileInput) {
 
 function creatorTool(tool){
 
-    let text="";
 
-    switch(tool){
+let request="";
 
-        case "captionTemplates":
-            text="Caption Templates";
-            break;
 
-        case "hashtags":
-            text="Hashtag Generator";
-            break;
+switch(tool){
 
-        case "hooks":
-            text="Hook Generator";
-            break;
 
-        case "cta":
-            text="CTA Generator";
-            break;
+case "captionTemplates":
 
-        case "bio":
-            text="Bio Generator";
-            break;
+request="Create caption templates";
 
-        case "username":
-            text="Username Ideas";
-            break;
+break;
 
-        case "ideas":
-            text="Viral Content Ideas";
-            break;
 
-        case "calendar":
-            text="Content Calendar";
-            break;
+case "hashtags":
 
-        default:
-            text="Creator Tool";
+request="Generate hashtags";
 
-    }
+break;
 
-    input.value = text;
-    sendMessage();
+
+case "hooks":
+
+request="Create viral hooks";
+
+break;
+
+
+case "cta":
+
+request="Create CTA ideas";
+
+break;
+
+
+case "bio":
+
+request="Create creator bio";
+
+break;
+
+
+case "username":
+
+request="Generate username ideas";
+
+break;
+
+
+case "ideas":
+
+request="Generate viral content ideas";
+
+break;
+
+
+case "calendar":
+
+request="Create content calendar";
+
+break;
+
+
+default:
+
+request="Creator tool";
+
 
 }
 
+
+input.value=request;
+
+sendMessage();
+
+
+}
+
+
 // =============================
-// AI Video Studio
+// AI Video Studio Tools
 // =============================
 
 function videoTool(tool){
 
-    chatBox.classList.remove("hidden");
 
-    let message="";
+chatBox.classList.remove("hidden");
 
-    switch(tool){
 
-        case "create":
-            message="🎥 Let's create your AI video.\n\nQuestion 1 of 5:\n\nWhat is your video about?";
-            break;
+let message="";
 
-        case "script":
-            message="🎬 What topic do you want the video script to cover?";
-            break;
 
-        case "image":
-            message="🖼️ Describe the image you want to generate.";
-            break;
+switch(tool){
 
-        case "scene":
-            message="🎞️ What story or product should I turn into scenes?";
-            break;
 
-        case "voice":
-            message="🎙️ What should the voice-over say?";
-            break;
+case "create":
 
-        case "youtube":
-            message="📺 What is your YouTube video topic?";
-            break;
+message=
+`🎥 AI Video Creator
 
-        case "reels":
-            message="🎵 What is your Reel or TikTok about?";
-            break;
+I will create:
 
-    }
+1. Hook
+2. Story
+3. Scenes
+4. CTA
 
-    chatBox.innerHTML += `
-    <div class="flex justify-start mb-3">
-        <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-            🤖 <strong>ChatTBM</strong><br><br>
-            ${message}
-        </div>
-    </div>
-    `;
+Tell me your video topic.`;
 
-    chatBox.scrollTop = chatBox.scrollHeight;
+break;
+
+
+
+case "script":
+
+message=
+`🎬 Video Script Generator
+
+Give me your topic and I will create:
+
+• Hook
+• Main story
+• Ending CTA`;
+
+break;
+
+
+
+case "image":
+
+message=
+`🖼️ AI Image Prompt Generator
+
+Tell me what you want to create.
+
+I will add:
+
+• Character
+• Camera
+• Lighting
+• Style`;
+
+break;
+
+
+
+case "scene":
+
+message=
+`🎞️ Story Scene Breakdown
+
+Send your story and I will divide it into cinematic scenes.`;
+
+break;
+
+
+
+case "voice":
+
+message=
+`🎙️ Voice-over Writer
+
+Tell me your video topic and I will create a natural voice script.`;
+
+break;
+
+
+
+case "youtube":
+
+message=
+`📺 YouTube Script Generator
+
+Give me your topic.
+
+I will create:
+
+Hook → Body → CTA`;
+
+break;
+
+
+
+case "reels":
+
+message=
+`🎵 Reel & TikTok Script
+
+Tell me your idea and I will create a short viral script.`;
+
+break;
+
+
+}
+
+
+addBotMessage(message);
+
 
 }
 
@@ -164,44 +317,385 @@ function videoTool(tool){
 // Voice Recognition
 // =============================
 
-if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+if("webkitSpeechRecognition" in window || "SpeechRecognition" in window){
 
     const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
 
     const recognition = new SpeechRecognition();
 
-    recognition.lang = "en-US";
-    recognition.continuous = false;
-    recognition.interimResults = false;
 
-    voiceBtn.addEventListener("click", () => {
+    recognition.lang="en-US";
+    recognition.continuous=false;
+    recognition.interimResults=false;
+
+
+    voiceBtn.addEventListener("click",()=>{
 
         recognition.start();
-        voiceBtn.textContent = "🎙️";
+
+        voiceBtn.textContent="🎙️";
 
     });
 
-    recognition.onresult = (event) => {
 
-        input.value = event.results[0][0].transcript;
-        voiceBtn.textContent = "🎤";
+    recognition.onresult=(event)=>{
+
+
+        input.value =
+        event.results[0][0].transcript;
+
+
+        voiceBtn.textContent="🎤";
 
     };
 
-    recognition.onend = () => {
 
-        voiceBtn.textContent = "🎤";
+    recognition.onend=()=>{
+
+        voiceBtn.textContent="🎤";
 
     };
 
-} else {
 
-    voiceBtn.addEventListener("click", () => {
+}
 
-        alert("Voice input is not supported in this browser.");
+else{
+
+
+    voiceBtn.addEventListener("click",()=>{
+
+        alert("Voice input is not supported on this browser.");
 
     });
+
+
+}
+
+
+
+// =============================
+// ChatTBM Demo AI Brain
+// =============================
+
+function generateAIReply(message){
+
+
+let text=message.toLowerCase();
+
+
+
+// Greetings
+
+if(text.includes("hello") || text.includes("hi")){
+
+
+return `
+👋 Welcome to ChatTBM!
+
+I am your AI Content Assistant.
+
+I can help you create:
+
+🎥 Videos
+✍️ Captions
+#️⃣ Hashtags
+🎬 Scripts
+🖼️ Image Prompts
+📅 Content Plans
+`;
+
+}
+
+
+
+// Video Script Generator
+
+if(
+text.includes("video script") ||
+text.includes("create ai video") ||
+text.includes("script")
+){
+
+
+return `
+🎥 VIDEO SCRIPT
+
+🔥 HOOK:
+"Stop scrolling! You need to see this."
+
+📖 STORY:
+Introduce the problem and tell an engaging story.
+
+🎬 SCENE 1:
+Show the beginning moment.
+
+🎬 SCENE 2:
+Show the main action.
+
+🎬 SCENE 3:
+Show the result.
+
+📢 CTA:
+"Follow ChatTBM for more AI content ideas."
+`;
+
+}
+
+
+
+// Image Prompt Generator
+
+if(
+text.includes("image") ||
+text.includes("prompt")
+){
+
+
+return `
+🖼️ CINEMATIC IMAGE PROMPT
+
+Subject:
+A detailed main character or product.
+
+Camera:
+Cinematic camera angle, shallow depth of field.
+
+Lighting:
+Professional dramatic lighting.
+
+Style:
+Ultra realistic, high quality, detailed.
+
+Mood:
+Creative and inspiring.
+`;
+
+}
+
+
+
+// Scene Generator
+
+if(
+text.includes("scene") ||
+text.includes("story")
+){
+
+
+return `
+🎬 STORY TO SCENE BREAKDOWN
+
+
+Scene 1:
+Introduction and setting.
+
+
+Scene 2:
+Character faces a challenge.
+
+
+Scene 3:
+The main action happens.
+
+
+Scene 4:
+Final result and message.
+
+
+Scene 5:
+CTA and audience engagement.
+`;
+
+}
+
+
+
+// Voice Over Generator
+
+if(
+text.includes("voice") ||
+text.includes("voice-over")
+){
+
+
+return `
+🎙️ VOICE-OVER SCRIPT
+
+
+Intro:
+"Today I will show you something amazing."
+
+
+Middle:
+"Follow along as we discover this step by step."
+
+
+Ending:
+"Try it yourself and share your results."
+`;
+
+}
+
+
+
+// Caption Generator
+
+if(
+text.includes("caption")
+){
+
+
+return `
+✍️ VIRAL CAPTION IDEAS
+
+
+🔥 Caption 1:
+"Your next big idea starts here."
+
+
+🚀 Caption 2:
+"Small actions create massive results."
+
+
+😂 Caption 3:
+"When your idea finally becomes reality."
+`;
+
+}
+
+
+
+// Hashtag Generator
+
+if(
+text.includes("hashtag")
+){
+
+
+return `
+#️⃣ HASHTAG PACK
+
+
+#ContentCreator
+#AI
+#DigitalCreator
+#ViralContent
+#Entrepreneur
+#SocialMedia
+#ChatTBM
+`;
+
+}
+
+
+
+// Hook Generator
+
+if(
+text.includes("hook")
+){
+
+
+return `
+🎯 VIRAL HOOKS
+
+
+• Nobody tells you this...
+
+• I tested this so you don't have to...
+
+• This changed everything...
+
+• Stop making this mistake...
+`;
+
+}
+
+
+
+// Title Generator
+
+if(
+text.includes("title")
+){
+
+
+return `
+📌 TITLE IDEAS
+
+
+1. The Secret To Creating Viral Content
+
+2. How AI Is Changing Creators
+
+3. 5 Things Every Creator Should Know
+`;
+
+}
+
+
+
+// Content Calendar
+
+if(
+text.includes("calendar")
+){
+
+
+return `
+📅 CONTENT CALENDAR
+
+
+Monday:
+Educational post
+
+
+Tuesday:
+Behind the scenes
+
+
+Wednesday:
+Tips and tricks
+
+
+Thursday:
+Storytelling
+
+
+Friday:
+Product showcase
+
+
+Weekend:
+Community content
+`;
+
+}
+
+
+
+// Default AI Response
+
+
+return `
+🤖 ChatTBM Demo AI
+
+
+I can help you create:
+
+🎥 Video scripts
+🖼️ Image prompts
+🎬 Scenes
+🎙️ Voice overs
+✍️ Captions
+#️⃣ Hashtags
+📅 Content calendars
+
+
+Tell me what you want to create.
+`;
 
 }
 
@@ -209,399 +703,471 @@ if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
 // Send Message
 // =============================
 
-function sendMessage() {
+function sendMessage(){
 
-    const text = input.value.trim();
 
-    if (text === "") return;
+const text = input.value.trim();
 
-    chatBox.classList.remove("hidden");
 
-    // User Message
-    chatBox.innerHTML += `
-    <div class="flex justify-end mb-3">
-        <div class="bg-blue-600 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-            ${text}
-        </div>
-    </div>
-    `;
+if(text==="") return;
 
-    input.value = "";
 
-    // Thinking Bubble
-    const thinking = document.createElement("div");
 
-    thinking.innerHTML = `
-    <div class="flex justify-start mb-3">
-        <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-            🤖 <strong>ChatTBM</strong><br><br>
-            Thinking...
-        </div>
-    </div>
-    `;
+addUserMessage(text);
 
-    chatBox.appendChild(thinking);
 
-    chatBox.scrollTop = chatBox.scrollHeight;
+input.value="";
 
-    setTimeout(() => {
 
-        const message = text.toLowerCase();
 
-        let reply = "";
+// Thinking Animation
 
-        if (message.includes("hello") || message.includes("hi")) {
+const thinking=document.createElement("div");
 
-            reply = "👋 Hello! Welcome to ChatTBM. How can I help you today?";
 
-        }
+thinking.innerHTML=`
 
-        else if (message.includes("caption templates")) {
+<div class="flex justify-start mb-3">
 
-            reply = `✍️ Caption Templates
+<div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
 
-🔥 Viral
-Stop scrolling... this changes everything.
+🤖 <strong>ChatTBM</strong>
 
-💼 Business
-Helping people solve problems every day.
+<br><br>
 
-😂 Funny
-I said one video... now it's 3 AM.
+Thinking...
 
-💪 Motivation
-Small steps every day become big results.`;
+</div>
 
-        }
+</div>
 
-        else if (message.includes("hashtag")) {
+`;
 
-            reply = `#️⃣ Trending Hashtags
 
-#ContentCreator
-#Entrepreneur
-#Marketing
-#SocialMedia
-#AI
-#Viral
-#Business
-#Success`;
 
-        }
+chatBox.appendChild(thinking);
 
-        else if (message.includes("hook")) {
 
-            reply = `🎯 Viral Hooks
+chatBox.scrollTop=chatBox.scrollHeight;
 
-• Nobody talks about this...
 
-• I wish I knew this earlier...
 
-• Stop scrolling!
+setTimeout(()=>{
 
-• Here's why you're struggling...
 
-• This will surprise you...`;
+let reply = generateAIReply(text);
 
-        }
 
-        else if (message.includes("cta")) {
 
-            reply = `📢 Call To Action Ideas
+thinking.innerHTML=`
 
-• Follow for more.
+<div class="flex justify-start mb-3">
 
-• Save this post.
+<div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
 
-• Share with a friend.
+🤖 <strong>ChatTBM</strong>
 
-• Comment your thoughts.
+<br><br>
 
-• DM me to get started.`;
+${reply.replace(/\n/g,"<br>")}
 
-        }
+</div>
 
-        else if (message.includes("bio")) {
+</div>
 
-            reply = `👤 Bio Generator
+`;
 
-Helping brands grow online 🚀
 
-Content Creator | Entrepreneur
 
-DM for collaborations`;
+chatBox.scrollTop=chatBox.scrollHeight;
 
-        }
 
-        else if (message.includes("username")) {
 
-            reply = `🔥 Username Ideas
+},1000);
 
-ChatTBMStudio
 
-TBMCreator
-
-TBMMedia
-
-CreateWithTBM
-
-TheContentPlug`;
-
-        }
-
-        else if (message.includes("viral content")) {
-
-            reply = `💡 Viral Content Ideas
-
-1. Before vs After
-
-2. Things Nobody Tells You
-
-3. Behind The Scenes
-
-4. My Biggest Mistake
-
-5. AI Productivity Hacks`;
-
-        }
-
-        else if (message.includes("content calendar")) {
-
-            reply = `📅 Weekly Content Calendar
-
-Monday - Educational
-
-Tuesday - Behind The Scenes
-
-Wednesday - Tips
-
-Thursday - Storytelling
-
-Friday - Product
-
-Saturday - Trends
-
-Sunday - Motivation`;
-
-        }
-
-        else if (message.includes("create ai video")) {
-
-            reply = `🎥 AI Video Creator
-
-Let's begin!
-
-Question 1 of 5
-
-What is your video about?`;
-
-        }
-
-        else if (message.includes("video script")) {
-
-            reply = `🎬 Tell me your topic and I'll create a complete video script.`;
-
-        }
-
-        else if (message.includes("image prompt")) {
-
-            reply = `🖼️ Describe the scene you want and I'll generate an AI image prompt.`;
-
-        }
-
-        else if (message.includes("scene")) {
-
-            reply = `🎞️ I'll divide your story into cinematic scenes.`;
-
-        }
-
-        else if (message.includes("voice")) {
-
-            reply = `🎙️ I'll create a natural voice-over script for your video.`;
-
-        }
-
-        else if (message.includes("youtube")) {
-
-            reply = `📺 I'll generate a YouTube script with Hook, Body and CTA.`;
-
-        }
-
-        else if (message.includes("reel") || message.includes("tiktok")) {
-
-            reply = `🎵 I'll create a short-form Reel/TikTok script optimized for engagement.`;
-
-        }
-
-        else if (message.includes("caption")) {
-
-            reply = "✍️ Dream big. Stay consistent. Success follows action. 🚀";
-
-        }
-
-        else if (message.includes("video")) {
-
-            reply = "🎬 Try: Behind the scenes, 5 tips, Product showcase, Customer story.";
-
-        }
-
-        else if (message.includes("social media")) {
-
-            reply = "📱 Consistency beats perfection. Show up every day.";
-
-        }
-
-        else if (message.includes("script")) {
-
-            reply = "🎬 Start with a strong hook, tell a story, and end with a clear CTA.";
-
-        }
-
-        else {
-
-            reply = "😊 ChatTBM is currently running in Demo Mode. Connect an AI API to unlock intelligent responses.";
-
-        }
-
-        thinking.innerHTML = `
-        <div class="flex justify-start mb-3">
-            <div class="bg-gray-800 text-white px-4 py-3 rounded-2xl max-w-[80%]">
-                🤖 <strong>ChatTBM</strong><br><br>
-                ${reply}
-            </div>
-        </div>
-        `;
-
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-    }, 1000);
 
 }
 
+
+
 // =============================
-// Events
+// Button Events
 // =============================
 
-sendBtn.addEventListener("click", sendMessage);
 
-input.addEventListener("keypress", (e) => {
+if(sendBtn){
 
-    if (e.key === "Enter") {
+sendBtn.addEventListener("click",sendMessage);
 
-        sendMessage();
+}
 
-    }
+
+
+if(input){
+
+input.addEventListener("keypress",(e)=>{
+
+
+if(e.key==="Enter"){
+
+sendMessage();
+
+}
+
 
 });
 
+}
+
+
+
 // =============================
-// Quick Action Buttons
+// Quick Actions
 // =============================
 
-document.getElementById("caption-btn").addEventListener("click", () => {
 
-    input.value = "Create a Viral Caption";
-    sendMessage();
+const captionButton =
+document.getElementById("caption-btn");
+
+
+if(captionButton){
+
+captionButton.addEventListener("click",()=>{
+
+
+input.value="Create a viral caption";
+
+
+sendMessage();
+
+
+});
+
+}
+
+
+
+const videoButton =
+document.getElementById("video-btn");
+
+
+if(videoButton){
+
+videoButton.addEventListener("click",()=>{
+
+
+input.value="Create AI video script";
+
+
+sendMessage();
+
 
 });
 
-document.getElementById("video-btn").addEventListener("click", () => {
+}
 
-    input.value = "Generate Video Ideas";
-    sendMessage();
+
+
+const postButton =
+document.getElementById("post-btn");
+
+
+if(postButton){
+
+postButton.addEventListener("click",()=>{
+
+
+input.value="Write social media posts";
+
+
+sendMessage();
+
 
 });
 
-document.getElementById("post-btn").addEventListener("click", () => {
+}
 
-    input.value = "Write Social Media Posts";
-    sendMessage();
 
-});
 
 // =============================
 // Auto Save Chat
 // =============================
 
+
 function saveChat(){
 
-    localStorage.setItem("ChatTBM_Chat", chatBox.innerHTML);
+
+localStorage.setItem(
+"ChatTBM_Chat",
+chatBox.innerHTML
+);
+
 
 }
+
+
 
 function loadChat(){
 
-    const saved = localStorage.getItem("ChatTBM_Chat");
 
-    if(saved){
+const saved =
+localStorage.getItem("ChatTBM_Chat");
 
-        chatBox.innerHTML = saved;
 
-        if(saved.trim() !== ""){
 
-            chatBox.classList.remove("hidden");
+if(saved){
 
-        }
 
-        chatBox.scrollTop = chatBox.scrollHeight;
+chatBox.innerHTML=saved;
 
-    }
+
+chatBox.classList.remove("hidden");
+
+
+chatBox.scrollTop=
+chatBox.scrollHeight;
+
 
 }
 
-const observer = new MutationObserver(() => {
 
-    saveChat();
+}
+
+
+
+const observer =
+new MutationObserver(()=>{
+
+
+saveChat();
+
 
 });
 
-observer.observe(chatBox, {
 
-    childList:true,
-    subtree:true
+
+observer.observe(chatBox,{
+
+childList:true,
+subtree:true
 
 });
+
+
 
 loadChat();
+
+
 
 // =============================
 // Clear Chat
 // =============================
 
+
 function clearChat(){
 
-    if(confirm("Clear this conversation?")){
 
-        chatBox.innerHTML="";
+if(confirm("Clear this conversation?")){
 
-        chatBox.classList.add("hidden");
 
-        localStorage.removeItem("ChatTBM_Chat");
+chatBox.innerHTML="";
 
-    }
+
+chatBox.classList.add("hidden");
+
+
+localStorage.removeItem("ChatTBM_Chat");
+
 
 }
 
+
+}
+
+
+
 // =============================
-// Copy Latest ChatTBM Reply
+// Copy Latest Reply
 // =============================
+
 
 function copyLastReply(){
 
-    const messages = chatBox.querySelectorAll(".bg-gray-800");
 
-    if(messages.length===0){
+const replies =
+chatBox.querySelectorAll(".bg-gray-800");
 
-        alert("No ChatTBM reply to copy.");
 
-        return;
 
-    }
+if(replies.length===0){
 
-    const lastReply = messages[messages.length-1].innerText;
 
-    navigator.clipboard.writeText(lastReply);
+alert("No ChatTBM reply found.");
 
-    alert("Copied!");
+
+return;
+
 
 }
+
+
+
+const last =
+replies[replies.length-1].innerText;
+
+
+
+navigator.clipboard.writeText(last);
+
+
+
+alert("ChatTBM reply copied!");
+
+
+
+}
+
+// =============================
+// ChatTBM V3.5 Extra AI Features
+// =============================
+
+
+// AI Content Post Generator
+
+function createSocialPost(topic){
+
+return `
+📱 SOCIAL MEDIA POST
+
+
+🔥 Hook:
+${topic} is changing the way creators work.
+
+
+📝 Main Post:
+
+Here is something every creator should know about ${topic}.
+
+Create.
+Test.
+Improve.
+Grow.
+
+
+📢 CTA:
+
+Follow ChatTBM for more creator tools 🚀
+`;
+
+}
+
+
+
+// AI YouTube Description Generator
+
+function createYoutubeDescription(topic){
+
+return `
+📺 YOUTUBE DESCRIPTION
+
+
+Title:
+${topic} - Everything You Need To Know
+
+
+Description:
+
+In this video we explore ${topic}.
+
+You will learn:
+✅ Important tips
+✅ Creative ideas
+✅ Practical steps
+
+
+Subscribe for more AI creator content.
+`;
+
+}
+
+
+
+// AI Marketing Idea Generator
+
+function marketingIdeas(){
+
+return `
+🚀 MARKETING IDEAS
+
+
+1. Create a behind-the-scenes video
+
+2. Share customer results
+
+3. Make educational content
+
+4. Show your process
+
+5. Use storytelling to build trust
+`;
+
+}
+
+
+
+// =============================
+// New Chat Function
+// =============================
+
+
+function newChat(){
+
+
+chatBox.innerHTML="";
+
+
+chatBox.classList.add("hidden");
+
+
+localStorage.removeItem("ChatTBM_Chat");
+
+
+}
+
+
+
+// =============================
+// Protect Empty Elements
+// =============================
+
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+
+if(!chatBox){
+
+console.log("ChatTBM chat area missing");
+
+}
+
+
+if(!input){
+
+console.log("ChatTBM input missing");
+
+}
+
+
+});
+
+
+
+// =============================
+// ChatTBM V3.5 Ready
+// =============================
+
+
+console.log(
+"🚀 ChatTBM V3.5 Demo AI Engine Loaded"
+);
