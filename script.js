@@ -20,6 +20,38 @@ let activeTool = null;
 let toolStep = 0;
 let toolData = {};
 
+// =============================
+// ChatTBM V3.6 Conversation Memory
+// =============================
+
+let chatMemory = {
+    topic: "",
+    contentType: "",
+    style: ""
+};
+
+
+// Load Memory
+
+const savedMemory = localStorage.getItem("ChatTBM_Memory");
+
+if(savedMemory){
+
+    chatMemory = JSON.parse(savedMemory);
+
+}
+
+
+// Save Memory
+
+function saveMemory(){
+
+    localStorage.setItem(
+        "ChatTBM_Memory",
+        JSON.stringify(chatMemory)
+    );
+
+}
 
 // =============================
 // ChatTBM Message Display
