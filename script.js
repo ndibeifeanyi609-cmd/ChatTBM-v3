@@ -12,6 +12,14 @@ const uploadBtn = document.getElementById("upload-btn");
 const fileInput = document.getElementById("file-input");
 
 // =============================
+// Creator Tool State
+// =============================
+
+let activeTool = null;
+let toolStep = 0;
+let toolData = {};
+
+// =============================
 // Upload Button
 // =============================
 
