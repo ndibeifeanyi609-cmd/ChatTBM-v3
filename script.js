@@ -1,6 +1,6 @@
 // =====================================
-// ChatTBM V4.2
-// Part 1A - Core AI Chat System
+// ChatTBM V4.2 FINAL
+// Part 1A - Core Chat System
 // =====================================
 
 
@@ -11,10 +11,23 @@
 const chatBox = document.getElementById("chat-box");
 const input = document.getElementById("user-input");
 
-
-// Memory
-
 let lastUserRequest = "";
+
+
+
+
+// =============================
+// Get Time
+// =============================
+
+function getTime(){
+
+    return new Date().toLocaleTimeString([],{
+        hour:"2-digit",
+        minute:"2-digit"
+    });
+
+}
 
 
 
@@ -25,13 +38,17 @@ let lastUserRequest = "";
 
 function addUserMessage(message){
 
+
     if(!chatBox) return;
+
 
 
     chatBox.classList.remove("hidden");
 
 
+
     lastUserRequest = message;
+
 
 
     chatBox.innerHTML += `
@@ -40,11 +57,12 @@ function addUserMessage(message){
 
         <div class="user-bubble">
 
-            ${message}
+            ${message.replace(/\n/g,"<br>")}
+
 
             <div style="
             font-size:11px;
-            opacity:.7;
+            opacity:.6;
             margin-top:5px;
             text-align:right;
             ">
@@ -53,22 +71,28 @@ function addUserMessage(message){
 
             </div>
 
+
         </div>
+
 
     </div>
 
     `;
 
 
+
     chatBox.scrollTop =
     chatBox.scrollHeight;
 
 
-    saveChat();
 
     saveLastRequest();
 
+    saveChat();
+
+
 }
+
 
 
 
@@ -81,6 +105,7 @@ function addBotMessage(message){
 
 
     if(!chatBox) return;
+
 
 
     chatBox.classList.remove("hidden");
@@ -129,37 +154,34 @@ function addBotMessage(message){
             <div class="ai-actions">
 
 
-            <button
-            class="ai-btn"
-            onclick="copyResponse('${id}')">
+                <button class="ai-btn"
+                onclick="copyResponse('${id}')">
 
-            📋 Copy
+                📋 Copy
 
-            </button>
-
-
-
-            <button
-            class="ai-btn"
-            onclick="editResponse('${id}')">
-
-            ✏️ Edit
-
-            </button>
+                </button>
 
 
 
-            <button
-            class="ai-btn"
-            onclick="regenerateResponse('${id}')">
+                <button class="ai-btn"
+                onclick="editResponse('${id}')">
 
-            🔄 Regenerate
+                ✏️ Edit
 
-            </button>
+                </button>
 
+
+
+                <button class="ai-btn"
+                onclick="regenerateResponse('${id}')">
+
+                🔄 Regenerate
+
+                </button>
 
 
             </div>
+
 
 
         </div>
@@ -176,27 +198,12 @@ function addBotMessage(message){
     chatBox.scrollHeight;
 
 
+
     saveChat();
 
 
 }
 
-
-
-
-// =============================
-// Time Display
-// =============================
-
-function getTime(){
-
-    return new Date()
-    .toLocaleTimeString([],{
-        hour:"2-digit",
-        minute:"2-digit"
-    });
-
-}
 
 
 
@@ -237,12 +244,7 @@ function showThinking(){
 
         <div class="ai-content">
 
-        <span class="thinking">
-
         Thinking<span class="dots">...</span>
-
-        </span>
-
 
         </div>
 
@@ -270,12 +272,13 @@ function showThinking(){
 
 
 
+
 console.log(
-"✅ ChatTBM V4.2 Core System Loaded"
+"✅ ChatTBM V4.2 Part 1A Loaded"
 );
 
 // =====================================
-// ChatTBM V4.2
+// ChatTBM V4.2 FINAL
 // Part 1B - Copy Edit Regenerate System
 // =====================================
 
@@ -310,48 +313,25 @@ function copyResponse(id){
 
 
 
-    // Modern copy
-
-    if(
-        navigator.clipboard &&
-        window.isSecureContext
-    ){
+    navigator.clipboard.writeText(text)
+    .then(()=>{
 
 
-        navigator.clipboard.writeText(text);
+        showNotice(
+        "📋 Response copied"
+        );
 
 
-    }
-
-    else{
-
-
-        const temp =
-        document.createElement("textarea");
+    })
+    .catch(()=>{
 
 
-        temp.value = text;
+        showNotice(
+        "Copy failed"
+        );
 
 
-        document.body.appendChild(temp);
-
-
-        temp.select();
-
-
-        document.execCommand("copy");
-
-
-        temp.remove();
-
-
-    }
-
-
-
-    showNotice(
-    "📋 Response copied"
-    );
+    });
 
 
 }
@@ -399,8 +379,8 @@ function editResponse(id){
 
 
     if(
-        edited &&
-        edited.trim() !== ""
+    edited &&
+    edited.trim() !== ""
     ){
 
 
@@ -428,11 +408,10 @@ function editResponse(id){
 
 
 // =============================
-// Regenerate Response
+// Regenerate AI Response
 // =============================
 
 function regenerateResponse(id){
-
 
 
     const box =
@@ -453,16 +432,16 @@ function regenerateResponse(id){
 
 
 
-    content.innerHTML = `
 
-    ⏳ Creating a better version...
+    content.innerHTML =
 
+    `
+    ⏳ Creating a new version...
     `;
 
 
 
     setTimeout(()=>{
-
 
 
         let request =
@@ -476,7 +455,7 @@ function regenerateResponse(id){
 
 
         if(
-            typeof generateAIReply === "function"
+        typeof generateAIReply === "function"
         ){
 
 
@@ -494,7 +473,7 @@ function regenerateResponse(id){
             `
             🚀 ChatTBM V4.2
 
-            Here is a fresh version for:
+            Here is another creative version:
 
             ${request}
 
@@ -502,6 +481,7 @@ function regenerateResponse(id){
 
 
         }
+
 
 
 
@@ -531,7 +511,7 @@ function regenerateResponse(id){
 
 
 // =============================
-// App Notification
+// Notification Popup
 // =============================
 
 function showNotice(message){
@@ -551,40 +531,50 @@ function showNotice(message){
     "fixed";
 
 
+
     notice.style.bottom =
     "90px";
+
 
 
     notice.style.left =
     "50%";
 
 
+
     notice.style.transform =
     "translateX(-50%)";
+
 
 
     notice.style.background =
     "#222";
 
 
+
     notice.style.color =
-    "white";
+    "#fff";
+
 
 
     notice.style.padding =
     "12px 20px";
 
 
+
     notice.style.borderRadius =
     "999px";
+
 
 
     notice.style.zIndex =
     "9999";
 
 
+
     notice.style.fontSize =
     "14px";
+
 
 
     document.body.appendChild(notice);
@@ -605,35 +595,23 @@ function showNotice(message){
 
 
 
+
 console.log(
-"✅ ChatTBM V4.2 Copy Edit Regenerate Loaded"
+"✅ ChatTBM V4.2 Part 1B Loaded"
 );
 
 // =====================================
-// ChatTBM V4.2
-// Part 2A - Memory + Chat Storage Upgrade
+// ChatTBM V4.2 FINAL
+// Part 2A - Memory + Chat History System
 // =====================================
 
 
-// =============================
-// User Memory
-// =============================
-
-let lastUserRequest = "";
-
-let activeCreatorMode = "";
-
-
-
 
 // =============================
-// Remember User Request
+// Save Last User Request
 // =============================
 
-function rememberUserRequest(message){
-
-
-    lastUserRequest = message;
+function saveLastRequest(){
 
 
     localStorage.setItem(
@@ -652,7 +630,7 @@ function rememberUserRequest(message){
 
 
 // =============================
-// Load User Memory
+// Load Last User Request
 // =============================
 
 function loadLastRequest(){
@@ -673,6 +651,25 @@ function loadLastRequest(){
 
 
     }
+
+
+}
+
+
+
+
+
+// =============================
+// Remember User Message
+// =============================
+
+function rememberUserRequest(message){
+
+
+    lastUserRequest = message;
+
+
+    saveLastRequest();
 
 
 }
@@ -714,7 +711,6 @@ function saveChat(){
 function loadChat(){
 
 
-
     const saved =
 
     localStorage.getItem(
@@ -726,8 +722,8 @@ function loadChat(){
 
 
     if(
-        saved &&
-        chatBox
+    saved &&
+    chatBox
     ){
 
 
@@ -737,7 +733,7 @@ function loadChat(){
 
 
         chatBox.classList.remove(
-            "hidden"
+        "hidden"
         );
 
 
@@ -749,7 +745,6 @@ function loadChat(){
     }
 
 
-
 }
 
 
@@ -757,21 +752,21 @@ function loadChat(){
 
 
 // =============================
-// Clear Conversation
+// Clear Chat
 // =============================
 
 function clearChat(){
 
 
-
-    const confirmClear =
+    const confirmDelete =
     confirm(
     "Delete ChatTBM conversation?"
     );
 
 
 
-    if(!confirmClear) return;
+    if(!confirmDelete) return;
+
 
 
 
@@ -818,7 +813,7 @@ function clearChat(){
 
 
 // =============================
-// New Chat Button
+// New Chat
 // =============================
 
 function createNewChat(){
@@ -840,38 +835,28 @@ function createNewChat(){
 
 
 // =============================
-// Save Before Closing
+// Save Before Leaving
 // =============================
 
 window.addEventListener(
-
 "beforeunload",
-
 ()=>{
 
 
     saveChat();
 
-
-    localStorage.setItem(
-
-    "ChatTBM_Last_Request",
-
-    lastUserRequest
-
-    );
+    saveLastRequest();
 
 
-}
+});
 
-);
 
 
 
 
 
 // =============================
-// Restore Data
+// Restore Data On Start
 // =============================
 
 loadChat();
@@ -883,12 +868,12 @@ loadLastRequest();
 
 
 console.log(
-"✅ ChatTBM V4.2 Memory System Loaded"
+"✅ ChatTBM V4.2 Part 2A Memory Loaded"
 );
 
 // =====================================
-// ChatTBM V4.2
-// Part 2B - Smart Send System Upgrade
+// ChatTBM V4.2 FINAL
+// Part 2B - Smart Send + Upload + Voice
 // =====================================
 
 
@@ -926,7 +911,6 @@ function sendMessage(){
 
 
 
-
     const loader =
     showThinking();
 
@@ -944,9 +928,7 @@ function sendMessage(){
 
 
 
-
         let reply;
-
 
 
 
@@ -966,14 +948,19 @@ function sendMessage(){
 
             reply =
 
-            `
-            🚀 ChatTBM V4.2 is ready.
+`
+🚀 ChatTBM V4.2 is ready.
 
-            Your AI engine is waiting for API connection.
+Your AI engine is waiting for API connection.
 
-            For now, I can help you design content workflows.
-            `;
+For now, I can help you create:
 
+✍️ Captions
+🎬 Scripts
+🔥 Viral ideas
+📱 Social content
+
+`;
 
         }
 
@@ -994,12 +981,9 @@ function sendMessage(){
 
 
 
-
-
 // =============================
 // Send Button
 // =============================
-
 
 const sendBtn =
 document.getElementById(
@@ -1012,11 +996,8 @@ if(sendBtn){
 
 
     sendBtn.addEventListener(
-
     "click",
-
     sendMessage
-
     );
 
 
@@ -1032,18 +1013,21 @@ if(sendBtn){
 // Enter Key Support
 // =============================
 
-
 if(input){
 
 
     input.addEventListener(
-
     "keydown",
-
     function(event){
 
 
-        if(event.key === "Enter"){
+        if(
+        event.key === "Enter" &&
+        !event.shiftKey
+        ){
+
+
+            event.preventDefault();
 
 
             sendMessage();
@@ -1064,136 +1048,14 @@ if(input){
 
 
 // =============================
-// Better Thinking Animation
+// File Upload System
 // =============================
-
-
-function showThinking(){
-
-
-    if(!chatBox) return;
-
-
-
-
-    const loader =
-    document.createElement("div");
-
-
-
-    loader.className =
-    "ai-message mb-5";
-
-
-
-    loader.innerHTML = `
-
-    <div class="ai-bubble">
-
-
-        <div class="ai-header">
-
-        🤖 <strong>ChatTBM</strong>
-
-        </div>
-
-
-
-        <div class="ai-content">
-
-        <span class="thinking">
-
-        Thinking<span class="dots">...</span>
-
-        </span>
-
-
-        </div>
-
-
-    </div>
-
-    `;
-
-
-
-
-    chatBox.appendChild(loader);
-
-
-
-    chatBox.scrollTop =
-    chatBox.scrollHeight;
-
-
-
-    return loader;
-
-
-}
-
-
-
-
-
-
-
-// =============================
-// Small App Notification
-// =============================
-
-
-function showNotice(text){
-
-
-    const notice =
-    document.createElement("div");
-
-
-
-    notice.className =
-    "fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 px-5 py-3 rounded-full text-sm";
-
-
-
-    notice.innerText =
-    text;
-
-
-
-    document.body.appendChild(
-    notice
-    );
-
-
-
-    setTimeout(()=>{
-
-
-        notice.remove();
-
-
-    },2000);
-
-
-
-}
-
-
-
-
-
-
-
-// =============================
-// File Upload Upgrade
-// =============================
-
 
 const uploadBtn =
 document.getElementById(
 "upload-btn"
 );
+
 
 
 const fileInput =
@@ -1204,52 +1066,169 @@ document.getElementById(
 
 
 
+
 if(
 uploadBtn &&
 fileInput
 ){
 
 
-uploadBtn.onclick = ()=>{
+    uploadBtn.onclick = ()=>{
 
 
-    fileInput.click();
+        fileInput.click();
 
 
-};
-
-
-
-fileInput.onchange = ()=>{
-
-
-    const file =
-    fileInput.files[0];
+    };
 
 
 
-    if(file){
 
 
-        addUserMessage(
-        "📎 Uploaded: " + file.name
+    fileInput.onchange = ()=>{
+
+
+        const file =
+        fileInput.files[0];
+
+
+
+        if(file){
+
+
+            addUserMessage(
+            "📎 Uploaded file: " + file.name
+            );
+
+
+
+            addBotMessage(
+
+`
+📂 File received.
+
+ChatTBM can process files after AI API connection is activated.
+
+`
+
+            );
+
+
+        }
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+// =============================
+// Voice Input System
+// =============================
+
+const voiceBtn =
+document.getElementById(
+"voice-btn"
+);
+
+
+
+
+if(
+voiceBtn &&
+"webkitSpeechRecognition" in window
+){
+
+
+    const recognition =
+    new webkitSpeechRecognition();
+
+
+
+    recognition.lang =
+    "en-US";
+
+
+
+    recognition.continuous =
+    false;
+
+
+
+    voiceBtn.onclick = ()=>{
+
+
+        recognition.start();
+
+
+
+        voiceBtn.innerHTML =
+        "🔴";
+
+
+    };
+
+
+
+
+
+    recognition.onresult =
+    function(event){
+
+
+        const text =
+        event.results[0][0].transcript;
+
+
+
+        input.value =
+        text;
+
+
+
+        voiceBtn.innerHTML =
+        "🎤";
+
+
+    };
+
+
+
+
+
+    recognition.onerror =
+    function(){
+
+
+        voiceBtn.innerHTML =
+        "🎤";
+
+
+    };
+
+
+}
+
+
+
+else if(voiceBtn){
+
+
+    voiceBtn.onclick = ()=>{
+
+
+        showNotice(
+        "🎤 Voice input is not supported on this browser"
         );
 
 
-
-        addBotMessage(
-
-        "📂 File received. File analysis will activate after ChatTBM API connection."
-
-        );
-
-
-    }
-
-
-
-};
-
+    };
 
 
 }
@@ -1261,13 +1240,13 @@ fileInput.onchange = ()=>{
 
 
 console.log(
-"✅ ChatTBM V4.2 Send System Loaded"
+"✅ ChatTBM V4.2 Part 2B Loaded"
 );
 
 // =====================================
-// ChatTBM V4.2
+// ChatTBM V4.2 FINAL
 // Part 3 - App Feel Upgrade
-// Typing Effect + Smooth AI Experience
+// Typing Effect + Smooth Experience
 // =====================================
 
 
@@ -1275,7 +1254,6 @@ console.log(
 // =============================
 // AI Typing Effect
 // =============================
-
 
 function typeAIResponse(element, text){
 
@@ -1288,11 +1266,17 @@ function typeAIResponse(element, text){
 
 
 
-    const timer = setInterval(()=>{
+    const cleanText =
+    text;
 
 
-        element.innerHTML +=
-        text.charAt(index);
+
+    const typing =
+    setInterval(()=>{
+
+
+        element.textContent +=
+        cleanText.charAt(index);
 
 
 
@@ -1300,15 +1284,18 @@ function typeAIResponse(element, text){
 
 
 
-        if(index >= text.length){
+        if(index >= cleanText.length){
 
 
-            clearInterval(timer);
+            clearInterval(typing);
 
 
 
             element.innerHTML =
-            text.replace(/\n/g,"<br>");
+            cleanText.replace(
+            /\n/g,
+            "<br>"
+            );
 
 
 
@@ -1316,7 +1303,6 @@ function typeAIResponse(element, text){
 
 
         }
-
 
 
     },15);
@@ -1332,121 +1318,23 @@ function typeAIResponse(element, text){
 
 
 // =============================
-// Upgrade AI Message Animation
+// Smooth Chat Scroll
 // =============================
 
-
-function addBotMessage(message){
+function smoothChatScroll(){
 
 
     if(!chatBox) return;
 
 
 
-    chatBox.classList.remove(
-    "hidden"
-    );
+    chatBox.scrollTo({
 
+        top:chatBox.scrollHeight,
 
+        behavior:"smooth"
 
-    const id =
-    "chat_" + Date.now();
-
-
-
-
-    chatBox.innerHTML += `
-
-    <div class="ai-message mb-5" id="${id}">
-
-
-        <div class="ai-bubble">
-
-
-            <div class="ai-header">
-
-            🤖 <strong>ChatTBM</strong>
-
-            </div>
-
-
-
-            <div class="ai-content">
-
-            </div>
-
-
-
-            <div class="ai-actions">
-
-
-                <button 
-                class="ai-btn"
-                onclick="copyResponse('${id}')">
-
-                📋 Copy
-
-                </button>
-
-
-
-
-                <button
-                class="ai-btn"
-                onclick="editResponse('${id}')">
-
-                ✏️ Edit
-
-                </button>
-
-
-
-
-                <button
-                class="ai-btn"
-                onclick="regenerateResponse('${id}')">
-
-                🔄 Regenerate
-
-                </button>
-
-
-            </div>
-
-
-        </div>
-
-
-    </div>
-
-    `;
-
-
-
-
-    const box =
-    document.getElementById(id);
-
-
-
-    const content =
-    box.querySelector(
-    ".ai-content"
-    );
-
-
-
-    typeAIResponse(
-    content,
-    message
-    );
-
-
-
-
-    chatBox.scrollTop =
-    chatBox.scrollHeight;
-
+    });
 
 
 }
@@ -1461,8 +1349,8 @@ function addBotMessage(message){
 // Button Press Animation
 // =============================
 
-
-document.querySelectorAll(
+document
+.querySelectorAll(
 ".action-btn,.ai-btn,.icon-btn"
 )
 .forEach(button=>{
@@ -1492,7 +1380,6 @@ document.querySelectorAll(
     });
 
 
-
 });
 
 
@@ -1502,9 +1389,91 @@ document.querySelectorAll(
 
 
 // =============================
-// Auto Hide Empty Chat Space
+// Input Focus Effect
 // =============================
 
+const inputArea =
+document.getElementById(
+"user-input"
+);
+
+
+
+if(inputArea){
+
+
+    inputArea.addEventListener(
+    "focus",
+    ()=>{
+
+
+        inputArea.parentElement.style.border =
+        "1px solid #2563eb";
+
+
+    });
+
+
+
+
+
+    inputArea.addEventListener(
+    "blur",
+    ()=>{
+
+
+        inputArea.parentElement.style.border =
+        "";
+
+
+    });
+
+
+
+}
+
+
+
+
+
+
+
+// =============================
+// Mobile App Feel
+// =============================
+
+document.body.style.webkitTapHighlightColor =
+"transparent";
+
+
+
+
+
+
+
+// =============================
+// Online Status
+// =============================
+
+function showOnlineStatus(){
+
+
+    console.log(
+    "🟢 ChatTBM Online"
+    );
+
+
+}
+
+
+
+
+
+
+
+// =============================
+// Chat Visibility Check
+// =============================
 
 function checkChatVisibility(){
 
@@ -1527,159 +1496,25 @@ function checkChatVisibility(){
 
 
 
-
-
 checkChatVisibility();
 
+showOnlineStatus();
 
 
 
 
-
-
-// =============================
-// Mobile App Feel
-// =============================
-
-
-document.body.style.webkitTapHighlightColor =
-"transparent";
 
 
 
 console.log(
-"✨ ChatTBM V4.2 App Feel Loaded"
+"✨ ChatTBM V4.2 Part 3 App Feel Loaded"
 );
 
 // =====================================
-// ChatTBM V4.2
+// ChatTBM V4.2 FINAL
 // Part 4 - Final Polish
-// Mobile App Feel + Better UX
+// Welcome + Startup + Final Checks
 // =====================================
-
-
-
-// =============================
-// Smooth Chat Scroll
-// =============================
-
-
-function smoothChatScroll(){
-
-
-    if(!chatBox) return;
-
-
-
-    chatBox.scrollTo({
-
-        top: chatBox.scrollHeight,
-
-        behavior:"smooth"
-
-    });
-
-
-}
-
-
-
-
-
-
-// =============================
-// Improve User Message Display
-// =============================
-
-
-function addUserMessage(message){
-
-
-    if(!chatBox) return;
-
-
-
-    chatBox.classList.remove(
-    "hidden"
-    );
-
-
-
-    chatBox.innerHTML += `
-
-
-    <div class="flex justify-end mb-5">
-
-
-        <div class="user-bubble">
-
-
-            ${message.replace(/\n/g,"<br>")}
-
-
-        </div>
-
-
-    </div>
-
-
-    `;
-
-
-
-    smoothChatScroll();
-
-
-
-    saveChat();
-
-
-
-}
-
-
-
-
-
-
-
-// =============================
-// Enter Key Mobile Friendly
-// =============================
-
-
-if(input){
-
-
-input.addEventListener(
-"keydown",
-function(event){
-
-
-    if(
-    event.key === "Enter" &&
-    !event.shiftKey
-    ){
-
-
-        event.preventDefault();
-
-
-        sendMessage();
-
-
-    }
-
-
-
-});
-
-
-}
-
-
-
-
 
 
 
@@ -1687,16 +1522,17 @@ function(event){
 // Welcome Message
 // =============================
 
-
 function showWelcome(){
 
 
-
-    if(
+    const visited =
     localStorage.getItem(
     "ChatTBM_Visited"
-    )
-    ){
+    );
+
+
+
+    if(visited){
 
         return;
 
@@ -1713,14 +1549,20 @@ function showWelcome(){
 `
 👋 Welcome to ChatTBM
 
-Your AI Content Assistant 🚀
+🚀 Your AI Content Assistant
 
 I can help you create:
 
 ✍️ Viral captions
+
 🎬 Video scripts
-📱 Social media ideas
-🔥 Content strategies
+
+📱 Social media posts
+
+🔥 Content ideas
+
+🎯 Marketing strategies
+
 
 What are we creating today?
 `
@@ -1749,46 +1591,42 @@ What are we creating today?
 
 
 // =============================
-// Input Focus Effect
+// Creator Mode Memory
 // =============================
 
-
-const inputArea =
-document.querySelector(
-"#user-input"
-);
-
-
-
-if(inputArea){
-
-
-inputArea.addEventListener(
-"focus",
-()=>{
-
-
-    inputArea.parentElement.style.border =
-    "1px solid #2563eb";
-
-
-
-});
+let activeCreatorMode = "";
 
 
 
 
-inputArea.addEventListener(
-"blur",
-()=>{
+function activateCreatorMode(mode){
 
 
-    inputArea.parentElement.style.border =
-    "none";
+    activeCreatorMode = mode;
 
 
 
-});
+    localStorage.setItem(
+    "ChatTBM_Mode",
+    mode
+    );
+
+
+
+    addBotMessage(
+
+`
+🎨 Creator Mode Activated
+
+${mode}
+
+
+I will customize your content style for this mode.
+
+Tell me what you want to create.
+`
+
+    );
 
 
 }
@@ -1800,18 +1638,27 @@ inputArea.addEventListener(
 
 
 // =============================
-// Online Status
+// Load Creator Mode
 // =============================
 
-
-function showOnlineStatus(){
-
+function loadCreatorMode(){
 
 
-console.log(
-"🟢 ChatTBM Online"
-);
+    const savedMode =
+    localStorage.getItem(
+    "ChatTBM_Mode"
+    );
 
+
+
+    if(savedMode){
+
+
+        activeCreatorMode =
+        savedMode;
+
+
+    }
 
 
 }
@@ -1820,18 +1667,146 @@ console.log(
 
 
 
+
+
 // =============================
-// Start App
+// Chat History Check
 // =============================
 
+function showChatHistory(){
+
+
+    const history =
+    localStorage.getItem(
+    "ChatTBM_Chat_History"
+    );
+
+
+
+    if(history){
+
+
+        showNotice(
+        "📂 Previous chat history available"
+        );
+
+
+    }
+
+    else{
+
+
+        showNotice(
+        "No chat history yet"
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+// =============================
+// Final System Check
+// =============================
+
+function checkChatTBM(){
+
+
+
+    console.log(
+    "🚀 ChatTBM V4.2 System Check"
+    );
+
+
+
+    console.log(
+
+    "Chat Box:",
+
+    chatBox
+    ?
+    "Connected ✅"
+    :
+    "Missing ❌"
+
+    );
+
+
+
+
+    console.log(
+
+    "AI Generator:",
+
+    typeof generateAIReply === "function"
+
+    ?
+    "Connected ✅"
+
+    :
+    "Waiting for API"
+
+    );
+
+
+
+
+    console.log(
+
+    "Memory:",
+
+    typeof saveChat === "function"
+
+    ?
+    "Active ✅"
+
+    :
+    "Missing ❌"
+
+    );
+
+
+
+
+    console.log(
+
+    "Version:",
+
+    "ChatTBM V4.2"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+// =============================
+// Start ChatTBM App
+// =============================
+
+loadCreatorMode();
 
 showWelcome();
 
-showOnlineStatus();
+checkChatTBM();
+
+
 
 
 
 
 console.log(
-"🚀 ChatTBM V4.2 Final Polish Loaded"
+"🔥 ChatTBM V4.2 FINAL POLISH COMPLETE"
 );
