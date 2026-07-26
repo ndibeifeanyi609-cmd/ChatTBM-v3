@@ -4,276 +4,697 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
 <title>ChatTBM</title>
 
+
+<!-- Favicon -->
+
 <link rel="icon" type="image/png" href="IMG_4397.png">
+
 <link rel="apple-touch-icon" href="IMG_4397.png">
+
+
+
+<!-- Tailwind -->
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+
+
 <style>
 
+
 body{
+
     background:#000;
+
     color:#fff;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+    font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
 }
+
+
 
 .main-logo{
+
     width:90px;
+
     height:90px;
+
     border-radius:9999px;
+
 }
+
+
 
 .action-btn{
+
     width:100%;
+
     background:#1f1f1f;
+
     transition:.2s;
+
 }
+
+
 
 .action-btn:hover{
+
     background:#2b2b2b;
+
     transform:translateY(-2px);
+
 }
 
+
+
 .icon-btn{
+
     width:52px;
+
     height:52px;
+
     border-radius:9999px;
+
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     transition:.2s;
+
 }
+
+
+
+.mode-btn{
+
+    background:#111;
+
+    border:1px solid #333;
+
+}
+
+
+
+.mode-btn:hover{
+
+    border-color:#2563eb;
+
+}
+
+
 
 </style>
 
+
 </head>
+
+
 
 <body class="min-h-screen bg-black text-white">
 
+
+
 <div class="max-w-lg mx-auto px-5 py-6">
 
-<!-- Header -->
+
+
+<!-- HEADER -->
 
 <div class="flex items-center justify-between mb-12">
 
-    <div class="flex items-center gap-3">
 
-        <img
-        src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-        class="w-9 h-9 rounded-full">
 
-        <h1 class="text-3xl font-bold">
-            ChatTBM
-        </h1>
+<div class="flex items-center gap-3">
 
-    </div>
 
-    <button
-    onclick="window.location.href='signin.html'"
-    class="px-4 py-2 border border-gray-600 rounded-full hover:border-blue-500 transition">
+<img
 
-        Sign In
+src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
 
-    </button>
+class="w-9 h-9 rounded-full"
+
+alt="ChatTBM Logo">
+
+
+<h1 class="text-3xl font-bold">
+
+ChatTBM
+
+</h1>
+
 
 </div>
 
-<!-- Center Logo -->
+
+
+<button
+
+onclick="window.location.href='signin.html'"
+
+class="px-4 py-2 border border-gray-600 rounded-full hover:border-blue-500 transition">
+
+
+Sign In
+
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+<!-- CENTER LOGO -->
+
 
 <div class="flex justify-center mb-12">
 
-    <img
-    src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-    class="main-logo"
-    alt="ChatTBM Logo">
+
+<img
+
+src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+
+class="main-logo"
+
+alt="ChatTBM">
+
 
 </div>
 
-<!-- Quick Action Buttons -->
+// =============================
+// QUICK ACTION BUTTONS
+// =============================
+
 
 <div class="space-y-5">
 
-    <button
-    id="caption-btn"
-    class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
 
-        ✍️ Create a Viral Caption
+<button
+id="caption-btn"
+class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
 
-    </button>
+✍️ Create a Viral Caption
 
-    <button
-    id="video-btn"
-    class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
+</button>
 
-        🎬 Generate Video Ideas
 
-    </button>
 
-    <button
-    id="post-btn"
-    class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
+<button
+id="video-btn"
+class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
 
-        📱 Write Social Media Posts
+🎬 Generate Video Ideas
 
-    </button>
+</button>
+
+
+
+<button
+id="post-btn"
+class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
+
+📱 Write Social Media Posts
+
+</button>
+
 
 </div>
 
-<!-- Creator Tools -->
+
+
+
+
+<!-- CREATOR TOOLS -->
+
 
 <div class="mt-12">
 
-    <h2 class="text-xl font-bold mb-5">
 
-        🚀 Creator Tools
+<h2 class="text-xl font-bold mb-5">
 
-    </h2>
+🚀 Creator Tools
 
-    <div class="space-y-4">
+</h2>
 
-        <button onclick="creatorTool('captionTemplates')" class="action-btn rounded-3xl text-left px-6 py-4">
-            ✍️ Caption Templates
-        </button>
 
-        <button onclick="creatorTool('hashtags')" class="action-btn rounded-3xl text-left px-6 py-4">
-            #️⃣ Hashtag Generator
-        </button>
 
-        <button onclick="creatorTool('hooks')" class="action-btn rounded-3xl text-left px-6 py-4">
-            🎯 Hook Generator
-        </button>
+<div class="space-y-4">
 
-        <button onclick="creatorTool('cta')" class="action-btn rounded-3xl text-left px-6 py-4">
-            📢 CTA Generator
-        </button>
 
-        <button onclick="creatorTool('bio')" class="action-btn rounded-3xl text-left px-6 py-4">
-            👤 Bio Generator
-        </button>
 
-        <button onclick="creatorTool('username')" class="action-btn rounded-3xl text-left px-6 py-4">
-            🔥 Username Ideas
-        </button>
+<button
+onclick="creatorTool('captionTemplates')"
+class="action-btn rounded-3xl text-left px-6 py-4">
 
-        <button onclick="creatorTool('ideas')" class="action-btn rounded-3xl text-left px-6 py-4">
-            💡 Viral Content Ideas
-        </button>
+✍️ Caption Templates
 
-        <button onclick="creatorTool('calendar')" class="action-btn rounded-3xl text-left px-6 py-4">
-            📅 Content Calendar
-        </button>
+</button>
 
-    </div>
+
+
+<button
+onclick="creatorTool('hashtags')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+#️⃣ Hashtag Generator
+
+</button>
+
+
+
+<button
+onclick="creatorTool('hooks')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+🎯 Hook Generator
+
+</button>
+
+
+
+<button
+onclick="creatorTool('cta')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+📢 CTA Generator
+
+</button>
+
+
+
+<button
+onclick="creatorTool('bio')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+👤 Creator Bio
+
+</button>
+
+
+
+<button
+onclick="creatorTool('username')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+🔥 Username Ideas
+
+</button>
+
+
+
+<button
+onclick="creatorTool('ideas')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+💡 Viral Content Ideas
+
+</button>
+
+
+
+<button
+onclick="creatorTool('calendar')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+📅 Content Calendar
+
+</button>
+
+
 
 </div>
 
-<!-- AI Video Studio -->
+</div>
+
+
+
+
+
+
+<!-- AI VIDEO STUDIO -->
+
 
 <div class="mt-12">
 
-    <h2 class="text-xl font-bold mb-5">
 
-        🎥 AI Video Studio
+<h2 class="text-xl font-bold mb-5">
 
-    </h2>
+🎥 AI Video Studio
 
-    <div class="space-y-4">
+</h2>
 
-        <button onclick="videoTool('create')" class="action-btn rounded-3xl text-left px-6 py-4">
-            🎥 Create AI Video
-        </button>
 
-        <button onclick="videoTool('script')" class="action-btn rounded-3xl text-left px-6 py-4">
-            🎬 Video Script Generator
-        </button>
 
-        <button onclick="videoTool('image')" class="action-btn rounded-3xl text-left px-6 py-4">
-            🖼️ Image Prompt Generator
-        </button>
+<div class="space-y-4">
 
-        <button onclick="videoTool('scene')" class="action-btn rounded-3xl text-left px-6 py-4">
-            🎞️ Scene Generator
-        </button>
 
-        <button onclick="videoTool('voice')" class="action-btn rounded-3xl text-left px-6 py-4">
-            🎙️ Voice-over Script
-        </button>
 
-        <button onclick="videoTool('youtube')" class="action-btn rounded-3xl text-left px-6 py-4">
-            📺 YouTube Script
-        </button>
+<button
+onclick="videoTool('create')"
+class="action-btn rounded-3xl text-left px-6 py-4">
 
-        <button onclick="videoTool('reels')" class="action-btn rounded-3xl text-left px-6 py-4">
-            🎵 Reel & TikTok Script
-        </button>
+🎥 Create AI Video
 
-    </div>
+</button>
+
+
+
+<button
+onclick="videoTool('script')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+🎬 Video Script Generator
+
+</button>
+
+
+
+<button
+onclick="videoTool('image')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+🖼️ Image Prompt Generator
+
+</button>
+
+
+
+<button
+onclick="videoTool('scene')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+🎞️ Scene Generator
+
+</button>
+
+
+
+<button
+onclick="videoTool('voice')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+🎙️ Voice-over Script
+
+</button>
+
+
+
+<button
+onclick="videoTool('youtube')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+📺 YouTube Script
+
+</button>
+
+
+
+<button
+onclick="videoTool('reels')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+🎵 Reel & TikTok Script
+
+</button>
+
+
 
 </div>
 
-<!-- Chat Area -->
+
+</div>
+
+<!-- ================================= -->
+<!-- CREATOR MODES -->
+<!-- ================================= -->
+
+
+<div class="mt-12">
+
+
+<h2 class="text-xl font-bold mb-5">
+
+🎨 Creator Modes
+
+</h2>
+
+
+
+<div class="space-y-4">
+
+
+
+<button
+onclick="activateCreatorMode('YouTube Creator Mode')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+📺 YouTube Creator Mode
+
+</button>
+
+
+
+
+<button
+onclick="activateCreatorMode('TikTok/Reels Mode')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+🎵 TikTok / Reels Mode
+
+</button>
+
+
+
+
+<button
+onclick="activateCreatorMode('Business Marketing Mode')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+💼 Business Marketing Mode
+
+</button>
+
+
+
+
+<button
+onclick="activateCreatorMode('Storytelling Mode')"
+class="action-btn rounded-3xl text-left px-6 py-4">
+
+📖 Storytelling Mode
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- ================================= -->
+<!-- CHAT CONTROLS -->
+<!-- ================================= -->
+
+
+<div class="mt-12 grid grid-cols-2 gap-4">
+
+
+
+<button
+onclick="createNewChat()"
+class="action-btn rounded-3xl px-5 py-4">
+
+
+➕ New Chat
+
+
+</button>
+
+
+
+<button
+onclick="showChatHistory()"
+class="action-btn rounded-3xl px-5 py-4">
+
+
+📂 Chat History
+
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+<!-- ================================= -->
+<!-- CHAT AREA -->
+<!-- ================================= -->
+
 
 <div
+
 id="chat-box"
+
 class="hidden mt-8 space-y-4 h-[420px] overflow-y-auto">
+
+
 </div>
 
-<!-- Input Bar -->
+
+
+
+
+
+
+<!-- ================================= -->
+<!-- INPUT AREA -->
+<!-- ================================= -->
+
 
 <div class="mt-12 bg-[#1f1f1f] rounded-full flex items-center p-2">
 
-    <!-- Upload Button -->
-    <button
-    id="upload-btn"
-    class="icon-btn hover:bg-gray-700"
-    title="Upload File">
 
-        +
 
-    </button>
+<!-- Upload -->
 
-    <!-- Hidden File Input -->
-    <input
-    type="file"
-    id="file-input"
-    hidden>
+<button
 
-    <!-- User Input -->
-    <input
-    id="user-input"
-    type="text"
-    placeholder="Ask anything..."
-    class="flex-1 bg-transparent px-4 outline-none text-lg">
+id="upload-btn"
 
-    <!-- Voice Button -->
-    <button
-    id="voice-btn"
-    class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl"
-    title="Voice Input">
+class="icon-btn hover:bg-gray-700"
 
-        🎤
+title="Upload File">
 
-    </button>
 
-    <!-- Send Button -->
-    <button
-    id="send-btn"
-    class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2"
-    title="Send">
++
 
-        ➤
 
-    </button>
+</button>
+
+
+
+
+<input
+
+type="file"
+
+id="file-input"
+
+hidden>
+
+
+
+
+
+
+<!-- Text Input -->
+
+
+<input
+
+id="user-input"
+
+type="text"
+
+placeholder="Ask anything..."
+
+class="flex-1 bg-transparent px-4 outline-none text-lg">
+
+
+
+
+
+<!-- Voice -->
+
+
+<button
+
+id="voice-btn"
+
+class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl"
+
+title="Voice Input">
+
+
+🎤
+
+
+</button>
+
+
+
+
+
+
+<!-- Send -->
+
+
+<button
+
+id="send-btn"
+
+class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2"
+
+title="Send">
+
+
+➤
+
+
+</button>
+
+
+
 
 </div>
 
+
+
+
+
+
 </div>
+
+
+
+
+
+<!-- ================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================= -->
+
 
 <script src="script.js"></script>
 
+
+
 </body>
+
+
 </html>
