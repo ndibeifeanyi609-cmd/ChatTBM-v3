@@ -1,81 +1,52 @@
 // =====================================
-// ChatTBM V4.5
-// Secure AI Server Bridge
-// Part 3
+// ChatTBM Backend
+// Express Server
 // =====================================
 
+require("dotenv").config();
 
-// Future API connection point
+const express = require("express");
+const cors = require("cors");
 
+const app = express();
 
-const ChatTBM_Server = {
+app.use(cors());
+app.use(express.json());
 
+// Health check
+app.get("/", (req, res) => {
 
-    status:"ready",
+    res.json({
 
+        app: "ChatTBM Backend",
 
-    provider:"not-connected",
+        status: "Running ✅"
 
+    });
 
-};
+});
 
+// Future AI endpoint
+app.post("/api/chat", async (req, res) => {
 
+    const { message } = req.body;
 
+    res.json({
 
+        reply: `Backend received: ${message}`
 
-async function connectAI(request){
+    });
 
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
 
     console.log(
-        "Secure AI Request:",
-        request
+
+        `🚀 ChatTBM Backend running on port ${PORT}`
+
     );
 
-
-
-    /*
-    
-    Future example:
-
-
-    const response = await fetch(
-        AI_API_URL,
-        {
-            method:"POST",
-            headers:{
-                "Authorization":
-                "Bearer SERVER_KEY"
-            },
-
-            body:JSON.stringify({
-                message:request
-            })
-
-        }
-    );
-
-
-    return response.json();
-
-
-    */
-
-
-
-    return {
-
-        message:
-        "Secure AI connection prepared."
-
-    };
-
-
-}
-
-
-
-
-
-console.log(
-"✅ ChatTBM Secure Server Structure Ready"
-);
+});
