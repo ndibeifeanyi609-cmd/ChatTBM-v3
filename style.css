@@ -1,48 +1,79 @@
-.top-bar {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-}
-
-.top-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 17px;
-    font-weight: 600;
-}
-
-.top-logo img {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-}
-
-.main-logo-container {
-    margin-top: 90px;
-    margin-bottom: 50px;
-}
-
-.main-logo {
-    width: 110px;
-    height: 110px;
-    border-radius: 9999px;
-}
-
 /* =====================================
 ChatTBM V4.1
-Modern Chat Bubble Design
+Clean Style
 ===================================== */
 
 
-.ai-message{
+/* ==============================
+LOGO AREA
+============================== */
+
+
+.top-bar {
+
+    position:absolute;
+    top:20px;
+    left:20px;
+
+}
+
+
+.top-logo {
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:17px;
+    font-weight:600;
+
+}
+
+
+.top-logo img {
+
+    width:30px;
+    height:30px;
+    border-radius:50%;
+
+}
+
+
+
+.main-logo-container {
+
+    margin-top:90px;
+    margin-bottom:50px;
+
+}
+
+
+
+.main-logo {
+
+    width:110px;
+    height:110px;
+    border-radius:9999px;
+
+}
+
+
+
+
+
+/* ==============================
+CHATTBM V4.1 AI CHAT
+============================== */
+
+
+.ai-message {
 
     width:100%;
 
 }
 
 
-.ai-bubble{
+
+.ai-bubble {
 
     background:#111;
 
@@ -61,7 +92,7 @@ Modern Chat Bubble Design
 
 
 
-.ai-header{
+.ai-header {
 
     font-size:16px;
 
@@ -73,7 +104,7 @@ Modern Chat Bubble Design
 
 
 
-.ai-content{
+.ai-content {
 
     color:#e5e5e5;
 
@@ -85,7 +116,7 @@ Modern Chat Bubble Design
 
 
 
-.ai-actions{
+.ai-actions {
 
     display:flex;
 
@@ -99,7 +130,7 @@ Modern Chat Bubble Design
 
 
 
-.ai-btn{
+.ai-btn {
 
     background:#222;
 
@@ -115,19 +146,30 @@ Modern Chat Bubble Design
 
     cursor:pointer;
 
+    transition:.2s;
+
 }
 
 
 
-.ai-btn:hover{
+.ai-btn:hover {
 
     background:#2563eb;
 
+    border-color:#2563eb;
+
 }
 
 
 
-.user-bubble{
+
+
+/* ==============================
+USER CHAT BUBBLE
+============================== */
+
+
+.user-bubble {
 
     background:#2563eb;
 
@@ -146,31 +188,99 @@ Modern Chat Bubble Design
 }
 
 
-@keyframes messageAppear{
 
-from{
 
-opacity:0;
 
-transform:translateY(10px);
+/* ==============================
+MESSAGE ANIMATION
+============================== */
+
+
+@keyframes messageAppear {
+
+
+from {
+
+    opacity:0;
+
+    transform:translateY(10px);
+
+}
+
+
+
+to {
+
+    opacity:1;
+
+    transform:translateY(0);
 
 }
 
 
-to{
-
-opacity:1;
-
-transform:translateY(0);
-
 }
 
-}
 
 
 .ai-message,
-.user-bubble{
+.user-bubble {
 
-animation:messageAppear .25s ease;
+    animation:messageAppear .25s ease;
+
+}
+
+
+
+
+
+/* ==============================
+BUTTON STYLE
+============================== */
+
+
+.action-btn {
+
+    width:100%;
+
+    background:#1f1f1f;
+
+    transition:.2s;
+
+}
+
+
+
+.action-btn:hover {
+
+    background:#2b2b2b;
+
+    transform:translateY(-2px);
+
+}
+
+
+
+
+
+/* ==============================
+INPUT ICON BUTTONS
+============================== */
+
+
+.icon-btn {
+
+    width:52px;
+
+    height:52px;
+
+    border-radius:9999px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    transition:.2s;
 
 }
