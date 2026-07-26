@@ -1,7 +1,10 @@
-    /* ===================================
+/* ===================================
    ChatTBM - Core AI Assistant
-   script.js
+   CLEAN script.js
+
+   PART 1/3
 =================================== */
+
 
 
 // ===============================
@@ -9,12 +12,58 @@
 // ===============================
 
 const chatBox = document.getElementById("chat-box");
+
 const userInput = document.getElementById("user-input");
+
 const sendBtn = document.getElementById("send-btn");
 
 const toolButtons = document.querySelectorAll(".tool-btn");
 
+
+
 let lastUserMessage = "";
+
+
+
+
+
+// ===============================
+// SEND BUTTON
+// ===============================
+
+
+sendBtn.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+
+
+
+// ===============================
+// ENTER KEY
+// ===============================
+
+
+userInput.addEventListener(
+    "keypress",
+    function(event){
+
+
+        if(event.key === "Enter"){
+
+
+            sendMessage();
+
+
+        }
+
+
+    }
+);
+
+
 
 
 
@@ -23,27 +72,12 @@ let lastUserMessage = "";
 // SEND MESSAGE
 // ===============================
 
-sendBtn.addEventListener("click", sendMessage);
-
-
-userInput.addEventListener("keypress", function(e){
-
-    if(e.key === "Enter"){
-
-        sendMessage();
-
-    }
-
-});
-
-
-
-
 
 async function sendMessage(){
 
 
     const message = userInput.value.trim();
+
 
 
     if(message === "") return;
@@ -54,7 +88,11 @@ async function sendMessage(){
 
 
 
-    addMessage(message,"user");
+    addMessage(
+        message,
+        "user"
+    );
+
 
 
     userInput.value = "";
@@ -65,27 +103,28 @@ async function sendMessage(){
 
 
 
-    setTimeout(()=>{
-
-
-        removeLoading();
-
-
-     const response = await generateAIResponse(message);
-
-
-        addMessage(response,"bot");
-
-
-        saveChat();
+    const response = await generateAIResponse(message);
 
 
 
-    },1000);
+    removeLoading();
 
+
+
+    addMessage(
+        response,
+        "bot"
+    );
+
+
+
+    saveChat();
 
 
 }
+
+
+
 
 
 
@@ -96,42 +135,56 @@ async function sendMessage(){
 // ===============================
 
 
-function addMessage(text,sender){
+function addMessage(text, sender){
 
 
-    const messageDiv = document.createElement("div");
+    const messageDiv =
+    document.createElement("div");
+
 
 
     messageDiv.classList.add(
+
         "message",
+
         sender === "user"
         ? "user-message"
         : "bot-message"
+
     );
 
 
 
     messageDiv.innerHTML = `
 
+
         <p>${text}</p>
 
+
         ${
-        sender === "bot"
+            sender === "bot"
 
-        ?
+            ?
 
-        `<button onclick="copyResponse(this)">
-        Copy
-        </button>
-        <button onclick="regenerateResponse()">
-        Regenerate
-        </button>`
+            `
 
-        :
+            <button onclick="copyResponse(this)">
+            Copy
+            </button>
 
-        ""
+
+            <button onclick="regenerateResponse()">
+            Regenerate
+            </button>
+
+            `
+
+            :
+
+            ""
 
         }
+
 
     `;
 
@@ -140,7 +193,10 @@ function addMessage(text,sender){
     chatBox.appendChild(messageDiv);
 
 
-    chatBox.scrollTop = chatBox.scrollHeight;
+
+    chatBox.scrollTop =
+    chatBox.scrollHeight;
+
 
 
 }
@@ -149,78 +205,38 @@ function addMessage(text,sender){
 
 
 
-// ===============================
-// AI RESPONSE ENGINE
-// ===============================
+
 
 
 // ===============================
-// CONNECT TO CHATTBM BACKEND
+// CONNECT TO RENDER BACKEND
 // ===============================
 
 
-// ===============================
-// CONNECT TO CHATTBM BACKEND
-// ===============================
+async function generateAIResponse(message){
 
-async function generateAIResponse(message) {
 
     try {
 
-        const response = await fetch(
+
+        const response =
+        await fetch(
+
             "https://chattbm-backend.onrender.com/api/chat",
+
             {
+
 
                 method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    message: message
-                })
-
-            }
-        );
-
-
-        const data = await response.json();
-
-
-        return data.reply;
-
-
-    } catch(error) {
-
-
-        console.log(
-            "Backend connection error:",
-            error
-        );
-
-
-        return "ChatTBM is having trouble connecting right now.";
-
-    }
-
-}
-
-
-    try {
-
-
-        const response = await fetch(
-            "http://localhost:3000/api/chat",
-            {
-
-                method: "POST",
 
                 headers: {
 
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                    "application/json"
 
                 },
+
 
                 body: JSON.stringify({
 
@@ -228,17 +244,22 @@ async function generateAIResponse(message) {
 
                 })
 
+
             }
 
         );
 
 
 
-        const data = await response.json();
+
+        const data =
+        await response.json();
+
 
 
 
         return data.reply;
+
 
 
 
@@ -248,152 +269,36 @@ async function generateAIResponse(message) {
     catch(error){
 
 
-        console.log(error);
+
+        console.log(
+
+            "Backend Error:",
+            error
+
+        );
 
 
 
-        return "ChatTBM could not connect to the backend.";
+        return (
+
+            "ChatTBM cannot connect " +
+            "to the AI server right now."
+
+        );
+
 
     }
 
 
 }
 
+/* ===================================
+   ChatTBM - Core AI Assistant
 
-    const text = message.toLowerCase();
+   CLEAN script.js
 
-
-
-    if(text.includes("caption")){
-
-
-        return `
-        Here is a caption idea:
-
-        🔥 Turning ideas into reality.
-        Creating, improving and building every day.
-
-        #Creator #AI #ContentCreation
-        `;
-
-    }
-
-
-
-    if(text.includes("script")){
-
-
-        return `
-        Video Script:
-
-        Hook:
-        "You won't believe what happened next..."
-
-        Body:
-        Explain your story and add value.
-
-        Ending:
-        Ask viewers to follow for more.
-        `;
-
-    }
-
-
-
-
-    if(text.includes("hashtag")){
-
-
-        return `
-        Suggested hashtags:
-
-        #ChatTBM
-        #ContentCreator
-        #ViralVideos
-        #AItools
-        #DigitalCreator
-        `;
-
-    }
-
-
-
-
-    if(text.includes("idea")){
-
-
-        return `
-        Viral Content Ideas:
-
-        1. Behind the scenes
-        2. Before and after transformation
-        3. Storytelling videos
-        4. AI challenge videos
-        `;
-
-    }
-
-
-
-
-    if(text.includes("advert")){
-
-
-        return `
-        Advert Template:
-
-        Attention grabbing headline.
-
-        Explain the benefit.
-
-        Add a strong call to action.
-        `;
-
-    }
-
-
-
-
-    if(text.includes("calendar")){
-
-
-        return `
-        Weekly Content Calendar:
-
-        Monday:
-        Educational post
-
-        Wednesday:
-        Storytelling video
-
-        Friday:
-        Viral trend content
-        `;
-
-    }
-
-
-
-
-    return `
-
-    I am ChatTBM 🤖
-
-    I can help you create:
-
-    • Captions
-    • Scripts
-    • Hashtags
-    • Viral ideas
-    • Advert content
-    • Content calendars
-
-    Ask me anything.
-
-    `;
-
-
-}
+   PART 2/3
+=================================== */
 
 
 
@@ -404,23 +309,31 @@ async function generateAIResponse(message) {
 // ===============================
 
 
-toolButtons.forEach(button=>{
+toolButtons.forEach(button => {
 
 
-    button.addEventListener("click",()=>{
+    button.addEventListener(
+        "click",
+        function(){
 
 
-        const tool = button.dataset.tool;
+            const tool =
+            button.dataset.tool;
 
 
-        userInput.value = 
-        "Create " + tool;
+
+            userInput.value =
+            "Create " + tool;
 
 
-        sendMessage();
+
+            sendMessage();
 
 
-    });
+
+        }
+
+    );
 
 
 });
@@ -430,47 +343,76 @@ toolButtons.forEach(button=>{
 
 
 
+
 // ===============================
-// LOADING
+// LOADING ANIMATION
 // ===============================
 
 
 function showLoading(){
 
 
-    const loading = document.createElement("div");
+    const loading =
+    document.createElement("div");
 
 
-    loading.id="loading";
+
+    loading.id =
+    "loading";
 
 
-    loading.className="message bot-message";
+
+    loading.className =
+    "message bot-message";
 
 
-    loading.innerHTML="ChatTBM is thinking... 🤖";
+
+    loading.innerHTML = `
+
+        <p>
+        ChatTBM is thinking... 🤖
+        </p>
+
+    `;
+
 
 
     chatBox.appendChild(loading);
 
 
+
+    chatBox.scrollTop =
+    chatBox.scrollHeight;
+
+
 }
+
+
+
+
 
 
 
 function removeLoading(){
 
 
-    const loading=document.getElementById("loading");
+    const loading =
+    document.getElementById("loading");
+
 
 
     if(loading){
 
+
         loading.remove();
+
 
     }
 
 
 }
+
+
 
 
 
@@ -485,8 +427,13 @@ function removeLoading(){
 function copyResponse(button){
 
 
+
     const text =
-    button.parentElement.querySelector("p").innerText;
+
+    button.parentElement
+    .querySelector("p")
+    .innerText;
+
 
 
 
@@ -494,12 +441,19 @@ function copyResponse(button){
 
 
 
-    button.innerText="Copied!";
+
+    button.innerText =
+    "Copied!";
+
+
 
 
     setTimeout(()=>{
 
-        button.innerText="Copy";
+
+        button.innerText =
+        "Copy";
+
 
     },1500);
 
@@ -512,33 +466,48 @@ function copyResponse(button){
 
 
 
+
+
 // ===============================
-// REGENERATE
+// REGENERATE RESPONSE
 // ===============================
 
 
-function regenerateResponse(){
+async function regenerateResponse(){
+
 
 
     if(lastUserMessage){
 
 
+
         showLoading();
 
 
-        setTimeout(()=>{
 
 
-            removeLoading();
+        const response =
+
+        await generateAIResponse(
+            lastUserMessage
+        );
 
 
-            addMessage(
-            generateAIResponse(lastUserMessage),
+
+
+        removeLoading();
+
+
+
+
+        addMessage(
+
+            response,
+
             "bot"
-            );
 
+        );
 
-        },1000);
 
 
     }
@@ -546,13 +515,20 @@ function regenerateResponse(){
 
 }
 
+/* ===================================
+   ChatTBM - Core AI Assistant
+
+   CLEAN script.js
+
+   PART 3/3
+=================================== */
 
 
 
 
 
 // ===============================
-// CHAT STORAGE
+// CHAT HISTORY STORAGE
 // ===============================
 
 
@@ -560,8 +536,11 @@ function saveChat(){
 
 
     localStorage.setItem(
+
         "ChatTBM_history",
+
         chatBox.innerHTML
+
     );
 
 
@@ -571,17 +550,26 @@ function saveChat(){
 
 
 
+
+
 function loadChat(){
 
 
-    const saved =
-    localStorage.getItem("ChatTBM_history");
+    const savedChat =
+
+    localStorage.getItem(
+
+        "ChatTBM_history"
+
+    );
 
 
-    if(saved){
+
+    if(savedChat){
 
 
-        chatBox.innerHTML=saved;
+        chatBox.innerHTML =
+        savedChat;
 
 
     }
@@ -591,37 +579,75 @@ function loadChat(){
 
 
 
+
+
+
+
+// Load previous conversations
+
 loadChat();
+
+
+
+
+
+
+
 
 // ===============================
 // SERVICE WORKER REGISTRATION
 // ===============================
 
-if ("serviceWorker" in navigator) {
 
-    window.addEventListener("load", () => {
+if(
+    "serviceWorker" in navigator
+){
 
-        navigator.serviceWorker.register(
-            "service-worker.js"
-        )
 
-        .then(() => {
+    window.addEventListener(
 
-            console.log(
-            "ChatTBM App Ready"
-            );
+        "load",
 
-        })
+        ()=>{
 
-        .catch(error => {
 
-            console.log(
-            "Service Worker Error:",
-            error
-            );
+            navigator.serviceWorker
+            .register(
+                "service-worker.js"
+            )
 
-        });
 
-    });
+            .then(()=>{
+
+
+                console.log(
+
+                    "ChatTBM App Ready 🚀"
+
+                );
+
+
+            })
+
+
+            .catch(error=>{
+
+
+                console.log(
+
+                    "Service Worker Error:",
+                    error
+
+                );
+
+
+            });
+
+
+
+        }
+
+    );
+
 
 }
