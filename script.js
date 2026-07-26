@@ -163,7 +163,9 @@ function showNotice(message){
 // API WILL REPLACE THIS LATER
 // =============================
 
-function generateAIReply(message){
+function generateAIReply(message) {
+    ...
+}
 
 
     const text =
