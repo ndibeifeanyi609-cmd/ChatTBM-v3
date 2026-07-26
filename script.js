@@ -154,7 +154,65 @@ function addMessage(text,sender){
 // ===============================
 
 
-function generateAIResponse(message){
+// ===============================
+// CONNECT TO CHATTBM BACKEND
+// ===============================
+
+
+async function generateAIResponse(message) {
+
+
+    try {
+
+
+        const response = await fetch(
+            "http://localhost:3000/api/chat",
+            {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type": "application/json"
+
+                },
+
+                body: JSON.stringify({
+
+                    message: message
+
+                })
+
+            }
+
+        );
+
+
+
+        const data = await response.json();
+
+
+
+        return data.reply;
+
+
+
+    }
+
+
+    catch(error){
+
+
+        console.log(error);
+
+
+
+        return "ChatTBM could not connect to the backend.";
+
+    }
+
+
+}
 
 
     const text = message.toLowerCase();
