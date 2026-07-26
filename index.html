@@ -18,134 +18,17 @@
 <link rel="apple-touch-icon" href="IMG_4397.png">
 
 
+<!-- Main CSS -->
+
+<link rel="stylesheet" href="style.css">
+
+
 <!-- Tailwind -->
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 
-
-<style>
-
-body{
-
-background:#000;
-
-color:#fff;
-
-font-family:
--apple-system,
-BlinkMacSystemFont,
-"Segoe UI",
-sans-serif;
-
-}
-
-
-
-.main-logo{
-
-width:100px;
-
-height:100px;
-
-border-radius:9999px;
-
-}
-
-
-
-.action-btn{
-
-width:100%;
-
-background:#1f1f1f;
-
-transition:.25s;
-
-}
-
-
-
-.action-btn:hover{
-
-background:#2b2b2b;
-
-transform:translateY(-3px);
-
-}
-
-
-
-.icon-btn{
-
-width:52px;
-
-height:52px;
-
-border-radius:9999px;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-}
-
-
-
-.suggest-card{
-
-background:#111;
-
-border:1px solid #222;
-
-border-radius:22px;
-
-padding:18px;
-
-text-align:center;
-
-transition:.25s;
-
-}
-
-
-
-.suggest-card:hover{
-
-background:#1f1f1f;
-
-border-color:#2563eb;
-
-}
-
-
-
-.welcome-title{
-
-font-size:30px;
-
-font-weight:700;
-
-}
-
-
-
-.welcome-subtitle{
-
-color:#999;
-
-font-size:16px;
-
-}
-
-
-</style>
-
-
 </head>
-
 
 
 
@@ -158,7 +41,6 @@ font-size:16px;
 
 <!-- HEADER -->
 
-
 <div class="flex items-center justify-between mb-10">
 
 
@@ -169,7 +51,10 @@ font-size:16px;
 
 src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
 
-class="w-10 h-10 rounded-full">
+class="w-10 h-10 rounded-full"
+
+alt="ChatTBM Logo">
+
 
 
 <h1 class="text-3xl font-bold">
@@ -180,6 +65,7 @@ ChatTBM
 
 
 </div>
+
 
 
 
@@ -202,7 +88,7 @@ Sign In
 
 
 
-<!-- WELCOME -->
+<!-- WELCOME SECTION -->
 
 
 <div class="flex flex-col items-center text-center mb-10">
@@ -213,7 +99,9 @@ Sign In
 
 src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
 
-class="main-logo mb-6">
+class="main-logo mb-6"
+
+alt="ChatTBM Logo">
 
 
 
@@ -239,10 +127,7 @@ scripts, videos and viral ideas.
 
 </div>
 
-<!-- ============================= -->
 <!-- CREATOR SUGGESTIONS -->
-<!-- ============================= -->
-
 
 <div class="grid grid-cols-2 gap-4 mb-12">
 
@@ -327,9 +212,8 @@ YouTube Script
 
 
 
-<!-- ============================= -->
+
 <!-- QUICK ACTIONS -->
-<!-- ============================= -->
 
 
 <div class="space-y-5 mb-12">
@@ -385,10 +269,7 @@ class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
 
 
 
-
-<!-- ============================= -->
 <!-- CREATOR TOOLS -->
-<!-- ============================= -->
 
 
 <div class="mt-12">
@@ -514,9 +395,7 @@ class="action-btn rounded-3xl text-left px-6 py-4">
 
 </div>
 
-<!-- ============================= -->
 <!-- AI VIDEO STUDIO -->
-<!-- ============================= -->
 
 
 <div class="mt-12">
@@ -540,7 +419,9 @@ onclick="videoTool('create')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 🎥 Create AI Video
+
 
 </button>
 
@@ -553,7 +434,9 @@ onclick="videoTool('script')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 🎬 Video Script Generator
+
 
 </button>
 
@@ -566,7 +449,9 @@ onclick="videoTool('image')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 🖼️ Image Prompt Generator
+
 
 </button>
 
@@ -579,7 +464,9 @@ onclick="videoTool('scene')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 🎞️ Scene Generator
+
 
 </button>
 
@@ -592,7 +479,9 @@ onclick="videoTool('voice')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 🎙️ Voice-over Script
+
 
 </button>
 
@@ -605,7 +494,9 @@ onclick="videoTool('youtube')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 📺 YouTube Script
+
 
 </button>
 
@@ -618,7 +509,9 @@ onclick="videoTool('reels')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 🎵 Reel & TikTok Script
+
 
 </button>
 
@@ -634,10 +527,7 @@ class="action-btn rounded-3xl text-left px-6 py-4">
 
 
 
-
-<!-- ============================= -->
 <!-- CREATOR MODES -->
-<!-- ============================= -->
 
 
 <div class="mt-12">
@@ -662,7 +552,9 @@ onclick="activateCreatorMode('YouTube Creator Mode')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 📺 YouTube Creator Mode
+
 
 </button>
 
@@ -675,7 +567,9 @@ onclick="activateCreatorMode('TikTok/Reels Mode')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 🎵 TikTok / Reels Mode
+
 
 </button>
 
@@ -688,7 +582,9 @@ onclick="activateCreatorMode('Business Marketing Mode')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 💼 Business Marketing Mode
+
 
 </button>
 
@@ -701,7 +597,9 @@ onclick="activateCreatorMode('Storytelling Mode')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
+
 📖 Storytelling Mode
+
 
 </button>
 
@@ -717,10 +615,7 @@ class="action-btn rounded-3xl text-left px-6 py-4">
 
 
 
-
-<!-- ============================= -->
 <!-- CHAT CONTROLS -->
-<!-- ============================= -->
 
 
 <div class="mt-12 grid grid-cols-2 gap-4">
@@ -733,7 +628,9 @@ onclick="createNewChat()"
 
 class="action-btn rounded-3xl px-5 py-4">
 
+
 ➕ New Chat
+
 
 </button>
 
@@ -746,7 +643,9 @@ onclick="showChatHistory()"
 
 class="action-btn rounded-3xl px-5 py-4">
 
+
 📂 Chat History
+
 
 </button>
 
@@ -754,16 +653,7 @@ class="action-btn rounded-3xl px-5 py-4">
 
 </div>
 
-
-
-
-
-
-
-
-<!-- ============================= -->
 <!-- CHAT AREA -->
-<!-- ============================= -->
 
 
 <div
@@ -781,13 +671,11 @@ class="hidden mt-8 space-y-4 h-[420px] overflow-y-auto">
 
 
 
-
-<!-- ============================= -->
 <!-- MESSAGE INPUT AREA -->
-<!-- ============================= -->
 
 
 <div class="input-area mt-8">
+
 
 
 <!-- Upload Button -->
@@ -797,11 +685,13 @@ class="hidden mt-8 space-y-4 h-[420px] overflow-y-auto">
 
 id="upload-btn"
 
-class="icon-btn hover:bg-gray-700 text-xl">
+class="icon-btn text-xl">
+
 
 +
 
 </button>
+
 
 
 
@@ -813,6 +703,7 @@ type="file"
 id="file-input"
 
 hidden>
+
 
 
 
@@ -837,6 +728,7 @@ class="flex-1 bg-transparent px-4 outline-none text-lg">
 
 
 
+
 <!-- Voice Button -->
 
 
@@ -844,9 +736,11 @@ class="flex-1 bg-transparent px-4 outline-none text-lg">
 
 id="voice-btn"
 
-class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl">
+class="icon-btn text-xl">
+
 
 🎤
+
 
 </button>
 
@@ -863,12 +757,32 @@ class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl">
 
 id="send-btn"
 
-class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2">
+class="icon-btn text-xl ml-2">
+
 
 ➤
+
 
 </button>
 
 
 
 </div>
+
+
+
+
+
+</div>
+
+
+
+
+<!-- SCRIPT -->
+
+<script src="script.js"></script>
+
+
+</body>
+
+</html>
