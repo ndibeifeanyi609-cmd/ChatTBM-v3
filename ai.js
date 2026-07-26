@@ -74,7 +74,248 @@ async function askChatTBM(message){
 // TEMPORARY
 // =============================
 
+// =====================================
+// ChatTBM V4.5
+// Part 4A - Advanced Creator AI Engine
+// =====================================
+
+
 function demoAIResponse(message){
+
+
+    const text =
+    message.toLowerCase();
+
+
+
+
+    // =============================
+    // CAPTION ENGINE
+    // =============================
+
+    if(
+        text.includes("caption")
+    ){
+
+
+        return `
+
+✍️ ChatTBM Caption Creator
+
+
+Here are 3 caption styles:
+
+
+🔥 Viral Style:
+
+"POV: You almost gave up...
+but your future self needed you to continue 🚀"
+
+
+😂 Funny Style:
+
+"My motivation disappeared,
+but my WiFi is still working 😂"
+
+
+💎 Luxury Style:
+
+"Building quietly.
+Winning loudly."
+
+
+Tell me your niche and I will customize it.
+
+`;
+
+    }
+
+
+
+
+
+    // =============================
+    // VIDEO SCRIPT ENGINE
+    // =============================
+
+    if(
+        text.includes("video") ||
+        text.includes("script")
+    ){
+
+
+        return `
+
+🎬 ChatTBM Video Studio
+
+
+VIDEO STRUCTURE:
+
+
+🔥 Hook (0-3 seconds):
+
+"Wait until you see what happens next..."
+
+
+🎥 Scene 1:
+
+Show the problem or challenge.
+
+
+🎥 Scene 2:
+
+Show the process and journey.
+
+
+🎥 Scene 3:
+
+Show the final result.
+
+
+🎙️ Voice-over:
+
+"Every creator starts somewhere.
+The difference is consistency."
+
+
+🚀 Ending CTA:
+
+"Follow for more ideas."
+
+
+`;
+
+    }
+
+
+
+
+
+    // =============================
+    // MARKETING ENGINE
+    // =============================
+
+    if(
+        text.includes("marketing") ||
+        text.includes("business") ||
+        text.includes("sale")
+    ){
+
+
+        return `
+
+📢 ChatTBM Marketing Assistant
+
+
+Marketing Idea:
+
+
+HOOK:
+
+"Stop wasting time searching for solutions."
+
+
+VALUE:
+
+Show how your product solves a real problem.
+
+
+CTA:
+
+"Send a message today and get started."
+
+
+I can also create:
+
+• Facebook ads
+• Product descriptions
+• Sales posts
+• Brand slogans
+
+
+`;
+
+    }
+
+
+
+
+
+    // =============================
+    // HASHTAG ENGINE
+    // =============================
+
+    if(
+        text.includes("hashtag")
+    ){
+
+
+        return `
+
+#️⃣ Hashtag Generator
+
+
+Suggested tags:
+
+
+#ContentCreator
+
+#ViralIdeas
+
+#DigitalCreator
+
+#AIContent
+
+#CreatorLife
+
+
+Tell me your topic for better hashtags.
+
+`;
+
+    }
+
+
+
+
+
+    // =============================
+    // GENERAL CREATOR AI
+    // =============================
+
+
+    return `
+
+🚀 ChatTBM Creator AI
+
+
+I can help you create:
+
+
+✍️ Viral captions
+
+🎬 Video scripts
+
+📱 Social media posts
+
+🔥 Content ideas
+
+📢 Marketing strategies
+
+🎯 Strong hooks
+
+
+Your request:
+
+"${message}"
+
+
+Tell me your niche and audience,
+and I will create a better plan.
+
+`;
+
+}
 
 
     const text =
