@@ -1,8 +1,12 @@
 // =====================================
 // ChatTBM V4.2 CLEAN SCRIPT
-// Part 1A - Core Chat System
+// PART 1A - CORE CHAT SYSTEM
 // =====================================
 
+
+// =============================
+// HTML CONNECTIONS
+// =============================
 
 const chatBox = document.getElementById("chat-box");
 const input = document.getElementById("user-input");
@@ -11,15 +15,16 @@ let lastUserRequest = "";
 
 
 
+
 // =============================
-// Time
+// TIME
 // =============================
 
 function getTime(){
 
-    return new Date().toLocaleTimeString([],{
-        hour:"2-digit",
-        minute:"2-digit"
+    return new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
     });
 
 }
@@ -27,23 +32,15 @@ function getTime(){
 
 
 
-
 // =============================
-// Smooth Scroll
+// SCROLL CHAT
 // =============================
 
-function smoothChatScroll(){
+function scrollChat(){
 
     if(!chatBox) return;
 
-
-    chatBox.scrollTo({
-
-        top: chatBox.scrollHeight,
-
-        behavior:"smooth"
-
-    });
+    chatBox.scrollTop = chatBox.scrollHeight;
 
 }
 
@@ -52,7 +49,7 @@ function smoothChatScroll(){
 
 
 // =============================
-// Add User Message
+// ADD USER MESSAGE
 // =============================
 
 function addUserMessage(message){
@@ -66,7 +63,6 @@ function addUserMessage(message){
     lastUserRequest = message;
 
 
-
     chatBox.innerHTML += `
 
     <div class="flex justify-end mb-5">
@@ -78,25 +74,19 @@ function addUserMessage(message){
 
             <div class="message-time">
 
-            ${getTime()}
+                ${getTime()}
 
             </div>
 
 
         </div>
 
-
     </div>
 
     `;
 
 
-    saveChat();
-
-    saveLastRequest();
-
-
-    smoothChatScroll();
+    scrollChat();
 
 }
 
@@ -105,7 +95,7 @@ function addUserMessage(message){
 
 
 // =============================
-// Add AI Message
+// ADD AI MESSAGE
 // =============================
 
 function addBotMessage(message){
@@ -113,27 +103,19 @@ function addBotMessage(message){
     if(!chatBox) return;
 
 
-
     chatBox.classList.remove("hidden");
-
-
-
-    const id =
-    "ai_" + Date.now();
-
 
 
     chatBox.innerHTML += `
 
-    <div class="ai-message mb-5" id="${id}">
-
+    <div class="ai-message mb-5">
 
         <div class="ai-bubble">
 
 
             <div class="ai-header">
 
-            🤖 ChatTBM
+                🤖 ChatTBM
 
             </div>
 
@@ -141,7 +123,7 @@ function addBotMessage(message){
 
             <div class="ai-content">
 
-            ${message.replace(/\n/g,"<br>")}
+                ${message.replace(/\n/g,"<br>")}
 
             </div>
 
@@ -149,57 +131,19 @@ function addBotMessage(message){
 
             <div class="message-time">
 
-            ${getTime()}
-
-            </div>
-
-
-
-            <div class="ai-actions">
-
-
-                <button class="ai-btn"
-                onclick="copyResponse('${id}')">
-
-                📋 Copy
-
-                </button>
-
-
-
-                <button class="ai-btn"
-                onclick="editResponse('${id}')">
-
-                ✏️ Edit
-
-                </button>
-
-
-
-                <button class="ai-btn"
-                onclick="regenerateResponse('${id}')">
-
-                🔄 Regenerate
-
-                </button>
-
+                ${getTime()}
 
             </div>
 
 
         </div>
 
-
     </div>
 
     `;
 
 
-
-    saveChat();
-
-
-    smoothChatScroll();
+    scrollChat();
 
 }
 
@@ -208,7 +152,7 @@ function addBotMessage(message){
 
 
 // =============================
-// Thinking Animation
+// THINKING LOADER
 // =============================
 
 function showThinking(){
@@ -216,15 +160,11 @@ function showThinking(){
     if(!chatBox) return null;
 
 
-
-    const loader =
-    document.createElement("div");
-
+    const loader = document.createElement("div");
 
 
     loader.className =
     "ai-message mb-5";
-
 
 
     loader.innerHTML = `
@@ -234,14 +174,15 @@ function showThinking(){
 
         <div class="ai-header">
 
-        🤖 ChatTBM
+            🤖 ChatTBM
 
         </div>
 
 
+
         <div class="ai-content">
 
-        Thinking...
+            Thinking...
 
         </div>
 
@@ -251,11 +192,10 @@ function showThinking(){
     `;
 
 
-
     chatBox.appendChild(loader);
 
 
-    smoothChatScroll();
+    scrollChat();
 
 
     return loader;
@@ -272,50 +212,48 @@ console.log(
 
 // =====================================
 // ChatTBM V4.2 CLEAN SCRIPT
-// Part 1B - Response Actions
+// PART 1B - RESPONSE ACTIONS
 // =====================================
 
 
 
 // =============================
-// Copy Response
+// COPY RESPONSE
 // =============================
 
-function copyResponse(id){
+function copyResponse(element){
 
-    const box =
-    document.getElementById(id);
+
+    const box = document.getElementById(element);
 
 
     if(!box) return;
 
 
 
-    const content =
+    const text =
     box.querySelector(".ai-content");
 
 
-    if(!content) return;
+
+    if(!text) return;
 
 
 
     navigator.clipboard.writeText(
-        content.innerText
+        text.innerText
     )
     .then(()=>{
 
-        showNotice(
-            "📋 Response copied"
-        );
+        showNotice("📋 Response copied");
 
     })
     .catch(()=>{
 
-        showNotice(
-            "❌ Copy failed"
-        );
+        showNotice("❌ Copy failed");
 
     });
+
 
 }
 
@@ -323,14 +261,17 @@ function copyResponse(id){
 
 
 
+
+
 // =============================
-// Edit Response
+// EDIT RESPONSE
 // =============================
 
-function editResponse(id){
+function editResponse(element){
+
 
     const box =
-    document.getElementById(id);
+    document.getElementById(element);
 
 
 
@@ -347,30 +288,22 @@ function editResponse(id){
 
 
 
-    const oldText =
-    content.innerText;
-
-
-
-    const edited =
+    const newText =
     prompt(
-        "✏️ Edit ChatTBM response:",
-        oldText
+        "Edit ChatTBM response:",
+        content.innerText
     );
 
 
 
     if(
-        edited &&
-        edited.trim() !== ""
+        newText &&
+        newText.trim() !== ""
     ){
 
+
         content.innerHTML =
-        edited.replace(/\n/g,"<br>");
-
-
-
-        saveChat();
+        newText.replace(/\n/g,"<br>");
 
 
 
@@ -378,7 +311,9 @@ function editResponse(id){
             "✅ Response updated"
         );
 
+
     }
+
 
 }
 
@@ -386,15 +321,17 @@ function editResponse(id){
 
 
 
+
+
 // =============================
-// Regenerate Response
+// REGENERATE RESPONSE
 // =============================
 
-function regenerateResponse(id){
+function regenerateResponse(element){
 
 
     const box =
-    document.getElementById(id);
+    document.getElementById(element);
 
 
 
@@ -419,36 +356,17 @@ function regenerateResponse(id){
     setTimeout(()=>{
 
 
-        let reply;
-
-
-
-        if(
-            typeof generateAIReply === "function"
-        ){
-
-            reply =
-            generateAIReply(
-                lastUserRequest
-            );
-
-
-        }
-
-        else{
-
-
-            reply = `
+        let reply = `
 
 🚀 ChatTBM V4.2
 
-Here is another creative version:
+Here is another version:
 
 ${lastUserRequest}
 
-`;
+I can help improve this into a stronger caption, script, or content idea.
 
-        }
+`;
 
 
 
@@ -457,12 +375,8 @@ ${lastUserRequest}
 
 
 
-        saveChat();
-
-
-
         showNotice(
-            "🔄 Response regenerated"
+            "🔄 New version created"
         );
 
 
@@ -476,8 +390,10 @@ ${lastUserRequest}
 
 
 
+
+
 // =============================
-// Notification
+// NOTICE POPUP
 // =============================
 
 function showNotice(message){
@@ -514,7 +430,7 @@ function showNotice(message){
 
 
     notice.style.color =
-    "white";
+    "#fff";
 
 
     notice.style.padding =
@@ -534,15 +450,15 @@ function showNotice(message){
 
 
 
-    document.body.appendChild(
-        notice
-    );
+    document.body.appendChild(notice);
 
 
 
     setTimeout(()=>{
 
+
         notice.remove();
+
 
     },2000);
 
@@ -559,13 +475,13 @@ console.log(
 
 // =====================================
 // ChatTBM V4.2 CLEAN SCRIPT
-// Part 2A - Memory + Chat Storage
+// PART 2A - MEMORY + CHAT STORAGE
 // =====================================
 
 
 
 // =============================
-// Save Last User Request
+// SAVE LAST REQUEST
 // =============================
 
 function saveLastRequest(){
@@ -582,7 +498,7 @@ function saveLastRequest(){
 
 
 // =============================
-// Load Last User Request
+// LOAD LAST REQUEST
 // =============================
 
 function loadLastRequest(){
@@ -606,7 +522,7 @@ function loadLastRequest(){
 
 
 // =============================
-// Remember User Request
+// REMEMBER USER MESSAGE
 // =============================
 
 function rememberUserRequest(message){
@@ -622,7 +538,7 @@ function rememberUserRequest(message){
 
 
 // =============================
-// Save Chat History
+// SAVE CHAT HISTORY
 // =============================
 
 function saveChat(){
@@ -631,8 +547,11 @@ function saveChat(){
 
 
     localStorage.setItem(
+
         "ChatTBM_Chat_History",
+
         chatBox.innerHTML
+
     );
 
 }
@@ -642,7 +561,7 @@ function saveChat(){
 
 
 // =============================
-// Load Chat History
+// LOAD CHAT HISTORY
 // =============================
 
 function loadChat(){
@@ -659,8 +578,7 @@ function loadChat(){
         chatBox
     ){
 
-        chatBox.innerHTML =
-        saved;
+        chatBox.innerHTML = saved;
 
 
         chatBox.classList.remove(
@@ -668,8 +586,7 @@ function loadChat(){
         );
 
 
-        chatBox.scrollTop =
-        chatBox.scrollHeight;
+        scrollChat();
 
     }
 
@@ -680,7 +597,7 @@ function loadChat(){
 
 
 // =============================
-// Clear Chat
+// CLEAR CHAT
 // =============================
 
 function clearChat(){
@@ -715,6 +632,7 @@ function clearChat(){
     );
 
 
+
     localStorage.removeItem(
         "ChatTBM_Last_Request"
     );
@@ -737,7 +655,7 @@ function clearChat(){
 
 
 // =============================
-// Create New Chat
+// NEW CHAT BUTTON
 // =============================
 
 function createNewChat(){
@@ -756,7 +674,7 @@ function createNewChat(){
 
 
 // =============================
-// Save Before Leaving
+// SAVE BEFORE EXIT
 // =============================
 
 window.addEventListener(
@@ -775,8 +693,9 @@ window.addEventListener(
 
 
 
+
 // =============================
-// Restore Data On Start
+// RESTORE DATA
 // =============================
 
 loadChat();
@@ -788,19 +707,20 @@ loadLastRequest();
 
 
 
+
 console.log(
 "✅ ChatTBM V4.2 Part 2A Memory Loaded"
 );
 
- // =====================================
+// =====================================
 // ChatTBM V4.2 CLEAN SCRIPT
-// Part 2B - Smart Send + Upload + Voice
+// PART 2B - SEND + UPLOAD + VOICE
 // =====================================
 
 
 
 // =============================
-// Send Message
+// SEND MESSAGE
 // =============================
 
 function sendMessage(){
@@ -836,6 +756,7 @@ function sendMessage(){
 
 
 
+
     setTimeout(()=>{
 
 
@@ -847,30 +768,14 @@ function sendMessage(){
 
 
 
-        let reply;
+        const reply = `
 
-
-
-        if(
-            typeof generateAIReply === "function"
-        ){
-
-
-            reply =
-            generateAIReply(message);
-
-
-        }
-
-        else{
-
-
-            reply =
-
-`
 🚀 ChatTBM V4.2
 
-Your AI engine is ready for API connection.
+I received your request:
+
+"${message}"
+
 
 I can help you create:
 
@@ -884,13 +789,18 @@ I can help you create:
 
 🎯 Marketing plans
 
-`;
 
-        }
+API connection can be added later for advanced AI responses.
+
+`;
 
 
 
         addBotMessage(reply);
+
+
+
+        saveChat();
 
 
 
@@ -905,13 +815,14 @@ I can help you create:
 
 
 
+
 // =============================
-// Send Button
+// SEND BUTTON
 // =============================
 
 const sendBtn =
 document.getElementById(
-    "send-btn"
+"send-btn"
 );
 
 
@@ -932,8 +843,9 @@ if(sendBtn){
 
 
 
+
 // =============================
-// Enter Key
+// ENTER KEY SEND
 // =============================
 
 if(input){
@@ -941,7 +853,7 @@ if(input){
 
     input.addEventListener(
         "keydown",
-        function(event){
+        (event)=>{
 
 
             if(
@@ -971,20 +883,21 @@ if(input){
 
 
 
+
 // =============================
-// Upload System
+// FILE UPLOAD
 // =============================
 
 const uploadBtn =
 document.getElementById(
-    "upload-btn"
+"upload-btn"
 );
 
 
 
 const fileInput =
 document.getElementById(
-    "file-input"
+"file-input"
 );
 
 
@@ -992,8 +905,8 @@ document.getElementById(
 
 
 if(
-    uploadBtn &&
-    fileInput
+uploadBtn &&
+fileInput
 ){
 
 
@@ -1021,23 +934,27 @@ if(
 
 
             addUserMessage(
-                "📎 Uploaded file: " 
-                + 
+                "📎 Uploaded file: "
+                +
                 file.name
             );
 
 
 
-            addBotMessage(
+            setTimeout(()=>{
 
-`
+
+                addBotMessage(`
+
 📂 File received.
 
-ChatTBM will analyze files after AI API connection is added.
+ChatTBM can process this file after AI API connection is added.
 
-`
+`);
 
-            );
+
+            },700);
+
 
 
         }
@@ -1053,13 +970,14 @@ ChatTBM will analyze files after AI API connection is added.
 
 
 
+
 // =============================
-// Voice Input
+// VOICE INPUT
 // =============================
 
 const voiceBtn =
 document.getElementById(
-    "voice-btn"
+"voice-btn"
 );
 
 
@@ -1067,10 +985,9 @@ document.getElementById(
 
 
 if(
-    voiceBtn &&
-    "webkitSpeechRecognition" in window
+voiceBtn &&
+"webkitSpeechRecognition" in window
 ){
-
 
 
     const recognition =
@@ -1093,7 +1010,6 @@ if(
 
 
 
-
     voiceBtn.onclick = ()=>{
 
 
@@ -1106,7 +1022,6 @@ if(
 
 
     };
-
 
 
 
@@ -1131,8 +1046,6 @@ if(
 
 
     };
-
-
 
 
 
@@ -1173,283 +1086,118 @@ else if(voiceBtn){
 
 
 
+
 console.log(
 "✅ ChatTBM V4.2 Part 2B Loaded"
 );
 
 // =====================================
 // ChatTBM V4.2 CLEAN SCRIPT
-// Part 3 - App Feel Upgrade
-// Smooth Mobile Experience
+// PART 3 - CREATOR TOOLS + VIDEO STUDIO
 // =====================================
 
 
 
 // =============================
-// Typing Effect
+// CREATOR TOOLS
 // =============================
 
-function typeAIResponse(element, text){
+function creatorTool(type){
 
-    if(!element) return;
 
+    let request = "";
 
-    let index = 0;
 
 
-    element.innerHTML = "";
+    switch(type){
 
 
-    const typing = setInterval(()=>{
+        case "ideas":
 
+            request =
+            "💡 Create viral content ideas";
 
-        element.textContent +=
-        text.charAt(index);
+        break;
 
 
-        index++;
 
+        case "captionTemplates":
 
-        if(index >= text.length){
+            request =
+            "✍️ Create viral caption templates";
 
+        break;
 
-            clearInterval(typing);
 
 
-            element.innerHTML =
-            text.replace(
-                /\n/g,
-                "<br>"
-            );
+        case "hashtags":
 
+            request =
+            "#️⃣ Generate trending hashtags";
 
-            saveChat();
+        break;
 
 
-        }
 
+        case "hooks":
 
-    },20);
+            request =
+            "🎯 Create powerful content hooks";
 
+        break;
 
-}
 
 
+        case "cta":
 
+            request =
+            "📢 Create a strong call to action";
 
+        break;
 
-// =============================
-// Smooth Chat Scroll
-// =============================
 
-function smoothChatScroll(){
 
+        case "bio":
 
-    if(!chatBox) return;
+            request =
+            "👤 Create a creator bio";
 
+        break;
 
 
-    chatBox.scrollTo({
 
-        top: chatBox.scrollHeight,
+        case "username":
 
-        behavior:"smooth"
+            request =
+            "🔥 Generate username ideas";
 
-    });
+        break;
 
 
-}
 
+        case "calendar":
 
+            request =
+            "📅 Create a content calendar";
 
+        break;
 
 
-// =============================
-// Button Animation
-// =============================
 
-document
-.querySelectorAll(
-    ".action-btn, .ai-btn, .icon-btn"
-)
-.forEach(button=>{
+        default:
 
-
-    button.addEventListener(
-        "click",
-        ()=>{
-
-
-            button.style.transform =
-            "scale(.96)";
-
-
-            setTimeout(()=>{
-
-
-                button.style.transform =
-                "";
-
-
-            },120);
-
-
-        }
-    );
-
-
-});
-
-
-
-
-
-
-// =============================
-// Input Focus Effect
-// =============================
-
-const inputBox =
-document.getElementById(
-    "user-input"
-);
-
-
-
-if(inputBox){
-
-
-    inputBox.addEventListener(
-        "focus",
-        ()=>{
-
-
-            const parent =
-            inputBox.parentElement;
-
-
-            if(parent){
-
-                parent.style.border =
-                "1px solid #2563eb";
-
-            }
-
-
-        }
-    );
-
-
-
-
-
-    inputBox.addEventListener(
-        "blur",
-        ()=>{
-
-
-            const parent =
-            inputBox.parentElement;
-
-
-            if(parent){
-
-                parent.style.border =
-                "";
-
-            }
-
-
-        }
-    );
-
-
-}
-
-
-
-
-
-
-
-// =============================
-// Mobile App Feel
-// =============================
-
-document.body.style.webkitTapHighlightColor =
-"transparent";
-
-
-
-
-
-
-// =============================
-// Check Chat Visibility
-// =============================
-
-function checkChatVisibility(){
-
-
-    if(
-        chatBox &&
-        chatBox.innerHTML.trim() !== ""
-    ){
-
-
-        chatBox.classList.remove(
-            "hidden"
-        );
-
+            request =
+            "Create amazing content ideas";
 
     }
 
 
-}
+
+    addUserMessage(request);
 
 
 
-
-
-checkChatVisibility();
-
-
-
-
-
-
-console.log(
-"✨ ChatTBM V4.2 Part 3 App Experience Loaded"
-);
-
-// =====================================
-// ChatTBM V4.2 CLEAN SCRIPT
-// Part 4 - Final Polish
-// Welcome + Creator Mode + Startup Checks
-// =====================================
-
-
-
-// =============================
-// Welcome Message
-// =============================
-
-function showWelcome(){
-
-
-    const visited =
-    localStorage.getItem(
-        "ChatTBM_Visited"
-    );
-
-
-
-    if(visited){
-
-        return;
-
-    }
-
+    rememberUserRequest(request);
 
 
 
@@ -1458,36 +1206,24 @@ function showWelcome(){
 
         addBotMessage(`
 
-👋 Welcome to ChatTBM
-
-🚀 Your AI Content Assistant
-
-I can help you create:
-
-✍️ Viral captions
-
-🎬 Video scripts
-
-📱 Social media posts
-
-🔥 Content ideas
-
-🎯 Marketing strategies
+🚀 ChatTBM Creator Assistant
 
 
-What are we creating today?
+I will help you with:
 
-        `);
-
-
-
-        localStorage.setItem(
-            "ChatTBM_Visited",
-            "true"
-        );
+${request}
 
 
-    },800);
+Tell me your niche and target audience,
+and I will create something powerful.
+
+`);
+
+
+        saveChat();
+
+
+    },700);
 
 
 }
@@ -1499,11 +1235,147 @@ What are we creating today?
 
 
 // =============================
-// Creator Mode Memory
+// VIDEO TOOLS
+// =============================
+
+function videoTool(type){
+
+
+    let videoRequest = "";
+
+
+
+    switch(type){
+
+
+        case "create":
+
+            videoRequest =
+            "Create an AI video concept";
+
+        break;
+
+
+
+        case "script":
+
+            videoRequest =
+            "Create a video script";
+
+        break;
+
+
+
+        case "image":
+
+            videoRequest =
+            "Create an image generation prompt";
+
+        break;
+
+
+
+        case "scene":
+
+            videoRequest =
+            "Create cinematic video scenes";
+
+        break;
+
+
+
+        case "voice":
+
+            videoRequest =
+            "Create a voice-over script";
+
+        break;
+
+
+
+        case "youtube":
+
+            videoRequest =
+            "Create a YouTube script";
+
+        break;
+
+
+
+        case "reels":
+
+            videoRequest =
+            "Create TikTok/Reels content";
+
+        break;
+
+
+
+        default:
+
+            videoRequest =
+            "Create video ideas";
+
+    }
+
+
+
+    addUserMessage(
+        "🎥 " + videoRequest
+    );
+
+
+
+    rememberUserRequest(
+        videoRequest
+    );
+
+
+
+    setTimeout(()=>{
+
+
+        addBotMessage(`
+
+🎬 AI Video Studio
+
+
+Request:
+
+${videoRequest}
+
+
+ChatTBM will help you create:
+
+• Story ideas
+• Scenes
+• Scripts
+• Prompts
+• Hooks
+• Voice-over plans
+
+
+`);
+
+        saveChat();
+
+
+    },700);
+
+
+}
+
+
+
+
+
+
+
+// =============================
+// CREATOR MODES
 // =============================
 
 let activeCreatorMode = "";
-
 
 
 
@@ -1525,15 +1397,16 @@ function activateCreatorMode(mode){
 
 🎨 Creator Mode Activated
 
+
 ${mode}
 
 
-ChatTBM will customize your ideas for this style.
+Your future ideas will follow this style.
 
-Tell me what you want to create.
 
-    `);
+What do you want to create?
 
+`);
 
 }
 
@@ -1541,27 +1414,24 @@ Tell me what you want to create.
 
 
 
-
-
 // =============================
-// Load Creator Mode
+// LOAD CREATOR MODE
 // =============================
 
 function loadCreatorMode(){
 
 
-    const savedMode =
+    const saved =
     localStorage.getItem(
         "ChatTBM_Mode"
     );
 
 
 
-    if(savedMode){
+    if(saved){
 
 
-        activeCreatorMode =
-        savedMode;
+        activeCreatorMode = saved;
 
 
     }
@@ -1573,10 +1443,8 @@ function loadCreatorMode(){
 
 
 
-
-
 // =============================
-// Chat History Button
+// CHAT HISTORY BUTTON
 // =============================
 
 function showChatHistory(){
@@ -1593,7 +1461,7 @@ function showChatHistory(){
 
 
         showNotice(
-            "📂 Previous chat history found"
+            "📂 Chat history found"
         );
 
 
@@ -1618,118 +1486,82 @@ function showChatHistory(){
 
 
 
+loadCreatorMode();
+
+
+
+console.log(
+"✅ ChatTBM V4.2 Part 3 Creator System Loaded"
+);
+
+// =====================================
+// ChatTBM V4.2 CLEAN SCRIPT
+// PART 4 - STARTUP + FINAL POLISH
+// =====================================
+
+
+
 // =============================
-// Creator Tools Backup
+// FIRST VISIT WELCOME
 // =============================
 
-function creatorTool(type){
+function showWelcome(){
 
 
-    let message = "";
-
-
-
-    switch(type){
-
-
-        case "ideas":
-
-        message =
-        "💡 Give me viral content ideas";
-
-        break;
+    const visited =
+    localStorage.getItem(
+        "ChatTBM_Visited"
+    );
 
 
 
-        case "captionTemplates":
+    if(visited){
 
-        message =
-        "✍️ Create viral caption templates";
-
-        break;
-
-
-
-        case "hashtags":
-
-        message =
-        "#️⃣ Generate trending hashtags";
-
-        break;
-
-
-
-        case "hooks":
-
-        message =
-        "🎯 Create powerful content hooks";
-
-        break;
-
-
-
-        case "cta":
-
-        message =
-        "📢 Create a strong call to action";
-
-        break;
-
-
-
-        case "bio":
-
-        message =
-        "👤 Create a creator bio";
-
-        break;
-
-
-
-        case "username":
-
-        message =
-        "🔥 Generate username ideas";
-
-        break;
-
-
-
-        case "calendar":
-
-        message =
-        "📅 Create a content calendar";
-
-        break;
-
-
-
-        default:
-
-        message =
-        "Create something amazing";
-
+        return;
 
     }
 
 
 
-    addUserMessage(message);
-
-
-
     setTimeout(()=>{
 
 
-        addBotMessage(
+        addBotMessage(`
 
-        "🚀 ChatTBM is preparing your creator idea..."
+👋 Welcome to ChatTBM
 
+
+🚀 Your AI Content Assistant
+
+
+I can help you create:
+
+
+✍️ Viral captions
+
+🎬 Video scripts
+
+📱 Social media posts
+
+🔥 Content ideas
+
+🎯 Marketing plans
+
+
+What are we creating today?
+
+
+`);
+
+
+
+        localStorage.setItem(
+            "ChatTBM_Visited",
+            "true"
         );
 
 
-    },700);
-
+    },800);
 
 
 }
@@ -1741,53 +1573,7 @@ function creatorTool(type){
 
 
 // =============================
-// Video Tools Backup
-// =============================
-
-function videoTool(type){
-
-
-    addUserMessage(
-        "🎥 Create " + type + " content"
-    );
-
-
-
-    setTimeout(()=>{
-
-
-        addBotMessage(
-
-        `
-🎬 Video Studio Activated
-
-I will help you create:
-
-• Video ideas
-• Scripts
-• Scenes
-• Prompts
-• Voice-over concepts
-
-        `
-
-        );
-
-
-    },700);
-
-
-
-}
-
-
-
-
-
-
-
-// =============================
-// System Check
+// SYSTEM CHECK
 // =============================
 
 function checkChatTBM(){
@@ -1822,10 +1608,21 @@ function checkChatTBM(){
 
 
     console.log(
-        "Memory:",
-        typeof saveChat === "function"
+        "Send Button:",
+        document.getElementById("send-btn")
         ?
-        "Active ✅"
+        "Connected ✅"
+        :
+        "Missing ❌"
+    );
+
+
+
+    console.log(
+        "Upload:",
+        document.getElementById("upload-btn")
+        ?
+        "Connected ✅"
         :
         "Missing ❌"
     );
@@ -1847,11 +1644,21 @@ function checkChatTBM(){
 
 
 // =============================
-// Start App
+// MOBILE APP FEEL
 // =============================
 
-loadCreatorMode();
+document.body.style.webkitTapHighlightColor =
+"transparent";
 
+
+
+
+
+
+
+// =============================
+// START CHATTBM
+// =============================
 
 showWelcome();
 
@@ -1863,6 +1670,7 @@ checkChatTBM();
 
 
 
+
 console.log(
-"🔥 ChatTBM V4.2 FINAL POLISH LOADED"
+"🔥 ChatTBM V4.2 FINAL SCRIPT LOADED"
 );
