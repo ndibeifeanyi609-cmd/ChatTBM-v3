@@ -71,7 +71,7 @@ function sendMessage(){
         removeLoading();
 
 
-        const response = generateAIResponse(message);
+     const response = await generateAIResponse(message);
 
 
         addMessage(response,"bot");
