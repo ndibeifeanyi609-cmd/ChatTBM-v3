@@ -1,148 +1,34 @@
-/* ==========================================
-   ChatTBM V5.1
+    /* ===================================
+   ChatTBM - Core AI Assistant
    script.js
-   Part 1 - Core System
-========================================== */
+=================================== */
 
-// ===========================
-// DOM ELEMENTS
-// ===========================
+
+// ===============================
+// CONNECT ELEMENTS
+// ===============================
 
 const chatBox = document.getElementById("chat-box");
-const welcomeScreen = document.getElementById("welcome-screen");
-
 const userInput = document.getElementById("user-input");
-
 const sendBtn = document.getElementById("send-btn");
-const uploadBtn = document.getElementById("upload-btn");
-const voiceBtn = document.getElementById("voice-btn");
 
-const fileInput = document.getElementById("file-input");
-const attachmentPreview = document.getElementById("attachment-preview");
+const toolButtons = document.querySelectorAll(".tool-btn");
 
-const loadingIndicator =
-document.getElementById("loading-indicator");
+let lastUserMessage = "";
 
-const toast =
-document.getElementById("toast");
 
-// ===========================
-// APP STATE
-// ===========================
 
-let uploadedFile = null;
 
-let chatHistory = [];
-
-const STORAGE_KEY = "ChatTBM_V51_History";
-
-// ===========================
-// SHOW CHAT
-// ===========================
-
-function showChat(){
-
-    if(welcomeScreen){
-
-        welcomeScreen.style.display = "none";
-
-    }
-
-}
-
-// ===========================
-// AUTO SCROLL
-// ===========================
-
-function scrollChat(){
-
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-}
-
-// ===========================
-// ADD MESSAGE
-// ===========================
-
-function addMessage(type,text){
-
-    showChat();
-
-    const message =
-    document.createElement("div");
-
-    message.className =
-    `message ${type}`;
-
-    message.textContent = text;
-
-    chatBox.appendChild(message);
-
-    scrollChat();
-
-    chatHistory.push({
-
-        type:type,
-
-        text:text
-
-    });
-
-    saveHistory();
-
-}
-
-// ===========================
+// ===============================
 // SEND MESSAGE
-// ===========================
+// ===============================
 
-function sendMessage(){
+sendBtn.addEventListener("click", sendMessage);
 
-    const message =
-    userInput.value.trim();
 
-    if(message === "" && !uploadedFile){
+userInput.addEventListener("keypress", function(e){
 
-        return;
-
-    }
-
-    let finalMessage = message;
-
-    if(uploadedFile){
-
-        finalMessage +=
-        `\n📎 ${uploadedFile.name}`;
-
-    }
-
-    addMessage("user",finalMessage);
-
-    userInput.value = "";
-
-    clearAttachment();
-
-    generateReply(message);
-
-}
-
-// ===========================
-// EVENTS
-// ===========================
-
-sendBtn.addEventListener(
-"click",
-sendMessage
-);
-
-userInput.addEventListener(
-"keydown",
-function(event){
-
-    if(event.key === "Enter"
-    && !event.shiftKey){
-
-        event.preventDefault();
+    if(e.key === "Enter"){
 
         sendMessage();
 
@@ -150,573 +36,456 @@ function(event){
 
 });
 
-// ===========================
-// STARTUP
-// ===========================
 
-console.log(
-"✅ ChatTBM V5.1 Started"
-);
 
-/* ==========================================
-   ChatTBM V5.1
-   script.js
-   Part 2 - AI Engine & Chat History
-========================================== */
 
-// ===========================
-// AI RESPONSE DATABASE
-// ===========================
 
-const aiReplies = {
+function sendMessage(){
 
-    greeting: [
-        "Hello! 👋 Welcome to ChatTBM.",
-        "Hi! What would you like to create today?",
-        "Welcome back! Let's make something amazing."
-    ],
 
-    caption: [
-        "I can write engaging captions for your social media posts.",
-        "Tell me about your photo or video and I'll create a caption."
-    ],
+    const message = userInput.value.trim();
 
-    script: [
-        "I can help write YouTube, TikTok, Facebook, and Instagram scripts.",
-        "Give me your topic and I'll build a script."
-    ],
 
-    ideas: [
-        "Here are some fresh content ideas you can try today.",
-        "Let's brainstorm viral content together."
-    ],
+    if(message === "") return;
 
-    default: [
-        "Tell me more so I can help.",
-        "That's interesting. Let's build something great.",
-        "I'm ready to help with your content."
-    ]
 
-};
 
-// ===========================
-// FIND REPLY
-// ===========================
+    lastUserMessage = message;
 
-function getReply(message){
+
+
+    addMessage(message,"user");
+
+
+    userInput.value = "";
+
+
+
+    showLoading();
+
+
+
+    setTimeout(()=>{
+
+
+        removeLoading();
+
+
+        const response = generateAIResponse(message);
+
+
+        addMessage(response,"bot");
+
+
+        saveChat();
+
+
+
+    },1000);
+
+
+
+}
+
+
+
+
+
+// ===============================
+// MESSAGE DISPLAY
+// ===============================
+
+
+function addMessage(text,sender){
+
+
+    const messageDiv = document.createElement("div");
+
+
+    messageDiv.classList.add(
+        "message",
+        sender === "user"
+        ? "user-message"
+        : "bot-message"
+    );
+
+
+
+    messageDiv.innerHTML = `
+
+        <p>${text}</p>
+
+        ${
+        sender === "bot"
+
+        ?
+
+        `<button onclick="copyResponse(this)">
+        Copy
+        </button>
+        <button onclick="regenerateResponse()">
+        Regenerate
+        </button>`
+
+        :
+
+        ""
+
+        }
+
+    `;
+
+
+
+    chatBox.appendChild(messageDiv);
+
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+
+}
+
+
+
+
+
+// ===============================
+// AI RESPONSE ENGINE
+// ===============================
+
+
+function generateAIResponse(message){
+
 
     const text = message.toLowerCase();
 
-    if(text.includes("hello") ||
-       text.includes("hi") ||
-       text.includes("hey")){
 
-        return randomReply("greeting");
-    }
 
     if(text.includes("caption")){
 
-        return randomReply("caption");
-    }
 
-    if(text.includes("script") ||
-       text.includes("video")){
+        return `
+        Here is a caption idea:
 
-        return randomReply("script");
-    }
+        🔥 Turning ideas into reality.
+        Creating, improving and building every day.
 
-    if(text.includes("idea") ||
-       text.includes("viral")){
-
-        return randomReply("ideas");
-    }
-
-    return randomReply("default");
-
-}
-
-// ===========================
-// RANDOM REPLY
-// ===========================
-
-function randomReply(category){
-
-    const list = aiReplies[category];
-
-    return list[
-        Math.floor(Math.random() * list.length)
-    ];
-
-}
-
-// ===========================
-// GENERATE AI RESPONSE
-// ===========================
-
-function generateReply(message){
-
-    showLoading();
-
-    setTimeout(()=>{
-
-        hideLoading();
-
-        addMessage(
-            "bot",
-            getReply(message)
-        );
-
-    },700);
-
-}
-
-// ===========================
-// CHAT HISTORY
-// ===========================
-
-function saveHistory(){
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(chatHistory)
-    );
-
-}
-
-function loadHistory(){
-
-    const saved =
-    localStorage.getItem(STORAGE_KEY);
-
-    if(!saved){
-
-        showWelcomeMessage();
-
-        return;
+        #Creator #AI #ContentCreation
+        `;
 
     }
 
-    chatHistory =
-    JSON.parse(saved);
 
-    chatHistory.forEach(item=>{
 
-        const message =
-        document.createElement("div");
+    if(text.includes("script")){
 
-        message.className =
-        `message ${item.type}`;
 
-        message.textContent =
-        item.text;
+        return `
+        Video Script:
 
-        chatBox.appendChild(message);
+        Hook:
+        "You won't believe what happened next..."
 
-    });
+        Body:
+        Explain your story and add value.
 
-    scrollChat();
-
-}
-
-// ===========================
-// WELCOME MESSAGE
-// ===========================
-
-function showWelcomeMessage(){
-
-    addMessage(
-        "bot",
-        "👋 Welcome to ChatTBM. Your AI Content Assistant is ready."
-    );
-
-}
-
-/* ==========================================
-   ChatTBM V5.1
-   script.js
-   Part 3 - Upload, Quick Actions & Toast
-========================================== */
-
-// ===========================
-// FILE UPLOAD
-// ===========================
-
-if(uploadBtn){
-
-    uploadBtn.addEventListener("click",()=>{
-
-        fileInput.click();
-
-    });
-
-}
-
-if(fileInput){
-
-    fileInput.addEventListener("change",(event)=>{
-
-        const file = event.target.files[0];
-
-        if(!file){
-
-            return;
-
-        }
-
-        uploadedFile = file;
-
-        showAttachment(file);
-
-    });
-
-}
-
-// ===========================
-// SHOW ATTACHMENT
-// ===========================
-
-function showAttachment(file){
-
-    attachmentPreview.innerHTML = "";
-
-    const preview =
-    document.createElement("div");
-
-    preview.className = "file-preview";
-
-    if(file.type.startsWith("image/")){
-
-        const image =
-        document.createElement("img");
-
-        image.src =
-        URL.createObjectURL(file);
-
-        image.className =
-        "upload-image-preview";
-
-        preview.appendChild(image);
+        Ending:
+        Ask viewers to follow for more.
+        `;
 
     }
 
-    const fileName =
-    document.createElement("span");
 
-    fileName.textContent =
-    file.name;
 
-    preview.appendChild(fileName);
 
-    attachmentPreview.appendChild(preview);
+    if(text.includes("hashtag")){
+
+
+        return `
+        Suggested hashtags:
+
+        #ChatTBM
+        #ContentCreator
+        #ViralVideos
+        #AItools
+        #DigitalCreator
+        `;
+
+    }
+
+
+
+
+    if(text.includes("idea")){
+
+
+        return `
+        Viral Content Ideas:
+
+        1. Behind the scenes
+        2. Before and after transformation
+        3. Storytelling videos
+        4. AI challenge videos
+        `;
+
+    }
+
+
+
+
+    if(text.includes("advert")){
+
+
+        return `
+        Advert Template:
+
+        Attention grabbing headline.
+
+        Explain the benefit.
+
+        Add a strong call to action.
+        `;
+
+    }
+
+
+
+
+    if(text.includes("calendar")){
+
+
+        return `
+        Weekly Content Calendar:
+
+        Monday:
+        Educational post
+
+        Wednesday:
+        Storytelling video
+
+        Friday:
+        Viral trend content
+        `;
+
+    }
+
+
+
+
+    return `
+
+    I am ChatTBM 🤖
+
+    I can help you create:
+
+    • Captions
+    • Scripts
+    • Hashtags
+    • Viral ideas
+    • Advert content
+    • Content calendars
+
+    Ask me anything.
+
+    `;
+
 
 }
 
-// ===========================
-// CLEAR ATTACHMENT
-// ===========================
 
-function clearAttachment(){
 
-    uploadedFile = null;
 
-    fileInput.value = "";
 
-    attachmentPreview.innerHTML = "";
+// ===============================
+// CREATOR TOOL BUTTONS
+// ===============================
 
-}
 
-// ===========================
-// QUICK ACTION BUTTONS
-// ===========================
+toolButtons.forEach(button=>{
 
-const quickButtons =
-document.querySelectorAll(".quick-btn");
-
-quickButtons.forEach(button=>{
 
     button.addEventListener("click",()=>{
 
-        const prompt =
-        button.dataset.prompt;
 
-        userInput.value = prompt;
+        const tool = button.dataset.tool;
 
-        userInput.focus();
+
+        userInput.value = 
+        "Create " + tool;
+
+
+        sendMessage();
+
 
     });
+
 
 });
 
-// ===========================
-// TOAST MESSAGE
-// ===========================
 
-function showToast(message){
 
-    if(!toast){
 
-        return;
 
-    }
 
-    toast.textContent = message;
+// ===============================
+// LOADING
+// ===============================
 
-    toast.classList.remove("hidden");
-
-    setTimeout(()=>{
-
-        toast.classList.add("hidden");
-
-    },2000);
-
-}
-
-// ===========================
-// COPY LAST BOT MESSAGE
-// ===========================
-
-function copyLastReply(){
-
-    const replies =
-    document.querySelectorAll(".message.bot");
-
-    if(replies.length === 0){
-
-        showToast("No reply to copy");
-
-        return;
-
-    }
-
-    const lastReply =
-    replies[replies.length - 1];
-
-    navigator.clipboard.writeText(
-        lastReply.textContent
-    );
-
-    showToast("Copied");
-
-}
-
-/* ==========================================
-   ChatTBM V5.1
-   script.js
-   Part 4 - Voice Input & Loading System
-========================================== */
-
-// ===========================
-// SPEECH RECOGNITION
-// ===========================
-
-const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
-
-let recognition = null;
-
-if(SpeechRecognition){
-
-    recognition = new SpeechRecognition();
-
-    recognition.lang = "en-US";
-
-    recognition.continuous = false;
-
-    recognition.interimResults = false;
-
-    recognition.onresult = function(event){
-
-        const speech =
-        event.results[0][0].transcript;
-
-        userInput.value = speech;
-
-        userInput.focus();
-
-        showToast("Voice captured");
-
-    };
-
-    recognition.onerror = function(){
-
-        showToast("Voice recognition failed");
-
-    };
-
-    recognition.onend = function(){
-
-        voiceBtn.classList.remove("recording");
-
-    };
-
-}
-
-// ===========================
-// VOICE BUTTON
-// ===========================
-
-if(voiceBtn){
-
-    voiceBtn.addEventListener("click",()=>{
-
-        if(!recognition){
-
-            showToast(
-            "Voice not supported on this browser"
-            );
-
-            return;
-
-        }
-
-        voiceBtn.classList.add("recording");
-
-        recognition.start();
-
-    });
-
-}
-
-// ===========================
-// LOADING INDICATOR
-// ===========================
 
 function showLoading(){
 
-    if(loadingIndicator){
 
-        loadingIndicator.classList.remove("hidden");
+    const loading = document.createElement("div");
 
-    }
+
+    loading.id="loading";
+
+
+    loading.className="message bot-message";
+
+
+    loading.innerHTML="ChatTBM is thinking... 🤖";
+
+
+    chatBox.appendChild(loading);
+
 
 }
 
-function hideLoading(){
 
-    if(loadingIndicator){
 
-        loadingIndicator.classList.add("hidden");
+function removeLoading(){
+
+
+    const loading=document.getElementById("loading");
+
+
+    if(loading){
+
+        loading.remove();
 
     }
 
+
 }
 
-// ===========================
-// SIMULATE BOT TYPING
-// ===========================
 
-function botTyping(callback){
 
-    showLoading();
+
+
+
+// ===============================
+// COPY RESPONSE
+// ===============================
+
+
+function copyResponse(button){
+
+
+    const text =
+    button.parentElement.querySelector("p").innerText;
+
+
+
+    navigator.clipboard.writeText(text);
+
+
+
+    button.innerText="Copied!";
+
 
     setTimeout(()=>{
 
-        hideLoading();
+        button.innerText="Copy";
 
-        if(typeof callback === "function"){
+    },1500);
 
-            callback();
 
-        }
-
-    },700);
 
 }
 
-/* ==========================================
-   ChatTBM V5.1
-   script.js
-   Part 5 - Initialization & Final Setup
-========================================== */
 
-// ===========================
-// AUTO-RESIZE TEXTAREA
-// ===========================
 
-function autoResizeTextarea(){
 
-    if(!userInput) return;
 
-    userInput.style.height = "auto";
 
-    userInput.style.height =
-    userInput.scrollHeight + "px";
+// ===============================
+// REGENERATE
+// ===============================
+
+
+function regenerateResponse(){
+
+
+    if(lastUserMessage){
+
+
+        showLoading();
+
+
+        setTimeout(()=>{
+
+
+            removeLoading();
+
+
+            addMessage(
+            generateAIResponse(lastUserMessage),
+            "bot"
+            );
+
+
+        },1000);
+
+
+    }
+
 
 }
 
-if(userInput){
 
-    userInput.addEventListener(
-        "input",
-        autoResizeTextarea
+
+
+
+
+// ===============================
+// CHAT STORAGE
+// ===============================
+
+
+function saveChat(){
+
+
+    localStorage.setItem(
+        "ChatTBM_history",
+        chatBox.innerHTML
     );
 
-}
-
-
-
-// ===========================
-// CLEAR CHAT
-// ===========================
-
-function clearChat(){
-
-    chatHistory = [];
-
-    localStorage.removeItem(
-        STORAGE_KEY
-    );
-
-    chatBox.innerHTML = "";
-
-    showWelcomeMessage();
 
 }
 
 
 
-// ===========================
-// NEW CHAT BUTTON
-// ===========================
 
-const newChatBtn =
-document.getElementById("new-chat-btn");
 
-if(newChatBtn){
+function loadChat(){
 
-    newChatBtn.addEventListener(
-        "click",
-        clearChat
-    );
+
+    const saved =
+    localStorage.getItem("ChatTBM_history");
+
+
+    if(saved){
+
+
+        chatBox.innerHTML=saved;
+
+
+    }
+
 
 }
 
 
 
-// ===========================
-// LOAD APP
-// ===========================
-
-function initializeApp(){
-
-    loadHistory();
-
-    autoResizeTextarea();
-
-    console.log(
-        "🚀 ChatTBM V5.1 Ready"
-    );
-
-}
-
-
-
-// ===========================
-// DOM READY
-// ===========================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    initializeApp
-);
+loadChat();
