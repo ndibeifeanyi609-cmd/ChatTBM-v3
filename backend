@@ -2,5 +2,3 @@ server.js
 package.json
 .env
 
-AI_API_KEY=YOUR_API_KEY_HERE
-PORT=3000
