@@ -3,6 +3,12 @@
 // Part 1A - Core System + AI Configuration
 // =====================================
 
+// ===============================
+// ChatTBM Backend Configuration
+// ===============================
+
+const BACKEND_URL = "https://chattbm-backend.onrender.com";
+
 
 // =============================
 // CONNECT HTML ELEMENTS
