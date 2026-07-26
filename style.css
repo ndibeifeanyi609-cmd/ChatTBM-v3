@@ -1,982 +1,433 @@
-/* =====================================
-   ChatTBM V5.0 Professional Edition
-   Part 2A
-===================================== */
+/* ===================================
+   ChatTBM - Core App Design
+   style.css
+=================================== */
 
-/* RESET */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+/* GLOBAL RESET */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* ROOT */
 
-:root{
+body {
 
-    --bg:#0b0b0f;
+    font-family: Arial, Helvetica, sans-serif;
 
-    --surface:#17171c;
+    background:
+    radial-gradient(circle at top, #1b2735, #050505);
 
-    --surface2:#202027;
+    color: white;
 
-    --border:#2f2f39;
+    min-height: 100vh;
 
-    --text:#ffffff;
+    display: flex;
 
-    --muted:#9ca3af;
+    justify-content: center;
 
-    --accent:#14b8a6;
-
-    --hover:#292933;
-
-    --shadow:0 10px 30px rgba(0,0,0,.35);
+    align-items: center;
 
 }
 
-/* BODY */
 
-html{
 
-    scroll-behavior:smooth;
+/* APP CONTAINER */
 
-}
+.app-container {
 
-body{
+    width: 100%;
 
-    font-family:"Inter",sans-serif;
+    max-width: 450px;
 
-    background:var(--bg);
+    min-height: 100vh;
 
-    color:var(--text);
+    background: rgba(15,15,15,0.95);
 
-    min-height:100vh;
+    display: flex;
 
-    display:flex;
+    flex-direction: column;
 
-    flex-direction:column;
-
-    overflow:hidden;
+    overflow: hidden;
 
 }
 
-/* LINKS */
 
-a{
 
-    color:inherit;
 
-    text-decoration:none;
-
-}
-
-/* BUTTON */
-
-button{
-
-    font-family:inherit;
-
-}
 
 /* HEADER */
 
-.header{
+.app-header {
 
-    width:100%;
+    display: flex;
 
-    height:70px;
+    justify-content: space-between;
 
-    display:flex;
+    align-items: center;
 
-    justify-content:space-between;
+    padding: 15px;
 
-    align-items:center;
-
-    padding:0 22px;
-
-    background:#111116;
-
-    border-bottom:1px solid var(--border);
-
-    position:sticky;
-
-    top:0;
-
-    z-index:1000;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 
 }
 
-.header-left{
 
-    display:flex;
 
-    align-items:center;
+.brand {
 
-    gap:12px;
+    display: flex;
 
-}
+    align-items: center;
 
-.logo-small{
-
-    width:42px;
-
-    height:42px;
-
-    border-radius:12px;
-
-    object-fit:cover;
+    gap: 10px;
 
 }
 
-.brand{
 
-    font-size:22px;
 
-    font-weight:700;
+.logo {
 
-}
+    width: 45px;
 
-.header-right{
+    height: 45px;
 
-    display:flex;
+    border-radius: 50%;
 
-    align-items:center;
-
-    gap:10px;
+    object-fit: cover;
 
 }
 
-/* BUTTONS */
 
-.icon-btn,
 
-#signin-btn,
+.brand-text h1 {
 
-#signup-btn{
-
-    border:none;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    border-radius:14px;
+    font-size: 20px;
 
 }
 
-.icon-btn{
 
-    width:44px;
 
-    height:44px;
+.brand-text p {
 
-    background:transparent;
+    font-size: 11px;
 
-    color:white;
-
-    font-size:20px;
+    color: #aaa;
 
 }
 
-#signin-btn{
 
-    padding:11px 18px;
 
-    background:transparent;
 
-    color:white;
 
-    border:1px solid var(--border);
+/* AUTH BUTTONS */
 
-}
+.auth-buttons {
 
-#signup-btn{
+    display: flex;
 
-    padding:11px 20px;
-
-    background:var(--accent);
-
-    color:white;
-
-    font-weight:600;
+    gap: 8px;
 
 }
 
-.icon-btn:hover,
 
-#signin-btn:hover,
 
-#signup-btn:hover{
+.auth-buttons button {
 
-    transform:translateY(-2px);
+    border: none;
 
-}
+    padding: 8px 12px;
 
-/* WELCOME */
+    border-radius: 20px;
 
-#welcome-screen{
+    background: #ffffff;
 
-    flex:1;
+    color: black;
 
-    display:flex;
+    font-size: 12px;
 
-    flex-direction:column;
-
-    justify-content:center;
-
-    align-items:center;
-
-    text-align:center;
-
-    padding:40px 20px;
+    cursor: pointer;
 
 }
 
-.hero-logo{
 
-    width:150px;
 
-    margin-bottom:25px;
 
-    animation:floatLogo 4s ease-in-out infinite;
 
-}
+/* WELCOME SCREEN */
 
-#welcome-screen h1{
+.welcome-screen {
 
-    font-size:48px;
+    text-align: center;
 
-    font-weight:800;
-
-    margin-bottom:12px;
+    padding: 35px 20px 20px;
 
 }
 
-#welcome-screen p{
 
-    color:var(--muted);
 
-    font-size:18px;
+.hero-logo {
+
+    width: 90px;
+
+    height: 90px;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    margin-bottom: 15px;
 
 }
+
+
+
+.welcome-screen h2 {
+
+    font-size: 25px;
+
+    margin-bottom: 10px;
+
+}
+
+
+
+.welcome-screen p {
+
+    color: #bdbdbd;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+
+}
+
+
+
+
 
 /* CHAT AREA */
 
-main{
+.chat-container {
 
-    flex:1;
+    flex: 1;
 
-    overflow:hidden;
+    display: flex;
 
-}
+    flex-direction: column;
 
-.chat-box{
-
-    width:100%;
-
-    height:100%;
-
-    overflow-y:auto;
-
-    padding:25px 20px 160px;
+    padding: 15px;
 
 }
 
-.hidden{
 
-    display:none;
 
-}
+.chat-box {
 
-/* SCROLLBAR */
+    flex: 1;
 
-.chat-box::-webkit-scrollbar{
+    overflow-y: auto;
 
-    width:7px;
+    padding-bottom: 15px;
 
 }
 
-.chat-box::-webkit-scrollbar-thumb{
 
-    background:#444;
 
-    border-radius:20px;
+
+
+/* MESSAGE STYLE */
+
+.message {
+
+    max-width: 85%;
+
+    padding: 12px;
+
+    margin-bottom: 12px;
+
+    border-radius: 15px;
+
+    line-height: 1.4;
+
+    font-size: 14px;
 
 }
 
-/* LOGO */
 
-@keyframes floatLogo{
 
-    0%{
+.bot-message {
 
-        transform:translateY(0);
+    background: #202020;
+
+    align-self: flex-start;
+
+}
+
+
+
+.user-message {
+
+    background: white;
+
+    color: black;
+
+    margin-left: auto;
+
+}
+
+
+
+
+
+/* CREATOR TOOLS */
+
+.creator-tools {
+
+    display: grid;
+
+    grid-template-columns: repeat(3,1fr);
+
+    gap: 8px;
+
+    margin-bottom: 15px;
+
+}
+
+
+
+.tool-btn {
+
+    background: #151515;
+
+    color: white;
+
+    border: 1px solid rgba(255,255,255,0.15);
+
+    padding: 10px 5px;
+
+    border-radius: 12px;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+}
+
+
+
+.tool-btn:hover {
+
+    background: #2a2a2a;
+
+}
+
+
+
+
+
+/* INPUT AREA */
+
+.input-area {
+
+    display: flex;
+
+    gap: 8px;
+
+    align-items: center;
+
+}
+
+
+
+.upload-btn {
+
+    width: 40px;
+
+    height: 40px;
+
+    border-radius: 50%;
+
+    border: none;
+
+    background: white;
+
+    color: black;
+
+    font-size: 25px;
+
+}
+
+
+
+.input-area input {
+
+    flex: 1;
+
+    padding: 12px;
+
+    border-radius: 25px;
+
+    border: none;
+
+    outline: none;
+
+    background: #222;
+
+    color: white;
+
+}
+
+
+
+#send-btn {
+
+    padding: 12px 15px;
+
+    border-radius: 25px;
+
+    border: none;
+
+    background: white;
+
+    color: black;
+
+}
+
+
+
+
+
+/* FOOTER */
+
+.app-footer {
+
+    text-align: center;
+
+    padding: 15px;
+
+    font-size: 12px;
+
+    color: #777;
+
+}
+
+
+
+
+
+/* MOBILE OPTIMIZATION */
+
+@media (max-width:450px) {
+
+
+    .creator-tools {
+
+        grid-template-columns: repeat(2,1fr);
 
     }
 
-    50%{
-
-        transform:translateY(-8px);
-
-    }
-
-    100%{
-
-        transform:translateY(0);
-
-    }
-
-}
-
-/* =====================================
-   ChatTBM V5.0 Professional Edition
-   Part 2B
-   Chat Messages
-===================================== */
-
-/* USER MESSAGE */
-
-.user-message{
-
-    display:flex;
-
-    justify-content:flex-end;
-
-    margin:22px 0;
-
-}
-
-.user-bubble{
-
-    max-width:80%;
-
-    background:linear-gradient(135deg,#14b8a6,#0d9488);
-
-    color:#fff;
-
-    padding:16px 18px;
-
-    border-radius:22px 22px 6px 22px;
-
-    font-size:15px;
-
-    line-height:1.7;
-
-    word-wrap:break-word;
-
-    box-shadow:var(--shadow);
-
-}
-
-/* AI MESSAGE */
-
-.ai-message{
-
-    display:flex;
-
-    justify-content:flex-start;
-
-    margin:22px 0;
-
-}
-
-.ai-bubble{
-
-    width:100%;
-
-    max-width:92%;
-
-    background:var(--surface);
-
-    border:1px solid var(--border);
-
-    border-radius:20px;
-
-    padding:18px;
-
-    box-shadow:var(--shadow);
-
-}
-
-/* AI HEADER */
-
-.ai-header{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    margin-bottom:14px;
-
-    font-size:16px;
-
-    font-weight:700;
-
-}
-
-.ai-header img{
-
-    width:30px;
-
-    height:30px;
-
-    border-radius:8px;
-
-}
-
-/* AI CONTENT */
-
-.ai-content{
-
-    white-space:pre-wrap;
-
-    line-height:1.8;
-
-    font-size:15px;
-
-    color:#f5f5f5;
-
-}
-
-/* MESSAGE TIME */
-
-.message-time{
-
-    margin-top:12px;
-
-    font-size:12px;
-
-    color:var(--muted);
-
-}
-
-/* ACTION BUTTONS */
-
-.ai-actions{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:10px;
-
-    margin-top:18px;
-
-}
-
-.ai-btn{
-
-    background:var(--surface2);
-
-    color:white;
-
-    border:1px solid var(--border);
-
-    border-radius:12px;
-
-    padding:10px 14px;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    font-size:14px;
-
-}
-
-.ai-btn:hover{
-
-    background:var(--hover);
-
-}
-
-/* THINKING */
-
-.thinking{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:8px;
-
-    color:var(--muted);
-
-}
-
-.thinking::after{
-
-    content:"";
-
-    width:8px;
-
-    height:8px;
-
-    border-radius:50%;
-
-    background:var(--accent);
-
-    animation:pulse 1s infinite;
-
-}
-
-@keyframes pulse{
-
-    0%{
-
-        opacity:.2;
-
-        transform:scale(.8);
-
-    }
-
-    50%{
-
-        opacity:1;
-
-        transform:scale(1.3);
-
-    }
-
-    100%{
-
-        opacity:.2;
-
-        transform:scale(.8);
-
-    }
-
-}
-
-/* EDIT BOX */
-
-.edit-box{
-
-    width:100%;
-
-    min-height:140px;
-
-    padding:15px;
-
-    background:#111;
-
-    color:white;
-
-    border:1px solid var(--border);
-
-    border-radius:14px;
-
-    resize:vertical;
-
-    font-family:inherit;
-
-    font-size:15px;
-
-}
-
-/* NOTIFICATION */
-
-.chat-notice{
-
-    position:fixed;
-
-    left:50%;
-
-    bottom:90px;
-
-    transform:translateX(-50%);
-
-    background:#1f2937;
-
-    color:white;
-
-    padding:12px 22px;
-
-    border-radius:999px;
-
-    font-size:14px;
-
-    z-index:9999;
-
-    box-shadow:var(--shadow);
-
-    animation:noticeFade .25s ease;
-
-}
-
-@keyframes noticeFade{
-
-    from{
-
-        opacity:0;
-
-        transform:translate(-50%,15px);
-
-    }
-
-    to{
-
-        opacity:1;
-
-        transform:translate(-50%,0);
-
-    }
-
-}
-
-/* =====================================
-   ChatTBM V5.0 Professional Edition
-   Part 2C
-   Input • Tools • Responsive
-===================================== */
-
-/* =========================
-   INPUT AREA
-========================= */
-
-.input-area{
-
-    position:fixed;
-
-    bottom:0;
-
-    left:0;
-
-    width:100%;
-
-    padding:18px;
-
-    background:linear-gradient(to top,#0b0b0f,#0b0b0fe8);
-
-    backdrop-filter:blur(18px);
-
-}
-
-.input-wrapper{
-
-    max-width:900px;
-
-    margin:auto;
-
-    display:flex;
-
-    align-items:flex-end;
-
-    gap:12px;
-
-    background:var(--surface);
-
-    border:1px solid var(--border);
-
-    border-radius:26px;
-
-    padding:12px;
-
-    box-shadow:var(--shadow);
-
-}
-
-#user-input{
-
-    flex:1;
-
-    background:transparent;
-
-    border:none;
-
-    outline:none;
-
-    resize:none;
-
-    color:white;
-
-    font-size:16px;
-
-    min-height:28px;
-
-    max-height:180px;
-
-    overflow-y:auto;
-
-    font-family:inherit;
-
-}
-
-#user-input::placeholder{
-
-    color:var(--muted);
-
-}
-
-#upload-btn,
-#voice-btn,
-#send-btn{
-
-    width:48px;
-
-    height:48px;
-
-    border:none;
-
-    border-radius:50%;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    font-size:20px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-}
-
-#upload-btn{
-
-    background:#25252d;
-
-    color:white;
-
-}
-
-#voice-btn{
-
-    background:#25252d;
-
-    color:white;
-
-}
-
-#send-btn{
-
-    background:var(--accent);
-
-    color:white;
-
-    font-size:22px;
-
-}
-
-#upload-btn:hover,
-#voice-btn:hover,
-#send-btn:hover{
-
-    transform:scale(1.08);
-
-}
-
-/* =========================
-   QUICK TOOLS
-========================= */
-
-.quick-tools{
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-
-    gap:14px;
-
-    max-width:950px;
-
-    margin:25px auto 140px;
-
-    padding:0 20px;
-
-}
-
-.quick-tools button{
-
-    background:var(--surface);
-
-    color:white;
-
-    border:1px solid var(--border);
-
-    border-radius:16px;
-
-    padding:18px;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    font-size:15px;
-
-    font-weight:600;
-
-}
-
-.quick-tools button:hover{
-
-    background:var(--hover);
-
-    transform:translateY(-3px);
-
-}
-
-/* =========================
-   FADE ANIMATION
-========================= */
-
-.fade-in{
-
-    animation:fadeIn .35s ease;
-
-}
-
-@keyframes fadeIn{
-
-    from{
-
-        opacity:0;
-
-        transform:translateY(15px);
-
-    }
-
-    to{
-
-        opacity:1;
-
-        transform:translateY(0);
-
-    }
-
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media(max-width:768px){
-
-.header{
-
-    padding:0 14px;
-
-}
-
-.brand{
-
-    font-size:18px;
-
-}
-
-.logo-small{
-
-    width:36px;
-
-    height:36px;
-
-}
-
-.hero-logo{
-
-    width:120px;
-
-}
-
-#welcome-screen h1{
-
-    font-size:34px;
-
-}
-
-#welcome-screen p{
-
-    font-size:16px;
-
-}
-
-#signin-btn{
-
-    display:none;
-
-}
-
-.quick-tools{
-
-    grid-template-columns:repeat(2,1fr);
-
-}
-
-.input-area{
-
-    padding:12px;
-
-}
-
-.input-wrapper{
-
-    border-radius:22px;
-
-}
-
-#upload-btn,
-#voice-btn,
-#send-btn{
-
-    width:44px;
-
-    height:44px;
-
-}
-
-}
-
-/* =========================
-   SMALL PHONES
-========================= */
-
-@media(max-width:480px){
-
-.quick-tools{
-
-    grid-template-columns:1fr;
-
-}
-
-.user-bubble{
-
-    max-width:92%;
-
-}
-
-.ai-bubble{
-
-    max-width:100%;
-
-}
-
-#welcome-screen h1{
-
-    font-size:30px;
-
-}
-
-.hero-logo{
-
-    width:100px;
-
-}
-
-}
-
-/* =========================
-   SELECTION
-========================= */
-
-::selection{
-
-    background:var(--accent);
-
-    color:white;
 
 }
