@@ -1,533 +1,982 @@
 /* =====================================
-ChatTBM V4.3
-Matching Style For Current Index + Script
+   ChatTBM V5.0 Professional Edition
+   Part 2A
 ===================================== */
 
-
-/* GLOBAL */
+/* RESET */
 
 *{
-box-sizing:border-box;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
+/* ROOT */
+
+:root{
+
+    --bg:#0b0b0f;
+
+    --surface:#17171c;
+
+    --surface2:#202027;
+
+    --border:#2f2f39;
+
+    --text:#ffffff;
+
+    --muted:#9ca3af;
+
+    --accent:#14b8a6;
+
+    --hover:#292933;
+
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+
+}
+
+/* BODY */
+
+html{
+
+    scroll-behavior:smooth;
+
+}
 
 body{
 
-background:#000;
+    font-family:"Inter",sans-serif;
 
-color:#fff;
+    background:var(--bg);
 
-font-family:
--apple-system,
-BlinkMacSystemFont,
-"Segoe UI",
-sans-serif;
+    color:var(--text);
+
+    min-height:100vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:hidden;
 
 }
 
+/* LINKS */
 
+a{
 
+    color:inherit;
 
+    text-decoration:none;
+
+}
+
+/* BUTTON */
+
+button{
+
+    font-family:inherit;
+
+}
+
+/* HEADER */
+
+.header{
+
+    width:100%;
+
+    height:70px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 22px;
+
+    background:#111116;
+
+    border-bottom:1px solid var(--border);
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1000;
+
+}
+
+.header-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.logo-small{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:12px;
+
+    object-fit:cover;
+
+}
+
+.brand{
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+.header-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+/* BUTTONS */
+
+.icon-btn,
+
+#signin-btn,
+
+#signup-btn{
+
+    border:none;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    border-radius:14px;
+
+}
+
+.icon-btn{
+
+    width:44px;
+
+    height:44px;
+
+    background:transparent;
+
+    color:white;
+
+    font-size:20px;
+
+}
+
+#signin-btn{
+
+    padding:11px 18px;
+
+    background:transparent;
+
+    color:white;
+
+    border:1px solid var(--border);
+
+}
+
+#signup-btn{
+
+    padding:11px 20px;
+
+    background:var(--accent);
+
+    color:white;
+
+    font-weight:600;
+
+}
+
+.icon-btn:hover,
+
+#signin-btn:hover,
+
+#signup-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* WELCOME */
+
+#welcome-screen{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+    padding:40px 20px;
+
+}
+
+.hero-logo{
+
+    width:150px;
+
+    margin-bottom:25px;
+
+    animation:floatLogo 4s ease-in-out infinite;
+
+}
+
+#welcome-screen h1{
+
+    font-size:48px;
+
+    font-weight:800;
+
+    margin-bottom:12px;
+
+}
+
+#welcome-screen p{
+
+    color:var(--muted);
+
+    font-size:18px;
+
+}
+
+/* CHAT AREA */
+
+main{
+
+    flex:1;
+
+    overflow:hidden;
+
+}
+
+.chat-box{
+
+    width:100%;
+
+    height:100%;
+
+    overflow-y:auto;
+
+    padding:25px 20px 160px;
+
+}
+
+.hidden{
+
+    display:none;
+
+}
+
+/* SCROLLBAR */
+
+.chat-box::-webkit-scrollbar{
+
+    width:7px;
+
+}
+
+.chat-box::-webkit-scrollbar-thumb{
+
+    background:#444;
+
+    border-radius:20px;
+
+}
 
 /* LOGO */
 
-.main-logo{
+@keyframes floatLogo{
 
-width:100px;
+    0%{
 
-height:100px;
+        transform:translateY(0);
 
-border-radius:50%;
+    }
 
-object-fit:cover;
+    50%{
 
-}
+        transform:translateY(-8px);
 
+    }
 
+    100%{
 
+        transform:translateY(0);
 
-
-/* WELCOME TEXT */
-
-.welcome-title{
-
-font-size:30px;
-
-font-weight:700;
+    }
 
 }
 
-
-.welcome-subtitle{
-
-color:#999;
-
-font-size:16px;
-
-}
-
-
-
-
-
-/* SUGGESTION CARDS */
-
-.suggest-card{
-
-background:#111;
-
-border:1px solid #222;
-
-border-radius:22px;
-
-padding:18px;
-
-color:white;
-
-text-align:center;
-
-cursor:pointer;
-
-transition:.25s;
-
-}
-
-
-.suggest-card:hover{
-
-background:#1f1f1f;
-
-border-color:#2563eb;
-
-transform:translateY(-3px);
-
-}
-
-
-
-
-
-/* ACTION BUTTONS */
-
-.action-btn{
-
-width:100%;
-
-background:#1f1f1f;
-
-border:1px solid #222;
-
-color:white;
-
-cursor:pointer;
-
-transition:.25s;
-
-}
-
-
-.action-btn:hover{
-
-background:#2b2b2b;
-
-border-color:#2563eb;
-
-transform:translateY(-2px);
-
-}
-
-
-
-
-
-/* CHAT BOX */
-
-#chat-box{
-
-width:100%;
-
-max-height:420px;
-
-overflow-y:auto;
-
-scroll-behavior:smooth;
-
-padding-bottom:20px;
-
-}
-
-
-#chat-box.hidden{
-
-display:none;
-
-}
-
-
-
-
+/* =====================================
+   ChatTBM V5.0 Professional Edition
+   Part 2B
+   Chat Messages
+===================================== */
 
 /* USER MESSAGE */
 
-.user-bubble{
+.user-message{
 
-background:#2563eb;
+    display:flex;
 
-color:white;
+    justify-content:flex-end;
 
-padding:14px 18px;
-
-border-radius:22px 22px 5px 22px;
-
-max-width:80%;
-
-margin-left:auto;
-
-line-height:1.5;
-
-word-wrap:break-word;
+    margin:22px 0;
 
 }
 
+.user-bubble{
 
+    max-width:80%;
 
+    background:linear-gradient(135deg,#14b8a6,#0d9488);
 
+    color:#fff;
+
+    padding:16px 18px;
+
+    border-radius:22px 22px 6px 22px;
+
+    font-size:15px;
+
+    line-height:1.7;
+
+    word-wrap:break-word;
+
+    box-shadow:var(--shadow);
+
+}
 
 /* AI MESSAGE */
 
 .ai-message{
 
-width:100%;
+    display:flex;
+
+    justify-content:flex-start;
+
+    margin:22px 0;
 
 }
-
-
 
 .ai-bubble{
 
-background:#111;
+    width:100%;
 
-border:1px solid #2a2a2a;
+    max-width:92%;
 
-border-radius:24px;
+    background:var(--surface);
 
-padding:18px;
+    border:1px solid var(--border);
 
-box-shadow:
-0 10px 30px rgba(0,0,0,.35);
+    border-radius:20px;
+
+    padding:18px;
+
+    box-shadow:var(--shadow);
 
 }
 
-
+/* AI HEADER */
 
 .ai-header{
 
-font-size:16px;
+    display:flex;
 
-font-weight:700;
+    align-items:center;
 
-margin-bottom:12px;
+    gap:10px;
+
+    margin-bottom:14px;
+
+    font-size:16px;
+
+    font-weight:700;
 
 }
 
+.ai-header img{
 
+    width:30px;
+
+    height:30px;
+
+    border-radius:8px;
+
+}
+
+/* AI CONTENT */
 
 .ai-content{
 
-font-size:15px;
+    white-space:pre-wrap;
 
-line-height:1.7;
+    line-height:1.8;
 
-color:#e5e5e5;
+    font-size:15px;
 
-word-wrap:break-word;
+    color:#f5f5f5;
 
 }
 
-
-
-
-
-/* TIME */
+/* MESSAGE TIME */
 
 .message-time{
 
-font-size:11px;
+    margin-top:12px;
 
-opacity:.6;
+    font-size:12px;
 
-margin-top:8px;
+    color:var(--muted);
 
 }
 
-
-
-
-
-/* COPY EDIT REGENERATE AREA */
+/* ACTION BUTTONS */
 
 .ai-actions{
 
-display:flex;
+    display:flex;
 
-gap:8px;
+    flex-wrap:wrap;
 
-flex-wrap:wrap;
+    gap:10px;
 
-margin-top:15px;
+    margin-top:18px;
 
 }
-
 
 .ai-btn{
 
-background:#222;
+    background:var(--surface2);
 
-border:1px solid #333;
+    color:white;
 
-color:white;
+    border:1px solid var(--border);
 
-padding:8px 14px;
+    border-radius:12px;
 
-border-radius:999px;
+    padding:10px 14px;
 
-font-size:13px;
+    cursor:pointer;
 
-cursor:pointer;
+    transition:.25s;
 
-display:inline-flex;
-
-align-items:center;
-
-justify-content:center;
-
-transition:.2s;
+    font-size:14px;
 
 }
-
-
 
 .ai-btn:hover{
 
-background:#2563eb;
-
-border-color:#2563eb;
+    background:var(--hover);
 
 }
 
-
-
-
-
-/* INPUT AREA */
-
-.input-area{
-
-width:100%;
-
-background:#1f1f1f;
-
-border:1px solid #2a2a2a;
-
-border-radius:999px;
-
-padding:8px;
-
-display:flex;
-
-align-items:center;
-
-gap:8px;
-
-position:sticky;
-
-bottom:15px;
-
-z-index:20;
-
-}
-
-
-
-
-
-#user-input{
-
-background:transparent;
-
-border:none;
-
-outline:none;
-
-color:white;
-
-font-size:16px;
-
-width:100%;
-
-}
-
-
-#user-input::placeholder{
-
-color:#888;
-
-}
-
-
-
-
-
-/* ICON BUTTONS */
-
-.icon-btn{
-
-width:52px;
-
-height:52px;
-
-border-radius:50%;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:20px;
-
-border:none;
-
-color:white;
-
-cursor:pointer;
-
-transition:.2s;
-
-background:#333;
-
-}
-
-
-
-.icon-btn:hover{
-
-transform:scale(1.05);
-
-background:#444;
-
-}
-
-
-
-
-
-#send-btn{
-
-background:#2563eb;
-
-}
-
-
-
-#send-btn:hover{
-
-background:#1d4ed8;
-
-}
-
-
-
-
-
-/* THINKING EFFECT */
+/* THINKING */
 
 .thinking{
 
-animation:pulse 1s infinite;
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:var(--muted);
 
 }
 
+.thinking::after{
+
+    content:"";
+
+    width:8px;
+
+    height:8px;
+
+    border-radius:50%;
+
+    background:var(--accent);
+
+    animation:pulse 1s infinite;
+
+}
 
 @keyframes pulse{
 
-50%{
+    0%{
 
-opacity:.4;
+        opacity:.2;
 
-}
+        transform:scale(.8);
 
-}
+    }
 
+    50%{
 
+        opacity:1;
 
+        transform:scale(1.3);
 
+    }
 
-/* SCROLL BAR */
+    100%{
 
-#chat-box::-webkit-scrollbar{
+        opacity:.2;
 
-width:5px;
+        transform:scale(.8);
 
-}
-
-
-#chat-box::-webkit-scrollbar-thumb{
-
-background:#333;
-
-border-radius:20px;
+    }
 
 }
 
+/* EDIT BOX */
 
+.edit-box{
 
+    width:100%;
 
+    min-height:140px;
 
-/* MOBILE */
+    padding:15px;
 
-@media(max-width:600px){
+    background:#111;
 
+    color:white;
 
-.main-logo{
+    border:1px solid var(--border);
 
-width:95px;
+    border-radius:14px;
 
-height:95px;
+    resize:vertical;
 
-}
+    font-family:inherit;
 
-
-.user-bubble{
-
-max-width:85%;
-
-}
-
-
-.ai-bubble{
-
-padding:15px;
-
-border-radius:20px;
+    font-size:15px;
 
 }
 
+/* NOTIFICATION */
 
-.ai-btn{
+.chat-notice{
 
-font-size:12px;
+    position:fixed;
 
-padding:7px 12px;
+    left:50%;
+
+    bottom:90px;
+
+    transform:translateX(-50%);
+
+    background:#1f2937;
+
+    color:white;
+
+    padding:12px 22px;
+
+    border-radius:999px;
+
+    font-size:14px;
+
+    z-index:9999;
+
+    box-shadow:var(--shadow);
+
+    animation:noticeFade .25s ease;
 
 }
 
+@keyframes noticeFade{
+
+    from{
+
+        opacity:0;
+
+        transform:translate(-50%,15px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translate(-50%,0);
+
+    }
+
+}
+
+/* =====================================
+   ChatTBM V5.0 Professional Edition
+   Part 2C
+   Input • Tools • Responsive
+===================================== */
+
+/* =========================
+   INPUT AREA
+========================= */
 
 .input-area{
 
-bottom:10px;
+    position:fixed;
+
+    bottom:0;
+
+    left:0;
+
+    width:100%;
+
+    padding:18px;
+
+    background:linear-gradient(to top,#0b0b0f,#0b0b0fe8);
+
+    backdrop-filter:blur(18px);
 
 }
 
+.input-wrapper{
+
+    max-width:900px;
+
+    margin:auto;
+
+    display:flex;
+
+    align-items:flex-end;
+
+    gap:12px;
+
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+    border-radius:26px;
+
+    padding:12px;
+
+    box-shadow:var(--shadow);
+
+}
+
+#user-input{
+
+    flex:1;
+
+    background:transparent;
+
+    border:none;
+
+    outline:none;
+
+    resize:none;
+
+    color:white;
+
+    font-size:16px;
+
+    min-height:28px;
+
+    max-height:180px;
+
+    overflow-y:auto;
+
+    font-family:inherit;
+
+}
+
+#user-input::placeholder{
+
+    color:var(--muted);
+
+}
+
+#upload-btn,
+#voice-btn,
+#send-btn{
+
+    width:48px;
+
+    height:48px;
+
+    border:none;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    font-size:20px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+#upload-btn{
+
+    background:#25252d;
+
+    color:white;
+
+}
+
+#voice-btn{
+
+    background:#25252d;
+
+    color:white;
+
+}
+
+#send-btn{
+
+    background:var(--accent);
+
+    color:white;
+
+    font-size:22px;
+
+}
+
+#upload-btn:hover,
+#voice-btn:hover,
+#send-btn:hover{
+
+    transform:scale(1.08);
+
+}
+
+/* =========================
+   QUICK TOOLS
+========================= */
+
+.quick-tools{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+
+    gap:14px;
+
+    max-width:950px;
+
+    margin:25px auto 140px;
+
+    padding:0 20px;
+
+}
+
+.quick-tools button{
+
+    background:var(--surface);
+
+    color:white;
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    padding:18px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    font-size:15px;
+
+    font-weight:600;
+
+}
+
+.quick-tools button:hover{
+
+    background:var(--hover);
+
+    transform:translateY(-3px);
+
+}
+
+/* =========================
+   FADE ANIMATION
+========================= */
+
+.fade-in{
+
+    animation:fadeIn .35s ease;
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(15px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:768px){
+
+.header{
+
+    padding:0 14px;
+
+}
+
+.brand{
+
+    font-size:18px;
+
+}
+
+.logo-small{
+
+    width:36px;
+
+    height:36px;
+
+}
+
+.hero-logo{
+
+    width:120px;
+
+}
+
+#welcome-screen h1{
+
+    font-size:34px;
+
+}
+
+#welcome-screen p{
+
+    font-size:16px;
+
+}
+
+#signin-btn{
+
+    display:none;
+
+}
+
+.quick-tools{
+
+    grid-template-columns:repeat(2,1fr);
+
+}
+
+.input-area{
+
+    padding:12px;
+
+}
+
+.input-wrapper{
+
+    border-radius:22px;
+
+}
+
+#upload-btn,
+#voice-btn,
+#send-btn{
+
+    width:44px;
+
+    height:44px;
+
+}
+
+}
+
+/* =========================
+   SMALL PHONES
+========================= */
+
+@media(max-width:480px){
+
+.quick-tools{
+
+    grid-template-columns:1fr;
+
+}
+
+.user-bubble{
+
+    max-width:92%;
+
+}
+
+.ai-bubble{
+
+    max-width:100%;
+
+}
+
+#welcome-screen h1{
+
+    font-size:30px;
+
+}
+
+.hero-logo{
+
+    width:100px;
+
+}
+
+}
+
+/* =========================
+   SELECTION
+========================= */
+
+::selection{
+
+    background:var(--accent);
+
+    color:white;
 
 }
