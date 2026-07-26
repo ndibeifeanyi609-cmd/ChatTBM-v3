@@ -672,7 +672,7 @@ function sendMessage(){
 
 
 
-        askChatTBM(message)
+        APIManager.sendMessage(message)
 .then(reply=>{
 
     addBotMessage(reply);
