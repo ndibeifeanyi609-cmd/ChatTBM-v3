@@ -3,45 +3,58 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-    <title>ChatTBM</title>
+<title>ChatTBM</title>
 
-    <meta name="theme-color"
-          content="#0B0B0F">
+<meta name="theme-color"
+content="#0B0B0F">
 
-    <meta name="description"
-          content="ChatTBM - Your AI Content Assistant">
+<meta name="description"
+content="ChatTBM - Your AI Content Assistant">
 
-    <!-- Favicon -->
-    <link rel="icon"
-          type="image/png"
-          href="IMG_4365.png">
 
-    <link rel="apple-touch-icon"
-          href="IMG_4365.png">
+<!-- ========================= -->
+<!-- FAVICON -->
+<!-- ========================= -->
 
-    <!-- Google Font -->
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
+<link rel="icon"
+type="image/png"
+href="IMG_4397.png">
 
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
+<link rel="apple-touch-icon"
+href="IMG_4397.png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-          rel="stylesheet">
 
-    <!-- Style -->
-    <link rel="stylesheet"
-          href="style.css">
+<!-- ========================= -->
+<!-- GOOGLE FONT -->
+<!-- ========================= -->
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+
+<!-- ========================= -->
+<!-- STYLESHEET -->
+<!-- ========================= -->
+
+<link rel="stylesheet"
+href="style.css">
 
 </head>
 
 <body>
+
 
 <!-- ========================= -->
 <!-- HEADER -->
@@ -49,156 +62,157 @@
 
 <header class="header">
 
-    <div class="header-left">
+<div class="header-left">
 
-        <img
-        src="IMG_4365.png"
-        class="logo-small"
-        alt="ChatTBM">
+<img
+src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+class="logo-small"
+alt="ChatTBM Logo">
 
-        <span class="brand">
+<span class="brand">
 
-            ChatTBM
+ChatTBM
 
-        </span>
+</span>
 
-    </div>
+</div>
 
-    <div class="header-right">
+<div class="header-right">
 
-        <button
-        id="image-btn"
-        class="icon-btn">
+<button
+id="login-btn"
+class="header-btn">
 
-            🖼️
+Sign In
 
-        </button>
+</button>
 
-        <button
-        id="signin-btn">
+<button
+id="signup-btn"
+class="header-btn primary">
 
-            Sign In
+Sign Up
 
-        </button>
+</button>
 
-        <button
-        id="signup-btn">
-
-            Sign Up
-
-        </button>
-
-    </div>
+</div>
 
 </header>
 
+
 <!-- ========================= -->
-<!-- WELCOME -->
+<!-- WELCOME SCREEN -->
 <!-- ========================= -->
 
 <section
-id="welcome-screen">
+id="welcome-screen"
+class="welcome-screen">
 
-    <img
-    src="IMG_4365.png"
-    class="hero-logo"
-    alt="ChatTBM">
+<img
+src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+class="hero-logo"
+alt="ChatTBM Logo">
 
-    <h1>
+<h1>
 
-        ChatTBM
+ChatTBM
 
-    </h1>
+</h1>
 
-    <p>
+<p>
 
-        Your AI Content Assistant
+Your AI Content Assistant for Captions, Scripts & Viral Ideas
 
-    </p>
+</p>
 
 </section>
 
+
 <!-- ========================= -->
-<!-- CHAT -->
+<!-- CHAT CONTAINER -->
 <!-- ========================= -->
 
-<main>
+<main
+id="chat-container"
+class="chat-container">
 
-    <div
-    id="chat-box"
-    class="chat-box hidden">
+<div
+id="chat-box"
+class="chat-box">
 
-    </div>
+<!-- Messages appear here -->
+
+</div>
 
 </main>
 
 <!-- ========================= -->
-<!-- QUICK TOOLS -->
+<!-- ATTACHMENT PREVIEW -->
 <!-- ========================= -->
 
 <section
-class="quick-tools">
+id="attachment-preview"
+class="attachment-preview">
 
-<button onclick="creatorTool('ideas')">
+</section>
+
+
+<!-- ========================= -->
+<!-- QUICK ACTIONS -->
+<!-- ========================= -->
+
+<section
+class="quick-actions">
+
+<button
+class="quick-btn"
+data-prompt="Write a viral caption">
+
+✍️ Caption
+
+</button>
+
+<button
+class="quick-btn"
+data-prompt="Generate content ideas">
 
 💡 Ideas
 
 </button>
 
-<button onclick="creatorTool('hooks')">
+<button
+class="quick-btn"
+data-prompt="Write a short video script">
 
-🔥 Hooks
-
-</button>
-
-<button onclick="creatorTool('captionTemplates')">
-
-✍️ Captions
+🎬 Script
 
 </button>
 
-<button onclick="creatorTool('hashtags')">
+<button
+class="quick-btn"
+data-prompt="Generate hashtags">
 
 #️⃣ Hashtags
 
 </button>
 
-<button onclick="videoTool('script')">
-
-🎬 Scripts
-
-</button>
-
-<button onclick="videoTool('image')">
-
-🖼️ Prompts
-
-</button>
-
-<button onclick="creatorTool('calendar')">
-
-📅 Calendar
-
-</button>
-
-<button onclick="creatorTool('bio')">
-
-👤 Bio
-
-</button>
-
 </section>
 
+
 <!-- ========================= -->
-<!-- INPUT -->
+<!-- INPUT AREA -->
 <!-- ========================= -->
 
-<footer class="input-area">
+<footer
+class="input-area">
 
-<div class="input-wrapper">
+<div
+class="input-wrapper">
 
 <button
-id="upload-btn">
+id="upload-btn"
+class="tool-btn"
+title="Upload File">
 
 ＋
 
@@ -213,21 +227,33 @@ hidden>
 
 id="user-input"
 
+placeholder="Ask anything..."
+
 rows="1"
 
-placeholder="Ask anything...">
+autocomplete="off">
 
 </textarea>
 
 <button
-id="voice-btn">
+
+id="voice-btn"
+
+class="tool-btn"
+
+title="Voice Input">
 
 🎤
 
 </button>
 
 <button
-id="send-btn">
+
+id="send-btn"
+
+class="send-btn"
+
+title="Send">
 
 ➜
 
@@ -238,185 +264,100 @@ id="send-btn">
 </footer>
 
 <!-- ========================= -->
-<!-- JAVASCRIPT -->
+<!-- DASHBOARD PANEL -->
 <!-- ========================= -->
 
-<script src="ai.js"></script>
-
-<script src="apiManager.js"></script>
-
-<script src="users.js"></script>
-
-<script src="app.js"></script>
-
-<script src="script.js"></script>
-
-</body>
-
-</html>
-
-<!-- ========================= -->
-<!-- EXTRA CONTROLS -->
-<!-- ========================= -->
-
-<section class="controls">
-
-
-<button id="new-chat-btn">
-
-New Chat
-
-</button>
-
-
-<button id="copy-btn">
-
-Copy
-
-</button>
-
-
-<button id="regenerate-btn">
-
-Regenerate
-
-</button>
-
-
-<button id="upgrade-btn">
-
-Upgrade
-
-</button>
-
-
-<button id="settings-btn">
-
-Settings
-
-</button>
-
-
-</section>
-
-
-
-
-
-<!-- ========================= -->
-<!-- DASHBOARD -->
-<!-- ========================= -->
-
-
-<div
-
+<section
 id="dashboard-panel"
+class="dashboard-panel hidden">
 
-style="display:none;">
-
+<div class="dashboard-card">
 
 <h2>
 
-ChatTBM Dashboard
+Dashboard
 
 </h2>
-
 
 <p>
 
 User:
-
-<span id="dashboard-name">
+<strong id="dashboard-name">
 
 Guest
 
-</span>
-
+</strong>
 
 </p>
-
-
 
 <p>
 
 Plan:
-
-<span id="dashboard-plan">
+<strong id="dashboard-plan">
 
 Free
 
-</span>
-
+</strong>
 
 </p>
-
-
 
 <p id="dashboard-usage">
 
-0 messages used
+0 / 20 messages used today
 
 </p>
 
-
-
-<button id="close-dashboard">
+<button
+id="close-dashboard"
+class="secondary-btn">
 
 Close
 
 </button>
 
+</div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- LOADING INDICATOR -->
+<!-- ========================= -->
+
+<div
+id="loading-indicator"
+class="loading-indicator hidden">
+
+<div class="loader"></div>
+
+<p>
+
+ChatTBM is thinking...
+
+</p>
 
 </div>
 
 
-
-
-
 <!-- ========================= -->
-<!-- SETTINGS OPTIONS -->
+<!-- TOAST MESSAGE -->
 <!-- ========================= -->
 
+<div
+id="toast"
+class="toast hidden">
 
-<div class="settings-panel">
-
-
-<button id="dark-mode-btn">
-
-Dark Mode
-
-</button>
-
-
-<button id="light-mode-btn">
-
-Light Mode
-
-</button>
-
-
-<button id="notification-btn">
-
-Notifications
-
-</button>
-
+Ready
 
 </div>
-
-
-
 
 
 <!-- ========================= -->
 <!-- JAVASCRIPT -->
 <!-- ========================= -->
 
-
 <script src="script.js"></script>
 
-
 </body>
-
 
 </html>
