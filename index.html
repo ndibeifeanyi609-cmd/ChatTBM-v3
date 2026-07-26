@@ -16,6 +16,8 @@ content="#0B0B0F">
 <meta name="description"
 content="ChatTBM - Your AI Content Assistant">
 
+<meta name="color-scheme"
+content="dark">
 
 <!-- ========================= -->
 <!-- FAVICON -->
@@ -27,7 +29,6 @@ href="IMG_4397.png">
 
 <link rel="apple-touch-icon"
 href="IMG_4397.png">
-
 
 <!-- ========================= -->
 <!-- GOOGLE FONT -->
@@ -43,7 +44,6 @@ crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
 rel="stylesheet">
 
-
 <!-- ========================= -->
 <!-- STYLESHEET -->
 <!-- ========================= -->
@@ -55,10 +55,9 @@ href="style.css">
 
 <body>
 
-
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- HEADER -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
 <header class="header">
 
@@ -66,8 +65,10 @@ href="style.css">
 
 <img
 src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-class="logo-small"
-alt="ChatTBM Logo">
+alt="ChatTBM Logo"
+class="logo-small">
+
+<div class="brand-group">
 
 <span class="brand">
 
@@ -75,13 +76,21 @@ ChatTBM
 
 </span>
 
+<span class="brand-status">
+
+AI Assistant
+
+</span>
+
+</div>
+
 </div>
 
 <div class="header-right">
 
 <button
 id="login-btn"
-class="header-btn">
+class="header-btn secondary">
 
 Sign In
 
@@ -99,19 +108,20 @@ Sign Up
 
 </header>
 
-
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- WELCOME SCREEN -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
 <section
 id="welcome-screen"
 class="welcome-screen">
 
+<div class="welcome-content">
+
 <img
 src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-class="hero-logo"
-alt="ChatTBM Logo">
+alt="ChatTBM Logo"
+class="hero-logo">
 
 <h1>
 
@@ -119,18 +129,31 @@ ChatTBM
 
 </h1>
 
-<p>
+<p class="hero-subtitle">
 
-Your AI Content Assistant for Captions, Scripts & Viral Ideas
+Your AI Content Assistant for
+Captions, Scripts & Viral Ideas
 
 </p>
 
+<p class="hero-description">
+
+Create engaging content,
+brainstorm fresh ideas,
+write captions,
+generate scripts,
+and grow your audience
+with AI.
+
+</p>
+
+</div>
+
 </section>
 
-
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- CHAT CONTAINER -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
 <main
 id="chat-container"
@@ -140,15 +163,15 @@ class="chat-container">
 id="chat-box"
 class="chat-box">
 
-<!-- Messages appear here -->
+<!-- Chat messages appear here -->
 
 </div>
 
 </main>
 
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- ATTACHMENT PREVIEW -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
 <section
 id="attachment-preview"
@@ -156,27 +179,28 @@ class="attachment-preview">
 
 </section>
 
-
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- QUICK ACTIONS -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
 <section
 class="quick-actions">
 
 <button
 class="quick-btn"
-data-prompt="Write a viral caption">
+data-prompt="Write a viral caption for social media">
 
-✍️ Caption
+✍️
+<span>Caption</span>
 
 </button>
 
 <button
 class="quick-btn"
-data-prompt="Generate content ideas">
+data-prompt="Generate viral content ideas">
 
-💡 Ideas
+💡
+<span>Ideas</span>
 
 </button>
 
@@ -184,24 +208,25 @@ data-prompt="Generate content ideas">
 class="quick-btn"
 data-prompt="Write a short video script">
 
-🎬 Script
+🎬
+<span>Script</span>
 
 </button>
 
 <button
 class="quick-btn"
-data-prompt="Generate hashtags">
+data-prompt="Generate trending hashtags">
 
-#️⃣ Hashtags
+#️⃣
+<span>Hashtags</span>
 
 </button>
 
 </section>
 
-
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- INPUT AREA -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
 <footer
 class="input-area">
@@ -224,23 +249,17 @@ id="file-input"
 hidden>
 
 <textarea
-
 id="user-input"
-
-placeholder="Ask anything..."
-
+placeholder="Ask ChatTBM anything..."
 rows="1"
-
-autocomplete="off">
+autocomplete="off"
+spellcheck="true">
 
 </textarea>
 
 <button
-
 id="voice-btn"
-
 class="tool-btn"
-
 title="Voice Input">
 
 🎤
@@ -248,12 +267,9 @@ title="Voice Input">
 </button>
 
 <button
-
 id="send-btn"
-
 class="send-btn"
-
-title="Send">
+title="Send Message">
 
 ➜
 
@@ -263,15 +279,16 @@ title="Send">
 
 </footer>
 
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- DASHBOARD PANEL -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
 <section
 id="dashboard-panel"
 class="dashboard-panel hidden">
 
-<div class="dashboard-card">
+<div
+class="dashboard-card">
 
 <h2>
 
@@ -282,7 +299,8 @@ Dashboard
 <p>
 
 User:
-<strong id="dashboard-name">
+<strong
+id="dashboard-name">
 
 Guest
 
@@ -293,7 +311,8 @@ Guest
 <p>
 
 Plan:
-<strong id="dashboard-plan">
+<strong
+id="dashboard-plan">
 
 Free
 
@@ -301,7 +320,8 @@ Free
 
 </p>
 
-<p id="dashboard-usage">
+<p
+id="dashboard-usage">
 
 0 / 20 messages used today
 
@@ -319,16 +339,18 @@ Close
 
 </section>
 
-
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- LOADING INDICATOR -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
 <div
 id="loading-indicator"
 class="loading-indicator hidden">
 
-<div class="loader"></div>
+<div
+class="loader">
+
+</div>
 
 <p>
 
@@ -338,10 +360,9 @@ ChatTBM is thinking...
 
 </div>
 
-
-<!-- ========================= -->
-<!-- TOAST MESSAGE -->
-<!-- ========================= -->
+<!-- ===================================== -->
+<!-- TOAST -->
+<!-- ===================================== -->
 
 <div
 id="toast"
@@ -351,12 +372,14 @@ Ready
 
 </div>
 
-
-<!-- ========================= -->
+<!-- ===================================== -->
 <!-- JAVASCRIPT -->
-<!-- ========================= -->
+<!-- ===================================== -->
 
-<script src="script.js"></script>
+<script
+src="script.js">
+
+</script>
 
 </body>
 
