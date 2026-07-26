@@ -26,7 +26,6 @@
 
 <style>
 
-
 body{
 
 background:#000;
@@ -34,7 +33,6 @@ background:#000;
 color:#fff;
 
 font-family:
-
 -apple-system,
 BlinkMacSystemFont,
 "Segoe UI",
@@ -42,10 +40,6 @@ sans-serif;
 
 }
 
-
-
-
-/* Main Logo */
 
 
 .main-logo{
@@ -58,11 +52,6 @@ border-radius:9999px;
 
 }
 
-
-
-
-
-/* Buttons */
 
 
 .action-btn{
@@ -87,10 +76,6 @@ transform:translateY(-3px);
 
 
 
-
-/* Input Icons */
-
-
 .icon-btn{
 
 width:52px;
@@ -105,21 +90,11 @@ align-items:center;
 
 justify-content:center;
 
-transition:.2s;
-
 }
 
 
 
-
-
-
-
-/* V4.2 Suggestion Cards */
-
-
 .suggest-card{
-
 
 background:#111;
 
@@ -131,10 +106,7 @@ padding:18px;
 
 text-align:center;
 
-font-size:14px;
-
 transition:.25s;
-
 
 }
 
@@ -142,23 +114,12 @@ transition:.25s;
 
 .suggest-card:hover{
 
-
 background:#1f1f1f;
 
 border-color:#2563eb;
 
-transform:translateY(-3px);
-
-
 }
 
-
-
-
-
-
-
-/* Welcome Text */
 
 
 .welcome-title{
@@ -177,12 +138,7 @@ color:#999;
 
 font-size:16px;
 
-line-height:1.6;
-
 }
-
-
-
 
 
 </style>
@@ -193,46 +149,27 @@ line-height:1.6;
 
 
 
-
 <body class="min-h-screen bg-black text-white">
-
-
-
 
 
 <div class="max-w-lg mx-auto px-5 py-6">
 
 
 
-
-
-
-<!-- ============================= -->
-<!-- HEADER V4.2 -->
-<!-- ============================= -->
-
+<!-- HEADER -->
 
 
 <div class="flex items-center justify-between mb-10">
 
 
-
-
-
 <div class="flex items-center gap-3">
-
 
 
 <img
 
 src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
 
-class="w-10 h-10 rounded-full"
-
-alt="ChatTBM Logo">
-
-
-
+class="w-10 h-10 rounded-full">
 
 
 <h1 class="text-3xl font-bold">
@@ -242,12 +179,7 @@ ChatTBM
 </h1>
 
 
-
 </div>
-
-
-
-
 
 
 
@@ -255,7 +187,7 @@ ChatTBM
 
 onclick="window.location.href='signin.html'"
 
-class="px-4 py-2 border border-gray-600 rounded-full hover:border-blue-500 transition">
+class="px-4 py-2 border border-gray-600 rounded-full">
 
 
 Sign In
@@ -264,26 +196,16 @@ Sign In
 </button>
 
 
-
-
-
 </div>
 
 
 
 
 
-
-
-<!-- ============================= -->
-<!-- V4.2 WELCOME AREA -->
-<!-- ============================= -->
-
+<!-- WELCOME -->
 
 
 <div class="flex flex-col items-center text-center mb-10">
-
-
 
 
 
@@ -291,9 +213,7 @@ Sign In
 
 src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
 
-class="main-logo mb-6"
-
-alt="ChatTBM Logo">
+class="main-logo mb-6">
 
 
 
@@ -301,39 +221,30 @@ alt="ChatTBM Logo">
 
 <h2 class="welcome-title mb-3">
 
-
 What are we creating today?
-
 
 </h2>
 
 
 
 
-
 <p class="welcome-subtitle">
-
 
 Your AI Content Assistant for captions,
 scripts, videos and viral ideas.
 
-
 </p>
-
 
 
 
 </div>
 
 <!-- ============================= -->
-<!-- V4.2 CREATOR SUGGESTIONS -->
+<!-- CREATOR SUGGESTIONS -->
 <!-- ============================= -->
 
 
 <div class="grid grid-cols-2 gap-4 mb-12">
-
-
-
 
 
 <button
@@ -351,8 +262,6 @@ Viral Video Ideas
 
 
 </button>
-
-
 
 
 
@@ -376,9 +285,6 @@ Create Caption
 
 
 
-
-
-
 <button
 
 onclick="creatorTool('cta')"
@@ -394,9 +300,6 @@ Marketing Post
 
 
 </button>
-
-
-
 
 
 
@@ -418,27 +321,18 @@ YouTube Script
 </button>
 
 
-
-
-
 </div>
 
 
 
 
 
-
-
 <!-- ============================= -->
-<!-- QUICK ACTION BUTTONS -->
+<!-- QUICK ACTIONS -->
 <!-- ============================= -->
 
 
-
-<div class="space-y-5">
-
-
-
+<div class="space-y-5 mb-12">
 
 
 <button
@@ -452,8 +346,6 @@ class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
 
 
 </button>
-
-
 
 
 
@@ -473,9 +365,6 @@ class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
 
 
 
-
-
-
 <button
 
 id="post-btn"
@@ -489,38 +378,31 @@ class="action-btn rounded-3xl text-left px-6 py-5 text-lg">
 </button>
 
 
-
-
-
 </div>
 
 
 
 
 
+
+
 <!-- ============================= -->
-<!-- CHATTBM CREATOR TOOLS -->
+<!-- CREATOR TOOLS -->
 <!-- ============================= -->
 
 
 <div class="mt-12">
 
 
-
 <h2 class="text-xl font-bold mb-5">
 
-
 🚀 Creator Tools
-
 
 </h2>
 
 
 
-
-
 <div class="space-y-4">
-
 
 
 
@@ -530,13 +412,9 @@ onclick="creatorTool('captionTemplates')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 ✍️ Caption Templates
 
-
 </button>
-
-
 
 
 
@@ -547,14 +425,9 @@ onclick="creatorTool('hashtags')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 #️⃣ Hashtag Generator
 
-
 </button>
-
-
-
 
 
 
@@ -565,14 +438,9 @@ onclick="creatorTool('hooks')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🎯 Hook Generator
 
-
 </button>
-
-
-
 
 
 
@@ -583,11 +451,12 @@ onclick="creatorTool('cta')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 📢 CTA Generator
 
-
 </button>
+
+
+
 
 <button
 
@@ -595,13 +464,9 @@ onclick="creatorTool('bio')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 👤 Creator Bio
 
-
 </button>
-
-
 
 
 
@@ -612,14 +477,9 @@ onclick="creatorTool('username')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🔥 Username Ideas
 
-
 </button>
-
-
-
 
 
 
@@ -630,14 +490,9 @@ onclick="creatorTool('ideas')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 💡 Viral Content Ideas
 
-
 </button>
-
-
-
 
 
 
@@ -648,54 +503,34 @@ onclick="creatorTool('calendar')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 📅 Content Calendar
-
 
 </button>
 
 
 
-
-
 </div>
 
 
 </div>
-
-
-
-
-
-
-
 
 <!-- ============================= -->
 <!-- AI VIDEO STUDIO -->
 <!-- ============================= -->
 
 
-
 <div class="mt-12">
-
 
 
 <h2 class="text-xl font-bold mb-5">
 
-
 🎥 AI Video Studio
-
 
 </h2>
 
 
 
-
-
-
 <div class="space-y-4">
-
-
 
 
 
@@ -705,14 +540,9 @@ onclick="videoTool('create')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🎥 Create AI Video
 
-
 </button>
-
-
-
 
 
 
@@ -723,14 +553,9 @@ onclick="videoTool('script')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🎬 Video Script Generator
 
-
 </button>
-
-
-
 
 
 
@@ -741,14 +566,9 @@ onclick="videoTool('image')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🖼️ Image Prompt Generator
 
-
 </button>
-
-
-
 
 
 
@@ -759,14 +579,9 @@ onclick="videoTool('scene')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🎞️ Scene Generator
 
-
 </button>
-
-
-
 
 
 
@@ -777,14 +592,9 @@ onclick="videoTool('voice')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🎙️ Voice-over Script
 
-
 </button>
-
-
-
 
 
 
@@ -795,14 +605,9 @@ onclick="videoTool('youtube')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 📺 YouTube Script
 
-
 </button>
-
-
-
 
 
 
@@ -813,21 +618,22 @@ onclick="videoTool('reels')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🎵 Reel & TikTok Script
-
 
 </button>
 
 
 
-
-
-
 </div>
 
 
 </div>
+
+
+
+
+
+
 
 <!-- ============================= -->
 <!-- CREATOR MODES -->
@@ -850,22 +656,15 @@ class="action-btn rounded-3xl text-left px-6 py-4">
 
 
 
-
-
 <button
 
 onclick="activateCreatorMode('YouTube Creator Mode')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 📺 YouTube Creator Mode
 
-
 </button>
-
-
-
 
 
 
@@ -876,14 +675,9 @@ onclick="activateCreatorMode('TikTok/Reels Mode')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 🎵 TikTok / Reels Mode
 
-
 </button>
-
-
-
 
 
 
@@ -894,14 +688,9 @@ onclick="activateCreatorMode('Business Marketing Mode')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 💼 Business Marketing Mode
 
-
 </button>
-
-
-
 
 
 
@@ -912,14 +701,9 @@ onclick="activateCreatorMode('Storytelling Mode')"
 
 class="action-btn rounded-3xl text-left px-6 py-4">
 
-
 📖 Storytelling Mode
 
-
 </button>
-
-
-
 
 
 
@@ -939,10 +723,7 @@ class="action-btn rounded-3xl text-left px-6 py-4">
 <!-- ============================= -->
 
 
-
 <div class="mt-12 grid grid-cols-2 gap-4">
-
-
 
 
 
@@ -952,14 +733,9 @@ onclick="createNewChat()"
 
 class="action-btn rounded-3xl px-5 py-4">
 
-
 ➕ New Chat
 
-
 </button>
-
-
-
 
 
 
@@ -970,13 +746,9 @@ onclick="showChatHistory()"
 
 class="action-btn rounded-3xl px-5 py-4">
 
-
 📂 Chat History
 
-
 </button>
-
-
 
 
 
@@ -994,12 +766,110 @@ class="action-btn rounded-3xl px-5 py-4">
 <!-- ============================= -->
 
 
-
 <div
 
 id="chat-box"
 
 class="hidden mt-8 space-y-4 h-[420px] overflow-y-auto">
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- ============================= -->
+<!-- MESSAGE INPUT AREA -->
+<!-- ============================= -->
+
+
+<div class="mt-8 bg-[#1f1f1f] rounded-full flex items-center p-2">
+
+
+
+<!-- Upload Button -->
+
+
+<button
+
+id="upload-btn"
+
+class="icon-btn hover:bg-gray-700 text-xl">
+
++
+
+</button>
+
+
+
+
+<input
+
+type="file"
+
+id="file-input"
+
+hidden>
+
+
+
+
+
+
+<!-- Text Input -->
+
+
+<input
+
+id="user-input"
+
+type="text"
+
+placeholder="Ask anything..."
+
+class="flex-1 bg-transparent px-4 outline-none text-lg">
+
+
+
+
+
+
+<!-- Voice Button -->
+
+
+<button
+
+id="voice-btn"
+
+class="icon-btn bg-gray-700 hover:bg-gray-600 text-xl">
+
+🎤
+
+</button>
+
+
+
+
+
+
+
+<!-- Send Button -->
+
+
+<button
+
+id="send-btn"
+
+class="icon-btn bg-blue-600 hover:bg-blue-700 text-xl ml-2">
+
+➤
+
+</button>
+
 
 
 </div>
