@@ -159,7 +159,52 @@ function addMessage(text,sender){
 // ===============================
 
 
+// ===============================
+// CONNECT TO CHATTBM BACKEND
+// ===============================
+
 async function generateAIResponse(message) {
+
+    try {
+
+        const response = await fetch(
+            "https://chattbm-backend.onrender.com/api/chat",
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    message: message
+                })
+
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        return data.reply;
+
+
+    } catch(error) {
+
+
+        console.log(
+            "Backend connection error:",
+            error
+        );
+
+
+        return "ChatTBM is having trouble connecting right now.";
+
+    }
+
+}
 
 
     try {
