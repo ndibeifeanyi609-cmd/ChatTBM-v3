@@ -743,3 +743,58 @@ border-radius:20px;
 
 
 }
+
+/* ==============================
+ChatTBM V4.2 FINAL INPUT FIX
+============================== */
+
+
+#user-input{
+
+background:transparent;
+
+border:none;
+
+outline:none;
+
+color:white;
+
+width:100%;
+
+}
+
+
+
+#user-input:focus{
+
+outline:none;
+
+}
+
+
+
+
+/* Message box always visible */
+
+#chat-box{
+
+min-height:20px;
+
+}
+
+
+
+/* Input bar mobile protection */
+
+@media(max-width:600px){
+
+.input-area{
+
+position:sticky;
+
+bottom:10px;
+
+}
+
+
+}
