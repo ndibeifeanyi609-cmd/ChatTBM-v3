@@ -672,8 +672,26 @@ function sendMessage(){
 
 
 
-        const reply =
-        generateAIReply(message);
+        askChatTBM(message)
+.then(reply=>{
+
+    addBotMessage(reply);
+
+})
+.catch(error=>{
+
+
+    addBotMessage(
+
+    "❌ ChatTBM AI connection error."
+
+    );
+
+
+    console.error(error);
+
+
+});
 
 
 
