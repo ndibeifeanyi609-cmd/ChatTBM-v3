@@ -2,384 +2,203 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
+    <title>ChatTBM - AI Content Assistant</title>
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/favicon.png">
 
-<title>ChatTBM</title>
-
-<meta name="theme-color"
-content="#0B0B0F">
-
-<meta name="description"
-content="ChatTBM - Your AI Content Assistant">
-
-<meta name="color-scheme"
-content="dark">
-
-<!-- ========================= -->
-<!-- FAVICON -->
-<!-- ========================= -->
-
-<link rel="icon"
-type="image/png"
-href="IMG_4397.png">
-
-<link rel="apple-touch-icon"
-href="IMG_4397.png">
-
-<!-- ========================= -->
-<!-- GOOGLE FONT -->
-<!-- ========================= -->
-
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
-
-<link rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-rel="stylesheet">
-
-<!-- ========================= -->
-<!-- STYLESHEET -->
-<!-- ========================= -->
-
-<link rel="stylesheet"
-href="style.css">
-
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
+
 
 <body>
 
-<!-- ===================================== -->
-<!-- HEADER -->
-<!-- ===================================== -->
+    <!-- APP CONTAINER -->
+    <div class="app-container">
 
-<header class="header">
 
-<div class="header-left">
+        <!-- HEADER -->
+        <header class="app-header">
 
-<img
-src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-alt="ChatTBM Logo"
-class="logo-small">
+            <div class="brand">
 
-<div class="brand-group">
+                <img 
+                src="assets/logo.png" 
+                alt="ChatTBM Logo"
+                class="logo">
 
-<span class="brand">
+                <div class="brand-text">
+                    <h1>ChatTBM</h1>
+                    <p>Your AI Content Assistant</p>
+                </div>
 
-ChatTBM
+            </div>
 
-</span>
 
-<span class="brand-status">
+            <div class="auth-buttons">
 
-AI Assistant
+                <button id="login-btn">
+                    Log In
+                </button>
 
-</span>
+                <button id="signup-btn">
+                    Sign Up
+                </button>
 
-</div>
+            </div>
 
-</div>
+        </header>
 
-<div class="header-right">
 
-<button
-id="login-btn"
-class="header-btn secondary">
 
-Sign In
+        <!-- WELCOME SECTION -->
+        <section class="welcome-screen">
 
-</button>
+            <img 
+            src="assets/logo.png"
+            alt="ChatTBM"
+            class="hero-logo">
 
-<button
-id="signup-btn"
-class="header-btn primary">
 
-Sign Up
+            <h2>
+                Welcome to ChatTBM
+            </h2>
 
-</button>
 
-</div>
+            <p>
+                Your AI assistant for captions,
+                scripts, viral ideas, adverts and content creation.
+            </p>
 
-</header>
 
-<!-- ===================================== -->
-<!-- WELCOME SCREEN -->
-<!-- ===================================== -->
+        </section>
 
-<section
-id="welcome-screen"
-class="welcome-screen">
 
-<div class="welcome-content">
 
-<img
-src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-alt="ChatTBM Logo"
-class="hero-logo">
 
-<h1>
 
-ChatTBM
+        <!-- CHAT AREA -->
 
-</h1>
+        <main class="chat-container">
 
-<p class="hero-subtitle">
 
-Your AI Content Assistant for
-Captions, Scripts & Viral Ideas
+            <div id="chat-box" class="chat-box">
 
-</p>
 
-<p class="hero-description">
+                <div class="message bot-message">
 
-Create engaging content,
-brainstorm fresh ideas,
-write captions,
-generate scripts,
-and grow your audience
-with AI.
+                    <p>
+                        Hello 👋 I am ChatTBM.
+                        I can help you create captions,
+                        scripts, ideas and marketing content.
+                    </p>
 
-</p>
+                </div>
 
-</div>
 
-</section>
+            </div>
 
-<!-- ===================================== -->
-<!-- CHAT CONTAINER -->
-<!-- ===================================== -->
 
-<main
-id="chat-container"
-class="chat-container">
 
-<div
-id="chat-box"
-class="chat-box">
 
-<!-- Chat messages appear here -->
+            <!-- CREATOR TOOLS -->
 
-</div>
+            <div class="creator-tools">
 
-</main>
 
-<!-- ===================================== -->
-<!-- ATTACHMENT PREVIEW -->
-<!-- ===================================== -->
+                <button class="tool-btn" data-tool="caption">
+                    ✍️ Caption
+                </button>
 
-<section
-id="attachment-preview"
-class="attachment-preview">
 
-</section>
+                <button class="tool-btn" data-tool="script">
+                    🎬 Script
+                </button>
 
-<!-- ===================================== -->
-<!-- QUICK ACTIONS -->
-<!-- ===================================== -->
 
-<section
-class="quick-actions">
+                <button class="tool-btn" data-tool="hashtags">
+                    #️⃣ Hashtags
+                </button>
 
-<button
-class="quick-btn"
-data-prompt="Write a viral caption for social media">
 
-✍️
-<span>Caption</span>
+                <button class="tool-btn" data-tool="ideas">
+                    💡 Viral Ideas
+                </button>
 
-</button>
 
-<button
-class="quick-btn"
-data-prompt="Generate viral content ideas">
+                <button class="tool-btn" data-tool="advert">
+                    📢 Advert
+                </button>
 
-💡
-<span>Ideas</span>
 
-</button>
+                <button class="tool-btn" data-tool="calendar">
+                    📅 Calendar
+                </button>
 
-<button
-class="quick-btn"
-data-prompt="Write a short video script">
 
-🎬
-<span>Script</span>
+            </div>
 
-</button>
 
-<button
-class="quick-btn"
-data-prompt="Generate trending hashtags">
 
-#️⃣
-<span>Hashtags</span>
 
-</button>
 
-</section>
+            <!-- INPUT AREA -->
 
-<!-- ===================================== -->
-<!-- INPUT AREA -->
-<!-- ===================================== -->
+            <div class="input-area">
 
-<footer
-class="input-area">
 
-<div
-class="input-wrapper">
+                <button id="upload-btn" class="upload-btn">
+                    +
+                </button>
 
-<button
-id="upload-btn"
-class="tool-btn"
-title="Upload File">
 
-＋
+                <input 
+                type="text"
+                id="user-input"
+                placeholder="Ask ChatTBM anything...">
 
-</button>
 
-<input
-type="file"
-id="file-input"
-hidden>
+                <button id="send-btn">
+                    Send
+                </button>
 
-<textarea
-id="user-input"
-placeholder="Ask ChatTBM anything..."
-rows="1"
-autocomplete="off"
-spellcheck="true">
 
-</textarea>
+            </div>
 
-<button
-id="voice-btn"
-class="tool-btn"
-title="Voice Input">
 
-🎤
 
-</button>
+        </main>
 
-<button
-id="send-btn"
-class="send-btn"
-title="Send Message">
 
-➜
 
-</button>
 
-</div>
 
-</footer>
+        <!-- FOOTER -->
 
-<!-- ===================================== -->
-<!-- DASHBOARD PANEL -->
-<!-- ===================================== -->
+        <footer class="app-footer">
 
-<section
-id="dashboard-panel"
-class="dashboard-panel hidden">
+            <p>
+                ChatTBM AI Content Assistant
+            </p>
 
-<div
-class="dashboard-card">
+        </footer>
 
-<h2>
 
-Dashboard
 
-</h2>
+    </div>
 
-<p>
 
-User:
-<strong
-id="dashboard-name">
 
-Guest
 
-</strong>
 
-</p>
+    <!-- Main JavaScript -->
 
-<p>
+    <script src="script.js"></script>
 
-Plan:
-<strong
-id="dashboard-plan">
-
-Free
-
-</strong>
-
-</p>
-
-<p
-id="dashboard-usage">
-
-0 / 20 messages used today
-
-</p>
-
-<button
-id="close-dashboard"
-class="secondary-btn">
-
-Close
-
-</button>
-
-</div>
-
-</section>
-
-<!-- ===================================== -->
-<!-- LOADING INDICATOR -->
-<!-- ===================================== -->
-
-<div
-id="loading-indicator"
-class="loading-indicator hidden">
-
-<div
-class="loader">
-
-</div>
-
-<p>
-
-ChatTBM is thinking...
-
-</p>
-
-</div>
-
-<!-- ===================================== -->
-<!-- TOAST -->
-<!-- ===================================== -->
-
-<div
-id="toast"
-class="toast hidden">
-
-Ready
-
-</div>
-
-<!-- ===================================== -->
-<!-- JAVASCRIPT -->
-<!-- ===================================== -->
-
-<script
-src="script.js">
-
-</script>
 
 </body>
 
