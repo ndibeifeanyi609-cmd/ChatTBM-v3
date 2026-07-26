@@ -1,7 +1,30 @@
 /* =====================================
-ChatTBM V4.1
-Clean Style
+ChatTBM V4.2
+Clean AI App Style
 ===================================== */
+
+
+/* ==============================
+GLOBAL
+============================== */
+
+
+body{
+
+background:#000;
+
+color:#fff;
+
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"Segoe UI",
+sans-serif;
+
+}
+
+
+
 
 
 /* ==============================
@@ -9,154 +32,67 @@ LOGO AREA
 ============================== */
 
 
-.top-bar {
+.top-bar{
 
-    position:absolute;
-    top:20px;
-    left:20px;
+position:absolute;
 
-}
+top:20px;
 
-
-.top-logo {
-
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-size:17px;
-    font-weight:600;
-
-}
-
-
-.top-logo img {
-
-    width:30px;
-    height:30px;
-    border-radius:50%;
+left:20px;
 
 }
 
 
 
-.main-logo-container {
+.top-logo{
 
-    margin-top:90px;
-    margin-bottom:50px;
+display:flex;
+
+align-items:center;
+
+gap:8px;
+
+font-size:17px;
+
+font-weight:600;
 
 }
 
 
 
-.main-logo {
+.top-logo img{
 
-    width:110px;
-    height:110px;
-    border-radius:9999px;
+width:30px;
+
+height:30px;
+
+border-radius:50%;
 
 }
 
 
 
 
+.main-logo-container{
 
-/* ==============================
-CHATTBM V4.1 AI CHAT
-============================== */
+margin-top:90px;
 
-
-.ai-message {
-
-    width:100%;
+margin-bottom:50px;
 
 }
 
 
 
-.ai-bubble {
 
-    background:#111;
+.main-logo{
 
-    border:1px solid #2a2a2a;
+width:110px;
 
-    border-radius:24px;
+height:110px;
 
-    padding:18px;
+border-radius:9999px;
 
-    margin-bottom:15px;
-
-    box-shadow:
-    0 10px 30px rgba(0,0,0,.35);
-
-}
-
-
-
-.ai-header {
-
-    font-size:16px;
-
-    margin-bottom:12px;
-
-    color:white;
-
-}
-
-
-
-.ai-content {
-
-    color:#e5e5e5;
-
-    line-height:1.7;
-
-    font-size:15px;
-
-}
-
-
-
-.ai-actions {
-
-    display:flex;
-
-    gap:8px;
-
-    margin-top:15px;
-
-    flex-wrap:wrap;
-
-}
-
-
-
-.ai-btn {
-
-    background:#222;
-
-    color:white;
-
-    border:1px solid #333;
-
-    padding:8px 14px;
-
-    border-radius:999px;
-
-    font-size:13px;
-
-    cursor:pointer;
-
-    transition:.2s;
-
-}
-
-
-
-.ai-btn:hover {
-
-    background:#2563eb;
-
-    border-color:#2563eb;
+object-fit:cover;
 
 }
 
@@ -165,27 +101,246 @@ CHATTBM V4.1 AI CHAT
 
 
 /* ==============================
-USER CHAT BUBBLE
+V4.2 SUGGESTION CARDS
 ============================== */
 
 
-.user-bubble {
+.suggest-card{
 
-    background:#2563eb;
 
-    color:white;
+background:#111;
 
-    padding:14px 18px;
+border:1px solid #222;
 
-    border-radius:22px 22px 5px 22px;
+border-radius:22px;
 
-    max-width:80%;
+padding:18px;
 
-    margin-left:auto;
+text-align:center;
 
-    line-height:1.5;
+color:white;
+
+transition:.25s;
+
 
 }
+
+
+
+.suggest-card:hover{
+
+
+background:#1f1f1f;
+
+border-color:#2563eb;
+
+transform:translateY(-3px);
+
+
+}
+
+
+
+
+
+/* ==============================
+ACTION BUTTONS
+============================== */
+
+
+.action-btn{
+
+
+width:100%;
+
+background:#1f1f1f;
+
+border:1px solid #222;
+
+transition:.25s;
+
+
+}
+
+
+
+.action-btn:hover{
+
+
+background:#2b2b2b;
+
+border-color:#2563eb;
+
+transform:translateY(-2px);
+
+
+}
+
+/* ==============================
+CHATTBM V4.2 AI CHAT DESIGN
+============================== */
+
+
+.ai-message{
+
+width:100%;
+
+}
+
+
+
+
+.ai-bubble{
+
+
+background:#111;
+
+border:1px solid #2a2a2a;
+
+border-radius:24px;
+
+padding:18px;
+
+margin-bottom:15px;
+
+box-shadow:
+
+0 10px 30px rgba(0,0,0,.35);
+
+
+}
+
+
+
+
+
+.ai-header{
+
+
+font-size:16px;
+
+font-weight:600;
+
+margin-bottom:12px;
+
+color:white;
+
+
+}
+
+
+
+
+
+.ai-content{
+
+
+color:#e5e5e5;
+
+line-height:1.7;
+
+font-size:15px;
+
+word-wrap:break-word;
+
+
+}
+
+
+
+
+
+/* AI ACTION BUTTONS */
+
+
+.ai-actions{
+
+
+display:flex;
+
+gap:8px;
+
+margin-top:15px;
+
+flex-wrap:wrap;
+
+
+}
+
+
+
+
+.ai-btn{
+
+
+background:#222;
+
+color:white;
+
+border:1px solid #333;
+
+padding:8px 14px;
+
+border-radius:9999px;
+
+font-size:13px;
+
+cursor:pointer;
+
+transition:.2s;
+
+
+}
+
+
+
+
+
+.ai-btn:hover{
+
+
+background:#2563eb;
+
+border-color:#2563eb;
+
+
+}
+
+
+
+
+
+
+
+/* ==============================
+USER MESSAGE
+============================== */
+
+
+.user-bubble{
+
+
+background:#2563eb;
+
+color:white;
+
+padding:14px 18px;
+
+border-radius:
+
+22px 22px 5px 22px;
+
+
+max-width:80%;
+
+margin-left:auto;
+
+line-height:1.5;
+
+
+}
+
+
 
 
 
@@ -196,36 +351,367 @@ MESSAGE ANIMATION
 ============================== */
 
 
-@keyframes messageAppear {
+@keyframes messageAppear{
 
 
-from {
+from{
 
-    opacity:0;
 
-    transform:translateY(10px);
+opacity:0;
+
+transform:translateY(12px);
+
+
+}
+
+
+
+to{
+
+
+opacity:1;
+
+transform:translateY(0);
+
 
 }
 
 
-
-to {
-
-    opacity:1;
-
-    transform:translateY(0);
-
 }
 
 
-}
 
 
 
 .ai-message,
-.user-bubble {
+.user-bubble{
 
-    animation:messageAppear .25s ease;
+
+animation:
+
+messageAppear .25s ease;
+
+
+}
+
+
+
+
+
+
+
+/* ==============================
+THINKING EFFECT
+============================== */
+
+
+.thinking{
+
+
+color:#aaa;
+
+font-style:italic;
+
+
+}
+
+
+.thinking::after{
+
+
+content:"...";
+
+animation:dots 1.2s infinite;
+
+
+}
+
+
+
+@keyframes dots{
+
+
+0%{
+
+content:"";
+
+}
+
+
+50%{
+
+content:"...";
+
+}
+
+
+100%{
+
+content:"";
+
+}
+
+
+}
+
+/* ==============================
+CHATTBM V4.2 INPUT AREA
+============================== */
+
+
+#chat-box{
+
+scroll-behavior:smooth;
+
+padding-bottom:20px;
+
+}
+
+
+
+
+/* Input Container */
+
+
+.input-area{
+
+
+background:#1f1f1f;
+
+border:1px solid #2a2a2a;
+
+border-radius:999px;
+
+padding:8px;
+
+display:flex;
+
+align-items:center;
+
+
+}
+
+
+
+
+
+/* Text Input */
+
+
+#user-input{
+
+
+color:white;
+
+font-size:16px;
+
+}
+
+
+
+#user-input::placeholder{
+
+
+color:#888;
+
+
+}
+
+
+
+
+
+
+/* ==============================
+ICON BUTTONS
+============================== */
+
+
+.icon-btn{
+
+
+width:52px;
+
+height:52px;
+
+border-radius:50%;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+transition:.25s;
+
+font-size:20px;
+
+
+}
+
+
+
+
+
+.icon-btn:hover{
+
+
+transform:scale(1.05);
+
+background:#333;
+
+
+}
+
+
+
+
+#send-btn{
+
+
+background:#2563eb;
+
+}
+
+
+
+#send-btn:hover{
+
+
+background:#1d4ed8;
+
+
+}
+
+
+
+
+#voice-btn:hover{
+
+
+background:#444;
+
+
+}
+
+
+
+
+
+
+/* ==============================
+EMPTY CHAT WELCOME
+============================== */
+
+
+.empty-chat{
+
+
+text-align:center;
+
+color:#888;
+
+padding:40px 20px;
+
+font-size:15px;
+
+
+}
+
+
+
+
+.empty-chat h3{
+
+
+color:white;
+
+font-size:22px;
+
+margin-bottom:10px;
+
+
+}
+
+
+
+
+
+
+
+/* ==============================
+APP FEEL MOBILE
+============================== */
+
+
+@media(max-width:600px){
+
+
+
+body{
+
+
+overflow-x:hidden;
+
+
+}
+
+
+
+
+.max-w-lg{
+
+
+width:100%;
+
+
+}
+
+
+
+.main-logo{
+
+
+width:95px;
+
+height:95px;
+
+
+}
+
+
+
+.action-btn{
+
+
+font-size:15px;
+
+
+}
+
+
+
+.ai-bubble{
+
+
+border-radius:20px;
+
+padding:15px;
+
+
+}
+
+
+
+.user-bubble{
+
+
+max-width:85%;
+
+
+}
+
+
 
 }
 
@@ -234,53 +720,26 @@ to {
 
 
 /* ==============================
-BUTTON STYLE
+SMOOTH SCROLL BAR
 ============================== */
 
 
-.action-btn {
+#chat-box::-webkit-scrollbar{
 
-    width:100%;
 
-    background:#1f1f1f;
+width:5px;
 
-    transition:.2s;
 
 }
 
 
 
-.action-btn:hover {
-
-    background:#2b2b2b;
-
-    transform:translateY(-2px);
-
-}
+#chat-box::-webkit-scrollbar-thumb{
 
 
+background:#333;
 
+border-radius:20px;
 
-
-/* ==============================
-INPUT ICON BUTTONS
-============================== */
-
-
-.icon-btn {
-
-    width:52px;
-
-    height:52px;
-
-    border-radius:9999px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    transition:.2s;
 
 }
