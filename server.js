@@ -148,7 +148,324 @@ app.get("/", (req,res)=>{
 // =====================================
 
 
+// =====================================
+// CHATTBM BETTER RESPONSE ENGINE
+// =====================================
+
+
 function generateChatTBMResponse(message, history){
+
+
+    const text = message.toLowerCase();
+
+
+
+    // Remember recent conversation
+
+    let context = "";
+
+
+    if(history.length > 1){
+
+
+        context = history
+        .slice(-4)
+        .map(item => item.message)
+        .join(" ");
+
+
+    }
+
+
+
+
+
+    // ===============================
+    // GREETING
+    // ===============================
+
+
+    if(
+        text.includes("hello") ||
+        text.includes("hi") ||
+        text.includes("hey")
+    ){
+
+
+        return `
+
+Hello 👋 Welcome to ChatTBM.
+
+I am your AI Content Assistant.
+
+I can help you create:
+
+✍️ Captions
+🎬 Video Scripts
+#️⃣ Hashtags
+💡 Viral Content Ideas
+📢 Advert Concepts
+📅 Content Plans
+
+What are we creating today?
+
+`;
+
+    }
+
+
+
+
+
+    // ===============================
+    // BRAND / BUSINESS QUESTIONS
+    // ===============================
+
+
+    if(
+        text.includes("brand") ||
+        text.includes("business") ||
+        text.includes("company")
+    ){
+
+
+        return `
+
+Great! I can help you build content for your brand.
+
+Tell me:
+
+1. What is your business about?
+2. Who is your target audience?
+3. What platform are you creating for?
+
+Then I can create captions, scripts and marketing ideas.
+
+`;
+
+    }
+
+
+
+
+
+    // ===============================
+    // CAPTION
+    // ===============================
+
+
+    if(text.includes("caption")){
+
+
+        return `
+
+✍️ Here is a content caption:
+
+"Your ideas deserve attention.
+Create. Improve. Share your story with the world."
+
+Suggested hashtags:
+
+#ChatTBM
+#ContentCreator
+#DigitalCreator
+#CreativeIdeas
+
+`;
+
+    }
+
+
+
+
+
+    // ===============================
+    // VIDEO SCRIPT
+    // ===============================
+
+
+    if(text.includes("script") || text.includes("video")){
+
+
+        return `
+
+🎬 Video Script:
+
+HOOK:
+"Most people don't know this..."
+
+BODY:
+Explain the problem.
+Show your solution.
+Give viewers valuable information.
+
+ENDING:
+"Follow for more content ideas."
+
+`;
+
+    }
+
+
+
+
+
+    // ===============================
+    // VIRAL IDEAS
+    // ===============================
+
+
+    if(
+        text.includes("viral") ||
+        text.includes("idea")
+    ){
+
+
+        return `
+
+💡 Viral Content Ideas:
+
+1. Tell your story
+
+2. Show behind the scenes
+
+3. Share your biggest lesson
+
+4. Make a before and after video
+
+5. Answer common audience questions
+
+`;
+
+    }
+
+
+
+
+
+    // ===============================
+    // ADVERT
+    // ===============================
+
+
+    if(
+        text.includes("advert") ||
+        text.includes("marketing")
+    ){
+
+
+        return `
+
+📢 Advert Formula:
+
+Attention:
+Create a powerful first line.
+
+Problem:
+Show the customer's challenge.
+
+Solution:
+Explain your offer.
+
+Action:
+Tell them what to do next.
+
+`;
+
+    }
+
+
+
+
+
+    // ===============================
+    // CONTENT PLAN
+    // ===============================
+
+
+    if(
+        text.includes("calendar") ||
+        text.includes("plan")
+    ){
+
+
+        return `
+
+📅 Content Plan:
+
+Monday:
+Educational content
+
+Tuesday:
+Behind the scenes
+
+Wednesday:
+Storytelling
+
+Friday:
+Promotion
+
+Sunday:
+Community engagement
+
+`;
+
+    }
+
+
+
+
+
+    // ===============================
+    // FOLLOW UP MEMORY
+    // ===============================
+
+
+    if(context){
+
+
+        return `
+
+I remember our previous discussion.
+
+Based on what you shared:
+
+"${context.substring(0,150)}..."
+
+I can help you improve that idea.
+
+What would you like to create next?
+
+`;
+
+    }
+
+
+
+
+
+    // ===============================
+    // DEFAULT CHAT
+    // ===============================
+
+
+    return `
+
+I understand.
+
+I can help you turn your idea into content.
+
+Tell me:
+
+- What are you creating?
+- Who is your audience?
+- Which platform are you using?
+
+I will help you build it.
+
+`;
+
+}
 
 
     const text = message.toLowerCase();
