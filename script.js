@@ -40,7 +40,7 @@ userInput.addEventListener("keypress", function(e){
 
 
 
-function sendMessage(){
+async function sendMessage(){
 
 
     const message = userInput.value.trim();
