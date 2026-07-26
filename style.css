@@ -1,6 +1,6 @@
 /* =====================================
 ChatTBM V4.2
-Clean AI App Style
+Clean Matching Style For Current Index
 ===================================== */
 
 
@@ -8,11 +8,14 @@ Clean AI App Style
 GLOBAL
 ============================== */
 
+*{
+box-sizing:border-box;
+}
+
 
 body{
 
 background:#000;
-
 color:#fff;
 
 font-family:
@@ -25,72 +28,17 @@ sans-serif;
 
 
 
-
-
 /* ==============================
-LOGO AREA
+LOGO
 ============================== */
-
-
-.top-bar{
-
-position:absolute;
-
-top:20px;
-
-left:20px;
-
-}
-
-
-
-.top-logo{
-
-display:flex;
-
-align-items:center;
-
-gap:8px;
-
-font-size:17px;
-
-font-weight:600;
-
-}
-
-
-
-.top-logo img{
-
-width:30px;
-
-height:30px;
-
-border-radius:50%;
-
-}
-
-
-
-
-.main-logo-container{
-
-margin-top:90px;
-
-margin-bottom:50px;
-
-}
-
-
 
 
 .main-logo{
 
-width:110px;
+width:100px;
+height:100px;
 
-height:110px;
-
-border-radius:9999px;
+border-radius:50%;
 
 object-fit:cover;
 
@@ -99,14 +47,12 @@ object-fit:cover;
 
 
 
-
 /* ==============================
-V4.2 SUGGESTION CARDS
+SUGGESTION CARDS
 ============================== */
 
 
 .suggest-card{
-
 
 background:#111;
 
@@ -116,12 +62,13 @@ border-radius:22px;
 
 padding:18px;
 
-text-align:center;
-
 color:white;
+
+text-align:center;
 
 transition:.25s;
 
+cursor:pointer;
 
 }
 
@@ -129,13 +76,11 @@ transition:.25s;
 
 .suggest-card:hover{
 
-
 background:#1f1f1f;
 
 border-color:#2563eb;
 
 transform:translateY(-3px);
-
 
 }
 
@@ -150,15 +95,17 @@ ACTION BUTTONS
 
 .action-btn{
 
-
 width:100%;
 
 background:#1f1f1f;
 
 border:1px solid #222;
 
+color:white;
+
 transition:.25s;
 
+cursor:pointer;
 
 }
 
@@ -166,143 +113,44 @@ transition:.25s;
 
 .action-btn:hover{
 
-
 background:#2b2b2b;
 
 border-color:#2563eb;
 
 transform:translateY(-2px);
 
-
 }
 
+
+
+
+
+
+
 /* ==============================
-CHATTBM V4.2 AI CHAT DESIGN
+CHAT AREA
 ============================== */
 
 
-.ai-message{
+#chat-box{
 
 width:100%;
 
-}
+max-height:420px;
 
+overflow-y:auto;
 
+scroll-behavior:smooth;
 
-
-.ai-bubble{
-
-
-background:#111;
-
-border:1px solid #2a2a2a;
-
-border-radius:24px;
-
-padding:18px;
-
-margin-bottom:15px;
-
-box-shadow:
-
-0 10px 30px rgba(0,0,0,.35);
-
+padding-bottom:20px;
 
 }
 
 
 
+#chat-box.hidden{
 
-
-.ai-header{
-
-
-font-size:16px;
-
-font-weight:600;
-
-margin-bottom:12px;
-
-color:white;
-
-
-}
-
-
-
-
-
-.ai-content{
-
-
-color:#e5e5e5;
-
-line-height:1.7;
-
-font-size:15px;
-
-word-wrap:break-word;
-
-
-}
-
-
-
-
-
-/* AI ACTION BUTTONS */
-
-
-.ai-actions{
-
-
-display:flex;
-
-gap:8px;
-
-margin-top:15px;
-
-flex-wrap:wrap;
-
-
-}
-
-
-
-
-.ai-btn{
-
-
-background:#222;
-
-color:white;
-
-border:1px solid #333;
-
-padding:8px 14px;
-
-border-radius:9999px;
-
-font-size:13px;
-
-cursor:pointer;
-
-transition:.2s;
-
-
-}
-
-
-
-
-
-.ai-btn:hover{
-
-
-background:#2563eb;
-
-border-color:#2563eb;
-
+display:none;
 
 }
 
@@ -319,17 +167,13 @@ USER MESSAGE
 
 .user-bubble{
 
-
 background:#2563eb;
 
 color:white;
 
 padding:14px 18px;
 
-border-radius:
-
-22px 22px 5px 22px;
-
+border-radius:22px 22px 5px 22px;
 
 max-width:80%;
 
@@ -337,9 +181,83 @@ margin-left:auto;
 
 line-height:1.5;
 
+word-wrap:break-word;
+
+animation:messageIn .25s ease;
 
 }
 
+
+
+
+
+/* ==============================
+AI MESSAGE
+============================== */
+
+
+.ai-message{
+
+width:100%;
+
+}
+
+
+
+.ai-bubble{
+
+background:#111;
+
+border:1px solid #2a2a2a;
+
+border-radius:24px;
+
+padding:18px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.35);
+
+animation:messageIn .25s ease;
+
+}
+
+
+
+.ai-header{
+
+font-size:16px;
+
+font-weight:700;
+
+margin-bottom:12px;
+
+}
+
+
+
+.ai-content{
+
+font-size:15px;
+
+line-height:1.7;
+
+color:#e5e5e5;
+
+word-wrap:break-word;
+
+}
+
+
+
+.message-time{
+
+font-size:11px;
+
+opacity:.6;
+
+margin-top:8px;
+
+}
 
 
 
@@ -347,53 +265,53 @@ line-height:1.5;
 
 
 /* ==============================
-MESSAGE ANIMATION
+AI BUTTONS
 ============================== */
 
 
-@keyframes messageAppear{
+.ai-actions{
 
+display:flex;
 
-from{
+gap:8px;
 
+flex-wrap:wrap;
 
-opacity:0;
-
-transform:translateY(12px);
-
-
-}
-
-
-
-to{
-
-
-opacity:1;
-
-transform:translateY(0);
-
-
-}
-
+margin-top:15px;
 
 }
 
 
 
+.ai-btn{
 
+background:#222;
 
-.ai-message,
-.user-bubble{
+border:1px solid #333;
 
+color:white;
 
-animation:
+padding:8px 14px;
 
-messageAppear .25s ease;
+border-radius:999px;
 
+font-size:13px;
+
+cursor:pointer;
+
+transition:.2s;
 
 }
 
+
+
+.ai-btn:hover{
+
+background:#2563eb;
+
+border-color:#2563eb;
+
+}
 
 
 
@@ -401,80 +319,13 @@ messageAppear .25s ease;
 
 
 /* ==============================
-THINKING EFFECT
+INPUT AREA
 ============================== */
-
-
-.thinking{
-
-
-color:#aaa;
-
-font-style:italic;
-
-
-}
-
-
-.thinking::after{
-
-
-content:"...";
-
-animation:dots 1.2s infinite;
-
-
-}
-
-
-
-@keyframes dots{
-
-
-0%{
-
-content:"";
-
-}
-
-
-50%{
-
-content:"...";
-
-}
-
-
-100%{
-
-content:"";
-
-}
-
-
-}
-
-/* ==============================
-CHATTBM V4.2 INPUT AREA
-============================== */
-
-
-#chat-box{
-
-scroll-behavior:smooth;
-
-padding-bottom:20px;
-
-}
-
-
-
-
-/* Input Container */
 
 
 .input-area{
 
+width:100%;
 
 background:#1f1f1f;
 
@@ -488,6 +339,13 @@ display:flex;
 
 align-items:center;
 
+gap:8px;
+
+position:sticky;
+
+bottom:15px;
+
+z-index:20;
 
 }
 
@@ -495,15 +353,19 @@ align-items:center;
 
 
 
-/* Text Input */
-
-
 #user-input{
 
+background:transparent;
+
+border:none;
+
+outline:none;
 
 color:white;
 
 font-size:16px;
+
+width:100%;
 
 }
 
@@ -511,11 +373,10 @@ font-size:16px;
 
 #user-input::placeholder{
 
-
 color:#888;
 
-
 }
+
 
 
 
@@ -529,7 +390,6 @@ ICON BUTTONS
 
 .icon-btn{
 
-
 width:52px;
 
 height:52px;
@@ -542,32 +402,31 @@ align-items:center;
 
 justify-content:center;
 
-transition:.25s;
-
 font-size:20px;
 
+border:none;
+
+color:white;
+
+cursor:pointer;
+
+transition:.2s;
 
 }
-
-
 
 
 
 .icon-btn:hover{
 
-
 transform:scale(1.05);
 
 background:#333;
-
 
 }
 
 
 
-
 #send-btn{
-
 
 background:#2563eb;
 
@@ -577,22 +436,26 @@ background:#2563eb;
 
 #send-btn:hover{
 
-
 background:#1d4ed8;
 
+}
+
+
+
+#voice-btn{
+
+background:#333;
 
 }
 
 
 
+#upload-btn{
 
-#voice-btn:hover{
-
-
-background:#444;
-
+background:#333;
 
 }
+
 
 
 
@@ -600,36 +463,28 @@ background:#444;
 
 
 /* ==============================
-EMPTY CHAT WELCOME
+ANIMATION
 ============================== */
 
 
-.empty-chat{
+@keyframes messageIn{
 
+from{
 
-text-align:center;
+opacity:0;
 
-color:#888;
-
-padding:40px 20px;
-
-font-size:15px;
-
+transform:translateY(10px);
 
 }
 
 
+to{
 
+opacity:1;
 
-.empty-chat h3{
+transform:translateY(0);
 
-
-color:white;
-
-font-size:22px;
-
-margin-bottom:10px;
-
+}
 
 }
 
@@ -640,95 +495,13 @@ margin-bottom:10px;
 
 
 /* ==============================
-APP FEEL MOBILE
-============================== */
-
-
-@media(max-width:600px){
-
-
-
-body{
-
-
-overflow-x:hidden;
-
-
-}
-
-
-
-
-.max-w-lg{
-
-
-width:100%;
-
-
-}
-
-
-
-.main-logo{
-
-
-width:95px;
-
-height:95px;
-
-
-}
-
-
-
-.action-btn{
-
-
-font-size:15px;
-
-
-}
-
-
-
-.ai-bubble{
-
-
-border-radius:20px;
-
-padding:15px;
-
-
-}
-
-
-
-.user-bubble{
-
-
-max-width:85%;
-
-
-}
-
-
-
-}
-
-
-
-
-
-/* ==============================
-SMOOTH SCROLL BAR
+SCROLL BAR
 ============================== */
 
 
 #chat-box::-webkit-scrollbar{
 
-
 width:5px;
-
 
 }
 
@@ -736,28 +509,25 @@ width:5px;
 
 #chat-box::-webkit-scrollbar-thumb{
 
-
 background:#333;
 
 border-radius:20px;
 
-
 }
 
+
+
+
+
 /* ==============================
-ChatTBM V4.2 FINAL INPUT FIX
+MOBILE FIX
 ============================== */
 
 
-#user-input{
+@media(max-width:600px){
 
-background:transparent;
 
-border:none;
-
-outline:none;
-
-color:white;
+.max-w-lg{
 
 width:100%;
 
@@ -765,32 +535,35 @@ width:100%;
 
 
 
-#user-input:focus{
+.main-logo{
 
-outline:none;
+width:95px;
 
-}
-
-
-
-
-/* Message box always visible */
-
-#chat-box{
-
-min-height:20px;
+height:95px;
 
 }
 
 
 
-/* Input bar mobile protection */
+.user-bubble{
 
-@media(max-width:600px){
+max-width:85%;
+
+}
+
+
+
+.ai-bubble{
+
+padding:15px;
+
+border-radius:20px;
+
+}
+
+
 
 .input-area{
-
-position:sticky;
 
 bottom:10px;
 
