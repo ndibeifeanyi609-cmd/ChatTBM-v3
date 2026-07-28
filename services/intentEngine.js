@@ -1,110 +1,81 @@
 // =====================================
 // ChatTBM V5.0
-// controllers/chatController.js
+// services/memoryEngine.js
+// Conversation Memory Engine
 // =====================================
 
-const intentEngine = require("../services/intentEngine");
-
-// Placeholder modules (we'll build these next)
-const memoryEngine = {
-    loadConversation(id) {
-        return [];
-    },
-    saveConversation(id, userMessage, reply) {
-        return true;
-    }
-};
-
-const responseEngine = {
-    generate(intent, message, history) {
-        return "Response Engine is not connected yet.";
-    }
-};
-
-const formatter = {
-    format(reply) {
-        return reply;
-    }
-};
+// Store conversations in memory
+const conversations = {};
 
 // =====================================
-// CHAT CONTROLLER
+// CREATE CONVERSATION
 // =====================================
 
-async function chat(req, res) {
+function createConversation(conversationId) {
 
-    try {
+    if (!conversations[conversationId]) {
 
-        const message = req.body.message;
-        const conversationId =
-            req.body.conversationId || "default-user";
-
-        if (!message || message.trim() === "") {
-
-            return res.status(400).json({
-
-                success: false,
-                reply: "Please enter a message."
-
-            });
-
-        }
-
-        // Detect user intent
-        const intent =
-            intentEngine.detectIntent(message);
-
-        // Load previous conversation
-        const history =
-            memoryEngine.loadConversation(conversationId);
-
-        // Generate reply
-        let reply =
-            responseEngine.generate(
-                intent,
-                message,
-                history
-            );
-
-        // Format reply
-        reply =
-            formatter.format(reply);
-
-        // Save conversation
-        memoryEngine.saveConversation(
-            conversationId,
-            message,
-            reply
-        );
-
-        return res.json({
-
-            success: true,
-            conversationId,
-            intent,
-            reply
-
-        });
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        return res.status(500).json({
-
-            success: false,
-            reply: "Internal Server Error"
-
-        });
+        conversations[conversationId] = [];
 
     }
 
 }
 
+// =====================================
+// LOAD CONVERSATION
+// =====================================
+
+function loadConversation(conversationId) {
+
+    createConversation(conversationId);
+
+    return conversations[conversationId];
+
+}
+
+// =====================================
+// SAVE CONVERSATION
+// =====================================
+
+function saveConversation(conversationId, userMessage, assistantReply) {
+
+    createConversation(conversationId);
+
+    conversations[conversationId].push({
+
+        user: userMessage,
+        assistant: assistantReply,
+        timestamp: Date.now()
+
+    });
+
+    // Keep only the latest 20 messages
+    if (conversations[conversationId].length > 20) {
+
+        conversations[conversationId].shift();
+
+    }
+
+}
+
+// =====================================
+// CLEAR CONVERSATION
+// =====================================
+
+function clearConversation(conversationId) {
+
+    conversations[conversationId] = [];
+
+}
+
+// =====================================
+// EXPORT
+// =====================================
+
 module.exports = {
 
-    chat
+    loadConversation,
+    saveConversation,
+    clearConversation
 
 };
