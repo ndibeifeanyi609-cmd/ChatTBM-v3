@@ -219,9 +219,28 @@ async function generateAIResponse(message){
     try {
 
 
-        const conversationId =
-        localStorage.getItem("ChatTBM_user") 
-        || "guest-user";
+        // ===============================
+// CREATE UNIQUE USER ID
+// ===============================
+
+function createUserId(){
+
+    const id =
+    "user-" +
+    Date.now() +
+    "-" +
+    Math.floor(Math.random() * 10000);
+
+
+    localStorage.setItem(
+        "ChatTBM_user",
+        id
+    );
+
+
+    return id;
+
+}
 
 
 
