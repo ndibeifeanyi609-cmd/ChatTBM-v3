@@ -335,6 +335,18 @@ app.post(
 
         );
 
+        // =============================
+// SAVE CONVERSATION FACTS
+// =============================
+
+saveFact(
+
+    conversationId,
+
+    message
+
+);
+
 
 
 
