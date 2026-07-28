@@ -1,9 +1,7 @@
 // =====================================
-// ChatTBM V5.1
-// Real Memory Engine
-// User Profile + Creator Memory
+// ChatTBM V5.2
+// Structured Memory Engine
 // =====================================
-
 
 const memoryStore = {};
 
@@ -13,32 +11,23 @@ const memoryStore = {};
 // CREATE USER MEMORY
 // =====================================
 
-function createUserMemory(userId){
-
+function createUser(userId){
 
     if(!memoryStore[userId]){
 
-
         memoryStore[userId] = {
-
 
             profile:{},
 
-
             preferences:{},
 
-
-            history:[]
-
+            notes:[]
 
         };
 
-
     }
 
-
 }
-
 
 
 
@@ -49,42 +38,24 @@ function createUserMemory(userId){
 
 function saveMemory(
     userId,
-    category,
     key,
     value
 ){
 
+    createUser(userId);
 
-    createUserMemory(userId);
-
-
-
-    if(
-        !memoryStore[userId][category]
-    ){
-
-        memoryStore[userId][category] = {};
-
-    }
-
-
-
-    memoryStore[userId][category][key] = value;
-
-
+    memoryStore[userId]
+    .profile[key] = value;
 
     return {
 
         success:true,
 
-        message:
-        "Memory saved"
+        message:"Memory saved"
 
     };
 
-
 }
-
 
 
 
@@ -95,58 +66,38 @@ function saveMemory(
 
 function getMemory(
     userId,
-    category,
     key
 ){
 
+    createUser(userId);
 
-    createUserMemory(userId);
-
-
-
-    if(
-        memoryStore[userId][category] &&
-        memoryStore[userId][category][key]
-    ){
-
-        return memoryStore[userId][category][key];
-
-    }
-
-
-
-    return null;
-
+    return memoryStore[userId]
+        .profile[key] || null;
 
 }
 
 
 
 
-
 // =====================================
-// GET COMPLETE PROFILE
+// GET ALL MEMORY
 // =====================================
 
-function getAllMemory(userId){
+function getAllMemory(
+    userId
+){
 
-
-    createUserMemory(userId);
-
-
+    createUser(userId);
 
     return memoryStore[userId];
 
-
 }
 
 
 
 
-
-
 // =====================================
-// ADD IMPORTANT MEMORY
+// ADD MEMORY NOTE
 // =====================================
 
 function addMemoryNote(
@@ -154,63 +105,33 @@ function addMemoryNote(
     note
 ){
 
-
-    createUserMemory(userId);
-
-
+    createUser(userId);
 
     memoryStore[userId]
-    .history
+    .notes
     .push({
 
-        note,
+        text:note,
 
-        date:
+        created:
         new Date().toISOString()
 
     });
-
-
-
-    return {
-
-        success:true
-
-    };
-
 
 }
 
 
 
 
-
 // =====================================
-// CLEAR USER MEMORY
+// CLEAR MEMORY
 // =====================================
 
-function clearMemory(userId){
+function clearMemory(
+    userId
+){
 
-
-    if(memoryStore[userId]){
-
-
-        delete memoryStore[userId];
-
-
-    }
-
-
-
-    return {
-
-        success:true,
-
-        message:
-        "Memory cleared"
-
-    };
-
+    delete memoryStore[userId];
 
 }
 
@@ -221,9 +142,7 @@ function clearMemory(userId){
 // EXPORTS
 // =====================================
 
-
 module.exports = {
-
 
     saveMemory,
 
@@ -234,6 +153,5 @@ module.exports = {
     addMemoryNote,
 
     clearMemory
-
 
 };
