@@ -6,8 +6,24 @@
 
 require("dotenv").config();
 
-const express = require("express");
-const cors = require("cors");
+// =====================================
+// ChatTBM V5 AI ENGINES
+// =====================================
+
+const { 
+    detectIntent 
+} = require("./services/intentEngine");
+
+
+const {
+    saveMemory,
+    getMemory
+} = require("./services/memoryEngine");
+
+
+const {
+    generateResponse
+} = require("./services/responseEngine");
 
 const app = express();
 
