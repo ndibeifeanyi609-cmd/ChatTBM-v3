@@ -209,7 +209,7 @@ function addMessage(text, sender){
 
 
 // ===============================
-// CONNECT TO RENDER BACKEND
+// CONNECT TO CHATTBM V5 BACKEND
 // ===============================
 
 
@@ -219,6 +219,12 @@ async function generateAIResponse(message){
     try {
 
 
+        const conversationId =
+        localStorage.getItem("ChatTBM_user") 
+        || "guest-user";
+
+
+
         const response =
         await fetch(
 
@@ -226,9 +232,7 @@ async function generateAIResponse(message){
 
             {
 
-
                 method: "POST",
-
 
                 headers: {
 
@@ -240,10 +244,11 @@ async function generateAIResponse(message){
 
                 body: JSON.stringify({
 
-                    message: message
+                    message: message,
+
+                    conversationId: conversationId
 
                 })
-
 
             }
 
@@ -257,6 +262,12 @@ async function generateAIResponse(message){
 
 
 
+        console.log(
+            "ChatTBM AI:",
+            data
+        );
+
+
 
         return data.reply;
 
@@ -267,7 +278,6 @@ async function generateAIResponse(message){
 
 
     catch(error){
-
 
 
         console.log(
@@ -291,7 +301,6 @@ async function generateAIResponse(message){
 
 
 }
-
 /* ===================================
    ChatTBM - Core AI Assistant
 
