@@ -1,872 +1,581 @@
 // =====================================
-// ChatTBM Backend
-// Conversation Memory System
-// PART 1/3
+// ChatTBM Backend V2.0
+// Part 1/3
+// Core Server + Conversation Memory
 // =====================================
-
 
 require("dotenv").config();
 
-
 const express = require("express");
-
 const cors = require("cors");
-
-
 
 const app = express();
 
-
+// =====================================
+// MIDDLEWARE
+// =====================================
 
 app.use(cors());
-
 app.use(express.json());
-
-
-
-
 
 // =====================================
 // CONVERSATION MEMORY
 // =====================================
-
-
-// Temporary memory storage
-// Later we can move this to a database
-
+// Temporary in-memory storage.
+// Future versions can replace this with
+// a database (MongoDB, PostgreSQL, etc.)
+// =====================================
 
 const conversations = {};
 
+// Maximum messages to keep in memory
+const MAX_HISTORY = 30;
 
+// =====================================
+// CREATE CONVERSATION
+// =====================================
 
-
-
-// Create new conversation memory
-
-
-function createConversation(id){
-
-
-    if(!conversations[id]){
-
-
-        conversations[id] = [];
-
-
+function createConversation(conversationId) {
+    if (!conversations[conversationId]) {
+        conversations[conversationId] = [];
     }
-
-
 }
 
+// =====================================
+// SAVE MESSAGE
+// =====================================
 
+function saveMessage(conversationId, role, message) {
 
+    createConversation(conversationId);
 
-
-
-// Save message to memory
-
-
-function saveMessage(id, role, message){
-
-
-    createConversation(id);
-
-
-
-    conversations[id].push({
-
-
-        role: role,
-
-
-        message: message,
-
-
-        time: new Date()
-
-
+    conversations[conversationId].push({
+        role,
+        message,
+        timestamp: new Date().toISOString()
     });
 
-
+    // Keep only the latest messages
+    if (conversations[conversationId].length > MAX_HISTORY) {
+        conversations[conversationId] =
+            conversations[conversationId].slice(-MAX_HISTORY);
+    }
 }
 
+// =====================================
+// GET CONVERSATION
+// =====================================
 
+function getConversation(conversationId) {
 
+    createConversation(conversationId);
 
-
-
-// Get previous conversation
-
-
-function getConversation(id){
-
-
-    createConversation(id);
-
-
-
-    return conversations[id];
-
-
+    return conversations[conversationId];
 }
 
+// =====================================
+// CLEAR CONVERSATION
+// =====================================
 
-
-
-
-
-
+function clearConversation(conversationId) {
+    conversations[conversationId] = [];
+}
 
 // =====================================
 // HEALTH CHECK
 // =====================================
 
-
-app.get("/", (req,res)=>{
-
+app.get("/", (req, res) => {
 
     res.json({
 
+        app: "ChatTBM Backend",
 
-        app:"ChatTBM Backend",
+        version: "2.0",
 
+        status: "Running ✅",
 
-        status:"Running ✅",
+        memory: "Active 🧠",
 
+        uptime: process.uptime(),
 
-        memory:"Active 🧠"
+        conversations: Object.keys(conversations).length,
 
+        environment: process.env.NODE_ENV || "development"
 
     });
-
 
 });
 
 // =====================================
-// CHATTBM RESPONSE ENGINE
-// PART 2/3
+// ChatTBM Backend V2.0
+// Part 2/3
+// Smart Response Engine
 // =====================================
 
+// -------------------------------------
+// Generate AI Response
+// -------------------------------------
 
-// =====================================
-// CHATTBM BETTER RESPONSE ENGINE
-// =====================================
+function generateChatTBMResponse(message, history = []) {
 
+    const text = message.trim().toLowerCase();
 
-function generateChatTBMResponse(message, history){
+    // ---------------------------------
+    // Conversation Context
+    // ---------------------------------
 
-
-    const text = message.toLowerCase();
-
-
-
-    // Remember recent conversation
-
-    let context = "";
-
-
-    if(history.length > 1){
-
-
-        context = history
-        .slice(-4)
+    const previousMessages = history
+        .slice(-6)
         .map(item => item.message)
         .join(" ");
 
+    // ---------------------------------
+    // Greetings
+    // ---------------------------------
 
-    }
-
-
-
-
-
-    // ===============================
-    // GREETING
-    // ===============================
-
-
-    if(
+    if (
         text.includes("hello") ||
         text.includes("hi") ||
         text.includes("hey")
-    ){
-
+    ) {
 
         return `
+Hello 👋
 
-Hello 👋 Welcome to ChatTBM.
+Welcome to ChatTBM.
 
-I am your AI Content Assistant.
+I'm your AI Content Assistant.
 
-I can help you create:
+I can help you with:
 
 ✍️ Captions
 🎬 Video Scripts
 #️⃣ Hashtags
-💡 Viral Content Ideas
-📢 Advert Concepts
-📅 Content Plans
+💡 Viral Ideas
+📢 Advert Copy
+📅 Content Planning
 
-What are we creating today?
-
+What would you like to create today?
 `;
 
     }
 
+    // ---------------------------------
+    // Brand / Business
+    // ---------------------------------
 
-
-
-
-    // ===============================
-    // BRAND / BUSINESS QUESTIONS
-    // ===============================
-
-
-    if(
+    if (
         text.includes("brand") ||
         text.includes("business") ||
         text.includes("company")
-    ){
-
+    ) {
 
         return `
-
-Great! I can help you build content for your brand.
+Let's build something great.
 
 Tell me:
 
-1. What is your business about?
-2. Who is your target audience?
-3. What platform are you creating for?
+• What is your business?
 
-Then I can create captions, scripts and marketing ideas.
+• Who is your target audience?
 
+• Which platform are you posting on?
+
+I'll help you create content that fits your brand.
 `;
 
     }
 
+    // ---------------------------------
+    // Caption Generator
+    // ---------------------------------
 
-
-
-
-    // ===============================
-    // CAPTION
-    // ===============================
-
-
-    if(text.includes("caption")){
-
+    if (
+        text.includes("caption") ||
+        text.includes("instagram") ||
+        text.includes("facebook post")
+    ) {
 
         return `
-
-✍️ Here is a content caption:
+✍️ Caption
 
 "Your ideas deserve attention.
-Create. Improve. Share your story with the world."
+
+Keep creating.
+Keep improving.
+Keep showing the world what makes you different."
 
 Suggested hashtags:
 
 #ChatTBM
 #ContentCreator
-#DigitalCreator
 #CreativeIdeas
-
+#DigitalMarketing
 `;
 
     }
 
+    // ---------------------------------
+    // Video Script
+    // ---------------------------------
 
-
-
-
-    // ===============================
-    // VIDEO SCRIPT
-    // ===============================
-
-
-    if(text.includes("script") || text.includes("video")){
-
+    if (
+        text.includes("script") ||
+        text.includes("video") ||
+        text.includes("reel")
+    ) {
 
         return `
+🎬 Video Script
 
-🎬 Video Script:
+HOOK
 
-HOOK:
-"Most people don't know this..."
+"Most creators never realize this..."
 
-BODY:
+BODY
+
 Explain the problem.
+
 Show your solution.
+
 Give viewers valuable information.
 
-ENDING:
-"Follow for more content ideas."
+ENDING
 
+"Follow for more creator tips."
 `;
 
     }
 
+    // ---------------------------------
+    // Hashtags
+    // ---------------------------------
 
-
-
-
-    // ===============================
-    // VIRAL IDEAS
-    // ===============================
-
-
-    if(
-        text.includes("viral") ||
-        text.includes("idea")
-    ){
-
+    if (
+        text.includes("hashtag") ||
+        text.includes("hashtags")
+    ) {
 
         return `
-
-💡 Viral Content Ideas:
-
-1. Tell your story
-
-2. Show behind the scenes
-
-3. Share your biggest lesson
-
-4. Make a before and after video
-
-5. Answer common audience questions
-
-`;
-
-    }
-
-
-
-
-
-    // ===============================
-    // ADVERT
-    // ===============================
-
-
-    if(
-        text.includes("advert") ||
-        text.includes("marketing")
-    ){
-
-
-        return `
-
-📢 Advert Formula:
-
-Attention:
-Create a powerful first line.
-
-Problem:
-Show the customer's challenge.
-
-Solution:
-Explain your offer.
-
-Action:
-Tell them what to do next.
-
-`;
-
-    }
-
-
-
-
-
-    // ===============================
-    // CONTENT PLAN
-    // ===============================
-
-
-    if(
-        text.includes("calendar") ||
-        text.includes("plan")
-    ){
-
-
-        return `
-
-📅 Content Plan:
-
-Monday:
-Educational content
-
-Tuesday:
-Behind the scenes
-
-Wednesday:
-Storytelling
-
-Friday:
-Promotion
-
-Sunday:
-Community engagement
-
-`;
-
-    }
-
-
-
-
-
-    // ===============================
-    // FOLLOW UP MEMORY
-    // ===============================
-
-
-    if(context){
-
-
-        return `
-
-I remember our previous discussion.
-
-Based on what you shared:
-
-"${context.substring(0,150)}..."
-
-I can help you improve that idea.
-
-What would you like to create next?
-
-`;
-
-    }
-
-
-
-
-
-    // ===============================
-    // DEFAULT CHAT
-    // ===============================
-
-
-    return `
-
-I understand.
-
-I can help you turn your idea into content.
-
-Tell me:
-
-- What are you creating?
-- Who is your audience?
-- Which platform are you using?
-
-I will help you build it.
-
-`;
-
-}
-
-
-    const text = message.toLowerCase();
-
-
-
-
-    // Check previous conversation context
-
-
-    let previousContext = "";
-
-
-
-    if(history.length > 1){
-
-
-        previousContext = history
-        .slice(-3)
-        .map(item => item.message)
-        .join(" ");
-
-    }
-
-
-
-
-
-
-    // ===============================
-    // CAPTION GENERATOR
-    // ===============================
-
-
-    if(text.includes("caption")){
-
-
-        return `
-
-✍️ ChatTBM Caption Idea:
-
-"Turning ideas into reality, one creation at a time.
-
-Your story matters. Your content can inspire."
-
-#Creator
-#ContentCreation
 #ChatTBM
 
-${previousContext ? 
-"I used our previous conversation to make this more personal." 
-: ""}
-
-`;
-
-    }
-
-
-
-
-
-
-
-
-    // ===============================
-    // SCRIPT GENERATOR
-    // ===============================
-
-
-    if(text.includes("script")){
-
-
-        return `
-
-🎬 ChatTBM Video Script:
-
-HOOK:
-"Stop scrolling, this will change how you create content."
-
-BODY:
-Explain the problem, show your solution,
-and provide value to your audience.
-
-ENDING:
-"Follow ChatTBM for more creator ideas."
-
-`;
-
-    }
-
-
-
-
-
-
-
-
-    // ===============================
-    // HASHTAGS
-    // ===============================
-
-
-    if(text.includes("hashtag")){
-
-
-        return `
-
-#ChatTBM
 #AIContent
+
 #ContentCreator
-#ViralIdeas
-#DigitalCreator
+
 #CreatorLife
 
+#DigitalCreator
+
+#ViralContent
 `;
 
     }
 
+    // ---------------------------------
+    // Viral Ideas
+    // ---------------------------------
 
-
-
-
-
-
-
-    // ===============================
-    // VIRAL IDEAS
-    // ===============================
-
-
-    if(text.includes("idea")){
-
+    if (
+        text.includes("viral") ||
+        text.includes("idea") ||
+        text.includes("ideas")
+    ) {
 
         return `
+💡 Viral Content Ideas
 
-💡 Viral Content Ideas:
+1. Tell your personal story.
 
-1. Behind the scenes of your work
+2. Show behind the scenes.
 
-2. Before and after transformation
+3. Share your biggest lesson.
 
-3. Your biggest mistake and lesson
+4. Before vs After.
 
-4. AI challenge videos
-
-5. Customer success stories
-
+5. Answer a question your audience asks often.
 `;
 
     }
 
+    // ---------------------------------
+    // Advert Generator
+    // ---------------------------------
 
-
-
-
-
-
-
-    // ===============================
-    // ADVERT CREATION
-    // ===============================
-
-
-    if(text.includes("advert")){
-
+    if (
+        text.includes("advert") ||
+        text.includes("marketing") ||
+        text.includes("promotion")
+    ) {
 
         return `
+📢 Advert Formula
 
-📢 Advert Structure:
+Attention
 
-Headline:
 Grab attention immediately.
 
-Problem:
-Explain what people struggle with.
+Problem
 
-Solution:
-Show how your product/service helps.
+Explain the challenge.
 
-Action:
-Tell customers what to do next.
+Solution
 
+Present your product or service.
+
+Call To Action
+
+Tell viewers exactly what to do next.
 `;
 
     }
 
+    // ---------------------------------
+    // Content Calendar
+    // ---------------------------------
 
-
-
-
-
-
-
-    // ===============================
-    // CONTENT CALENDAR
-    // ===============================
-
-
-    if(text.includes("calendar")){
-
+    if (
+        text.includes("calendar") ||
+        text.includes("content plan") ||
+        text.includes("schedule")
+    ) {
 
         return `
+📅 Weekly Content Plan
 
-📅 Weekly Content Calendar:
+Monday
+Educational
 
-Monday:
-Educational content
+Tuesday
+Behind The Scenes
 
-Wednesday:
+Wednesday
 Storytelling
 
-Friday:
-Trending topic
+Thursday
+Tips
 
-Sunday:
-Community engagement
+Friday
+Promotion
 
+Saturday
+Trending Content
+
+Sunday
+Community Engagement
 `;
 
     }
 
+    // ---------------------------------
+    // Memory Awareness
+    // ---------------------------------
 
+    if (
+        previousMessages.length > 0 &&
+        (
+            text.includes("continue") ||
+            text.includes("again") ||
+            text.includes("improve") ||
+            text.includes("rewrite")
+        )
+    ) {
 
+        return `
+I remember what we've been discussing.
 
+Based on our recent conversation, I can continue improving your content instead of starting over.
 
+What specific part would you like me to improve?
+`;
 
+    }
 
-
-    // ===============================
-    // DEFAULT CHAT
-    // ===============================
-
+    // ---------------------------------
+    // Default Response
+    // ---------------------------------
 
     return `
+I understand your request.
 
-Hello 👋 I am ChatTBM.
+I'm ready to help with:
 
-I remember our conversation during this session.
+✍️ Writing
 
-I can help you create:
-
-✍️ Captions
 🎬 Scripts
-#️⃣ Hashtags
-💡 Viral ideas
-📢 Adverts
-📅 Content calendars
 
-Tell me what you want to create.
+📢 Marketing
 
+💡 Ideas
+
+📅 Planning
+
+Tell me exactly what you need, and I'll help you create it.
 `;
 
 }
 
 // =====================================
-// CHAT API
-// PART 3/3
+// ChatTBM Backend V2.0
+// Part 3/3
+// Chat API + Server Startup
 // =====================================
 
+// -------------------------------------
+// Chat Endpoint
+// -------------------------------------
 
-app.post("/api/chat", (req,res)=>{
+app.post("/api/chat", (req, res) => {
 
+    try {
 
-    const message = req.body.message;
+        const message = req.body.message;
+        const conversationId =
+            req.body.conversationId || "default-user";
 
+        // -----------------------------
+        // Validation
+        // -----------------------------
 
-    const conversationId = 
-    req.body.conversationId || "default-user";
+        if (
+            !message ||
+            typeof message !== "string" ||
+            message.trim() === ""
+        ) {
 
+            return res.status(400).json({
 
+                success: false,
 
+                reply: "Please enter a message."
 
+            });
 
-    if(!message){
+        }
 
+        // -----------------------------
+        // Save User Message
+        // -----------------------------
+
+        saveMessage(
+            conversationId,
+            "user",
+            message
+        );
+
+        // -----------------------------
+        // Load Conversation
+        // -----------------------------
+
+        const history =
+            getConversation(conversationId);
+
+        // -----------------------------
+        // Generate Reply
+        // -----------------------------
+
+        const reply =
+            generateChatTBMResponse(
+                message,
+                history
+            );
+
+        // -----------------------------
+        // Save Assistant Reply
+        // -----------------------------
+
+        saveMessage(
+            conversationId,
+            "assistant",
+            reply
+        );
+
+        // -----------------------------
+        // Response
+        // -----------------------------
 
         return res.json({
 
+            success: true,
 
-            reply:"Please enter a message."
+            reply,
 
+            conversationId,
+
+            historyLength: history.length
 
         });
 
+    } catch (error) {
+
+        console.error("ChatTBM Error:", error);
+
+        return res.status(500).json({
+
+            success: false,
+
+            reply:
+                "Something went wrong. Please try again."
+
+        });
 
     }
 
+});
 
+// =====================================
+// 404 Handler
+// =====================================
 
+app.use((req, res) => {
 
+    res.status(404).json({
 
+        success: false,
 
-    // Save user message
-
-
-    saveMessage(
-
-        conversationId,
-
-        "user",
-
-        message
-
-    );
-
-
-
-
-
-
-
-    // Get conversation history
-
-
-    const history = getConversation(
-
-        conversationId
-
-    );
-
-
-
-
-
-
-
-    // Generate ChatTBM answer
-
-
-    const reply = generateChatTBMResponse(
-
-        message,
-
-        history
-
-    );
-
-
-
-
-
-
-
-    // Save AI response
-
-
-    saveMessage(
-
-        conversationId,
-
-        "assistant",
-
-        reply
-
-    );
-
-
-
-
-
-
-
-    res.json({
-
-
-        reply: reply,
-
-
-        conversationId: conversationId
-
+        error: "Route not found."
 
     });
 
+});
 
+// =====================================
+// Global Error Handler
+// =====================================
+
+app.use((err, req, res, next) => {
+
+    console.error("Server Error:", err);
+
+    res.status(500).json({
+
+        success: false,
+
+        error: "Internal Server Error"
+
+    });
 
 });
 
-
-
-
-
-
-
-
 // =====================================
-// START SERVER
+// Start Server
 // =====================================
-
 
 const PORT = process.env.PORT || 3000;
 
+app.listen(PORT, () => {
 
+    console.log("");
 
-app.listen(PORT, ()=>{
-
-
-    console.log(
-
-        `🚀 ChatTBM Backend running on port ${PORT}`
-
-    );
-
+    console.log("==================================");
+    console.log(" ChatTBM Backend V2.0");
+    console.log("==================================");
+    console.log(` Server running on port ${PORT}`);
+    console.log(" Conversation Memory: Active");
+    console.log(" Response Engine: Ready");
+    console.log(" Status: Online");
+    console.log("==================================");
+    console.log("");
 
 });
