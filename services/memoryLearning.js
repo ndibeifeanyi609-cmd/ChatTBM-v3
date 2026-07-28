@@ -1,177 +1,160 @@
 
 // =====================================
-// ChatTBM V5.1
+// ChatTBM V5.2
 // Memory Learning Engine
-// Detects useful user information
+// Learns user preferences automatically
 // =====================================
-
 
 const {
     saveMemory,
-    addMemoryNote
+    getAllMemory
 } = require("./memoryEngine");
 
 
 
+function learnFromMessage(userId, message) {
 
-// =====================================
-// LEARN FROM USER MESSAGE
-// =====================================
+    const text = message.toLowerCase();
 
-function learnFromMessage(
-    userId,
-    message
-){
-
-
-    const text =
-    message.toLowerCase();
+    const memory =
+    getAllMemory(userId);
 
 
 
-
-    // ===============================
-    // CREATOR TYPE
-    // ===============================
-
-
-    if(
-        text.includes("creator") ||
-        text.includes("i make videos") ||
-        text.includes("i create videos")
-    ){
-
-        saveMemory(
-            userId,
-            "profile",
-            "creatorType",
-            "content creator"
-        );
-
+    if (!memory.profile) {
+        memory.profile = {};
     }
 
 
 
+    // =====================================
+    // PLATFORM
+    // =====================================
 
-    // ===============================
-    // PLATFORM DETECTION
-    // ===============================
-
-
-    if(
-        text.includes("tiktok")
-    ){
-
-        saveMemory(
-            userId,
-            "profile",
-            "platform",
-            "TikTok"
-        );
-
+    if (text.includes("tiktok")) {
+        saveMemory(userId, "platform", "TikTok");
     }
 
-
-    if(
-        text.includes("youtube")
-    ){
-
-        saveMemory(
-            userId,
-            "profile",
-            "platform",
-            "YouTube"
-        );
-
+    if (text.includes("instagram")) {
+        saveMemory(userId, "platform", "Instagram");
     }
 
+    if (text.includes("facebook")) {
+        saveMemory(userId, "platform", "Facebook");
+    }
 
-    if(
-        text.includes("instagram")
-    ){
-
-        saveMemory(
-            userId,
-            "profile",
-            "platform",
-            "Instagram"
-        );
-
+    if (text.includes("youtube")) {
+        saveMemory(userId, "platform", "YouTube");
     }
 
 
 
-
-    // ===============================
+    // =====================================
     // CONTENT STYLE
-    // ===============================
+    // =====================================
+
+    if (text.includes("funny")) {
+        saveMemory(userId, "contentStyle", "Funny");
+    }
+
+    if (text.includes("cinematic")) {
+        saveMemory(userId, "contentStyle", "Cinematic");
+    }
+
+    if (text.includes("educational")) {
+        saveMemory(userId, "contentStyle", "Educational");
+    }
+
+    if (text.includes("motivational")) {
+        saveMemory(userId, "contentStyle", "Motivational");
+    }
 
 
-    if(
-        text.includes("funny") ||
-        text.includes("comedy")
-    ){
+
+    // =====================================
+    // NICHE
+    // =====================================
+
+    if (text.includes("football")) {
+        saveMemory(userId, "niche", "Football");
+    }
+
+    if (text.includes("business")) {
+        saveMemory(userId, "niche", "Business");
+    }
+
+    if (text.includes("gaming")) {
+        saveMemory(userId, "niche", "Gaming");
+    }
+
+    if (text.includes("comedy")) {
+        saveMemory(userId, "niche", "Comedy");
+    }
+
+    if (text.includes("technology")) {
+        saveMemory(userId, "niche", "Technology");
+    }
+
+
+
+    // =====================================
+    // AUDIENCE
+    // =====================================
+
+    if (text.includes("teen")) {
+        saveMemory(userId, "audience", "Teenagers");
+    }
+
+    if (text.includes("student")) {
+        saveMemory(userId, "audience", "Students");
+    }
+
+    if (text.includes("creator")) {
+        saveMemory(userId, "audience", "Content Creators");
+    }
+
+    if (text.includes("business owner")) {
+        saveMemory(userId, "audience", "Business Owners");
+    }
+
+
+
+    // =====================================
+    // GOAL
+    // =====================================
+
+    if (
+        text.includes("grow") ||
+        text.includes("followers")
+    ) {
 
         saveMemory(
             userId,
-            "profile",
-            "contentStyle",
-            "funny comedy style"
+            "goal",
+            "Audience Growth"
         );
 
     }
 
 
 
-    if(
-        text.includes("cinematic")
-    ){
+    // =====================================
+    // EXPERIENCE
+    // =====================================
 
-        saveMemory(
-            userId,
-            "profile",
-            "contentStyle",
-            "cinematic style"
-        );
-
+    if (text.includes("beginner")) {
+        saveMemory(userId, "experience", "Beginner");
     }
 
-
-
-
-
-    // ===============================
-    // SAVE IMPORTANT NOTES
-    // ===============================
-
-
-    if(
-        text.includes("i am") ||
-        text.includes("i like") ||
-        text.includes("i make")
-    ){
-
-        addMemoryNote(
-            userId,
-            message
-        );
-
+    if (text.includes("intermediate")) {
+        saveMemory(userId, "experience", "Intermediate");
     }
 
-
-
-    return {
-
-        success:true,
-
-        message:
-        "Memory learning completed"
-
-    };
-
+    if (text.includes("expert")) {
+        saveMemory(userId, "experience", "Expert");
+    }
 
 }
-
 
 
 
