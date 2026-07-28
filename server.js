@@ -33,10 +33,11 @@ const {
 
 
 const {
-    generateResponse
-} = require("./services/responseEngine");
-
-
+    saveMemory,
+    getMemory,
+    getAllMemory,
+    addMemoryNote
+} = require("./services/memoryEngine");
 
 // =====================================
 // CREATE SERVER
