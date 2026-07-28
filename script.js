@@ -213,13 +213,7 @@ function addMessage(text, sender){
 // ===============================
 
 
-async function generateAIResponse(message){
-
-
-    try {
-
-
-        // ===============================
+// ===============================
 // CREATE UNIQUE USER ID
 // ===============================
 
@@ -242,6 +236,21 @@ function createUserId(){
 
 }
 
+
+
+// ===============================
+// CONNECT TO CHATTBM V5 BACKEND
+// ===============================
+
+async function generateAIResponse(message){
+
+
+    try {
+
+
+        const conversationId =
+        localStorage.getItem("ChatTBM_user")
+        || createUserId();
 
 
         const response =
