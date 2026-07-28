@@ -296,13 +296,12 @@ app.post("/api/chat", (req, res) => {
 
 
 
-        // Load user memory
-        const memory =
-        getMemory(
-            conversationId,
-            "profile"
-        );
+      // Load user memory profile
 
+const memory =
+getAllMemory(
+    conversationId
+);
 
 
 
