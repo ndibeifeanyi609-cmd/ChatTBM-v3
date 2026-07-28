@@ -1,26 +1,38 @@
 // =====================================
-// ChatTBM V5.0
+// ChatTBM V5.1
 // Response Engine
-// Generates AI responses
+// Memory Powered Responses
 // =====================================
 
 
-function generateResponse(intent, message, memory = {}) {
+
+function generateResponse(
+    intent,
+    message,
+    memory = {},
+    history = []
+){
+
 
     let response = "";
 
 
-    switch(intent) {
+
+
+    switch(intent){
+
 
 
         case "content_creation":
 
             response =
             "I can help you create viral content. " +
-            "Tell me your platform (Instagram, Facebook, TikTok, YouTube) " +
-            "and your topic.";
+            "Tell me your platform and topic, " +
+            "and I will build an idea for you.";
 
             break;
+
+
 
 
 
@@ -28,67 +40,119 @@ function generateResponse(intent, message, memory = {}) {
 
             response =
             "I can create a video script for you. " +
-            "Tell me the video topic, style, and length.";
+            "Tell me the topic, style, and video length.";
 
             break;
+
+
 
 
 
         case "marketing":
 
             response =
-            "I can help you create adverts, sales ideas, " +
+            "I can help you create adverts, " +
             "target audiences, and marketing strategies.";
 
             break;
 
 
 
+
+
         case "idea_generation":
 
             response =
-            "I can generate creative ideas. " +
-            "Tell me what type of content or project you need ideas for.";
+            "I can generate content ideas based on your niche. " +
+            "Tell me what you want to create.";
 
             break;
+
+
 
 
 
         case "general_question":
 
             response =
-            "I am ChatTBM, your AI content assistant. " +
-            "Ask me anything and I will help you.";
+            "I am ChatTBM, your AI Content Assistant. " +
+            "I help creators with ideas, scripts, captions, and marketing.";
 
             break;
+
+
 
 
 
         default:
 
             response =
-            "I understand. How can I help you create better content today?";
+            "I understand. Tell me what you want to create and I will help.";
 
     }
 
 
-    // Add memory personalization
 
-    if (memory.contentStyle) {
 
-        response += 
-        "\n\nI will also consider your preferred style: " 
-        + memory.contentStyle;
+
+
+    // =====================================
+    // MEMORY PERSONALIZATION
+    // =====================================
+
+
+    if(
+        memory.profile
+    ){
+
+
+        if(
+            memory.profile.contentStyle
+        ){
+
+            response +=
+
+            "\n\nI remember your style preference: " +
+
+            memory.profile.contentStyle;
+
+
+        }
+
+
+
+
+        if(
+            memory.profile.platform
+        ){
+
+            response +=
+
+            "\nI will tailor this for " +
+
+            memory.profile.platform;
+
+
+        }
+
 
     }
+
+
+
 
 
     return response;
+
 
 }
 
 
 
+
+
 module.exports = {
+
     generateResponse
+
 };
