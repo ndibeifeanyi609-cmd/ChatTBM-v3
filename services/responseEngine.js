@@ -1,16 +1,12 @@
 // =====================================
-// ChatTBM V5.4
+// ChatTBM V5.7
 // Smart Response Engine
-// Part 3
-// Context Integration
+// Personalized AI Responses
 // =====================================
-
 
 const {
     handleContextRequest
 } = require("./contextEngine");
-
-
 
 // =====================================
 // MAIN RESPONSE GENERATOR
@@ -28,14 +24,13 @@ function generateResponse(
 
     facts = {},
 
-    timeline = []
+    timeline = [],
 
-){
+    aiContext = {}
 
+) {
 
     let response = "";
-
-
 
     // =====================================
     // CHECK CONTEXT FIRST
@@ -50,28 +45,20 @@ function generateResponse(
 
     );
 
-
-
-    if(
-        contextResult.matched
-    ){
+    if (contextResult.matched) {
 
         return contextResult.response;
 
     }
 
-
-
     const text =
     message.trim().toLowerCase();
-
-
 
     // =====================================
     // GREETING
     // =====================================
 
-    if(
+    if (
 
         text === "hi" ||
 
@@ -79,7 +66,7 @@ function generateResponse(
 
         text === "hey"
 
-    ){
+    ) {
 
         return `
 Hello 👋
@@ -101,15 +88,11 @@ What would you like to create today?
 
     }
 
-
-
-
     // =====================================
     // INTENT RESPONSE
     // =====================================
 
-    switch(intent){
-
+    switch (intent) {
 
         case "content_creation":
 
@@ -118,16 +101,12 @@ What would you like to create today?
 
             break;
 
-
-
         case "script_generation":
 
             response =
             "I can create a video script. Tell me the topic, style and length.";
 
             break;
-
-
 
         case "marketing":
 
@@ -136,8 +115,6 @@ What would you like to create today?
 
             break;
 
-
-
         case "idea_generation":
 
             response =
@@ -145,16 +122,12 @@ What would you like to create today?
 
             break;
 
-
-
-        case "general_question":
+        case "greeting":
 
             response =
-            "I'm ChatTBM, your AI Content Assistant. How can I help you?";
+            "Hello! I'm ChatTBM. What would you like to create today?";
 
             break;
-
-
 
         default:
 
@@ -163,70 +136,99 @@ What would you like to create today?
 
     }
 
-
-
-
     // =====================================
     // MEMORY PERSONALIZATION
     // =====================================
 
-
-    if(memory.contentStyle){
+    if (memory.contentStyle) {
 
         response +=
-
-        "\n\n🎨 Style preference: " +
+        "\n\n🎨 Preferred Style: " +
         memory.contentStyle;
 
     }
 
-
-
-    if(memory.platform){
+    if (memory.platform) {
 
         response +=
-
-        "\n📱 Platform: " +
+        "\n📱 Preferred Platform: " +
         memory.platform;
 
     }
 
-
-
-    if(memory.tone){
+    if (memory.tone) {
 
         response +=
-
-        "\n🎯 Tone: " +
+        "\n🎯 Preferred Tone: " +
         memory.tone;
 
     }
 
-
-
-
     // =====================================
-    // FACT AWARENESS
+    // PERSONAL AI CONTEXT
     // =====================================
 
+    if (
 
-    if(facts.lastMessage){
+        aiContext &&
+
+        aiContext.personality
+
+    ) {
 
         response +=
+        "\n\n🤖 AI Mode: " +
+        aiContext.personality;
 
+    }
+
+    if (
+
+        aiContext &&
+
+        aiContext.goal
+
+    ) {
+
+        response +=
+        "\n🎯 Current Goal: " +
+        aiContext.goal;
+
+    }
+
+    // =====================================
+    // CONVERSATION MEMORY
+    // =====================================
+
+    if (
+
+        facts &&
+
+        facts.lastMessage
+
+    ) {
+
+        response +=
         "\n\n🧠 I remember our previous discussion.";
 
     }
 
+    if (
 
+        timeline &&
+
+        timeline.length > 0
+
+    ) {
+
+        response +=
+        "\n📚 Conversation history available.";
+
+    }
 
     return response;
 
-
 }
-
-
-
 
 module.exports = {
 
