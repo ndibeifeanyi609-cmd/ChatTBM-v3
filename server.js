@@ -507,12 +507,11 @@ function processConversationMemory(event){
 if(rankedMemory){
 
 
-    saveMemory(
+    saveDatabaseMemory(
 
-        conversationId,
+        event.userId,
 
         {
-
 
             type:
 
@@ -521,7 +520,7 @@ if(rankedMemory){
 
             value:
 
-            message,
+            event.message,
 
 
             score:
@@ -536,9 +535,15 @@ if(rankedMemory){
 
             metadata:{
 
-                intent,
+                intent:
 
-                source:"ChatTBM",
+                event.intent || "general",
+
+
+                source:
+
+                "ChatTBM",
+
 
                 timestamp:
 
@@ -546,69 +551,12 @@ if(rankedMemory){
 
             }
 
-
         }
 
     );
 
 
 }
-
-
-
-
-
-
-
-        console.log(
-
-            "🧠 V5.9 Memory:",
-
-            rankedMemory.level,
-
-            "| Score:",
-
-            rankedMemory.score
-
-        );
-
-
-
-
-
-        return rankedMemory;
-
-
-
-    }
-
-
-
-    catch(error){
-
-
-
-        console.error(
-
-
-            "V5.9 Memory Pipeline Error:",
-
-
-            error.message
-
-
-        );
-
-
-
-        return null;
-
-
-    }
-
-
-}
-
 // =====================================
 // ChatTBM Backend V5.9
 // Health Check + Chat API
