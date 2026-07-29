@@ -1,9 +1,16 @@
 // =====================================
 // ChatTBM V5.5
 // Advanced Memory Retrieval Engine
-// Part 1
-// Selects relevant memories
+// Part 4
+// Ranking Integration
 // =====================================
+
+
+const {
+    rankMemories
+} = require("./memoryRanking");
+
+
 
 
 // =====================================
@@ -18,92 +25,80 @@ function retrieveMemory(
 
 ){
 
-    const text =
-    message.toLowerCase();
+
+    // =====================================
+    // RANK ALL MEMORIES
+    // =====================================
+
+    const rankedMemories =
+
+    rankMemories(
+
+        memory,
+
+        message
+
+    );
+
+
 
 
     const relevantMemory = {};
 
 
 
-    // =====================================
-    // PLATFORM MEMORY
-    // =====================================
-
-    if(memory.platform){
-
-        relevantMemory.platform =
-        memory.platform;
-
-    }
-
-
 
     // =====================================
-    // STYLE MEMORY
+    // SELECT TOP MEMORIES
     // =====================================
 
-    if(memory.contentStyle){
+    rankedMemories
 
-        relevantMemory.contentStyle =
-        memory.contentStyle;
+    .slice(0,5)
 
-    }
+    .forEach(
+
+        item => {
 
 
+            if(item.score > 1){
 
-    // =====================================
-    // TONE MEMORY
-    // =====================================
 
-    if(memory.tone){
+                relevantMemory[item.key] =
+                item.value;
 
-        relevantMemory.tone =
-        memory.tone;
 
-    }
+            }
+
+
+        }
+
+    );
+
+
 
 
 
     // =====================================
-    // GOAL MEMORY
+    // MEMORY METADATA
     // =====================================
 
-    if(memory.goal){
+    relevantMemory._memoryInfo = {
 
-        relevantMemory.goal =
-        memory.goal;
-
-    }
+        total:
+        rankedMemories.length,
 
 
-
-    // =====================================
-    // MESSAGE BASED FILTER
-    // =====================================
-
-
-    if(
-        text.includes("script") &&
-        memory.contentStyle
-    ){
-
-        relevantMemory.reason =
-        "Using preferred content style for script.";
-
-    }
+        selected:
+        Object.keys(relevantMemory)
+        .length,
 
 
+        ranking:
+        rankedMemories
 
-    if(
-        text.includes("post") ||
-        text.includes("caption")
-    ){
+    };
 
-        relevantMemory.reason =
-        "Using saved content preferences.";
-
-    }
 
 
 
@@ -111,6 +106,7 @@ function retrieveMemory(
 
 
 }
+
 
 
 
