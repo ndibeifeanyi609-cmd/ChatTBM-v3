@@ -479,3 +479,247 @@ function getMemoryCount(
 
 
 }
+
+// =====================================
+// DELETE SINGLE MEMORY
+// =====================================
+
+
+function deleteMemory(
+
+    userId,
+
+    memoryId
+
+){
+
+
+    const userMemory =
+
+    createUserMemory(userId);
+
+
+
+    const before =
+
+    userMemory.memories.length;
+
+
+
+    userMemory.memories =
+
+    userMemory.memories.filter(
+
+        memory =>
+
+        memory.id !== memoryId
+
+    );
+
+
+
+    updateTimestamp(userId);
+
+
+
+    return {
+
+
+        success:
+
+        before !== userMemory.memories.length,
+
+
+        message:
+
+        before !== userMemory.memories.length
+
+        ?
+
+        "Memory deleted"
+
+        :
+
+        "Memory not found"
+
+
+    };
+
+
+}
+
+
+
+
+
+// =====================================
+// CLEAR ALL USER MEMORY
+// =====================================
+
+
+function clearUserMemory(
+
+    userId
+
+){
+
+
+    if(memoryDatabase[userId]){
+
+
+        memoryDatabase[userId].memories = [];
+
+        updateTimestamp(userId);
+
+
+    }
+
+
+
+    return {
+
+
+        success:true,
+
+
+        message:
+
+        "User memory cleared"
+
+
+    };
+
+
+}
+
+
+
+
+
+// =====================================
+// EXPORT USER MEMORY
+// =====================================
+
+
+function exportUserMemory(
+
+    userId
+
+){
+
+
+    const userMemory =
+
+    createUserMemory(userId);
+
+
+
+    return userMemory;
+
+
+}
+
+
+
+
+
+// =====================================
+// DATABASE STATISTICS
+// =====================================
+
+
+function getDatabaseStats(){
+
+
+    const users =
+
+    Object.keys(memoryDatabase);
+
+
+
+    let totalMemories = 0;
+
+
+
+    users.forEach(userId => {
+
+
+        totalMemories +=
+
+        memoryDatabase[userId]
+
+        .memories.length;
+
+
+    });
+
+
+
+    return {
+
+
+        totalUsers:
+
+        users.length,
+
+
+        totalMemories
+
+
+    };
+
+
+}
+
+
+
+
+
+// =====================================
+// FINAL EXPORT
+// =====================================
+
+
+module.exports = {
+
+
+    createUserMemory,
+
+
+    userExists,
+
+
+    saveMemory,
+
+
+    getMemories,
+
+
+    getImportantMemories,
+
+
+    searchMemory,
+
+
+    getBestMemories,
+
+
+    touchMemory,
+
+
+    getMemoryCount,
+
+
+    deleteMemory,
+
+
+    clearUserMemory,
+
+
+    exportUserMemory,
+
+
+    getDatabaseStats
+
+
+};
