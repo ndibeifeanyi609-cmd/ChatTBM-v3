@@ -287,15 +287,30 @@ app.post("/api/chat", (req, res) => {
 // AI Pipeline + Response
 // =====================================
 
-        // =============================
-        // LOAD USER MEMORY
-        // =============================
+     // =============================
+// LOAD USER MEMORY
+// =============================
 
-        const memory =
-        getAllMemory(
-            conversationId
-        );
+const userMemory =
+getAllMemory(
 
+    conversationId
+
+);
+
+
+// =============================
+// RETRIEVE RELEVANT MEMORY
+// =============================
+
+const memory =
+retrieveMemory(
+
+    userMemory,
+
+    message
+
+);
         // =============================
         // LOAD CONVERSATION FACTS
         // =============================
