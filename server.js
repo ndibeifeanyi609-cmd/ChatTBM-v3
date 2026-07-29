@@ -358,6 +358,19 @@ retrieveMemory(
         );
 
         // =============================
+// BUILD PERSONAL AI CONTEXT
+// =============================
+
+const aiContext =
+adaptiveEngine.personalize(
+
+    conversationId,
+
+    message
+
+);
+
+        // =============================
         // GENERATE AI RESPONSE
         // =============================
 
