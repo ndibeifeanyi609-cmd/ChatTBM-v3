@@ -46,10 +46,11 @@ const {
     clearConversationMemory
 } = require("./services/conversationMemory");
 
-// Response Engine
+// Memory Retrieval Engine
+
 const {
-    generateResponse
-} = require("./services/responseEngine");
+    retrieveMemory
+} = require("./services/memoryRetrieval");
 
 // =====================================
 // CREATE SERVER
