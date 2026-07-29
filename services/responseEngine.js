@@ -1,170 +1,235 @@
 // =====================================
 // ChatTBM V5.4
 // Smart Response Engine
-// Part 2
-// Context Awareness
+// Part 3
+// Context Integration
 // =====================================
 
 
-function handleContextRequest(
+const {
+    handleContextRequest
+} = require("./contextEngine");
+
+
+
+// =====================================
+// MAIN RESPONSE GENERATOR
+// =====================================
+
+function generateResponse(
+
+    intent,
+
     message,
-    history = []
+
+    memory = {},
+
+    history = [],
+
+    facts = {},
+
+    timeline = []
+
 ){
 
+
+    let response = "";
+
+
+
+    // =====================================
+    // CHECK CONTEXT FIRST
+    // =====================================
+
+    const contextResult =
+    handleContextRequest(
+
+        message,
+
+        history
+
+    );
+
+
+
+    if(
+        contextResult.matched
+    ){
+
+        return contextResult.response;
+
+    }
+
+
+
     const text =
-    message.toLowerCase();
-
-
-    // Get previous user message
-
-    let previousMessage = "";
-
-
-    if(history.length > 1){
-
-        for(
-            let i = history.length - 1;
-            i >= 0;
-            i--
-        ){
-
-            if(
-                history[i].role === "user"
-            ){
-
-                previousMessage =
-                history[i].message;
-
-                break;
-
-            }
-
-        }
-
-    }
+    message.trim().toLowerCase();
 
 
 
     // =====================================
-    // CONTINUE REQUEST
+    // GREETING
     // =====================================
 
     if(
-        text.includes("continue") ||
-        text.includes("keep going")
+
+        text === "hi" ||
+
+        text === "hello" ||
+
+        text === "hey"
+
     ){
 
-        return {
+        return `
+Hello 👋
 
-            matched:true,
+Welcome to ChatTBM.
 
-            response:
-`I'll continue from where we stopped.
+I'm your AI Content Assistant.
 
-Previous topic:
-${previousMessage || "our last conversation"}
+I can help you with:
 
-Let's build on that and improve it further.`
+✍️ Captions
+🎬 Video Scripts
+💡 Content Ideas
+📢 Marketing
+📅 Content Planning
 
-        };
+What would you like to create today?
+`;
 
     }
 
 
 
+
     // =====================================
-    // REWRITE REQUEST
+    // INTENT RESPONSE
     // =====================================
 
-    if(
-        text.includes("rewrite") ||
-        text.includes("make it better")
-    ){
+    switch(intent){
 
-        return {
 
-            matched:true,
+        case "content_creation":
 
-            response:
-`I'll rewrite and improve the previous content.
+            response =
+            "I can help you create content. Tell me your platform and topic.";
 
-Previous content:
-${previousMessage || "No previous content found."}
+            break;
 
-I will make it clearer, stronger, and more engaging.`
 
-        };
+
+        case "script_generation":
+
+            response =
+            "I can create a video script. Tell me the topic, style and length.";
+
+            break;
+
+
+
+        case "marketing":
+
+            response =
+            "I can help create adverts, promotions and marketing strategies.";
+
+            break;
+
+
+
+        case "idea_generation":
+
+            response =
+            "I can generate creative ideas. Tell me what you want ideas for.";
+
+            break;
+
+
+
+        case "general_question":
+
+            response =
+            "I'm ChatTBM, your AI Content Assistant. How can I help you?";
+
+            break;
+
+
+
+        default:
+
+            response =
+            "I understand. Tell me more details and I'll help you.";
 
     }
 
 
 
+
     // =====================================
-    // SHORTEN REQUEST
+    // MEMORY PERSONALIZATION
     // =====================================
 
-    if(
-        text.includes("shorten") ||
-        text.includes("make it shorter")
-    ){
 
-        return {
+    if(memory.contentStyle){
 
-            matched:true,
+        response +=
 
-            response:
-`I'll create a shorter version based on:
-
-${previousMessage || "your previous request"}
-
-I will keep the main idea while making it concise.`
-
-        };
+        "\n\n🎨 Style preference: " +
+        memory.contentStyle;
 
     }
 
 
 
-    // =====================================
-    // EXPAND REQUEST
-    // =====================================
+    if(memory.platform){
 
-    if(
-        text.includes("expand") ||
-        text.includes("make it longer")
-    ){
+        response +=
 
-        return {
-
-            matched:true,
-
-            response:
-`I'll expand the previous idea with more details:
-
-${previousMessage || "your previous request"}
-
-I will add more explanation and examples.`
-
-        };
+        "\n📱 Platform: " +
+        memory.platform;
 
     }
 
 
 
-    return {
+    if(memory.tone){
 
-        matched:false,
+        response +=
 
-        response:null
+        "\n🎯 Tone: " +
+        memory.tone;
 
-    };
+    }
+
+
+
+
+    // =====================================
+    // FACT AWARENESS
+    // =====================================
+
+
+    if(facts.lastMessage){
+
+        response +=
+
+        "\n\n🧠 I remember our previous discussion.";
+
+    }
+
+
+
+    return response;
+
 
 }
 
 
 
+
 module.exports = {
 
-    handleContextRequest
+    generateResponse
 
 };
