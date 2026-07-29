@@ -1,7 +1,7 @@
 // =====================================
 // ChatTBM V5.7
 // Intent Engine
-// Detects what the user wants
+// Detects the user's intent
 // =====================================
 
 // =====================================
@@ -10,17 +10,21 @@
 
 function detectIntent(message = "") {
 
-    const text = message.toLowerCase().trim();
+    const text = message
+        .trim()
+        .toLowerCase();
 
     // =====================================
     // CONTENT CREATION
     // =====================================
 
     if (
+
         text.includes("caption") ||
-        text.includes("content") ||
         text.includes("post") ||
-        text.includes("social media")
+        text.includes("content") ||
+        text.includes("write content")
+
     ) {
 
         return "content_creation";
@@ -32,11 +36,14 @@ function detectIntent(message = "") {
     // =====================================
 
     if (
+
         text.includes("script") ||
         text.includes("video") ||
         text.includes("youtube") ||
-        text.includes("tiktok") ||
-        text.includes("reel")
+        text.includes("reel") ||
+        text.includes("short") ||
+        text.includes("storyboard")
+
     ) {
 
         return "script_generation";
@@ -48,12 +55,14 @@ function detectIntent(message = "") {
     // =====================================
 
     if (
-        text.includes("marketing") ||
+
         text.includes("advert") ||
         text.includes("advertisement") ||
-        text.includes("promotion") ||
+        text.includes("marketing") ||
         text.includes("business") ||
-        text.includes("sell")
+        text.includes("promotion") ||
+        text.includes("brand")
+
     ) {
 
         return "marketing";
@@ -65,13 +74,35 @@ function detectIntent(message = "") {
     // =====================================
 
     if (
+
         text.includes("idea") ||
         text.includes("ideas") ||
         text.includes("brainstorm") ||
-        text.includes("creative")
+        text.includes("viral") ||
+        text.includes("content idea")
+
     ) {
 
         return "idea_generation";
+
+    }
+
+    // =====================================
+    // GREETINGS
+    // =====================================
+
+    if (
+
+        text === "hi" ||
+        text === "hello" ||
+        text === "hey" ||
+        text === "good morning" ||
+        text === "good afternoon" ||
+        text === "good evening"
+
+    ) {
+
+        return "greeting";
 
     }
 
@@ -80,12 +111,14 @@ function detectIntent(message = "") {
     // =====================================
 
     if (
+
         text.includes("what") ||
         text.includes("who") ||
         text.includes("where") ||
         text.includes("when") ||
         text.includes("why") ||
         text.includes("how")
+
     ) {
 
         return "general_question";
