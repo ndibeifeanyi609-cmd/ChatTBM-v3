@@ -1,5 +1,5 @@
 // =====================================
-// ChatTBM Backend V5.9
+// ChatTBM Backend V5.9.1
 // Part 1
 // Core Setup + AI Engine Connections
 // =====================================
@@ -35,13 +35,14 @@ app.use(express.json());
 
 
 // =====================================
-// CHATTBM AI ENGINES
+// CHATTBM CORE AI ENGINES
 // =====================================
 
 
-// Intent Engine
+// Intent Detection Engine
 
 const {
+
     detectIntent
 
 } = require("./services/intentEngine");
@@ -49,10 +50,10 @@ const {
 
 
 
-// Response Engine
-// Your actual filename is responseEngine.js
+// Response Generation Engine
 
 const {
+
     generateResponse
 
 } = require("./services/responseEngine");
@@ -61,17 +62,13 @@ const {
 
 
 // =====================================
-// EXISTING MEMORY SYSTEM
+// MEMORY ENGINE SYSTEM
 // =====================================
 
 
 const {
 
-    saveMemory,
-    getMemory,
-    getAllMemory,
-    addMemoryNote,
-    clearMemory
+    getAllMemory
 
 } = require("./services/memoryEngine");
 
@@ -87,18 +84,19 @@ const {
 
 
 
-
 const {
 
     saveFact,
-    getFact,
+
     getFacts,
+
     addTimeline,
+
     getTimeline,
+
     clearConversationMemory
 
 } = require("./services/conversationMemory");
-
 
 
 
@@ -108,6 +106,27 @@ const {
     retrieveMemory
 
 } = require("./services/memoryRetrieval");
+
+
+
+
+// =====================================
+// LONG TERM MEMORY DATABASE
+// V5.9.1
+// =====================================
+
+
+const {
+
+    saveMemory,
+
+    getMemories,
+
+    searchMemory,
+
+    getBestMemories
+
+} = require("./services/memoryDatabase");
 
 
 
@@ -158,7 +177,7 @@ require("./services/userProfile");
 
 
 // =====================================
-// V5.9 TRUE CONVERSATIONAL MEMORY
+// V5.9 ADVANCED MEMORY SYSTEM
 // =====================================
 
 
@@ -171,7 +190,7 @@ require("./services/conversationTimeline");
 
 
 
-// Memory Extraction
+// Memory Extractor
 
 const memoryExtractor =
 
@@ -189,7 +208,7 @@ require("./services/relationshipEngine");
 
 
 
-// Memory Importance Ranking
+// Memory Importance Ranker
 
 const memoryRanker =
 
@@ -198,28 +217,14 @@ require("./services/memoryRanker");
 
 
 
-// Memory Retrieval Ranking
-// V5.5 System
+// Legacy Memory Ranking
+// Keep for compatibility
 
 const {
 
     rankMemories
 
 } = require("./services/memoryRanking");
-
-
-
-
-// Memory Database
-
-const {
-
-    saveMemory,
-    getMemories,
-    searchMemory,
-    getBestMemories
-
-} = require("./services/memoryDatabase");
 
 
 
@@ -248,7 +253,7 @@ new AdaptiveResponseEngine(
 
 
 // =====================================
-// CONVERSATION CACHE
+// CONVERSATION STORAGE
 // =====================================
 
 
@@ -257,8 +262,11 @@ const conversations = {};
 const MAX_HISTORY = 30;
 
 // =====================================
-// CHAT CONVERSATION SYSTEM
+// ChatTBM Backend V5.9.1
+// Part 2
+// Conversation System + Memory Pipeline
 // =====================================
+
 
 
 // =====================================
@@ -282,8 +290,9 @@ function createConversation(conversationId){
 
 
 
+
 // =====================================
-// SAVE MESSAGE HISTORY
+// SAVE CHAT HISTORY
 // =====================================
 
 function saveMessage(
@@ -341,7 +350,7 @@ function saveMessage(
 
 
 // =====================================
-// GET CONVERSATION HISTORY
+// GET CHAT HISTORY
 // =====================================
 
 function getConversation(conversationId){
@@ -360,7 +369,7 @@ function getConversation(conversationId){
 
 
 // =====================================
-// CLEAR CONVERSATION
+// CLEAR CHAT HISTORY
 // =====================================
 
 function clearConversation(conversationId){
@@ -376,8 +385,7 @@ function clearConversation(conversationId){
 
 
 // =====================================
-// CHATTBM V5.9
-// TRUE MEMORY PIPELINE
+// V5.9.1 TRUE MEMORY PIPELINE
 // =====================================
 
 
@@ -388,12 +396,11 @@ function processConversationMemory(event){
 
 
         // =============================
-        // 1. SAVE TO TIMELINE
+        // 1. SAVE EVENT TO TIMELINE
         // =============================
 
 
         const timelineEvent =
-
 
         conversationTimeline.addEvent({
 
@@ -439,9 +446,8 @@ function processConversationMemory(event){
 
 
 
-
         // =============================
-        // 2. EXTRACT MEMORIES
+        // 2. EXTRACT MEMORY
         // =============================
 
 
@@ -450,8 +456,6 @@ function processConversationMemory(event){
             timelineEvent
 
         );
-
-
 
 
 
@@ -472,8 +476,6 @@ function processConversationMemory(event){
 
 
 
-
-
         // =============================
         // 4. RANK MEMORY IMPORTANCE
         // =============================
@@ -481,14 +483,13 @@ function processConversationMemory(event){
 
         const rankedMemory =
 
-
         memoryRanker.rank({
 
 
             ...timelineEvent,
 
 
-            count: 1,
+            count:1,
 
 
             timestamp:
@@ -498,68 +499,130 @@ function processConversationMemory(event){
 
         });
 
-        // =====================================
-// SAVE RANKED MEMORY
-// V5.9.1 DATABASE CONNECTION
-// =====================================
 
 
-if(rankedMemory){
 
 
-    saveDatabaseMemory(
-
-        event.userId,
-
-        {
-
-            type:
-
-            "conversation",
+        // =============================
+        // 5. SAVE IMPORTANT MEMORY
+        // TO LONG TERM DATABASE
+        // =============================
 
 
-            value:
-
-            event.message,
+        if(rankedMemory && rankedMemory.score >= 20){
 
 
-            score:
+            saveMemory(
 
-            rankedMemory.score,
-
-
-            level:
-
-            rankedMemory.level,
+                event.userId,
 
 
-            metadata:{
+                {
 
-                intent:
+                    type:
 
-                event.intent || "general",
-
-
-                source:
-
-                "ChatTBM",
+                    "conversation",
 
 
-                timestamp:
+                    value:
 
-                new Date().toISOString()
+                    event.message,
 
-            }
+
+                    score:
+
+                    rankedMemory.score,
+
+
+                    level:
+
+                    rankedMemory.level,
+
+
+                    metadata:{
+
+
+                        intent:
+
+                        event.intent || "general",
+
+
+                        topic:
+
+                        event.topic || "conversation",
+
+
+                        source:
+
+                        "ChatTBM",
+
+
+                        timestamp:
+
+                        new Date().toISOString()
+
+
+                    }
+
+
+                }
+
+            );
+
 
         }
 
-    );
+
+
+
+
+        console.log(
+
+            "🧠 Memory Saved:",
+
+            rankedMemory.level,
+
+            "| Score:",
+
+            rankedMemory.score
+
+        );
+
+
+
+
+
+        return rankedMemory;
+
+
+    }
+
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Memory Pipeline Error:",
+
+            error.message
+
+        );
+
+
+        return null;
+
+
+    }
 
 
 }
+
 // =====================================
-// ChatTBM Backend V5.9
-// Health Check + Chat API
+// ChatTBM Backend V5.9.1
+// Part 3
+// Chat API + AI Response Flow
 // =====================================
 
 
@@ -573,6 +636,7 @@ app.get("/", (req, res) => {
 
     res.json({
 
+
         app:
 
         "ChatTBM Backend",
@@ -580,7 +644,7 @@ app.get("/", (req, res) => {
 
         version:
 
-        "5.9",
+        "5.9.1",
 
 
         status:
@@ -612,24 +676,6 @@ app.get("/", (req, res) => {
             "Active 📚",
 
 
-            conversation:
-
-            "Active 📝",
-
-
-            identity:
-
-            "Active 👤",
-
-
-            adaptiveAI:
-
-            "Active 🤖",
-
-
-
-            // V5.9
-
             timeline:
 
             "Active 🕒",
@@ -647,7 +693,12 @@ app.get("/", (req, res) => {
 
             memoryRanker:
 
-            "Active 🧠"
+            "Active 🧠",
+
+
+            adaptiveAI:
+
+            "Active 🤖"
 
 
         },
@@ -656,7 +707,6 @@ app.get("/", (req, res) => {
         uptime:
 
         process.uptime(),
-
 
 
         conversations:
@@ -672,10 +722,10 @@ app.get("/", (req, res) => {
 
 
 
-
 // =====================================
 // CHAT API
 // =====================================
+
 
 app.post("/api/chat", (req,res)=>{
 
@@ -690,7 +740,6 @@ app.post("/api/chat", (req,res)=>{
 
 
             conversationId = "guest-user"
-
 
 
         } = req.body;
@@ -736,7 +785,6 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
         // SAVE USER MESSAGE
         // =============================
@@ -757,9 +805,8 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
-        // V5.8 MEMORY LEARNING
+        // BASIC MEMORY LEARNING
         // =============================
 
 
@@ -776,9 +823,26 @@ app.post("/api/chat", (req,res)=>{
 
 
 
+        // =============================
+        // DETECT INTENT
+        // =============================
+
+
+        const intent =
+
+        detectIntent(
+
+            message
+
+        );
+
+
+
+
+
 
         // =============================
-        // V5.9 MEMORY PIPELINE
+        // ADVANCED MEMORY PIPELINE
         // =============================
 
 
@@ -798,6 +862,9 @@ app.post("/api/chat", (req,res)=>{
             message,
 
 
+            intent,
+
+
             topic:
 
             "conversation",
@@ -805,9 +872,11 @@ app.post("/api/chat", (req,res)=>{
 
             metadata:{
 
+
                 source:
 
                 "user"
+
 
             }
 
@@ -838,9 +907,8 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
-        // SAVE LAST FACT
+        // SAVE FACT
         // =============================
 
 
@@ -848,31 +916,13 @@ app.post("/api/chat", (req,res)=>{
 
             conversationId,
 
+
             "lastMessage",
+
 
             message
 
         );
-
-
-
-
-
-
-
-        // =============================
-        // OLD TIMELINE SYSTEM
-        // =============================
-
-
-        addTimeline(
-
-            conversationId,
-
-            "User: " + message
-
-        );
-
 
 
 
@@ -897,28 +947,8 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
-        // DETECT INTENT
-        // =============================
-
-
-        const intent =
-
-        detectIntent(
-
-            message
-
-        );
-
-
-
-
-
-
-
-        // =============================
-        // LOAD MEMORY
+        // LOAD USER MEMORY
         // =============================
 
 
@@ -935,9 +965,8 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
-        // MEMORY RETRIEVAL
+        // RETRIEVE RELEVANT MEMORY
         // =============================
 
 
@@ -956,10 +985,8 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
-        // MEMORY RANKING
-        // V5.5 SYSTEM
+        // RANK MEMORY
         // =============================
 
 
@@ -973,6 +1000,23 @@ app.post("/api/chat", (req,res)=>{
 
         );
 
+
+
+
+
+
+        // =============================
+        // LOAD LONG TERM MEMORY
+        // =============================
+
+
+        const longTermMemory =
+
+        getBestMemories(
+
+            conversationId
+
+        );
 
 
 
@@ -997,7 +1041,6 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
         // LOAD TIMELINE
         // =============================
@@ -1016,9 +1059,8 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
-        // AI PERSONALITY CONTEXT
+        // AI PERSONAL CONTEXT
         // =============================
 
 
@@ -1031,7 +1073,6 @@ app.post("/api/chat", (req,res)=>{
             message
 
         );
-
 
 
 
@@ -1066,11 +1107,13 @@ app.post("/api/chat", (req,res)=>{
             timeline,
 
 
-            aiContext
+            aiContext,
+
+
+            longTermMemory
 
 
         );
-
 
 
 
@@ -1097,9 +1140,8 @@ app.post("/api/chat", (req,res)=>{
 
 
 
-
         // =============================
-        // V5.9 STORE AI RESPONSE
+        // STORE AI RESPONSE MEMORY
         // =============================
 
 
@@ -1131,9 +1173,11 @@ app.post("/api/chat", (req,res)=>{
 
             metadata:{
 
+
                 source:
 
                 "ChatTBM"
+
 
             }
 
@@ -1147,7 +1191,7 @@ app.post("/api/chat", (req,res)=>{
 
 
         // =============================
-        // RESPONSE
+        // RETURN RESPONSE
         // =============================
 
 
@@ -1167,6 +1211,9 @@ app.post("/api/chat", (req,res)=>{
 
 
             rankedMemory,
+
+
+            longTermMemory,
 
 
             facts,
@@ -1245,25 +1292,27 @@ app.post("/api/chat", (req,res)=>{
 });
 
 // =====================================
-// ChatTBM V5.9
-// Memory Debug System
+// ChatTBM Backend V5.9.1
+// Part 4
+// Memory Routes + Error Handling + Server
 // =====================================
+
 
 
 // =====================================
 // VIEW ALL MEMORY DATA
 // =====================================
 
-app.get("/api/memory", (req, res) => {
+app.get("/api/memory", (req,res)=>{
 
 
-    try {
+    try{
 
 
         res.json({
 
 
-            success: true,
+            success:true,
 
 
             timeline:
@@ -1290,8 +1339,13 @@ app.get("/api/memory", (req, res) => {
 
 
 
-            conversations:
+            databaseMemory:
 
+            "Use /api/memory/:userId to view saved memories",
+
+
+
+            conversations:
 
             Object.keys(conversations).length
 
@@ -1339,11 +1393,12 @@ app.get("/api/memory", (req, res) => {
 
 
 
+
 // =====================================
-// VIEW USER CONVERSATION MEMORY
+// VIEW USER MEMORY
 // =====================================
 
-app.get("/api/memory/:userId", (req,res)=>{
+app.get("/api/memory/:userId",(req,res)=>{
 
 
     try{
@@ -1355,10 +1410,15 @@ app.get("/api/memory/:userId", (req,res)=>{
 
 
 
+
         res.json({
 
 
             success:true,
+
+
+
+            userId,
 
 
 
@@ -1369,6 +1429,12 @@ app.get("/api/memory/:userId", (req,res)=>{
                 userId
 
             ),
+
+
+
+            extractedMemory:
+
+            memoryExtractor.getMemory(),
 
 
 
@@ -1398,6 +1464,16 @@ app.get("/api/memory/:userId", (req,res)=>{
 
                 userId
 
+            ),
+
+
+
+            longTermMemory:
+
+            getMemories(
+
+                userId
+
             )
 
 
@@ -1406,7 +1482,6 @@ app.get("/api/memory/:userId", (req,res)=>{
 
 
     }
-
 
 
     catch(error){
@@ -1444,11 +1519,15 @@ app.get("/api/memory/:userId", (req,res)=>{
 
 
 
+
+
 // =====================================
-// CLEAR USER MEMORY
+// SEARCH MEMORY
 // =====================================
 
-app.delete("/api/memory/:userId",(req,res)=>{
+app.get("/api/memory/search/:userId",
+
+(req,res)=>{
 
 
     try{
@@ -1460,16 +1539,19 @@ app.delete("/api/memory/:userId",(req,res)=>{
 
 
 
-        clearConversationMemory(
+        const query =
 
-            userId
-
-        );
+        req.query.q;
 
 
-        clearConversation(
 
-            userId
+        const results =
+
+        searchMemory(
+
+            userId,
+
+            query
 
         );
 
@@ -1481,9 +1563,7 @@ app.delete("/api/memory/:userId",(req,res)=>{
             success:true,
 
 
-            message:
-
-            "User conversation memory cleared."
+            results
 
 
         });
@@ -1491,7 +1571,6 @@ app.delete("/api/memory/:userId",(req,res)=>{
 
 
     }
-
 
 
     catch(error){
@@ -1520,6 +1599,88 @@ app.delete("/api/memory/:userId",(req,res)=>{
 
 
 
+
+// =====================================
+// CLEAR USER MEMORY
+// =====================================
+
+app.delete("/api/memory/:userId",
+
+(req,res)=>{
+
+
+    try{
+
+
+        const userId =
+
+        req.params.userId;
+
+
+
+
+        clearConversationMemory(
+
+            userId
+
+        );
+
+
+
+        clearConversation(
+
+            userId
+
+        );
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            message:
+
+            "User conversation memory cleared."
+
+
+        });
+
+
+
+    }
+
+
+    catch(error){
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            error:
+
+            error.message
+
+
+        });
+
+
+    }
+
+
+});
+
+
+
+
+
+
+
 // =====================================
 // 404 ROUTE HANDLER
 // =====================================
@@ -1538,7 +1699,6 @@ app.use((req,res)=>{
         "Route not found.",
 
 
-
         path:
 
         req.originalUrl
@@ -1548,6 +1708,8 @@ app.use((req,res)=>{
 
 
 });
+
+
 
 
 
@@ -1600,11 +1762,15 @@ app.use((err,req,res,next)=>{
 
 });
 
-// =====================================
-// ChatTBM Backend V5.9
-// Server Startup
-// =====================================
 
+
+
+
+
+
+// =====================================
+// SERVER STARTUP
+// =====================================
 
 const PORT =
 
@@ -1612,7 +1778,8 @@ process.env.PORT || 3000;
 
 
 
-app.listen(PORT, ()=>{
+
+app.listen(PORT,()=>{
 
 
     console.clear();
@@ -1623,7 +1790,7 @@ app.listen(PORT, ()=>{
 
     console.log("=========================================");
 
-    console.log("        ChatTBM Backend V5.9");
+    console.log("       ChatTBM Backend V5.9.1");
 
     console.log("=========================================");
 
@@ -1638,13 +1805,9 @@ app.listen(PORT, ()=>{
     );
 
 
+
     console.log("");
 
-
-
-    // =============================
-    // CORE AI ENGINES
-    // =============================
 
 
     console.log(
@@ -1661,13 +1824,11 @@ app.listen(PORT, ()=>{
     );
 
 
-
     console.log(
 
         "💾 Memory Engine ............. Active"
 
     );
-
 
 
     console.log(
@@ -1677,19 +1838,11 @@ app.listen(PORT, ()=>{
     );
 
 
-
     console.log(
 
         "🔍 Memory Retrieval .......... Active"
 
     );
-
-
-
-
-    // =============================
-    // PERSONAL AI SYSTEM
-    // =============================
 
 
     console.log(
@@ -1699,7 +1852,6 @@ app.listen(PORT, ()=>{
     );
 
 
-
     console.log(
 
         "🤖 Adaptive AI Engine ........ Active"
@@ -1707,29 +1859,11 @@ app.listen(PORT, ()=>{
     );
 
 
-
-    console.log(
-
-        "🧩 Context Engine ............ Active"
-
-    );
-
-
-
-
-    // =============================
-    // V5.9 MEMORY SYSTEM
-    // =============================
-
-
-    console.log("");
-
     console.log(
 
         "🕒 Conversation Timeline ..... Active"
 
     );
-
 
 
     console.log(
@@ -1739,13 +1873,11 @@ app.listen(PORT, ()=>{
     );
 
 
-
     console.log(
 
         "🔗 Relationship Engine ....... Active"
 
     );
-
 
 
     console.log(
@@ -1755,10 +1887,9 @@ app.listen(PORT, ()=>{
     );
 
 
-
     console.log(
 
-        "📊 Memory Ranking ............ Active"
+        "🗄️ Memory Database ........... Active"
 
     );
 
@@ -1770,18 +1901,13 @@ app.listen(PORT, ()=>{
 
     console.log(
 
-        "✅ ChatTBM Backend V5.9 Ready"
+        "✅ ChatTBM Backend V5.9.1 Ready"
 
     );
 
 
 
-    console.log(
-
-        "========================================="
-
-    );
-
+    console.log("=========================================");
 
     console.log("");
 
