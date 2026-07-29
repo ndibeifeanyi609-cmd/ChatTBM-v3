@@ -379,21 +379,23 @@ app.post("/api/chat", (req, res) => {
         // =============================
 
         const reply =
-        generateResponse(
+generateResponse(
 
-            intent,
+    intent,
 
-            message,
+    message,
 
-            memory,
+    memory,
 
-            history,
+    history,
 
-            facts,
+    facts,
 
-            timeline
+    timeline,
 
-        );
+    aiContext
+
+);
 
         // =============================
         // SAVE AI RESPONSE
