@@ -1,102 +1,251 @@
 // =====================================
-// ChatTBM V5.9
-// Memory Extraction Engine
+// ChatTBM V5.9.2
+// Memory Intelligence Engine
+// Part 1
+// Smart Memory Extraction
 // =====================================
+
 
 class MemoryExtractor {
 
-    constructor() {
+
+    constructor(){
+
 
         this.memory = {
-            names: [],
+
+
+            identity: [],
+
             projects: [],
+
             preferences: [],
+
             goals: [],
+
+            skills: [],
+
+            platforms: [],
+
             files: [],
+
             tasks: [],
+
             facts: []
+
+
         };
 
+
     }
 
+
+
+
+
     // =====================================
-    // Main Memory Extraction
+    // MAIN EXTRACTION
     // =====================================
 
-    extract(event) {
 
-        if (!event || !event.message) return;
+    extract(event){
 
-        const text = event.message.trim();
+
+        if(!event || !event.message) return;
+
+
+
+        const text =
+
+        event.message.trim();
+
+
 
         this.extractName(text);
+
+
         this.extractProjects(text);
+
+
         this.extractPreferences(text);
+
+
         this.extractGoals(text);
+
+
+        this.extractPlatforms(text);
+
+
+        this.extractSkills(text);
+
+
         this.extractFiles(text);
+
+
         this.extractTasks(text);
+
+
+        this.extractFacts(text);
+
+
 
     }
 
+
+
+
+
     // =====================================
-    // Name Detection
+    // NAME DETECTION
     // =====================================
 
-    extractName(text) {
 
-        const match = text.match(
+    extractName(text){
+
+
+        const match =
+
+        text.match(
+
             /my name is (.+)|i am (.+)|i'm (.+)/i
+
         );
 
-        if (match) {
 
-            const name = (
+
+        if(match){
+
+
+            const name =
+
+            (
+
                 match[1] ||
+
                 match[2] ||
+
                 match[3]
+
             ).trim();
 
-            this.saveUnique("names", name);
+
+
+            this.saveUnique(
+
+                "identity",
+
+                {
+
+                    type:"name",
+
+                    value:name,
+
+                    importance:"HIGH"
+
+                }
+
+            );
+
 
         }
 
+
     }
 
+
+
+
+
     // =====================================
-    // Project Detection
+    // PROJECT DETECTION
     // =====================================
 
-    extractProjects(text) {
+
+    extractProjects(text){
+
+
+        const lower =
+
+        text.toLowerCase();
+
+
 
         const keywords = [
-            "project",
+
             "build",
+
+            "building",
+
             "develop",
+
+            "developing",
+
+            "project",
+
             "app",
+
             "website",
+
             "system",
+
             "chattbm"
+
         ];
 
-        keywords.forEach(word => {
 
-            if (text.toLowerCase().includes(word)) {
 
-                this.saveUnique("projects", text);
+        keywords.forEach(keyword=>{
+
+
+            if(lower.includes(keyword)){
+
+
+
+                this.saveUnique(
+
+                    "projects",
+
+                    {
+
+                        type:"project",
+
+                        value:text,
+
+                        importance:"HIGH"
+
+                    }
+
+                );
+
 
             }
 
+
         });
+
 
     }
 
+
+
+
+
     // =====================================
-    // Preference Detection
+    // USER PREFERENCES
     // =====================================
 
-    extractPreferences(text) {
 
-        const keywords = [
+    extractPreferences(text){
+
+
+        const lower =
+
+        text.toLowerCase();
+
+
+
+        const patterns = [
+
 
             "i like",
 
@@ -104,154 +253,512 @@ class MemoryExtractor {
 
             "i prefer",
 
-            "my favorite"
+            "my favorite",
+
+            "i enjoy"
+
 
         ];
 
-        keywords.forEach(word => {
 
-            if (text.toLowerCase().includes(word)) {
 
-                this.saveUnique("preferences", text);
+        patterns.forEach(pattern=>{
+
+
+            if(lower.includes(pattern)){
+
+
+
+                this.saveUnique(
+
+                    "preferences",
+
+                    {
+
+                        type:"preference",
+
+                        value:text,
+
+                        importance:"MEDIUM"
+
+                    }
+
+                );
+
 
             }
 
+
         });
+
 
     }
 
+
+
+
+
     // =====================================
-    // Goal Detection
+    // GOAL DETECTION
     // =====================================
 
-    extractGoals(text) {
 
-        const keywords = [
+    extractGoals(text){
+
+
+        const lower =
+
+        text.toLowerCase();
+
+
+
+        const goals = [
+
 
             "i want",
 
             "my goal",
 
-            "my plan",
+            "i plan",
 
-            "i hope"
+            "i hope",
+
+            "i need to"
+
 
         ];
 
-        keywords.forEach(word => {
 
-            if (text.toLowerCase().includes(word)) {
 
-                this.saveUnique("goals", text);
+        goals.forEach(goal=>{
+
+
+            if(lower.includes(goal)){
+
+
+
+                this.saveUnique(
+
+                    "goals",
+
+                    {
+
+                        type:"goal",
+
+                        value:text,
+
+                        importance:"HIGH"
+
+                    }
+
+                );
+
 
             }
 
+
         });
+
 
     }
 
+
+
+
+
     // =====================================
-    // File Detection
+    // PLATFORM DETECTION
     // =====================================
 
-    extractFiles(text) {
 
-        const files = text.match(
+    extractPlatforms(text){
+
+
+        const platforms = [
+
+
+            "facebook",
+
+            "instagram",
+
+            "youtube",
+
+            "tiktok",
+
+            "twitter",
+
+            "linkedin"
+
+
+        ];
+
+
+
+        platforms.forEach(platform=>{
+
+
+            if(
+
+                text.toLowerCase()
+
+                .includes(platform)
+
+            ){
+
+
+                this.saveUnique(
+
+                    "platforms",
+
+                    {
+
+                        type:"platform",
+
+                        value:platform,
+
+                        importance:"MEDIUM"
+
+                    }
+
+                );
+
+
+            }
+
+
+        });
+
+
+    }
+
+
+
+
+
+    // =====================================
+    // SKILL DETECTION
+    // =====================================
+
+
+    extractSkills(text){
+
+
+        const skills = [
+
+
+            "editing",
+
+            "coding",
+
+            "programming",
+
+            "design",
+
+            "marketing",
+
+            "content creation",
+
+            "video creation"
+
+
+        ];
+
+
+
+        skills.forEach(skill=>{
+
+
+            if(
+
+                text.toLowerCase()
+
+                .includes(skill)
+
+            ){
+
+
+
+                this.saveUnique(
+
+                    "skills",
+
+                    {
+
+                        type:"skill",
+
+                        value:skill,
+
+                        importance:"MEDIUM"
+
+                    }
+
+                );
+
+
+            }
+
+
+        });
+
+
+    }
+
+
+
+
+
+    // =====================================
+    // FILE DETECTION
+    // =====================================
+
+
+    extractFiles(text){
+
+
+        const files =
+
+        text.match(
 
             /\b[\w-]+\.(js|json|html|css|env)\b/gi
 
         );
 
-        if (files) {
 
-            files.forEach(file =>
 
-                this.saveUnique("files", file)
+        if(files){
 
-            );
+
+            files.forEach(file=>{
+
+
+                this.saveUnique(
+
+                    "files",
+
+                    {
+
+                        type:"file",
+
+                        value:file,
+
+                        importance:"MEDIUM"
+
+                    }
+
+                );
+
+
+            });
+
 
         }
 
+
     }
 
+
+
+
+
     // =====================================
-    // Task Detection
+    // TASK DETECTION
     // =====================================
 
-    extractTasks(text) {
 
-        const keywords = [
+    extractTasks(text){
 
-            "todo",
+
+        const lower =
+
+        text.toLowerCase();
+
+
+
+        const tasks = [
+
 
             "next",
-
-            "later",
 
             "continue",
 
             "fix",
 
-            "upgrade"
+            "upgrade",
+
+            "complete",
+
+            "finish"
+
 
         ];
 
-        keywords.forEach(word => {
 
-            if (text.toLowerCase().includes(word)) {
 
-                this.saveUnique("tasks", text);
+        tasks.forEach(task=>{
+
+
+            if(lower.includes(task)){
+
+
+
+                this.saveUnique(
+
+                    "tasks",
+
+                    {
+
+                        type:"task",
+
+                        value:text,
+
+                        importance:"MEDIUM"
+
+                    }
+
+                );
+
 
             }
 
+
         });
+
 
     }
 
+
+
+
+
     // =====================================
-    // Save Unique Memory
+    // GENERAL FACTS
     // =====================================
 
-    saveUnique(type, value) {
 
-        if (!this.memory[type].includes(value)) {
+    extractFacts(text){
 
-            this.memory[type].push(value);
+
+        if(text.length > 20){
+
+
+            this.saveUnique(
+
+                "facts",
+
+                {
+
+                    type:"fact",
+
+                    value:text,
+
+                    importance:"LOW"
+
+                }
+
+            );
+
 
         }
 
+
     }
 
+
+
+
+
     // =====================================
-    // Get All Memories
+    // SAVE WITHOUT DUPLICATES
     // =====================================
 
-    getMemory() {
+
+    saveUnique(type,value){
+
+
+        const exists =
+
+        this.memory[type].some(item =>
+
+
+            JSON.stringify(item) ===
+
+            JSON.stringify(value)
+
+
+        );
+
+
+
+        if(!exists){
+
+
+            this.memory[type].push(value);
+
+
+        }
+
+
+    }
+
+
+
+
+
+    // =====================================
+    // GET MEMORY
+    // =====================================
+
+
+    getMemory(){
+
 
         return this.memory;
 
+
     }
 
+
+
+
+
     // =====================================
-    // Clear Memory
+    // CLEAR MEMORY
     // =====================================
 
-    clear() {
+
+    clear(){
+
 
         this.memory = {
 
-            names: [],
+
+            identity: [],
+
             projects: [],
+
             preferences: [],
+
             goals: [],
+
+            skills: [],
+
+            platforms: [],
+
             files: [],
+
             tasks: [],
+
             facts: []
+
 
         };
 
+
     }
 
+
 }
+
+
 
 module.exports = new MemoryExtractor();
