@@ -53,6 +53,22 @@ const {
 } = require("./services/memoryRetrieval");
 
 // =====================================
+// AI IDENTITY ENGINE
+// =====================================
+
+const AIIdentityEngine =
+require("./services/aiIdentityEngine");
+
+const AdaptiveResponseEngine =
+require("./services/adaptiveResponseEngine");
+
+const identityEngine =
+new AIIdentityEngine();
+
+const adaptiveEngine =
+new AdaptiveResponseEngine(identityEngine);
+
+// =====================================
 // CREATE SERVER
 // =====================================
 
