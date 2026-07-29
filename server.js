@@ -493,6 +493,62 @@ function processConversationMemory(event){
 
         });
 
+        // =====================================
+// SAVE RANKED MEMORY
+// V5.9.1 DATABASE CONNECTION
+// =====================================
+
+
+if(rankedMemory){
+
+
+    saveMemory(
+
+        conversationId,
+
+        {
+
+
+            type:
+
+            "conversation",
+
+
+            value:
+
+            message,
+
+
+            score:
+
+            rankedMemory.score,
+
+
+            level:
+
+            rankedMemory.level,
+
+
+            metadata:{
+
+                intent,
+
+                source:"ChatTBM",
+
+                timestamp:
+
+                new Date().toISOString()
+
+            }
+
+
+        }
+
+    );
+
+
+}
+
 
 
 
