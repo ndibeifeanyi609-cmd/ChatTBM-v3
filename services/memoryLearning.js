@@ -1,15 +1,33 @@
 
 // =====================================
-// ChatTBM V5.4
-// Memory Personalization Engine
+// ChatTBM V5.6
+// Memory Learning Engine
 // Part 4
-// Learns user preferences
+// User Profile Integration
 // =====================================
 
 
+
 const {
+
     saveMemory
+
 } = require("./memoryEngine");
+
+
+
+const {
+
+    updatePreference,
+
+    addInterest,
+
+    addGoal,
+
+    addProfileHistory
+
+} = require("./userProfile");
+
 
 
 
@@ -25,80 +43,20 @@ function learnFromMessage(
 
 ){
 
+
     const text =
     message.toLowerCase();
 
 
 
-    // =====================================
-    // DETECT PLATFORM
-    // =====================================
 
-    if(
-
-        text.includes("instagram")
-
-    ){
-
-        saveMemory(
-
-            userId,
-
-            "platform",
-
-            "Instagram"
-
-        );
-
-    }
+    // =================================
+    // CONTENT PLATFORM DETECTION
+    // =================================
 
 
+    if(text.includes("youtube")){
 
-    if(
-
-        text.includes("facebook")
-
-    ){
-
-        saveMemory(
-
-            userId,
-
-            "platform",
-
-            "Facebook"
-
-        );
-
-    }
-
-
-
-    if(
-
-        text.includes("tiktok")
-
-    ){
-
-        saveMemory(
-
-            userId,
-
-            "platform",
-
-            "TikTok"
-
-        );
-
-    }
-
-
-
-    if(
-
-        text.includes("youtube")
-
-    ){
 
         saveMemory(
 
@@ -110,62 +68,89 @@ function learnFromMessage(
 
         );
 
+
+        updatePreference(
+
+            userId,
+
+            "platform",
+
+            "YouTube"
+
+        );
+
+
     }
 
 
 
+    if(text.includes("tiktok")){
 
-    // =====================================
-    // DETECT CONTENT STYLE
-    // =====================================
-
-    if(
-
-        text.includes("funny") ||
-
-        text.includes("comedy")
-
-    ){
 
         saveMemory(
 
             userId,
 
-            "contentStyle",
+            "platform",
 
-            "Funny and entertaining"
+            "TikTok"
 
         );
+
+
+        updatePreference(
+
+            userId,
+
+            "platform",
+
+            "TikTok"
+
+        );
+
 
     }
 
 
 
-    if(
+    if(text.includes("instagram")){
 
-        text.includes("professional")
-
-    ){
 
         saveMemory(
 
             userId,
 
-            "contentStyle",
+            "platform",
 
-            "Professional"
+            "Instagram"
 
         );
+
+
+        updatePreference(
+
+            userId,
+
+            "platform",
+
+            "Instagram"
+
+        );
+
 
     }
 
 
 
-    if(
 
-        text.includes("cinematic")
 
-    ){
+    // =================================
+    // STYLE DETECTION
+    // =================================
+
+
+    if(text.includes("cinematic")){
+
 
         saveMemory(
 
@@ -177,53 +162,55 @@ function learnFromMessage(
 
         );
 
+
+        updatePreference(
+
+            userId,
+
+            "style",
+
+            "Cinematic"
+
+        );
+
+
     }
 
 
 
 
-    // =====================================
-    // DETECT TONE
-    // =====================================
+    if(text.includes("funny")){
 
-    if(
-
-        text.includes("serious")
-
-    ){
 
         saveMemory(
 
             userId,
 
-            "tone",
+            "contentStyle",
 
-            "Serious"
+            "Funny"
 
         );
 
-    }
 
-
-
-    if(
-
-        text.includes("casual")
-
-    ){
-
-        saveMemory(
+        addInterest(
 
             userId,
 
-            "tone",
-
-            "Casual"
+            "Comedy Content"
 
         );
 
+
     }
 
+
+
+
+
+    // =================================
+    // GOAL DETECTION
+    // =================================
 
 
     if(
@@ -232,17 +219,61 @@ function learnFromMessage(
 
     ){
 
-        saveMemory(
+
+        addGoal(
 
             userId,
-
-            "goal",
 
             "Create viral content"
 
         );
 
+
     }
+
+
+
+
+
+    if(
+
+        text.includes("business") ||
+
+        text.includes("marketing")
+
+    ){
+
+
+        addGoal(
+
+            userId,
+
+            "Grow business with content"
+
+        );
+
+
+    }
+
+
+
+
+
+
+    // =================================
+    // SAVE HISTORY
+    // =================================
+
+
+    addProfileHistory(
+
+        userId,
+
+        message
+
+    );
+
+
 
 
 
@@ -250,7 +281,8 @@ function learnFromMessage(
 
         success:true,
 
-        message:"Memory updated"
+        message:
+        "User profile updated"
 
     };
 
@@ -260,8 +292,11 @@ function learnFromMessage(
 
 
 
+
 module.exports = {
 
+
     learnFromMessage
+
 
 };
