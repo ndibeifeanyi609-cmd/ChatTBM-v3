@@ -254,6 +254,18 @@ app.post("/api/chat", (req, res) => {
         );
 
         // =============================
+// PERSONAL AI LEARNING
+// =============================
+
+identityEngine.learn(
+
+    conversationId,
+
+    message
+
+);
+
+        // =============================
         // SAVE CONVERSATION FACT
         // =============================
 
