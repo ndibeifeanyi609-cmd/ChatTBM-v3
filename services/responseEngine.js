@@ -1,14 +1,142 @@
 // =====================================
-// ChatTBM V5.9.1
+// ChatTBM V5.9.2
 // Smart Response Engine
-// AI Personality + Memory + Context
+// Memory Intelligence Upgrade
+// Part 2
 // =====================================
 
 
 const {
+
     handleContextRequest
 
 } = require("./contextEngine");
+
+
+
+
+
+// =====================================
+// MEMORY INTERPRETER
+// =====================================
+
+
+function understandMemory(longTermMemory = []){
+
+
+    let memoryText = "";
+
+
+
+    if(
+
+        !Array.isArray(longTermMemory) ||
+
+        longTermMemory.length === 0
+
+    ){
+
+        return "";
+
+    }
+
+
+
+
+    const memories =
+
+    longTermMemory.slice(0,5);
+
+
+
+
+
+    memories.forEach(memory=>{
+
+
+
+        if(
+
+            memory.type === "platform"
+
+        ){
+
+
+            memoryText +=
+
+            `\n🧠 I remember you create content for ${memory.value}.`;
+
+
+        }
+
+
+
+
+
+        else if(
+
+            memory.type === "project"
+
+        ){
+
+
+            memoryText +=
+
+            `\n🧠 I remember you are working on ${memory.value}.`;
+
+
+        }
+
+
+
+
+
+        else if(
+
+            memory.type === "goal"
+
+        ){
+
+
+            memoryText +=
+
+            `\n🎯 I remember your goal: ${memory.value}.`;
+
+
+        }
+
+
+
+
+
+        else if(
+
+            memory.type === "preference"
+
+        ){
+
+
+            memoryText +=
+
+            `\n🎨 I remember your preference: ${memory.value}.`;
+
+
+        }
+
+
+
+    });
+
+
+
+    return memoryText;
+
+
+}
+
+
+
+
 
 
 
@@ -39,7 +167,6 @@ function generateResponse(
 ){
 
 
-    let response = "";
 
     const text =
 
@@ -49,8 +176,14 @@ function generateResponse(
 
 
 
+    let response = "";
+
+
+
+
+
     // =====================================
-    // CONTEXT ENGINE
+    // CONTEXT CHECK
     // =====================================
 
 
@@ -65,9 +198,12 @@ function generateResponse(
     );
 
 
+
     if(contextResult.matched){
 
+
         return contextResult.response;
+
 
     }
 
@@ -76,8 +212,9 @@ function generateResponse(
 
 
 
+
     // =====================================
-    // GREETINGS
+    // GREETING
     // =====================================
 
 
@@ -98,36 +235,16 @@ Welcome back to ChatTBM.
 
 I'm your AI Content Assistant.
 
-I can help you create:
+I can help with:
 
 ✍️ Captions
-🎬 Video Scripts
+🎬 Scripts
 💡 Viral Ideas
-📢 Marketing Content
-📅 Content Plans
-🏷️ Hashtags
+📢 Marketing
+📅 Content Planning
 
 What are we creating today?`;
 
-    }
-
-
-
-
-
-
-
-    // =====================================
-    // THANK YOU
-    // =====================================
-
-
-    if(text.includes("thank")){
-
-
-        return `You're welcome 😊
-
-I'm always ready to help you create better content and develop your ideas.`;
 
     }
 
@@ -147,9 +264,10 @@ I'm always ready to help you create better content and develop your ideas.`;
 
         return `I'm ChatTBM 🤖
 
-Your AI Content Assistant designed to help with content creation, ideas, scripts, marketing, and personalized assistance.
+Your AI Content Assistant for creating content ideas, scripts, captions, marketing plans, and creative strategies.
 
-I can learn your preferences and remember important information to improve future conversations.`;
+I can also learn useful information from our conversations to personalize future responses.`;
+
 
     }
 
@@ -160,52 +278,11 @@ I can learn your preferences and remember important information to improve futur
 
 
     // =====================================
-    // EMPTY MESSAGE
-    // =====================================
-
-
-    if(text.length === 0){
-
-
-        return "Please type a message.";
-
-    }
-
-
-
-
-
-
-
-    // =====================================
-    // INTENT RESPONSE
+    // INTENT RESPONSES
     // =====================================
 
 
     switch(intent){
-
-
-
-        case "content_creation":
-
-
-            response =
-
-`I can help you create content.
-
-Tell me:
-
-• Topic
-• Platform
-• Audience
-• Goal
-
-I'll create something customized for you.`;
-
-
-        break;
-
-
 
 
 
@@ -237,15 +314,15 @@ I'll help structure the full script.`;
 
             response =
 
-`I can create an engaging caption.
+`I can help create your caption ✍️
 
 Tell me:
 
-• What the post is about
+• What is the post about?
 • Platform
 • Tone
 
-I'll generate a caption that fits your content.`;
+I'll create something that fits your audience.`;
 
 
         break;
@@ -254,14 +331,21 @@ I'll generate a caption that fits your content.`;
 
 
 
-        case "marketing":
+        case "content_creation":
 
 
             response =
 
-`I can help create marketing strategies, adverts, and promotional ideas.
+`Great! Let's create content.
 
-Tell me what you want to promote and who your audience is.`;
+Tell me your:
+
+• Topic
+• Audience
+• Platform
+• Goal
+
+I'll build it with you.`;
 
 
         break;
@@ -275,9 +359,9 @@ Tell me what you want to promote and who your audience is.`;
 
             response =
 
-`Let's generate fresh ideas 💡
+`Let's generate ideas 💡
 
-Tell me your niche and I'll create content concepts for you.`;
+Tell me your niche and I'll create fresh content concepts.`;
 
 
         break;
@@ -286,14 +370,14 @@ Tell me your niche and I'll create content concepts for you.`;
 
 
 
-        case "question":
+        case "marketing":
 
 
             response =
 
-`I'll help answer your question.
+`I can help with marketing, adverts, and audience growth.
 
-Give me more details and I'll provide the best response possible.`;
+Tell me what you want to promote.`;
 
 
         break;
@@ -307,54 +391,9 @@ Give me more details and I'll provide the best response possible.`;
 
             response =
 
-`I understand.
+`I understand your request.
 
-Give me more details so I can provide a better answer.`;
-
-
-
-    }
-
-
-
-
-
-
-
-
-    // =====================================
-    // LONG TERM MEMORY
-    // V5.9.1
-    // =====================================
-
-
-    if(
-
-        longTermMemory &&
-
-        longTermMemory.length > 0
-
-    ){
-
-
-        const memory =
-
-        longTermMemory[0];
-
-
-
-        if(memory.value){
-
-
-            response +=
-
-`\n\n🧠 Memory:
-
-I remember something related to:
-
-"${memory.value}"`;
-
-        }
+Give me more details so I can create a better response.`;
 
 
     }
@@ -366,7 +405,27 @@ I remember something related to:
 
 
     // =====================================
-    // USER FACT MEMORY
+    // ADD SMART MEMORY
+    // =====================================
+
+
+    response +=
+
+    understandMemory(
+
+        longTermMemory
+
+    );
+
+
+
+
+
+
+
+
+    // =====================================
+    // CONVERSATION MEMORY
     // =====================================
 
 
@@ -381,7 +440,8 @@ I remember something related to:
 
         response +=
 
-`\n\n📚 I can use our previous conversation context to keep the discussion connected.`;
+        `\n📚 I can continue from our previous conversation context.`;
+
 
     }
 
@@ -392,33 +452,7 @@ I remember something related to:
 
 
     // =====================================
-    // RECENT HISTORY
-    // =====================================
-
-
-    if(
-
-        history &&
-
-        history.length > 3
-
-    ){
-
-
-        response +=
-
-`\n💬 I have recent conversation history available, so I can continue from where we stopped.`;
-
-    }
-
-
-
-
-
-
-
-    // =====================================
-    // AI PERSONALIZATION
+    // PERSONALIZATION
     // =====================================
 
 
@@ -435,7 +469,7 @@ I remember something related to:
 
 `
 
-🤖 Personalization active:
+🤖 Personalization:
 
 Platform: ${aiContext.context.platform}
 
@@ -443,8 +477,8 @@ Tone: ${aiContext.context.tone}
 
 Style: ${aiContext.context.writingStyle}`;
 
-    }
 
+    }
 
 
 
@@ -457,11 +491,6 @@ Style: ${aiContext.context.writingStyle}`;
 
 
 
-
-
-// =====================================
-// EXPORT
-// =====================================
 
 
 module.exports = {
