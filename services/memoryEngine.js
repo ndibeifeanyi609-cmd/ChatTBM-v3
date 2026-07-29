@@ -1,33 +1,22 @@
 // =====================================
-// ChatTBM V5.2
-// Structured Memory Engine
+// ChatTBM V5.6
+// Memory Engine
+// Part 2
+// Long-Term Storage Connection
 // =====================================
 
-const memoryStore = {};
 
 
+const {
 
-// =====================================
-// CREATE USER MEMORY
-// =====================================
+    saveLongTermMemory,
 
-function createUser(userId){
+    getLongTermMemory,
 
-    if(!memoryStore[userId]){
+    deleteLongTermMemory
 
-        memoryStore[userId] = {
+} = require("./memoryDatabase");
 
-            profile:{},
-
-            preferences:{},
-
-            notes:[]
-
-        };
-
-    }
-
-}
 
 
 
@@ -37,44 +26,71 @@ function createUser(userId){
 // =====================================
 
 function saveMemory(
+
     userId,
+
     key,
+
     value
+
 ){
 
-    createUser(userId);
 
-    memoryStore[userId]
-    .profile[key] = value;
+    return saveLongTermMemory(
 
-    return {
+        userId,
 
-        success:true,
+        key,
 
-        message:"Memory saved"
+        value
 
-    };
+    );
+
 
 }
 
 
 
 
+
 // =====================================
-// GET MEMORY
+// GET SINGLE MEMORY
 // =====================================
 
 function getMemory(
+
     userId,
+
     key
+
 ){
 
-    createUser(userId);
 
-    return memoryStore[userId]
-        .profile[key] || null;
+    const memories =
+
+    getLongTermMemory(
+
+        userId
+
+    );
+
+
+
+    if(memories[key]){
+
+
+        return memories[key];
+
+
+    }
+
+
+
+    return null;
+
 
 }
+
 
 
 
@@ -84,14 +100,21 @@ function getMemory(
 // =====================================
 
 function getAllMemory(
+
     userId
+
 ){
 
-    createUser(userId);
 
-    return memoryStore[userId];
+    return getLongTermMemory(
+
+        userId
+
+    );
+
 
 }
+
 
 
 
@@ -101,24 +124,27 @@ function getAllMemory(
 // =====================================
 
 function addMemoryNote(
+
     userId,
+
     note
+
 ){
 
-    createUser(userId);
 
-    memoryStore[userId]
-    .notes
-    .push({
+    return saveLongTermMemory(
 
-        text:note,
+        userId,
 
-        created:
-        new Date().toISOString()
+        "note",
 
-    });
+        note
+
+    );
+
 
 }
+
 
 
 
@@ -128,21 +154,31 @@ function addMemoryNote(
 // =====================================
 
 function clearMemory(
+
     userId
+
 ){
 
-    delete memoryStore[userId];
+
+    return deleteLongTermMemory(
+
+        userId
+
+    );
+
 
 }
 
 
 
 
+
 // =====================================
-// EXPORTS
+// EXPORT
 // =====================================
 
 module.exports = {
+
 
     saveMemory,
 
@@ -153,5 +189,6 @@ module.exports = {
     addMemoryNote,
 
     clearMemory
+
 
 };
