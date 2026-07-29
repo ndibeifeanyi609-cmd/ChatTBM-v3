@@ -1,302 +1,130 @@
 
-// =====================================
-// ChatTBM V5.6
+// =========================================
+// ChatTBM V5.8
 // Memory Learning Engine
 // Part 4
-// User Profile Integration
-// =====================================
-
-
+// =========================================
 
 const {
-
     saveMemory
-
 } = require("./memoryEngine");
 
+function learnFromMessage(userId, message) {
 
+    const text = message.toLowerCase();
 
-const {
+    // =====================================
+    // PLATFORM DETECTION
+    // =====================================
 
-    updatePreference,
+    if (text.includes("facebook")) {
 
-    addInterest,
-
-    addGoal,
-
-    addProfileHistory
-
-} = require("./userProfile");
-
-
-
-
-// =====================================
-// LEARN FROM USER MESSAGE
-// =====================================
-
-function learnFromMessage(
-
-    userId,
-
-    message
-
-){
-
-
-    const text =
-    message.toLowerCase();
-
-
-
-
-    // =================================
-    // CONTENT PLATFORM DETECTION
-    // =================================
-
-
-    if(text.includes("youtube")){
-
-
-        saveMemory(
-
-            userId,
-
-            "platform",
-
-            "YouTube"
-
-        );
-
-
-        updatePreference(
-
-            userId,
-
-            "platform",
-
-            "YouTube"
-
-        );
-
+        saveMemory(userId, "platform", "Facebook");
 
     }
 
+    if (text.includes("instagram")) {
 
-
-    if(text.includes("tiktok")){
-
-
-        saveMemory(
-
-            userId,
-
-            "platform",
-
-            "TikTok"
-
-        );
-
-
-        updatePreference(
-
-            userId,
-
-            "platform",
-
-            "TikTok"
-
-        );
-
+        saveMemory(userId, "platform", "Instagram");
 
     }
 
+    if (text.includes("tiktok")) {
 
-
-    if(text.includes("instagram")){
-
-
-        saveMemory(
-
-            userId,
-
-            "platform",
-
-            "Instagram"
-
-        );
-
-
-        updatePreference(
-
-            userId,
-
-            "platform",
-
-            "Instagram"
-
-        );
-
+        saveMemory(userId, "platform", "TikTok");
 
     }
 
+    if (text.includes("youtube")) {
 
-
-
-
-    // =================================
-    // STYLE DETECTION
-    // =================================
-
-
-    if(text.includes("cinematic")){
-
-
-        saveMemory(
-
-            userId,
-
-            "contentStyle",
-
-            "Cinematic"
-
-        );
-
-
-        updatePreference(
-
-            userId,
-
-            "style",
-
-            "Cinematic"
-
-        );
-
+        saveMemory(userId, "platform", "YouTube");
 
     }
 
+    // =====================================
+    // CONTENT STYLE
+    // =====================================
 
+    if (text.includes("cinematic")) {
 
-
-    if(text.includes("funny")){
-
-
-        saveMemory(
-
-            userId,
-
-            "contentStyle",
-
-            "Funny"
-
-        );
-
-
-        addInterest(
-
-            userId,
-
-            "Comedy Content"
-
-        );
-
+        saveMemory(userId, "contentStyle", "Cinematic");
 
     }
 
+    if (text.includes("funny")) {
 
-
-
-
-    // =================================
-    // GOAL DETECTION
-    // =================================
-
-
-    if(
-
-        text.includes("viral")
-
-    ){
-
-
-        addGoal(
-
-            userId,
-
-            "Create viral content"
-
-        );
-
+        saveMemory(userId, "contentStyle", "Funny");
 
     }
 
+    if (text.includes("professional")) {
 
-
-
-
-    if(
-
-        text.includes("business") ||
-
-        text.includes("marketing")
-
-    ){
-
-
-        addGoal(
-
-            userId,
-
-            "Grow business with content"
-
-        );
-
+        saveMemory(userId, "contentStyle", "Professional");
 
     }
 
+    // =====================================
+    // TONE
+    // =====================================
 
+    if (text.includes("friendly")) {
 
+        saveMemory(userId, "tone", "Friendly");
 
+    }
 
+    if (text.includes("formal")) {
 
-    // =================================
-    // SAVE HISTORY
-    // =================================
+        saveMemory(userId, "tone", "Formal");
 
+    }
 
-    addProfileHistory(
+    if (text.includes("casual")) {
 
-        userId,
+        saveMemory(userId, "tone", "Casual");
 
-        message
+    }
 
-    );
+    // =====================================
+    // USER GOALS
+    // =====================================
 
+    if (text.includes("viral")) {
 
+        saveMemory(userId, "goal", "Create viral content");
 
+    }
 
+    if (text.includes("business")) {
+
+        saveMemory(userId, "goal", "Grow business");
+
+    }
+
+    if (text.includes("marketing")) {
+
+        saveMemory(userId, "goal", "Improve marketing");
+
+    }
+
+    if (text.includes("sales")) {
+
+        saveMemory(userId, "goal", "Increase sales");
+
+    }
 
     return {
 
-        success:true,
+        success: true,
 
-        message:
-        "User profile updated"
+        learned: true
 
     };
 
-
 }
-
-
-
-
 
 module.exports = {
 
-
     learnFromMessage
-
 
 };
