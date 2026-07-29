@@ -1,19 +1,21 @@
 // =====================================
-// ChatTBM V5.9.1
+// ChatTBM V5.9.2
 // Memory Engine
-// Database Bridge Layer
+// Database Connected Edition
 // =====================================
 
-
-// =====================================
-// CONNECT MEMORY DATABASE
-// =====================================
 
 const {
 
-    saveMemory: saveDatabaseMemory,
+    saveMemory: databaseSaveMemory,
 
     getMemories,
+
+    searchMemory,
+
+    getBestMemories,
+
+    deleteMemory,
 
     clearUserMemory
 
@@ -22,9 +24,9 @@ const {
 
 
 
+
 // =====================================
 // SAVE MEMORY
-// Compatibility Function
 // =====================================
 
 function saveMemory(
@@ -33,35 +35,37 @@ function saveMemory(
 
     key,
 
-    value
+    value,
+
+    options = {}
 
 ){
 
-
-    return saveDatabaseMemory(
+    return databaseSaveMemory(
 
         userId,
 
         {
 
-            type: key,
+            type:key,
 
-            value: value,
+            value:value,
 
-            score: 50,
+            score:
 
-            level: "TEMPORARY",
+            options.score || 10,
 
-            metadata: {
+            level:
 
-                source: "Memory Engine"
+            options.level || "TEMPORARY",
 
-            }
+            metadata:
+
+            options.metadata || {}
 
         }
 
     );
-
 
 }
 
@@ -88,17 +92,19 @@ function getMemory(
 
 
 
-    const memory =
+    const found =
 
     memories.find(
 
-        item => item.type === key
+        memory =>
+
+        memory.type === key
 
     );
 
 
 
-    return memory || null;
+    return found || null;
 
 
 }
@@ -117,15 +123,57 @@ function getAllMemory(
 
 ){
 
+    return getMemories(userId);
 
-    const memories =
-
-    getMemories(userId);
-
+}
 
 
-    return memories;
 
+
+
+// =====================================
+// SEARCH MEMORY
+// =====================================
+
+function findMemory(
+
+    userId,
+
+    query
+
+){
+
+    return searchMemory(
+
+        userId,
+
+        query
+
+    );
+
+}
+
+
+
+
+
+// =====================================
+// GET IMPORTANT MEMORY
+// =====================================
+
+function getImportantMemory(
+
+    userId
+
+){
+
+    return getBestMemories(
+
+        userId,
+
+        10
+
+    );
 
 }
 
@@ -145,31 +193,23 @@ function addMemoryNote(
 
 ){
 
-
-    return saveDatabaseMemory(
+    return saveMemory(
 
         userId,
 
+        "note",
+
+        note,
+
         {
 
-            type:"note",
+            score:20,
 
-            value:note,
-
-            score:40,
-
-            level:"TEMPORARY",
-
-            metadata:{
-
-                source:"Memory Note"
-
-            }
+            level:"LONG_TERM"
 
         }
 
     );
-
 
 }
 
@@ -178,7 +218,33 @@ function addMemoryNote(
 
 
 // =====================================
-// CLEAR MEMORY
+// DELETE MEMORY
+// =====================================
+
+function removeMemory(
+
+    userId,
+
+    memoryId
+
+){
+
+    return deleteMemory(
+
+        userId,
+
+        memoryId
+
+    );
+
+}
+
+
+
+
+
+// =====================================
+// CLEAR USER MEMORY
 // =====================================
 
 function clearMemory(
@@ -187,13 +253,68 @@ function clearMemory(
 
 ){
 
-
     return clearUserMemory(
 
         userId
 
     );
 
+}
+
+
+
+
+
+// =====================================
+// MEMORY CONTEXT BUILDER
+// Used by AI Brain
+// =====================================
+
+function buildMemoryContext(
+
+    userId
+
+){
+
+    const memories =
+
+    getBestMemories(
+
+        userId,
+
+        5
+
+    );
+
+
+
+    if(!memories.length){
+
+        return "";
+
+    }
+
+
+
+    let context =
+
+    "Known user information:\n";
+
+
+
+    memories.forEach(memory=>{
+
+
+        context +=
+
+        `- ${memory.type}: ${memory.value}\n`;
+
+
+    });
+
+
+
+    return context;
 
 }
 
@@ -210,17 +331,21 @@ module.exports = {
 
     saveMemory,
 
-
     getMemory,
-
 
     getAllMemory,
 
+    findMemory,
+
+    getImportantMemory,
 
     addMemoryNote,
 
+    removeMemory,
 
-    clearMemory
+    clearMemory,
+
+    buildMemoryContext
 
 
 };
