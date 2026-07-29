@@ -1,108 +1,146 @@
 // =====================================
-// ChatTBM V5.5
-// Advanced Memory Retrieval Engine
-// Part 4
-// Ranking Integration
+// ChatTBM V5.9.2
+// Memory Intelligence Retrieval
 // =====================================
-
-
-const {
-    rankMemories
-} = require("./memoryRanking");
-
 
 
 
 // =====================================
-// RETRIEVE RELEVANT MEMORY
+// SEARCH RELEVANT MEMORY
 // =====================================
 
 function retrieveMemory(
 
-    memory = {},
+    memories = {},
 
     message = ""
 
 ){
 
 
-    // =====================================
-    // RANK ALL MEMORIES
-    // =====================================
+    const text =
 
-    const rankedMemories =
-
-    rankMemories(
-
-        memory,
-
-        message
-
-    );
+    message.toLowerCase();
 
 
 
-
-    const relevantMemory = {};
-
+    const results = [];
 
 
 
-    // =====================================
-    // SELECT TOP MEMORIES
-    // =====================================
-
-    rankedMemories
-
-    .slice(0,5)
-
-    .forEach(
-
-        item => {
+    Object.keys(memories).forEach(key=>{
 
 
-            if(item.score > 1){
+        const value =
+
+        String(memories[key])
+
+        .toLowerCase();
 
 
-                relevantMemory[item.key] =
-                item.value;
+
+        let score = 0;
 
 
-            }
+
+        // Key match
+
+        if(
+
+            text.includes(
+
+                key.toLowerCase()
+
+            )
+
+        ){
+
+            score += 5;
+
+        }
+
+
+
+        // Value match
+
+        if(
+
+            text.includes(value)
+
+        ){
+
+            score += 5;
+
+        }
+
+
+
+
+
+        // Important user preferences
+
+        if(
+
+            [
+
+                "platform",
+
+                "contentStyle",
+
+                "tone",
+
+                "goal"
+
+            ].includes(key)
+
+        ){
+
+            score += 3;
+
+        }
+
+
+
+
+
+        if(score > 0){
+
+
+            results.push({
+
+                key,
+
+                value:
+
+                memories[key],
+
+                score
+
+
+            });
 
 
         }
 
+
+
+    });
+
+
+
+
+
+    results.sort(
+
+        (a,b)=>
+
+        b.score-a.score
+
     );
 
 
 
-
-
-    // =====================================
-    // MEMORY METADATA
-    // =====================================
-
-    relevantMemory._memoryInfo = {
-
-        total:
-        rankedMemories.length,
-
-
-        selected:
-        Object.keys(relevantMemory)
-        .length,
-
-
-        ranking:
-        rankedMemories
-
-    };
-
-
-
-
-    return relevantMemory;
+    return results;
 
 
 }
@@ -110,8 +148,59 @@ function retrieveMemory(
 
 
 
+
+// =====================================
+// BUILD MEMORY CONTEXT
+// =====================================
+
+function buildMemoryContext(
+
+    memories = []
+
+){
+
+
+    if(!memories.length){
+
+        return "";
+
+    }
+
+
+
+    let context =
+
+    "User preferences:\n";
+
+
+
+    memories.forEach(memory=>{
+
+
+        context +=
+
+        `- ${memory.key}: ${memory.value}\n`;
+
+
+    });
+
+
+
+    return context;
+
+
+}
+
+
+
+
+
 module.exports = {
 
-    retrieveMemory
+
+    retrieveMemory,
+
+    buildMemoryContext
+
 
 };
