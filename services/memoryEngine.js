@@ -1,28 +1,30 @@
 // =====================================
-// ChatTBM V5.6
+// ChatTBM V5.9.1
 // Memory Engine
-// Part 2
-// Long-Term Storage Connection
+// Database Bridge Layer
 // =====================================
 
 
+// =====================================
+// CONNECT MEMORY DATABASE
+// =====================================
 
 const {
 
-    saveLongTermMemory,
+    saveMemory: saveDatabaseMemory,
 
-    getLongTermMemory,
+    getMemories,
 
-    deleteLongTermMemory
+    clearUserMemory
 
 } = require("./memoryDatabase");
 
 
 
 
-
 // =====================================
 // SAVE MEMORY
+// Compatibility Function
 // =====================================
 
 function saveMemory(
@@ -36,13 +38,27 @@ function saveMemory(
 ){
 
 
-    return saveLongTermMemory(
+    return saveDatabaseMemory(
 
         userId,
 
-        key,
+        {
 
-        value
+            type: key,
+
+            value: value,
+
+            score: 50,
+
+            level: "TEMPORARY",
+
+            metadata: {
+
+                source: "Memory Engine"
+
+            }
+
+        }
 
     );
 
@@ -68,25 +84,21 @@ function getMemory(
 
     const memories =
 
-    getLongTermMemory(
+    getMemories(userId);
 
-        userId
+
+
+    const memory =
+
+    memories.find(
+
+        item => item.type === key
 
     );
 
 
 
-    if(memories[key]){
-
-
-        return memories[key];
-
-
-    }
-
-
-
-    return null;
+    return memory || null;
 
 
 }
@@ -106,11 +118,13 @@ function getAllMemory(
 ){
 
 
-    return getLongTermMemory(
+    const memories =
 
-        userId
+    getMemories(userId);
 
-    );
+
+
+    return memories;
 
 
 }
@@ -132,13 +146,27 @@ function addMemoryNote(
 ){
 
 
-    return saveLongTermMemory(
+    return saveDatabaseMemory(
 
         userId,
 
-        "note",
+        {
 
-        note
+            type:"note",
+
+            value:note,
+
+            score:40,
+
+            level:"TEMPORARY",
+
+            metadata:{
+
+                source:"Memory Note"
+
+            }
+
+        }
 
     );
 
@@ -160,7 +188,7 @@ function clearMemory(
 ){
 
 
-    return deleteLongTermMemory(
+    return clearUserMemory(
 
         userId
 
@@ -182,11 +210,15 @@ module.exports = {
 
     saveMemory,
 
+
     getMemory,
+
 
     getAllMemory,
 
+
     addMemoryNote,
+
 
     clearMemory
 
