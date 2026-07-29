@@ -212,9 +212,14 @@ const {
 
 // Memory Database
 
-const memoryDatabase =
+const {
 
-require("./services/memoryDatabase");
+    saveMemory,
+    getMemories,
+    searchMemory,
+    getBestMemories
+
+} = require("./services/memoryDatabase");
 
 
 
