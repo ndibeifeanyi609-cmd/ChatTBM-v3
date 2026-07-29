@@ -1,6 +1,7 @@
 // =====================================
 // ChatTBM V5.9.2
 // Memory Intelligence Retrieval
+// Database Memory Format Edition
 // =====================================
 
 
@@ -11,12 +12,11 @@
 
 function retrieveMemory(
 
-    memories = {},
+    memories = [],
 
     message = ""
 
 ){
-
 
     const text =
 
@@ -28,12 +28,24 @@ function retrieveMemory(
 
 
 
-    Object.keys(memories).forEach(key=>{
+    memories.forEach(memory=>{
+
+
+        if(!memory) return;
+
+
+
+        const type =
+
+        String(memory.type || "")
+
+        .toLowerCase();
+
 
 
         const value =
 
-        String(memories[key])
+        String(memory.value || "")
 
         .toLowerCase();
 
@@ -43,15 +55,13 @@ function retrieveMemory(
 
 
 
-        // Key match
+        // =============================
+        // TYPE MATCH
+        // =============================
 
         if(
 
-            text.includes(
-
-                key.toLowerCase()
-
-            )
+            text.includes(type)
 
         ){
 
@@ -61,7 +71,11 @@ function retrieveMemory(
 
 
 
-        // Value match
+
+
+        // =============================
+        // VALUE MATCH
+        // =============================
 
         if(
 
@@ -69,7 +83,7 @@ function retrieveMemory(
 
         ){
 
-            score += 5;
+            score += 8;
 
         }
 
@@ -77,21 +91,61 @@ function retrieveMemory(
 
 
 
-        // Important user preferences
+        // =============================
+        // IMPORTANT MEMORY LEVELS
+        // =============================
 
         if(
 
-            [
+            memory.level === "PERMANENT"
 
-                "platform",
+        ){
 
-                "contentStyle",
+            score += 5;
 
-                "tone",
+        }
 
-                "goal"
 
-            ].includes(key)
+
+        if(
+
+            memory.level === "LONG_TERM"
+
+        ){
+
+            score += 3;
+
+        }
+
+
+
+
+
+        // =============================
+        // IMPORTANT TYPES
+        // =============================
+
+        const importantTypes = [
+
+            "platform",
+
+            "contentstyle",
+
+            "tone",
+
+            "goal",
+
+            "project",
+
+            "name"
+
+        ];
+
+
+
+        if(
+
+            importantTypes.includes(type)
 
         ){
 
@@ -108,11 +162,25 @@ function retrieveMemory(
 
             results.push({
 
-                key,
+                id:
+
+                memory.id,
+
+
+                type:
+
+                memory.type,
+
 
                 value:
 
-                memories[key],
+                memory.value,
+
+
+                level:
+
+                memory.level,
+
 
                 score
 
@@ -123,18 +191,21 @@ function retrieveMemory(
         }
 
 
-
     });
 
 
 
 
 
+    // =============================
+    // SORT BEST MEMORY FIRST
+    // =============================
+
     results.sort(
 
         (a,b)=>
 
-        b.score-a.score
+        b.score - a.score
 
     );
 
@@ -150,7 +221,7 @@ function retrieveMemory(
 
 
 // =====================================
-// BUILD MEMORY CONTEXT
+// BUILD AI MEMORY CONTEXT
 // =====================================
 
 function buildMemoryContext(
@@ -170,7 +241,9 @@ function buildMemoryContext(
 
     let context =
 
-    "User preferences:\n";
+    "User memory:\n";
+
+
 
 
 
@@ -179,7 +252,7 @@ function buildMemoryContext(
 
         context +=
 
-        `- ${memory.key}: ${memory.value}\n`;
+        `- ${memory.type}: ${memory.value}\n`;
 
 
     });
@@ -194,6 +267,10 @@ function buildMemoryContext(
 
 
 
+
+// =====================================
+// EXPORT
+// =====================================
 
 module.exports = {
 
