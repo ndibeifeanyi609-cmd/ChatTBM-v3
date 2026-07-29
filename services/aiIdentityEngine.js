@@ -1,8 +1,8 @@
 // =========================================
 // ChatTBM V5.7
 // Personal AI Identity Engine
-// Part 2
-// Automatic Learning Engine
+// Part 3
+// Personality Scoring Engine
 // =========================================
 
 class AIIdentityEngine {
@@ -22,15 +22,10 @@ class AIIdentityEngine {
                 profile: {
 
                     name: "",
-
                     language: "English",
-
                     writingStyle: "Professional",
-
                     tone: "Friendly",
-
                     favoritePlatform: "Facebook",
-
                     favoriteCategory: "General"
 
                 },
@@ -38,10 +33,33 @@ class AIIdentityEngine {
                 learning: {
 
                     prompts: [],
-
                     interests: [],
-
                     history: []
+
+                },
+
+                scores: {
+
+                    platforms: {
+                        Facebook: 0,
+                        Instagram: 0,
+                        TikTok: 0,
+                        YouTube: 0
+                    },
+
+                    categories: {
+                        General: 0,
+                        Sports: 0,
+                        Business: 0,
+                        Comedy: 0,
+                        Motivation: 0
+                    },
+
+                    tones: {
+                        Professional: 0,
+                        Friendly: 0,
+                        Funny: 0
+                    }
 
                 }
 
@@ -53,9 +71,33 @@ class AIIdentityEngine {
 
     }
 
-    // -------------------------
-    // Learn from each message
-    // -------------------------
+    increaseScore(group, key) {
+
+        if (group[key] !== undefined) {
+            group[key]++;
+        }
+
+    }
+
+    highestScore(group) {
+
+        let best = null;
+        let score = -1;
+
+        for (const item in group) {
+
+            if (group[item] > score) {
+
+                score = group[item];
+                best = item;
+
+            }
+
+        }
+
+        return best;
+
+    }
 
     learn(userId, message) {
 
@@ -65,80 +107,87 @@ class AIIdentityEngine {
 
         user.learning.history.push(message);
 
-        // Save recent prompts
         user.learning.prompts.push(message);
 
         if (user.learning.prompts.length > 50) {
             user.learning.prompts.shift();
         }
 
-        // Detect favorite platform
-        if (text.includes("facebook")) {
-            user.profile.favoritePlatform = "Facebook";
-        }
+        // Platforms
 
-        if (text.includes("instagram")) {
-            user.profile.favoritePlatform = "Instagram";
-        }
+        if (text.includes("facebook"))
+            this.increaseScore(user.scores.platforms, "Facebook");
 
-        if (text.includes("tiktok")) {
-            user.profile.favoritePlatform = "TikTok";
-        }
+        if (text.includes("instagram"))
+            this.increaseScore(user.scores.platforms, "Instagram");
 
-        if (text.includes("youtube")) {
-            user.profile.favoritePlatform = "YouTube";
-        }
+        if (text.includes("tiktok"))
+            this.increaseScore(user.scores.platforms, "TikTok");
 
-        // Detect content niche
+        if (text.includes("youtube"))
+            this.increaseScore(user.scores.platforms, "YouTube");
+
+        // Categories
+
         if (text.includes("football") ||
             text.includes("soccer") ||
-            text.includes("sport")) {
+            text.includes("sport"))
+            this.increaseScore(user.scores.categories, "Sports");
 
-            user.profile.favoriteCategory = "Sports";
-        }
-
-        if (text.includes("business")) {
-            user.profile.favoriteCategory = "Business";
-        }
+        if (text.includes("business"))
+            this.increaseScore(user.scores.categories, "Business");
 
         if (text.includes("comedy") ||
-            text.includes("funny")) {
+            text.includes("funny"))
+            this.increaseScore(user.scores.categories, "Comedy");
 
-            user.profile.favoriteCategory = "Comedy";
-        }
+        if (text.includes("motivation"))
+            this.increaseScore(user.scores.categories, "Motivation");
 
-        if (text.includes("motivation")) {
-            user.profile.favoriteCategory = "Motivation";
-        }
+        // Tone
 
-        // Detect preferred tone
-        if (text.includes("professional")) {
-            user.profile.tone = "Professional";
-        }
+        if (text.includes("professional"))
+            this.increaseScore(user.scores.tones, "Professional");
 
-        if (text.includes("funny")) {
-            user.profile.tone = "Funny";
-        }
+        if (text.includes("friendly"))
+            this.increaseScore(user.scores.tones, "Friendly");
 
-        if (text.includes("friendly")) {
-            user.profile.tone = "Friendly";
-        }
+        if (text.includes("funny"))
+            this.increaseScore(user.scores.tones, "Funny");
 
-        // Store interests
+        // Update profile using highest scores
+
+        user.profile.favoritePlatform =
+            this.highestScore(user.scores.platforms);
+
+        user.profile.favoriteCategory =
+            this.highestScore(user.scores.categories);
+
+        user.profile.tone =
+            this.highestScore(user.scores.tones);
+
         if (!user.learning.interests.includes(user.profile.favoriteCategory)) {
-            user.learning.interests.push(user.profile.favoriteCategory);
+
+            user.learning.interests.push(
+                user.profile.favoriteCategory
+            );
+
         }
 
         return user;
 
     }
 
-    // -------------------------
-    // Get profile
-    // -------------------------
-
     getProfile(userId) {
+
         return this.createUser(userId).profile;
+
+    }
+
+    getScores(userId) {
+
+        return this.createUser(userId).scores;
+
     }
 
 }
