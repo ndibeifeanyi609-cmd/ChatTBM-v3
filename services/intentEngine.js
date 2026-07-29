@@ -1,70 +1,102 @@
 // =====================================
-// ChatTBM V5.0
-// services/memoryEngine.js
-// Conversation Memory Engine
+// ChatTBM V5.7
+// Intent Engine
+// Detects what the user wants
 // =====================================
 
-// Store conversations in memory
-const conversations = {};
-
 // =====================================
-// CREATE CONVERSATION
+// DETECT USER INTENT
 // =====================================
 
-function createConversation(conversationId) {
+function detectIntent(message = "") {
 
-    if (!conversations[conversationId]) {
+    const text = message.toLowerCase().trim();
 
-        conversations[conversationId] = [];
+    // =====================================
+    // CONTENT CREATION
+    // =====================================
+
+    if (
+        text.includes("caption") ||
+        text.includes("content") ||
+        text.includes("post") ||
+        text.includes("social media")
+    ) {
+
+        return "content_creation";
 
     }
 
-}
+    // =====================================
+    // SCRIPT GENERATION
+    // =====================================
 
-// =====================================
-// LOAD CONVERSATION
-// =====================================
+    if (
+        text.includes("script") ||
+        text.includes("video") ||
+        text.includes("youtube") ||
+        text.includes("tiktok") ||
+        text.includes("reel")
+    ) {
 
-function loadConversation(conversationId) {
-
-    createConversation(conversationId);
-
-    return conversations[conversationId];
-
-}
-
-// =====================================
-// SAVE CONVERSATION
-// =====================================
-
-function saveConversation(conversationId, userMessage, assistantReply) {
-
-    createConversation(conversationId);
-
-    conversations[conversationId].push({
-
-        user: userMessage,
-        assistant: assistantReply,
-        timestamp: Date.now()
-
-    });
-
-    // Keep only the latest 20 messages
-    if (conversations[conversationId].length > 20) {
-
-        conversations[conversationId].shift();
+        return "script_generation";
 
     }
 
-}
+    // =====================================
+    // MARKETING
+    // =====================================
 
-// =====================================
-// CLEAR CONVERSATION
-// =====================================
+    if (
+        text.includes("marketing") ||
+        text.includes("advert") ||
+        text.includes("advertisement") ||
+        text.includes("promotion") ||
+        text.includes("business") ||
+        text.includes("sell")
+    ) {
 
-function clearConversation(conversationId) {
+        return "marketing";
 
-    conversations[conversationId] = [];
+    }
+
+    // =====================================
+    // IDEA GENERATION
+    // =====================================
+
+    if (
+        text.includes("idea") ||
+        text.includes("ideas") ||
+        text.includes("brainstorm") ||
+        text.includes("creative")
+    ) {
+
+        return "idea_generation";
+
+    }
+
+    // =====================================
+    // GENERAL QUESTIONS
+    // =====================================
+
+    if (
+        text.includes("what") ||
+        text.includes("who") ||
+        text.includes("where") ||
+        text.includes("when") ||
+        text.includes("why") ||
+        text.includes("how")
+    ) {
+
+        return "general_question";
+
+    }
+
+    // =====================================
+    // DEFAULT
+    // =====================================
+
+    return "general_question";
 
 }
 
@@ -74,8 +106,6 @@ function clearConversation(conversationId) {
 
 module.exports = {
 
-    loadConversation,
-    saveConversation,
-    clearConversation
+    detectIntent
 
 };
