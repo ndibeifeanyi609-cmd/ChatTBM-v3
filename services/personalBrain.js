@@ -1,9 +1,8 @@
 // =====================================
 // ChatTBM V5.9.2
 // Personal AI Brain
-// Memory + Relationship + Context
+// Memory + Relationship + Context Engine
 // =====================================
-
 
 
 const {
@@ -33,7 +32,7 @@ require("./relationshipEngine");
 
 
 // =====================================
-// CREATE USER BRAIN CONTEXT
+// BUILD USER BRAIN CONTEXT
 // =====================================
 
 function buildBrainContext(
@@ -42,13 +41,12 @@ function buildBrainContext(
 
     message,
 
-    oldMemory = {}
+    oldMemory = []
 
 ){
 
-
     // =============================
-    // LONG TERM MEMORY
+    // IMPORTANT LONG TERM MEMORY
     // =============================
 
     const longTermMemory =
@@ -66,14 +64,22 @@ function buildBrainContext(
 
 
     // =============================
-    // OLD MEMORY SYSTEM
+    // SEARCH RELEVANT MEMORY
     // =============================
 
-    const retrievedMemory =
+    const relevantMemory =
 
     retrieveMemory(
 
-        oldMemory,
+        oldMemory.length
+
+        ?
+
+        oldMemory
+
+        :
+
+        longTermMemory,
 
         message
 
@@ -83,9 +89,8 @@ function buildBrainContext(
 
 
 
-
     // =============================
-    // RELATIONSHIPS
+    // USER RELATIONSHIPS
     // =============================
 
     const relationships =
@@ -100,16 +105,15 @@ function buildBrainContext(
 
 
 
-
     // =============================
-    // CREATE AI UNDERSTANDING
+    // AI MEMORY CONTEXT
     // =============================
 
     const memoryContext =
 
     buildMemoryContext(
 
-        retrievedMemory
+        relevantMemory
 
     );
 
@@ -119,14 +123,13 @@ function buildBrainContext(
 
     return {
 
-
         userId,
 
 
         longTermMemory,
 
 
-        retrievedMemory,
+        relevantMemory,
 
 
         relationships,
@@ -139,7 +142,6 @@ function buildBrainContext(
 
         new Date().toISOString()
 
-
     };
 
 
@@ -150,7 +152,7 @@ function buildBrainContext(
 
 
 // =====================================
-// LEARN FROM CONVERSATION
+// LEARN FROM USER MESSAGE
 // =====================================
 
 function learnBrain(
@@ -161,16 +163,13 @@ function learnBrain(
 
 ){
 
-
     return {
 
 
         userId,
 
 
-        learned:
-
-        true,
+        learned:true,
 
 
         message,
@@ -198,7 +197,6 @@ module.exports = {
 
 
     buildBrainContext,
-
 
     learnBrain
 
