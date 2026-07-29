@@ -1,13 +1,17 @@
 // =====================================
 // ChatTBM V5.9.2
 // Response Intelligence Engine
+// Personal Brain Connected
 // Memory + Context + Personality
 // =====================================
 
 
 const {
+
     handleContextRequest
+
 } = require("./contextEngine");
+
 
 
 
@@ -32,7 +36,9 @@ function generateResponse(
 
     aiContext = {},
 
-    longTermMemory = []
+    longTermMemory = [],
+
+    brainContext = {}
 
 ){
 
@@ -43,8 +49,10 @@ function generateResponse(
 
 
 
+
+
     // =====================================
-    // CONTEXT MEMORY CHECK
+    // CONTEXT FOLLOW UP
     // =====================================
 
     const context =
@@ -58,11 +66,24 @@ function generateResponse(
     );
 
 
-    if(context && context.matched){
+
+    if(
+
+        context &&
+
+        context.matched
+
+    ){
 
         return context.response;
 
     }
+
+
+
+
+
+    let response = "";
 
 
 
@@ -82,7 +103,9 @@ function generateResponse(
 
     ){
 
-        return `Hello 👋
+        response =
+
+`Hello 👋
 
 I'm ChatTBM, your AI Content Assistant.
 
@@ -103,21 +126,22 @@ What are we creating today?`;
 
 
     // =====================================
-    // SCRIPT CREATION
+    // SCRIPT GENERATION
     // =====================================
 
-    if(
+    else if(
 
         intent === "script_generation" ||
 
         text.includes("script") ||
 
-        text.includes("create a video")
+        text.includes("video")
 
     ){
 
+        response =
 
-        return `Let's create your script 🎬
+`Let's create your script 🎬
 
 
 Tell me:
@@ -130,10 +154,6 @@ Tell me:
 
 4️⃣ Style
 
-Example:
-
-"Create a 60 second funny Facebook video about Nigerian village life."
-
 
 I'll structure the complete script for you.`;
 
@@ -144,10 +164,10 @@ I'll structure the complete script for you.`;
 
 
     // =====================================
-    // CAPTION CREATION
+    // CAPTION GENERATION
     // =====================================
 
-    if(
+    else if(
 
         intent === "caption_generation" ||
 
@@ -155,15 +175,16 @@ I'll structure the complete script for you.`;
 
     ){
 
+        response =
 
-        return `Let's create your caption ✍️
+`Let's create your caption ✍️
 
 
 Tell me:
 
 • What is the post about?
-• Platform (Facebook, Instagram, TikTok)
-• Tone (funny, serious, motivational)
+• Platform
+• Tone
 
 
 I'll create captions that match your audience.`;
@@ -175,10 +196,10 @@ I'll create captions that match your audience.`;
 
 
     // =====================================
-    // CONTENT IDEAS
+    // IDEA GENERATION
     // =====================================
 
-    if(
+    else if(
 
         intent === "idea_generation" ||
 
@@ -186,8 +207,9 @@ I'll create captions that match your audience.`;
 
     ){
 
+        response =
 
-        return `Let's generate content ideas 💡
+`Let's generate content ideas 💡
 
 
 Tell me:
@@ -206,52 +228,112 @@ I'll create ideas designed for growth.`;
 
 
     // =====================================
-    // MEMORY PERSONALIZATION
+    // DEFAULT RESPONSE
     // =====================================
 
-    let response =
+    else {
 
-    `I understand your request.
+
+        response =
+
+`I understand your request.
 
 I'll help you with that.`;
 
+    }
 
 
 
-    if(facts && facts.lastMessage){
 
+
+    // =====================================
+    // PERSONAL BRAIN MEMORY
+    // =====================================
+
+
+    if(
+
+        brainContext &&
+
+        brainContext.memoryContext
+
+    ){
 
         response +=
 
-        `\n\n🧠 I remember we were previously discussing:
+`\n\n🧠 Personal Brain:
+
+${brainContext.memoryContext}`;
+
+    }
+
+
+
+
+
+    // =====================================
+    // RELATIONSHIP MEMORY
+    // =====================================
+
+    if(
+
+        brainContext &&
+
+        brainContext.relationships &&
+
+        brainContext.relationships.length > 0
+
+    ){
+
+        response +=
+
+`\n\n🔗 I understand this connects with your previous work.`;
+
+    }
+
+
+
+
+
+    // =====================================
+    // AI PROFILE PERSONALIZATION
+    // =====================================
+
+    if(
+
+        aiContext &&
+
+        aiContext.enhancedPrompt
+
+    ){
+
+        response +=
+
+`\n\n🤖 Response adapted to your preferences.`;
+
+    }
+
+
+
+
+
+    // =====================================
+    // PREVIOUS FACTS
+    // =====================================
+
+    if(
+
+        facts &&
+
+        facts.lastMessage
+
+    ){
+
+        response +=
+
+`\n\n📚 Previous discussion:
 
 "${facts.lastMessage}"`;
-
-    }
-
-
-
-
-
-    if(longTermMemory.length > 0){
-
-
-        response +=
-
-        `\n\n📚 I found ${longTermMemory.length} saved memory items that can help personalize this response.`;
-
-    }
-
-
-
-
-
-    if(aiContext && aiContext.context){
-
-
-        response +=
-
-        `\n\n🤖 I'm adapting this response to your preferences.`;
 
     }
 
