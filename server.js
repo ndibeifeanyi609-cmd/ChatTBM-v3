@@ -1,5 +1,5 @@
 // =====================================
-// ChatTBM Backend V5.7
+// ChatTBM Backend V5.8
 // Part 1
 // Core Setup + AI Engine Connections
 // =====================================
@@ -12,6 +12,20 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+
+// =====================================
+// CREATE SERVER
+// =====================================
+
+const app = express();
+
+// =====================================
+// MIDDLEWARE
+// =====================================
+
+app.use(cors());
+
+app.use(express.json());
 
 // =====================================
 // AI ENGINES
@@ -56,15 +70,17 @@ const {
     retrieveMemory
 } = require("./services/memoryRetrieval");
 
-// =====================================
-// PERSONAL AI ENGINES
-// =====================================
-
+// AI Identity Engine
 const AIIdentityEngine =
 require("./services/aiIdentityEngine");
 
+// Adaptive Response Engine
 const AdaptiveResponseEngine =
 require("./services/adaptiveResponseEngine");
+
+// =====================================
+// CREATE AI INSTANCES
+// =====================================
 
 const identityEngine =
 new AIIdentityEngine();
@@ -73,20 +89,7 @@ const adaptiveEngine =
 new AdaptiveResponseEngine(identityEngine);
 
 // =====================================
-// CREATE SERVER
-// =====================================
-
-const app = express();
-
-// =====================================
-// MIDDLEWARE
-// =====================================
-
-app.use(cors());
-app.use(express.json());
-
-// =====================================
-// CONVERSATION HISTORY
+// CONVERSATION CACHE
 // =====================================
 
 const conversations = {};
@@ -97,9 +100,9 @@ const MAX_HISTORY = 30;
 // CREATE CONVERSATION
 // =====================================
 
-function createConversation(conversationId) {
+function createConversation(conversationId){
 
-    if (!conversations[conversationId]) {
+    if(!conversations[conversationId]){
 
         conversations[conversationId] = [];
 
@@ -112,28 +115,40 @@ function createConversation(conversationId) {
 // =====================================
 
 function saveMessage(
+
     conversationId,
+
     role,
+
     message
-) {
+
+){
 
     createConversation(conversationId);
 
     conversations[conversationId].push({
 
         role,
+
         message,
-        timestamp: new Date().toISOString()
+
+        created:
+        new Date().toISOString()
 
     });
 
-    if (
+    if(
+
         conversations[conversationId].length >
+
         MAX_HISTORY
-    ) {
+
+    ){
 
         conversations[conversationId] =
+
         conversations[conversationId]
+
         .slice(-MAX_HISTORY);
 
     }
@@ -144,11 +159,21 @@ function saveMessage(
 // GET CONVERSATION
 // =====================================
 
-function getConversation(conversationId) {
+function getConversation(conversationId){
 
     createConversation(conversationId);
 
     return conversations[conversationId];
+
+}
+
+// =====================================
+// CLEAR CONVERSATION
+// =====================================
+
+function clearConversation(conversationId){
+
+    conversations[conversationId] = [];
 
 }
 
@@ -175,17 +200,11 @@ app.get("/", (req, res) => {
         engines: {
 
             intent: "Active 🧠",
-
             response: "Active 💬",
-
             memory: "Active 💾",
-
             learning: "Active 📚",
-
             conversation: "Active 📝",
-
             identity: "Active 👤",
-
             adaptiveAI: "Active 🤖"
 
         },
@@ -207,12 +226,12 @@ app.post("/api/chat", (req, res) => {
 
     try {
 
-        const message =
-        req.body.message;
+        const {
 
-        const conversationId =
-        req.body.conversationId ||
-        "guest-user";
+            message,
+            conversationId = "guest-user"
+
+        } = req.body;
 
         // =============================
         // VALIDATION
@@ -221,9 +240,7 @@ app.post("/api/chat", (req, res) => {
         if (
 
             !message ||
-
             typeof message !== "string" ||
-
             message.trim() === ""
 
         ) {
@@ -246,9 +263,7 @@ app.post("/api/chat", (req, res) => {
         saveMessage(
 
             conversationId,
-
             "user",
-
             message
 
         );
@@ -260,7 +275,6 @@ app.post("/api/chat", (req, res) => {
         learnFromMessage(
 
             conversationId,
-
             message
 
         );
@@ -272,39 +286,35 @@ app.post("/api/chat", (req, res) => {
         identityEngine.learn(
 
             conversationId,
-
             message
 
         );
 
         // =============================
-        // SAVE CONVERSATION FACT
+        // SAVE IMPORTANT FACT
         // =============================
 
         saveFact(
 
             conversationId,
-
             "lastMessage",
-
             message
 
         );
 
         // =============================
-        // ADD TIMELINE EVENT
+        // UPDATE TIMELINE
         // =============================
 
         addTimeline(
 
             conversationId,
-
             "User: " + message
 
         );
 
         // =============================
-        // LOAD CHAT HISTORY
+        // LOAD CONVERSATION HISTORY
         // =============================
 
         const history =
@@ -338,7 +348,6 @@ app.post("/api/chat", (req, res) => {
         retrieveMemory(
 
             userMemory,
-
             message
 
         );
@@ -362,14 +371,13 @@ app.post("/api/chat", (req, res) => {
         );
 
         // =============================
-        // BUILD PERSONAL AI CONTEXT
+        // BUILD AI PERSONALITY CONTEXT
         // =============================
 
         const aiContext =
         adaptiveEngine.personalize(
 
             conversationId,
-
             message
 
         );
@@ -379,23 +387,23 @@ app.post("/api/chat", (req, res) => {
         // =============================
 
         const reply =
-generateResponse(
+        generateResponse(
 
-    intent,
+            intent,
 
-    message,
+            message,
 
-    memory,
+            memory,
 
-    history,
+            history,
 
-    facts,
+            facts,
 
-    timeline,
+            timeline,
 
-    aiContext
+            aiContext
 
-);
+        );
 
         // =============================
         // SAVE AI RESPONSE
@@ -412,7 +420,7 @@ generateResponse(
         );
 
         // =============================
-        // ADD AI RESPONSE TO TIMELINE
+        // SAVE RESPONSE TO TIMELINE
         // =============================
 
         addTimeline(
@@ -424,7 +432,7 @@ generateResponse(
         );
 
         // =============================
-        // SEND RESPONSE
+        // RETURN RESPONSE
         // =============================
 
         return res.json({
@@ -446,7 +454,10 @@ generateResponse(
             conversationId,
 
             historyLength:
-            history.length
+            history.length,
+
+            timestamp:
+            new Date().toISOString()
 
         });
 
@@ -467,7 +478,12 @@ generateResponse(
             success: false,
 
             reply:
-            "Something went wrong. Please try again."
+            "Something went wrong. Please try again.",
+
+            error:
+            process.env.NODE_ENV === "development"
+                ? error.message
+                : undefined
 
         });
 
@@ -491,7 +507,9 @@ app.use((req, res) => {
 
         success: false,
 
-        error: "Route not found."
+        error: "Route not found.",
+
+        path: req.originalUrl
 
     });
 
@@ -515,7 +533,15 @@ app.use((err, req, res, next) => {
 
         success: false,
 
-        error: "Internal Server Error."
+        error: "Internal Server Error.",
+
+        message:
+
+        process.env.NODE_ENV === "development"
+
+            ? err.message
+
+            : "An unexpected error occurred."
 
     });
 
@@ -530,14 +556,13 @@ process.env.PORT || 3000;
 
 app.listen(PORT, () => {
 
+    console.clear();
+
     console.log("");
-
-    console.log("====================================");
-    console.log("      ChatTBM Backend V5.7");
-    console.log("====================================");
-
+    console.log("=========================================");
+    console.log("        ChatTBM Backend V5.7");
+    console.log("=========================================");
     console.log(`🚀 Server running on port ${PORT}`);
-
     console.log("");
 
     console.log("🧠 Intent Engine ............. Active");
@@ -545,14 +570,13 @@ app.listen(PORT, () => {
     console.log("💾 Memory Engine ............. Active");
     console.log("📚 Memory Learning ........... Active");
     console.log("📝 Conversation Memory ....... Active");
+    console.log("🔍 Memory Retrieval .......... Active");
     console.log("👤 AI Identity Engine ........ Active");
     console.log("🤖 Adaptive AI Engine ........ Active");
 
     console.log("");
-
     console.log("✅ ChatTBM Backend Ready");
-
-    console.log("====================================");
+    console.log("=========================================");
     console.log("");
 
 });
