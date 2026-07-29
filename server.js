@@ -1,6 +1,6 @@
 // =====================================
-// ChatTBM Backend V5.3 Clean Edition
-// Part 1/4
+// ChatTBM Backend V5.7
+// Part 1
 // Core Setup + AI Engine Connections
 // =====================================
 
@@ -17,10 +17,15 @@ const cors = require("cors");
 // AI ENGINES
 // =====================================
 
-// Intent Detection
+// Intent Engine
 const {
     detectIntent
 } = require("./services/intentEngine");
+
+// Response Engine
+const {
+    generateResponse
+} = require("./services/respondEngine");
 
 // Memory Engine
 const {
@@ -47,13 +52,12 @@ const {
 } = require("./services/conversationMemory");
 
 // Memory Retrieval Engine
-
 const {
     retrieveMemory
 } = require("./services/memoryRetrieval");
 
 // =====================================
-// AI IDENTITY ENGINE
+// PERSONAL AI ENGINES
 // =====================================
 
 const AIIdentityEngine =
@@ -149,8 +153,8 @@ function getConversation(conversationId) {
 }
 
 // =====================================
-// ChatTBM Backend V5.3 Clean Edition
-// Part 2/4
+// ChatTBM Backend V5.7
+// Part 2
 // Health Check + Chat API
 // =====================================
 
@@ -164,7 +168,7 @@ app.get("/", (req, res) => {
 
         app: "ChatTBM Backend",
 
-        version: "5.3",
+        version: "5.7",
 
         status: "Running ✅",
 
@@ -172,13 +176,17 @@ app.get("/", (req, res) => {
 
             intent: "Active 🧠",
 
+            response: "Active 💬",
+
             memory: "Active 💾",
 
             learning: "Active 📚",
 
             conversation: "Active 📝",
 
-            response: "Active 💬"
+            identity: "Active 👤",
+
+            adaptiveAI: "Active 🤖"
 
         },
 
@@ -211,9 +219,13 @@ app.post("/api/chat", (req, res) => {
         // =============================
 
         if (
+
             !message ||
+
             typeof message !== "string" ||
+
             message.trim() === ""
+
         ) {
 
             return res.status(400).json({
@@ -254,16 +266,16 @@ app.post("/api/chat", (req, res) => {
         );
 
         // =============================
-// PERSONAL AI LEARNING
-// =============================
+        // PERSONAL AI LEARNING
+        // =============================
 
-identityEngine.learn(
+        identityEngine.learn(
 
-    conversationId,
+            conversationId,
 
-    message
+            message
 
-);
+        );
 
         // =============================
         // SAVE CONVERSATION FACT
@@ -309,36 +321,28 @@ identityEngine.learn(
             message
         );
 
-// =====================================
-// ChatTBM Backend V5.3 Clean Edition
-// Part 3/4
-// AI Pipeline + Response
-// =====================================
+        // =============================
+        // LOAD USER MEMORY
+        // =============================
 
-     // =============================
-// LOAD USER MEMORY
-// =============================
+        const userMemory =
+        getAllMemory(
+            conversationId
+        );
 
-const userMemory =
-getAllMemory(
+        // =============================
+        // RETRIEVE RELEVANT MEMORY
+        // =============================
 
-    conversationId
+        const memory =
+        retrieveMemory(
 
-);
+            userMemory,
 
+            message
 
-// =============================
-// RETRIEVE RELEVANT MEMORY
-// =============================
+        );
 
-const memory =
-retrieveMemory(
-
-    userMemory,
-
-    message
-
-);
         // =============================
         // LOAD CONVERSATION FACTS
         // =============================
@@ -358,17 +362,17 @@ retrieveMemory(
         );
 
         // =============================
-// BUILD PERSONAL AI CONTEXT
-// =============================
+        // BUILD PERSONAL AI CONTEXT
+        // =============================
 
-const aiContext =
-adaptiveEngine.personalize(
+        const aiContext =
+        adaptiveEngine.personalize(
 
-    conversationId,
+            conversationId,
 
-    message
+            message
 
-);
+        );
 
         // =============================
         // GENERATE AI RESPONSE
@@ -435,6 +439,8 @@ adaptiveEngine.personalize(
 
             timeline,
 
+            aiContext,
+
             conversationId,
 
             historyLength:
@@ -447,8 +453,11 @@ adaptiveEngine.personalize(
     catch (error) {
 
         console.error(
+
             "ChatTBM Error:",
+
             error
+
         );
 
         return res.status(500).json({
@@ -465,8 +474,8 @@ adaptiveEngine.personalize(
 });
 
 // =====================================
-// ChatTBM Backend V5.3 Clean Edition
-// Part 4/4
+// ChatTBM Backend V5.7
+// Part 4
 // Error Handling + Server Startup
 // =====================================
 
@@ -522,22 +531,24 @@ app.listen(PORT, () => {
     console.log("");
 
     console.log("====================================");
-    console.log("     ChatTBM Backend V5.3");
+    console.log("      ChatTBM Backend V5.7");
     console.log("====================================");
 
-    console.log(` Server running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 
     console.log("");
 
-    console.log(" 🧠 Intent Engine ............. Active");
-    console.log(" 💾 Memory Engine ............. Active");
-    console.log(" 📚 Memory Learning ........... Active");
-    console.log(" 📝 Conversation Memory ....... Active");
-    console.log(" 💬 Response Engine ........... Active");
+    console.log("🧠 Intent Engine ............. Active");
+    console.log("💬 Response Engine ........... Active");
+    console.log("💾 Memory Engine ............. Active");
+    console.log("📚 Memory Learning ........... Active");
+    console.log("📝 Conversation Memory ....... Active");
+    console.log("👤 AI Identity Engine ........ Active");
+    console.log("🤖 Adaptive AI Engine ........ Active");
 
     console.log("");
 
-    console.log(" 🚀 ChatTBM Backend Ready");
+    console.log("✅ ChatTBM Backend Ready");
 
     console.log("====================================");
     console.log("");
