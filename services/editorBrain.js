@@ -51,16 +51,26 @@ function editorBrain(command, text){
 
 function shortenText(text){
 
-    const words = text.split(" ");
+    if(!text || text.trim() === ""){
 
-    if(words.length <= 6){
-        return text;
+        return "I need some text to shorten.";
+
     }
 
-    return words.slice(0,6).join(" ") + "...";
+
+    const words = text.split(" ");
+
+
+    if(words.length <= 4){
+
+        return words.slice(0,2).join(" ") + "...";
+
+    }
+
+
+    return words.slice(0,4).join(" ") + "...";
 
 }
-
 // =====================================
 // EXPAND
 // =====================================
