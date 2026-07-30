@@ -1,13 +1,15 @@
 /* =====================================
-   ChatTBM V5.9.6
+   ChatTBM V5.9.6.1
    Smart Editor Brain
 
    Upgrade:
    - Natural shortening
-   - Rewrite
-   - Expand
+   - Better caption editing
+   - Rewrite styles
+   - Expand ideas
    - Tone changing
 ===================================== */
+
 
 
 // =====================================
@@ -17,11 +19,12 @@
 function editorBrain(command, text){
 
 
-    if(!text){
+    if(!text || text.trim() === ""){
 
         return "I need content to edit.";
 
     }
+
 
 
     const cmd =
@@ -29,12 +32,13 @@ function editorBrain(command, text){
 
 
 
-    // SHORTEN
 
     if(
+
         cmd.includes("short") ||
         cmd.includes("summarize") ||
         cmd.includes("brief")
+
     ){
 
         return shortenText(text);
@@ -45,12 +49,13 @@ function editorBrain(command, text){
 
 
 
-    // EXPAND
 
     if(
+
         cmd.includes("expand") ||
         cmd.includes("longer") ||
         cmd.includes("more details")
+
     ){
 
         return expandText(text);
@@ -62,12 +67,12 @@ function editorBrain(command, text){
 
 
 
-    // REWRITE
-
     if(
+
         cmd.includes("rewrite") ||
         cmd.includes("improve") ||
         cmd.includes("better")
+
     ){
 
         return rewriteText(text);
@@ -79,18 +84,17 @@ function editorBrain(command, text){
 
 
 
-
-    // TONE CHANGE
-
-
     if(
+
         cmd.includes("motivational") ||
         cmd.includes("motivation")
+
     ){
 
         return motivationalText(text);
 
     }
+
 
 
 
@@ -108,6 +112,7 @@ function editorBrain(command, text){
 
 
 
+
     if(
         cmd.includes("cinematic")
     ){
@@ -115,8 +120,6 @@ function editorBrain(command, text){
         return cinematicText(text);
 
     }
-
-
 
 
 
@@ -130,24 +133,58 @@ function editorBrain(command, text){
 
 
 
+
 // =====================================
-// SHORTEN
+// NATURAL SHORTEN
 // =====================================
 
 
 function shortenText(text){
 
 
-    const words =
-    text.split(" ");
+    const lower =
+    text.toLowerCase();
 
 
 
-    if(words.length <= 4){
+    if(
+        lower.includes("no shortcuts")
+    ){
 
-        return text;
+        return "No shortcuts. Just consistency. 🚀";
 
     }
+
+
+
+
+
+    if(
+        lower.includes("small actions")
+    ){
+
+        return "Small steps. Big results. 🔥";
+
+    }
+
+
+
+
+
+    if(
+        lower.includes("journey")
+    ){
+
+        return "The journey continues. 🚀";
+
+    }
+
+
+
+
+
+    const words =
+    text.split(" ");
 
 
 
@@ -177,9 +214,9 @@ function expandText(text){
 
         text +
 
-        "\n\nEvery step tells a story. " +
+        "\n\nEvery step matters. " +
 
-        "Keep pushing forward and trust the journey."
+        "Growth comes from consistency, patience, and dedication."
 
     );
 
@@ -206,7 +243,7 @@ function rewriteText(text){
 
         text +
 
-        "\n\nTurning every challenge into progress."
+        "\n\nA new chapter, a stronger version of the story."
 
     );
 
@@ -220,7 +257,7 @@ function rewriteText(text){
 
 
 // =====================================
-// TONES
+// TONE STYLES
 // =====================================
 
 
@@ -233,12 +270,15 @@ function motivationalText(text){
 
         text +
 
-        "\n\nNo matter the obstacles, keep moving forward."
+        "\n\nKeep pushing forward. " +
+
+        "Every step is building something bigger."
 
     );
 
 
 }
+
 
 
 
@@ -252,12 +292,13 @@ function viralText(text){
 
         text +
 
-        " Follow the journey. The best is yet to come."
+        "\n\nWatch the journey. The best is coming."
 
     );
 
 
 }
+
 
 
 
@@ -271,7 +312,7 @@ function cinematicText(text){
 
         text +
 
-        "\n\nA story built through struggle, growth, and determination."
+        "\n\nA story written through challenges, growth, and determination."
 
     );
 
