@@ -1,16 +1,22 @@
-// =====================================
-// ChatTBM V5.4
-// Context Engine
-// Handles conversation follow-ups
-// =====================================
+/* =====================================
+   ChatTBM V5.9.4
+   Context Engine V1
+
+   Upgrade:
+   - Conversation follow-ups
+   - Topic awareness
+   - Previous message handling
+   - Browser compatible
+===================================== */
 
 
 
 // =====================================
-// CONTEXT HANDLER
+// MAIN CONTEXT ENGINE
 // =====================================
 
-function handleContextRequest(
+
+function contextEngine(
 
     message,
 
@@ -20,59 +26,27 @@ function handleContextRequest(
 
 
     const text =
-    message.toLowerCase();
+    normalize(message);
 
 
 
-    let previousMessage = "";
-
-
-
-    // =====================================
-    // FIND LAST USER MESSAGE
-    // =====================================
-
-    if(history.length > 0){
-
-
-        for(
-            let i = history.length - 1;
-            i >= 0;
-            i--
-        ){
-
-            if(
-                history[i].role === "user"
-            ){
-
-                previousMessage =
-                history[i].message;
-
-                break;
-
-            }
-
-        }
-
-
-    }
+    const previous =
+    getPreviousUserMessage(history);
 
 
 
 
-    // =====================================
-    // CONTINUE
-    // =====================================
+    // CONTINUE CONVERSATION
 
-    if(
+    if(hasWords(text,[
 
-        text.includes("continue") ||
+        "continue",
+        "keep going",
+        "go on",
+        "continue from there"
 
-        text.includes("keep going") ||
+    ])){
 
-        text.includes("go on")
-
-    ){
 
         return {
 
@@ -80,33 +54,33 @@ function handleContextRequest(
 
             response:
 
-`I'll continue from where we stopped.
+            "I'll continue from where we stopped.\n\n" +
 
-Previous topic:
-${previousMessage || "our last conversation"}
+            "Previous topic:\n" +
 
-Let's continue building on it.`
+            (previous || "our last conversation")
 
         };
+
 
     }
 
 
 
 
-    // =====================================
+
+
     // REWRITE
-    // =====================================
 
-    if(
+    if(hasWords(text,[
 
-        text.includes("rewrite") ||
+        "rewrite",
+        "improve",
+        "make it better",
+        "fix this"
 
-        text.includes("improve") ||
+    ])){
 
-        text.includes("make it better")
-
-    ){
 
         return {
 
@@ -114,33 +88,32 @@ Let's continue building on it.`
 
             response:
 
-`I'll improve the previous content.
+            "I'll improve this based on your previous request:\n\n" +
 
-Previous request:
-${previousMessage || "No previous request found."}
-
-I will make it clearer and more engaging.`
+            (previous || "No previous message found.")
 
         };
+
 
     }
 
 
 
 
-    // =====================================
+
+
+
     // SHORTEN
-    // =====================================
 
-    if(
+    if(hasWords(text,[
 
-        text.includes("shorter") ||
+        "shorter",
+        "shorten",
+        "make it brief",
+        "summarize"
 
-        text.includes("shorten") ||
+    ])){
 
-        text.includes("summarize")
-
-    ){
 
         return {
 
@@ -148,32 +121,33 @@ I will make it clearer and more engaging.`
 
             response:
 
-`I'll create a shorter version based on:
+            "I'll create a shorter version of:\n\n" +
 
-${previousMessage || "your previous request"}
-
-Keeping the main points clear.`
+            (previous || "your previous message")
 
         };
+
 
     }
 
 
 
 
-    // =====================================
+
+
+
+
     // EXPAND
-    // =====================================
 
-    if(
+    if(hasWords(text,[
 
-        text.includes("expand") ||
+        "expand",
+        "more details",
+        "make it longer",
+        "explain more"
 
-        text.includes("more details") ||
+    ])){
 
-        text.includes("make it longer")
-
-    ){
 
         return {
 
@@ -181,22 +155,52 @@ Keeping the main points clear.`
 
             response:
 
-`I'll expand the previous idea:
+            "I'll expand this idea:\n\n" +
 
-${previousMessage || "your previous request"}
-
-Adding more details and examples.`
+            (previous || "your previous request")
 
         };
+
 
     }
 
 
 
 
-    // =====================================
-    // NO CONTEXT MATCH
-    // =====================================
+
+
+
+    // REMEMBER LAST TOPIC
+
+    if(hasWords(text,[
+
+        "what were we talking about",
+        "what was i saying",
+        "last topic"
+
+    ])){
+
+
+        return {
+
+            matched:true,
+
+            response:
+
+            "Your previous topic was:\n\n" +
+
+            (previous || "No previous topic found.")
+
+        };
+
+
+    }
+
+
+
+
+
+
 
     return {
 
@@ -212,8 +216,111 @@ Adding more details and examples.`
 
 
 
-module.exports = {
 
-    handleContextRequest
 
-};
+
+
+// =====================================
+// GET PREVIOUS USER MESSAGE
+// =====================================
+
+
+function getPreviousUserMessage(history){
+
+
+
+    if(!Array.isArray(history)){
+
+        return "";
+
+    }
+
+
+
+
+    for(
+
+        let i = history.length - 1;
+
+        i >= 0;
+
+        i--
+
+    ){
+
+
+        if(
+
+            history[i].role === "user"
+
+        ){
+
+
+            return history[i].message;
+
+
+        }
+
+
+    }
+
+
+
+    return "";
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// HELPERS
+// =====================================
+
+
+function normalize(text){
+
+
+    return text
+
+    .toLowerCase()
+
+    .trim();
+
+
+}
+
+
+
+
+
+
+function hasWords(text,words){
+
+
+    return words.some(word =>
+
+        text.includes(word)
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// EXPORT
+// =====================================
+
+
+window.contextEngine = contextEngine;
