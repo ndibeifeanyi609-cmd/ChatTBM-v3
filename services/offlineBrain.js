@@ -661,13 +661,17 @@ function fallbackResponse(){
 
 function getChatHistory(){
 
+    if(
+        window.conversationManager
+    ){
+
+        return window.conversationManager.getHistory();
+
+    }
 
     return [];
 
-
 }
-
-
 
 
 
