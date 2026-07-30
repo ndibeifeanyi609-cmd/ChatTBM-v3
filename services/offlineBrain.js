@@ -1,35 +1,87 @@
 /* ===================================
-   ChatTBM V5.9.3
+   ChatTBM V5.9.4
    Offline Smart Response Brain
-   Part 3
 
    Upgrade:
-   - Connected Creator Brain
-   - Better modular AI routing
-   - Offline content assistant
+   - Context Engine connection
+   - Creator Brain connection
+   - Better conversation flow
+   - Offline intelligence expansion
 =================================== */
+
 
 
 // ===================================
 // MAIN OFFLINE BRAIN
 // ===================================
 
-function offlineBrain(message) {
+
+function offlineBrain(message){
 
 
-    const text = normalizeMessage(message);
+    const text =
+    normalizeMessage(message);
 
 
-    const intent = detectIntent(text);
+
+    // ===================================
+    // CHECK CONTEXT FIRST
+    // ===================================
+
+
+    if(
+
+        typeof window.contextEngine === "function"
+
+    ){
+
+
+        const contextResult =
+
+        window.contextEngine(
+
+            message,
+
+            getChatHistory()
+
+        );
+
+
+
+        if(
+
+            contextResult.matched
+
+        ){
+
+
+            return contextResult.response;
+
+
+        }
+
+
+    }
+
+
+
+
+
+
+    const intent =
+    detectIntent(text);
+
 
 
 
     switch(intent){
 
 
+
         case "greeting":
 
             return greetingResponse();
+
 
 
 
@@ -39,9 +91,11 @@ function offlineBrain(message) {
 
 
 
+
         case "creator":
 
             return handleCreatorRequest(text);
+
 
 
 
@@ -51,9 +105,11 @@ function offlineBrain(message) {
 
 
 
+
         case "math":
 
             return mathResponse(text);
+
 
 
 
@@ -63,9 +119,11 @@ function offlineBrain(message) {
 
 
 
+
         case "conversation":
 
             return conversationResponse(text);
+
 
 
 
@@ -75,15 +133,25 @@ function offlineBrain(message) {
 
 
 
+
         case "date":
 
             return dateResponse();
 
 
 
+
+        case "personal":
+
+            return personalResponse(text);
+
+
+
+
         default:
 
             return fallbackResponse();
+
 
 
     }
@@ -97,9 +165,11 @@ function offlineBrain(message) {
 
 
 
+
 // ===================================
 // INTENT DETECTOR
 // ===================================
+
 
 function detectIntent(text){
 
@@ -116,9 +186,14 @@ function detectIntent(text){
 
     ])){
 
+
         return "greeting";
 
+
     }
+
+
+
 
 
 
@@ -132,9 +207,13 @@ function detectIntent(text){
 
     ){
 
+
         return "identity";
 
+
     }
+
+
 
 
 
@@ -164,6 +243,8 @@ function detectIntent(text){
 
 
 
+
+
     if(hasWords(text,[
 
         "javascript",
@@ -184,6 +265,7 @@ function detectIntent(text){
 
 
 
+
     if(/[0-9]+[+\-*/][0-9]+/.test(text)){
 
 
@@ -191,6 +273,7 @@ function detectIntent(text){
 
 
     }
+
 
 
 
@@ -215,6 +298,28 @@ function detectIntent(text){
 
 
 
+
+    if(hasWords(text,[
+
+        "my journey",
+        "my story",
+        "i want",
+        "i need",
+        "i am building"
+
+    ])){
+
+
+        return "personal";
+
+
+    }
+
+
+
+
+
+
     if(text.includes("time")){
 
 
@@ -222,6 +327,7 @@ function detectIntent(text){
 
 
     }
+
 
 
 
@@ -240,6 +346,7 @@ function detectIntent(text){
 
 
     }
+
 
 
 
@@ -273,12 +380,15 @@ function detectIntent(text){
 
 
 
+
+
 // ===================================
 // CREATOR BRAIN CONNECTION
 // ===================================
 
 
 function handleCreatorRequest(text){
+
 
 
     if(
@@ -295,13 +405,10 @@ function handleCreatorRequest(text){
 
 
 
+
     return (
 
-        "Creator Brain is not loaded yet.\n\n" +
-
-        "Please make sure services/creatorBrain.js " +
-
-        "is connected."
+        "Creator Brain is not loaded yet."
 
     );
 
@@ -314,8 +421,42 @@ function handleCreatorRequest(text){
 
 
 
+
+
 // ===================================
-// NORMAL RESPONSES
+// PERSONAL MESSAGE RESPONSE
+// ===================================
+
+
+function personalResponse(text){
+
+
+
+    return (
+
+        "That sounds like an important part of your journey. " +
+
+        "Your story can become powerful content.\n\n" +
+
+        "Would you like me to turn it into a caption, " +
+
+        "video script, or content idea?"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===================================
+// BASIC RESPONSES
 // ===================================
 
 
@@ -372,8 +513,6 @@ function codingResponse(){
 
         "I can help with coding.\n\n" +
 
-        "Tell me the language or problem:\n\n" +
-
         "HTML, CSS, JavaScript, or ChatTBM development."
 
     );
@@ -390,7 +529,8 @@ function codingResponse(){
 function mathResponse(text){
 
 
-    const result = solveMath(text);
+    const result =
+    solveMath(text);
 
 
 
@@ -440,30 +580,17 @@ function motivationResponse(){
 function conversationResponse(text){
 
 
-
     if(text.includes("how are you")){
 
 
-        return (
-
-            "I'm working perfectly offline 🤖 " +
-
-            "Ready to help."
-
-        );
+        return "I'm working perfectly offline 🤖 Ready to help.";
 
 
     }
 
 
 
-    return (
-
-        "That's great! What would you " +
-
-        "like to work on next?"
-
-    );
+    return "That's great! What would you like to work on next?";
 
 
 }
@@ -477,13 +604,7 @@ function conversationResponse(text){
 function timeResponse(){
 
 
-    return (
-
-        "Current time: " +
-
-        new Date().toLocaleTimeString()
-
-    );
+    return "Current time: " + new Date().toLocaleTimeString();
 
 
 }
@@ -497,16 +618,11 @@ function timeResponse(){
 function dateResponse(){
 
 
-    return (
-
-        "Today is " +
-
-        new Date().toDateString()
-
-    );
+    return "Today is " + new Date().toDateString();
 
 
 }
+
 
 
 
@@ -536,9 +652,23 @@ function fallbackResponse(){
 
 
 
+
+
 // ===================================
 // HELPERS
 // ===================================
+
+
+function getChatHistory(){
+
+
+    return [];
+
+
+}
+
+
+
 
 
 function normalizeMessage(text){
@@ -602,22 +732,17 @@ function randomReply(list){
 function solveMath(text){
 
 
-
     const expression =
 
     text.match(/[0-9+\-*/(). ]+/);
 
 
 
-
     if(!expression){
-
 
         return null;
 
-
     }
-
 
 
 
@@ -634,7 +759,6 @@ function solveMath(text){
 
 
 
-
         if(
 
             typeof result === "number" &&
@@ -643,15 +767,12 @@ function solveMath(text){
 
         ){
 
-
             return result;
-
 
         }
 
 
     }
-
 
     catch(error){
 
@@ -674,8 +795,10 @@ function solveMath(text){
 
 
 
+
 // ===================================
 // EXPORT
 // ===================================
+
 
 window.offlineBrain = offlineBrain;
