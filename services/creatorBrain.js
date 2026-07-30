@@ -4,9 +4,10 @@
 
    Upgrade:
    - Creator Memory connected
-   - Personalized captions
+   - Personalized generation
    - Cinematic style support
    - Motivational style support
+   - Creator identity awareness
 
    Features:
    - Captions
@@ -32,7 +33,7 @@ function creatorBrain(request){
 
 
 
-    // Learn creator preference
+    // Learn user style
 
     if(
 
@@ -50,13 +51,11 @@ function creatorBrain(request){
 
 
 
-
     if(text.includes("caption")){
 
         return generateCaption();
 
     }
-
 
 
 
@@ -163,15 +162,15 @@ function creatorBrain(request){
 
 
 // ===================================
-// CAPTION GENERATOR V6.0.1
-// MEMORY AWARE
+// CAPTION GENERATOR
 // ===================================
 
 
 function generateCaption(){
 
 
-    let memory = null;
+
+    let memory = {};
 
 
 
@@ -193,28 +192,29 @@ function generateCaption(){
 
 
 
-    // Cinematic + Motivational
+
+    // CINEMATIC MOTIVATIONAL STYLE
+
 
     if(
 
-        memory &&
+        memory.tone === "motivational" &&
 
-        memory.style === "cinematic" &&
-
-        memory.tone === "motivational"
+        memory.style === "cinematic"
 
     ){
+
 
         return randomPick([
 
 
-            "🎬🔥 Every struggle, every lesson, every step is becoming part of my story.",
+            "🎬🔥 Every struggle becomes a chapter in my story.",
 
 
-            "🔥 Behind the dream is a journey filled with discipline, growth and determination.",
+            "The journey is not easy, but every step creates my legacy.",
 
 
-            "🎬 The road is not easy, but every challenge is creating the story."
+            "🎬 Built through challenges. Powered by consistency."
 
         ]);
 
@@ -226,15 +226,17 @@ function generateCaption(){
 
 
 
-    // Motivational style
+
+
+    // MOTIVATIONAL STYLE
+
 
     if(
-
-        memory &&
 
         memory.tone === "motivational"
 
     ){
+
 
         return randomPick([
 
@@ -249,6 +251,7 @@ function generateCaption(){
 
         ]);
 
+
     }
 
 
@@ -257,7 +260,8 @@ function generateCaption(){
 
 
 
-    // Default captions
+
+    // DEFAULT
 
 
     return randomPick([
@@ -335,9 +339,9 @@ function generateScript(){
 
         "HOOK:\nGrab attention in the first 3 seconds.\n\n" +
 
-        "BODY:\nShow the process, story or transformation.\n\n" +
+        "BODY:\nShow the process, struggle, and transformation.\n\n" +
 
-        "ENDING:\nGive viewers a reason to follow or comment."
+        "ENDING:\nGive viewers a reason to follow your journey."
 
     );
 
@@ -366,11 +370,11 @@ function generateHashtags(){
 
         "#ViralContent\n" +
 
-        "#CreativeIdeas\n" +
+        "#CreatorJourney\n" +
 
         "#VideoCreator\n" +
 
-        "#TrendingNow"
+        "#Motivation"
 
     );
 
@@ -397,9 +401,9 @@ function generateAdvert(){
 
         "📢 Advert Template\n\n" +
 
-        "Create better content faster with AI assistance.\n\n" +
+        "Turn your ideas into powerful content faster with AI assistance.\n\n" +
 
-        "Start building your audience today."
+        "Start creating today."
 
     );
 
@@ -415,7 +419,7 @@ function generateAdvert(){
 
 
 // ===================================
-// IDEAS
+// CONTENT IDEAS
 // ===================================
 
 
@@ -463,17 +467,17 @@ function generateContentPlan(){
 
         "7-Day Content Plan:\n\n" +
 
-        "Day 1: Your story\n" +
+        "Day 1: Share your story\n" +
 
         "Day 2: Behind the scenes\n" +
 
-        "Day 3: Educational content\n" +
+        "Day 3: Teach something useful\n" +
 
-        "Day 4: Personal experience\n" +
+        "Day 4: Share your experience\n" +
 
-        "Day 5: Audience engagement\n" +
+        "Day 5: Engage your audience\n" +
 
-        "Day 6: Promotion\n" +
+        "Day 6: Promote your work\n" +
 
         "Day 7: Weekly recap"
 
