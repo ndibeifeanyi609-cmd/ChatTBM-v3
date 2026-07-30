@@ -1,13 +1,13 @@
 /* ===================================
-   ChatTBM V6.0.2
-   Creator Brain Engine
+   ChatTBM V6.1
+   Creator Brain
 
    Upgrade:
-   - Creator Memory support
-   - User Profile support
-   - Personalized content generation
+   - Context aware captions
    - Cinematic writing style
-   - Motivational writing style
+   - Motivational tone
+   - Creator Memory connection
+   - Better content understanding
 
    Features:
    - Captions
@@ -15,11 +15,8 @@
    - Scripts
    - Hashtags
    - Ads
-   - Content ideas
-   - Content calendar
+   - Content Ideas
 =================================== */
-
-
 
 
 
@@ -36,10 +33,7 @@ function creatorBrain(request){
 
 
 
-
-
-    // Learn memory
-
+    // Learn creator preference
 
     if(
 
@@ -49,45 +43,18 @@ function creatorBrain(request){
 
     ){
 
-        window.creatorMemory.learn(
-            request
-        );
+        window.creatorMemory.learn(request);
 
     }
-
-
-
-
-
-
-    if(
-
-        window.userProfileMemory &&
-
-        typeof window.userProfileMemory.learn === "function"
-
-    ){
-
-        window.userProfileMemory.learn(
-            request
-        );
-
-    }
-
-
-
 
 
 
 
     if(text.includes("caption")){
 
-
-        return generateCaption();
-
+        return generateCaption(text);
 
     }
-
 
 
 
@@ -102,10 +69,7 @@ function creatorBrain(request){
 
         return generateHook();
 
-
     }
-
-
 
 
 
@@ -120,23 +84,16 @@ function creatorBrain(request){
 
         return generateScript();
 
-
     }
-
-
 
 
 
 
     if(text.includes("hashtag")){
 
-
         return generateHashtags();
 
-
     }
-
-
 
 
 
@@ -151,10 +108,20 @@ function creatorBrain(request){
 
         return generateAdvert();
 
-
     }
 
 
+
+
+    if(
+
+        text.includes("idea")
+
+    ){
+
+        return generateIdeas();
+
+    }
 
 
 
@@ -169,20 +136,6 @@ function creatorBrain(request){
 
         return generateContentPlan();
 
-
-    }
-
-
-
-
-
-
-    if(text.includes("idea")){
-
-
-        return generateIdeas();
-
-
     }
 
 
@@ -193,17 +146,12 @@ function creatorBrain(request){
 
         "I can help you create:\n\n" +
 
-        "• Captions\n" +
-
-        "• Viral hooks\n" +
-
-        "• Video scripts\n" +
-
-        "• Hashtags\n" +
-
-        "• Advert ideas\n" +
-
-        "• Content plans"
+        "✍️ Captions\n" +
+        "🎬 Video Scripts\n" +
+        "🔥 Viral Hooks\n" +
+        "#️⃣ Hashtags\n" +
+        "📢 Advert Ideas\n" +
+        "💡 Content Plans"
 
     );
 
@@ -219,74 +167,111 @@ function creatorBrain(request){
 
 
 // ===================================
-// CAPTION GENERATOR
+// SMART CAPTION GENERATOR
 // ===================================
 
 
-function generateCaption(){
-
+function generateCaption(request){
 
 
     let memory = {};
 
-    let profile = {};
-
-
-
-
-
-    if(window.creatorMemory){
-
-
-        memory =
-        window.creatorMemory.get();
-
-
-    }
-
-
-
-
-
-
-    if(window.userProfileMemory){
-
-
-        profile =
-        window.userProfileMemory.get();
-
-
-    }
-
-
-
-
-
-
-
-
-    // Cinematic motivational
 
 
     if(
 
-        memory.style === "cinematic" ||
+        window.creatorMemory &&
 
-        profile.style === "cinematic"
+        typeof window.creatorMemory.get === "function"
+
+    ){
+
+        memory =
+        window.creatorMemory.get();
+
+    }
+
+
+
+
+
+
+    const cinematic =
+
+    request.includes("cinematic");
+
+
+
+    const motivational =
+
+    request.includes("motivational") ||
+
+    memory.tone === "motivational";
+
+
+
+    const journey =
+
+    request.includes("journey") ||
+
+    request.includes("story");
+
+
+
+
+
+
+
+    // Cinematic + Motivational + Journey
+
+
+    if(
+
+        cinematic &&
+
+        motivational &&
+
+        journey
 
     ){
 
         return randomPick([
 
 
-            "🎬🔥 The journey is not easy, but every step creates my legacy.",
+            "🎬🔥 The journey is not easy, but every challenge, every sacrifice, and every step forward is creating my legacy.",
 
 
-            "🎬 Every struggle is a chapter. Every sacrifice is building the story.",
+
+            "🎬 Every struggle has a purpose. Every step has a meaning. This journey is becoming my story.",
 
 
-            "🔥 The road is difficult, but greatness is created through the process."
 
+            "🔥 The road is tough, but the vision is bigger. One step at a time, I am building my legacy."
+
+        ]);
+
+    }
+
+
+
+
+
+
+
+    // Cinematic captions
+
+
+    if(cinematic){
+
+
+        return randomPick([
+
+
+            "🎬 Every chapter, every battle, every moment is part of the story.",
+
+
+
+            "A dream becomes a legacy through patience, discipline, and action."
 
         ]);
 
@@ -300,16 +285,10 @@ function generateCaption(){
 
 
 
-    // Motivational
+    // Motivational captions
 
 
-    if(
-
-        memory.tone === "motivational" ||
-
-        profile.tone === "motivational"
-
-    ){
+    if(motivational){
 
 
         return randomPick([
@@ -318,19 +297,18 @@ function generateCaption(){
             "🔥 Building my dream one step at a time.",
 
 
-            "No shortcuts. Just consistency and hard work. 🚀",
+
+            "No shortcuts. Just consistency, discipline, and hard work. 🚀",
 
 
-            "Small actions. Big results.",
 
-
-            "The journey is the story. Keep watching."
-
+            "Every big result starts with small actions."
 
         ]);
 
 
     }
+
 
 
 
@@ -341,14 +319,15 @@ function generateCaption(){
     return randomPick([
 
 
+        "The journey is the story. Keep watching.",
+
+
+
         "Creating today what people will remember tomorrow.",
 
 
-        "The story is still being written.",
 
-
-        "Keep building. Keep growing."
-
+        "Small actions. Big results."
 
     ]);
 
@@ -379,17 +358,15 @@ function generateHook(){
         randomPick([
 
 
-            "Stop scrolling... you need to see this.",
+            "Nobody sees the struggle behind the success.",
 
 
-            "Nobody talks about this part.",
+
+            "This is the part nobody talks about.",
 
 
-            "The truth behind the journey is this.",
 
-
-            "Watch until the end."
-
+            "Watch the journey before judging the result."
 
         ])
 
@@ -407,7 +384,7 @@ function generateHook(){
 
 
 // ===================================
-// SCRIPT GENERATOR
+// VIDEO SCRIPT
 // ===================================
 
 
@@ -418,11 +395,17 @@ function generateScript(){
 
         "🎬 Short Video Script\n\n" +
 
-        "HOOK:\nGrab attention in the first 3 seconds.\n\n" +
+        "HOOK:\n" +
 
-        "STORY:\nShow the struggle, process and transformation.\n\n" +
+        "The world only sees the result, not the struggle.\n\n" +
 
-        "ENDING:\nGive viewers a reason to follow."
+        "BODY:\n" +
+
+        "Show the process, challenges, and growth.\n\n" +
+
+        "ENDING:\n" +
+
+        "Follow the journey because the story is still being written."
 
     );
 
@@ -447,15 +430,17 @@ function generateHashtags(){
 
     return (
 
+        "#Journey\n" +
+
+        "#Motivation\n" +
+
         "#ContentCreator\n" +
 
-        "#CinematicContent\n" +
+        "#CinematicStory\n" +
 
-        "#MyJourney\n" +
+        "#KeepBuilding\n" +
 
-        "#ViralReels\n" +
-
-        "#CreativeLife"
+        "#NeverGiveUp"
 
     );
 
@@ -480,11 +465,11 @@ function generateAdvert(){
 
     return (
 
-        "📢 Advert Idea\n\n" +
+        "📢 Create better content with AI.\n\n" +
 
-        "Create professional content faster with AI.\n\n" +
+        "Turn your ideas into captions, scripts, " +
 
-        "Turn your ideas into captions, scripts and viral posts."
+        "and viral content faster."
 
     );
 
@@ -500,7 +485,7 @@ function generateAdvert(){
 
 
 // ===================================
-// CONTENT IDEAS
+// IDEAS
 // ===================================
 
 
@@ -514,17 +499,15 @@ function generateIdeas(){
         randomPick([
 
 
-            "Share your personal journey story.",
+            "Document your journey from the beginning.",
+
 
 
             "Show behind-the-scenes moments.",
 
 
-            "Create a before and after transformation.",
-
 
             "Share lessons from your experience."
-
 
         ])
 
@@ -542,7 +525,7 @@ function generateIdeas(){
 
 
 // ===================================
-// CONTENT CALENDAR
+// CONTENT PLAN
 // ===================================
 
 
@@ -551,21 +534,21 @@ function generateContentPlan(){
 
     return (
 
-        "📅 7-Day Content Plan\n\n" +
+        "📅 7-Day Creator Plan\n\n" +
 
         "Day 1: Tell your story\n" +
 
         "Day 2: Behind the scenes\n" +
 
-        "Day 3: Educational content\n" +
+        "Day 3: Share a lesson\n" +
 
-        "Day 4: Personal journey\n" +
+        "Day 4: Show your process\n" +
 
-        "Day 5: Audience engagement\n" +
+        "Day 5: Audience connection\n" +
 
-        "Day 6: Promotion\n" +
+        "Day 6: Promote your work\n" +
 
-        "Day 7: Weekly recap"
+        "Day 7: Weekly reflection"
 
     );
 
@@ -592,27 +575,13 @@ function randomPick(list){
 
         Math.floor(
 
-            Math.random() * list.length
+            Math.random()*list.length
 
         )
 
     ];
 
-
 }
 
 
-
-
-
-
-
-
-
-// ===================================
-// EXPORT
-// ===================================
-
-
-window.creatorBrain =
-creatorBrain;
+window.creatorBrain = creatorBrain;
