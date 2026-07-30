@@ -40,92 +40,111 @@
 
 
 
-    <!-- HEADER -->
-
-    <header class="app-header">
+<header class="app-header">
 
 
-        <div class="brand">
-
-
-            <img 
-            src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-            alt="ChatTBM"
-            class="hero-logo">
-
-
-
-            <div class="brand-text">
-
-                <h1>
-                    ChatTBM
-                </h1>
-
-
-                <p>
-                    Your AI Content Assistant
-                </p>
-
-            </div>
-
-
-        </div>
-
-
-
-
-        <div class="auth-buttons">
-
-
-            <button id="login-btn">
-                Log In
-            </button>
-
-
-            <button id="signup-btn">
-                Sign Up
-            </button>
-
-
-        </div>
-
-
-    </header>
-
-
-
-
-
-
-
-    <!-- WELCOME -->
-
-
-    <section class="welcome-screen">
+    <div class="brand">
 
 
         <img 
         src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-        alt="ChatTBM Logo"
-        class="logo">
+        alt="ChatTBM"
+        class="hero-logo">
 
 
 
-        <h2>
-            Welcome to ChatTBM
-        </h2>
+        <div class="brand-text">
+
+            <h1>
+                ChatTBM
+            </h1>
 
 
+            <p>
+                Your AI Content Assistant
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+
+
+    <div class="auth-buttons">
+
+
+        <button id="login-btn">
+            Log In
+        </button>
+
+
+        <button id="signup-btn">
+            Sign Up
+        </button>
+
+
+    </div>
+
+
+</header>
+
+
+
+
+
+<section class="welcome-screen">
+
+
+    <img 
+    src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
+    alt="ChatTBM Logo"
+    class="logo">
+
+
+
+    <h2>
+        Welcome to ChatTBM
+    </h2>
+
+
+
+    <p>
+        Your AI assistant for captions,
+        scripts, viral ideas, adverts
+        and content creation.
+    </p>
+
+
+</section>
+
+
+
+
+
+
+<main class="chat-container">
+
+
+
+<div 
+id="chat-box" 
+class="chat-box">
+
+
+    <div class="message bot-message">
 
         <p>
-            Your AI assistant for captions,
-            scripts, viral ideas, adverts
-            and content creation.
+            Hello 👋 I am ChatTBM.
+            I can help you create captions,
+            scripts, ideas and marketing content.
         </p>
 
+    </div>
 
-    </section>
 
+</div>
 
 
 
@@ -133,173 +152,103 @@
 
 
 
-    <!-- CHAT AREA -->
 
+<div class="creator-tools">
 
-    <main class="chat-container">
 
+    <button class="tool-btn" data-tool="caption">
+        ✍️ Caption
+    </button>
 
 
-        <div 
-        id="chat-box" 
-        class="chat-box">
+    <button class="tool-btn" data-tool="script">
+        🎬 Script
+    </button>
 
 
-            <div class="message bot-message">
+    <button class="tool-btn" data-tool="hashtags">
+        #️⃣ Hashtags
+    </button>
 
-                <p>
-                    Hello 👋 I am ChatTBM.
-                    I can help you create captions,
-                    scripts, ideas and marketing content.
-                </p>
 
-            </div>
+    <button class="tool-btn" data-tool="ideas">
+        💡 Viral Ideas
+    </button>
 
 
-        </div>
+    <button class="tool-btn" data-tool="advert">
+        📢 Advert
+    </button>
 
 
+    <button class="tool-btn" data-tool="calendar">
+        📅 Calendar
+    </button>
 
 
+</div>
 
 
 
 
-        <!-- CREATOR TOOLS -->
 
 
-        <div class="creator-tools">
 
 
-            <button 
-            class="tool-btn"
-            data-tool="caption">
+<div class="input-area">
 
-                ✍️ Caption
 
-            </button>
+    <button 
+    id="upload-btn"
+    class="upload-btn">
 
+        +
 
+    </button>
 
-            <button 
-            class="tool-btn"
-            data-tool="script">
 
-                🎬 Script
 
-            </button>
 
+    <input
 
+    type="text"
 
-            <button 
-            class="tool-btn"
-            data-tool="hashtags">
+    id="user-input"
 
-                #️⃣ Hashtags
+    placeholder="Ask ChatTBM anything...">
 
-            </button>
 
 
 
-            <button 
-            class="tool-btn"
-            data-tool="ideas">
 
-                💡 Viral Ideas
+    <button id="send-btn">
 
-            </button>
+        Send
 
+    </button>
 
 
-            <button 
-            class="tool-btn"
-            data-tool="advert">
+</div>
 
-                📢 Advert
 
-            </button>
 
+</main>
 
 
-            <button 
-            class="tool-btn"
-            data-tool="calendar">
 
-                📅 Calendar
 
-            </button>
 
 
-        </div>
 
+<footer class="app-footer">
 
 
+<p>
+    ChatTBM AI Content Assistant
+</p>
 
 
-
-
-
-        <!-- INPUT -->
-
-
-        <div class="input-area">
-
-
-            <button 
-            id="upload-btn"
-            class="upload-btn">
-
-                +
-
-            </button>
-
-
-
-
-            <input
-
-            type="text"
-
-            id="user-input"
-
-            placeholder="Ask ChatTBM anything...">
-
-
-
-
-
-            <button id="send-btn">
-
-                Send
-
-            </button>
-
-
-        </div>
-
-
-
-    </main>
-
-
-
-
-
-
-
-
-    <!-- FOOTER -->
-
-
-    <footer class="app-footer">
-
-
-        <p>
-            ChatTBM AI Content Assistant
-        </p>
-
-
-    </footer>
+</footer>
 
 
 
@@ -320,11 +269,13 @@
 
 <script src="services/conversationManager.js"></script>
 
+<script src="services/contextEngine.js"></script>
+
 <script src="services/creatorMemory.js"></script>
 
-<script src="services/editorBrain.js"></script>
+<script src="services/userProfileMemory.js"></script>
 
-<script src="services/contextEngine.js"></script>
+<script src="services/editorBrain.js"></script>
 
 <script src="services/creatorBrain.js"></script>
 
@@ -332,7 +283,7 @@
 
 
 
-<!-- MAIN APP -->
+<!-- MAIN APPLICATION -->
 
 <script src="script.js"></script>
 
