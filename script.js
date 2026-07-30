@@ -140,6 +140,13 @@ async function sendMessage(){
         "bot"
     );
 
+   if (window.conversationManager) {
+    window.conversationManager.addMessage(
+        "assistant",
+        response
+    );
+}
+
 
 
     saveChat();
