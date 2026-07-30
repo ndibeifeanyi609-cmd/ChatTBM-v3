@@ -42,8 +42,6 @@ href="manifest.json">
 
 
 
-<!-- HEADER -->
-
 <header class="app-header">
 
 
@@ -78,6 +76,7 @@ Your AI Content Assistant
 
 
 
+
 <div class="auth-buttons">
 
 
@@ -102,7 +101,7 @@ Sign Up
 
 
 
-<!-- WELCOME -->
+
 
 <section class="welcome-screen">
 
@@ -113,9 +112,11 @@ alt="ChatTBM Logo"
 class="logo">
 
 
+
 <h2>
 Welcome to ChatTBM
 </h2>
+
 
 
 <p>
@@ -134,7 +135,6 @@ and content creation.
 
 
 
-<!-- CHAT -->
 
 <main class="chat-container">
 
@@ -143,6 +143,7 @@ and content creation.
 <div 
 id="chat-box"
 class="chat-box">
+
 
 
 <div class="message bot-message">
@@ -168,67 +169,41 @@ scripts, ideas and marketing content.
 
 
 
-<!-- CREATOR TOOLS -->
-
 <div class="creator-tools">
 
 
-<button 
-class="tool-btn"
-data-tool="caption">
-
+<button class="tool-btn" data-tool="caption">
 ✍️ Caption
-
 </button>
 
 
 
-<button 
-class="tool-btn"
-data-tool="script">
-
+<button class="tool-btn" data-tool="script">
 🎬 Script
-
 </button>
 
 
 
-<button 
-class="tool-btn"
-data-tool="hashtags">
-
+<button class="tool-btn" data-tool="hashtags">
 #️⃣ Hashtags
-
 </button>
 
 
 
-<button 
-class="tool-btn"
-data-tool="ideas">
-
+<button class="tool-btn" data-tool="ideas">
 💡 Viral Ideas
-
 </button>
 
 
 
-<button 
-class="tool-btn"
-data-tool="advert">
-
+<button class="tool-btn" data-tool="advert">
 📢 Advert
-
 </button>
 
 
 
-<button 
-class="tool-btn"
-data-tool="calendar">
-
+<button class="tool-btn" data-tool="calendar">
 📅 Calendar
-
 </button>
 
 
@@ -241,8 +216,6 @@ data-tool="calendar">
 
 
 
-
-<!-- INPUT -->
 
 <div class="input-area">
 
@@ -257,6 +230,8 @@ class="upload-btn">
 
 
 
+
+
 <input
 
 type="text"
@@ -264,6 +239,8 @@ type="text"
 id="user-input"
 
 placeholder="Ask ChatTBM anything...">
+
+
 
 
 
@@ -287,7 +264,6 @@ Send
 
 
 
-<!-- FOOTER -->
 
 <footer class="app-footer">
 
@@ -312,33 +288,49 @@ ChatTBM AI Content Assistant
 
 
 <!-- =================================
-     ChatTBM AI ENGINE SYSTEM
+     ChatTBM V6.0.2 AI ENGINE SYSTEM
 ================================= -->
 
 
-<!-- Memory System -->
+
+<!-- Conversation Memory -->
 
 <script src="services/conversationManager.js"></script>
 
-<script src="services/creatorMemory.js"></script>
+
+
+<!-- User Memory -->
 
 <script src="services/userProfileMemory.js"></script>
 
 
+<script src="services/creatorMemory.js"></script>
 
-<!-- Intelligence Engines -->
 
-<script src="services/editorBrain.js"></script>
+
+<!-- Personal AI Identity -->
+
+<script src="services/personalizationEngine.js"></script>
+
+
+
+<!-- Intelligence Layer -->
 
 <script src="services/contextEngine.js"></script>
 
+
+<script src="services/editorBrain.js"></script>
+
+
 <script src="services/creatorBrain.js"></script>
+
 
 <script src="services/offlineBrain.js"></script>
 
 
 
-<!-- Main Controller -->
+
+<!-- Main Application -->
 
 <script src="script.js"></script>
 
