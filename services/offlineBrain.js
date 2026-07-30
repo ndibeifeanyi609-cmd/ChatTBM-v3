@@ -1,324 +1,603 @@
 /* ===================================
    ChatTBM V5.9.3
    Offline Smart Response Brain
-   Part 1A
+   Part 1B
+
+   Upgrade:
+   - Better intent detection
+   - Creator assistant brain
+   - More natural replies
+   - Offline intelligence expansion
 =================================== */
 
+
 // ===================================
-// MAIN OFFLINE AI
+// MAIN OFFLINE BRAIN
 // ===================================
 
 function offlineBrain(message) {
 
+
     const text = normalizeMessage(message);
 
-    // -------------------------------
-    // Greetings
-    // -------------------------------
 
-    if (hasWords(text, [
+
+    const intent = detectIntent(text);
+
+
+
+    switch(intent){
+
+
+        case "greeting":
+            return greetingResponse();
+
+
+
+        case "identity":
+            return identityResponse();
+
+
+
+        case "creator":
+            return creatorResponse(text);
+
+
+
+        case "coding":
+            return codingResponse(text);
+
+
+
+        case "math":
+            return mathResponse(text);
+
+
+
+        case "motivation":
+            return motivationResponse();
+
+
+
+        case "conversation":
+            return conversationResponse(text);
+
+
+
+        case "time":
+            return timeResponse();
+
+
+
+        case "date":
+            return dateResponse();
+
+
+
+        default:
+            return fallbackResponse(text);
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+// ===================================
+// INTENT DETECTOR
+// ===================================
+
+function detectIntent(text){
+
+
+    if(hasWords(text,[
         "hi",
         "hello",
         "hey",
-        "good morning",
-        "good afternoon",
-        "good evening"
-    ])) {
+        "morning",
+        "afternoon",
+        "evening"
+    ])){
 
-        return randomReply([
-            "Hello 👋 I'm ChatTBM. How can I help you today?",
-            "Hi! I'm ready to help with content, coding, ideas and questions.",
-            "Welcome back! What would you like to create today?"
-        ]);
+        return "greeting";
 
     }
 
-    // -------------------------------
-    // Identity
-    // -------------------------------
 
-    if (
+
+    if(
         text.includes("who are you") ||
+        text.includes("your name") ||
         text.includes("what are you")
-    ) {
+    ){
 
-        return "I'm ChatTBM, your AI Content Assistant. I can help with captions, scripts, coding, ideas, explanations and much more—even when you're offline.";
-
-    }
-
-    // -------------------------------
-    // Help
-    // -------------------------------
-
-    if (
-        text.includes("help") ||
-        text.includes("what can you do")
-    ) {
-
-        return (
-            "I can help with:\n\n" +
-            "• Captions\n" +
-            "• Video ideas\n" +
-            "• Scripts\n" +
-            "• Coding\n" +
-            "• Math\n" +
-            "• Motivation\n" +
-            "• General questions\n" +
-            "• Creative writing"
-        );
+        return "identity";
 
     }
 
-    // -------------------------------
-    // Time
-    // -------------------------------
 
-    if (text.includes("time")) {
 
-        return "Current time: " +
-            new Date().toLocaleTimeString();
+    if(hasWords(text,[
+        "caption",
+        "hashtag",
+        "script",
+        "content",
+        "video idea",
+        "reel",
+        "post",
+        "advert"
+    ])){
+
+        return "creator";
 
     }
 
-    // -------------------------------
-    // Date
-    // -------------------------------
 
-    if (
+
+    if(hasWords(text,[
+        "javascript",
+        "html",
+        "css",
+        "code",
+        "program"
+    ])){
+
+        return "coding";
+
+    }
+
+
+
+    if(/[0-9]+[+\-*/][0-9]+/.test(text)){
+
+        return "math";
+
+    }
+
+
+
+    if(hasWords(text,[
+        "motivate",
+        "motivation",
+        "success",
+        "inspire"
+    ])){
+
+        return "motivation";
+
+    }
+
+
+
+    if(text.includes("time")){
+
+        return "time";
+
+    }
+
+
+
+    if(
         text.includes("date") ||
         text.includes("today")
-    ) {
+    ){
 
-        return "Today's date is " +
-            new Date().toDateString();
-
-    }
-
-    // -------------------------------
-    // Math
-    // -------------------------------
-
-    const math = solveMath(text);
-
-    if (math !== null) {
-
-        return "The answer is " + math;
+        return "date";
 
     }
 
-    // -------------------------------
-    // Caption
-    // -------------------------------
 
-    if (text.includes("caption")) {
 
-        return "✨ Create. Inspire. Repeat.\n\nEvery post is another chance to grow.";
+    if(hasWords(text,[
+        "how are you",
+        "good",
+        "nice",
+        "great"
+    ])){
 
-    }
-
-    // -------------------------------
-    // Hashtags
-    // -------------------------------
-
-    if (text.includes("hashtag")) {
-
-        return "#viral #contentcreator #explore #creative #trending";
+        return "conversation";
 
     }
 
-    // -------------------------------
-    // Video Ideas
-    // -------------------------------
 
-    if (
-        text.includes("video idea") ||
-        text.includes("content idea")
-    ) {
 
-        return (
-            "Content Idea:\n\n" +
-            "Show a surprising before-and-after transformation within the first 3 seconds to hook viewers."
-        );
+    return "unknown";
 
-    }
 
-    // -------------------------------
-    // Coding
-    // -------------------------------
+}
 
-    if (
-        text.includes("javascript") ||
-        text.includes("html") ||
-        text.includes("css")
-    ) {
 
-        return "I can help you learn HTML, CSS and JavaScript. Tell me exactly what you're trying to build.";
 
-    }
 
-    // -------------------------------
-    // Motivation
-    // -------------------------------
 
-    if (
-        text.includes("motivate") ||
-        text.includes("motivation")
-    ) {
+
+
+// ===================================
+// RESPONSE SYSTEMS
+// ===================================
+
+
+function greetingResponse(){
+
+    return randomReply([
+
+        "Hello 👋 I'm ChatTBM. What can we create today?",
+
+        "Welcome back! I'm ready to help you.",
+
+        "Hi! Let's build something amazing."
+
+    ]);
+
+}
+
+
+
+
+
+
+function identityResponse(){
+
+
+    return (
+        "I'm ChatTBM 🤖\n\n" +
+        "Your AI Content Assistant designed to help " +
+        "with ideas, captions, scripts, coding and creative projects."
+    );
+
+
+}
+
+
+
+
+
+
+
+function creatorResponse(text){
+
+
+
+    if(text.includes("caption")){
+
 
         return randomReply([
 
-            "Every expert started as a beginner. Keep building.",
+            "🔥 Built different. Creating my own path.",
 
-            "Small progress every day creates big results.",
+            "Dream big. Create bigger. 🚀",
 
-            "Stay consistent. Great projects aren't built overnight."
+            "Every story starts with one post."
 
         ]);
 
     }
 
-    // -------------------------------
-    // Thanks
-    // -------------------------------
 
-    if (
-        text.includes("thank") ||
-        text.includes("thanks")
-    ) {
 
-        return "You're welcome! 😊";
 
-    }
+    if(text.includes("hashtag")){
 
-    // -------------------------------
-    // Goodbye
-    // -------------------------------
 
-    if (
-        text.includes("bye") ||
-        text.includes("goodbye")
-    ) {
+        return (
+            "#ContentCreator " +
+            "#ViralIdeas " +
+            "#CreativeLife " +
+            "#Trending"
+        );
 
-        return "Goodbye! I'll be here whenever you need me.";
 
     }
 
-    // -------------------------------
-    // Default
-    // -------------------------------
 
-    return defaultResponse(message);
 
-}
 
-// ===================================
-// DEFAULT RESPONSE
-// ===================================
 
-function defaultResponse(message) {
+    if(
+        text.includes("script")
+    ){
 
-    const replies = [
 
-        "That's interesting. Tell me more.",
+        return (
 
-        "Can you explain that differently?",
+            "Video Script Idea:\n\n" +
 
-        "I'm still learning offline, but I'll do my best to help.",
+            "Hook (0-3 seconds): " +
+            "Stop scrolling, watch this.\n\n" +
 
-        "Let's solve that together.",
+            "Middle: Show the process or story.\n\n" +
 
-        "I understand your question. Could you provide a little more detail?"
+            "Ending: Ask viewers to follow for more."
 
-    ];
+        );
 
-    return randomReply(replies);
 
-}
+    }
 
-// ===================================
-// NORMALIZE
-// ===================================
 
-function normalizeMessage(text) {
 
-    return text
-        .toLowerCase()
-        .trim();
 
-}
+    return (
 
-// ===================================
-// RANDOM RESPONSE
-// ===================================
+        "I can help you create:\n\n" +
 
-function randomReply(list) {
+        "• Viral video ideas\n" +
+        "• Captions\n" +
+        "• Scripts\n" +
+        "• Advert copy\n" +
+        "• Content plans"
 
-    return list[
-        Math.floor(
-            Math.random() * list.length
-        )
-    ];
+    );
+
 
 }
 
-// ===================================
-// WORD MATCH
-// ===================================
 
-function hasWords(text, words) {
 
-    return words.some(word =>
-        text.includes(word)
+
+
+
+
+
+function codingResponse(){
+
+
+    return (
+
+        "I can help with coding.\n\n" +
+
+        "Tell me the language or problem:\n" +
+
+        "HTML, CSS, JavaScript, or ChatTBM development."
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+function mathResponse(text){
+
+
+    const result =
+    solveMath(text);
+
+
+
+    if(result !== null){
+
+        return "The answer is " + result;
+
+    }
+
+
+
+    return "I couldn't calculate that yet.";
+
+}
+
+
+
+
+
+
+
+function motivationResponse(){
+
+
+    return randomReply([
+
+        "Consistency creates results. Keep building.",
+
+        "Every big project begins with a small step.",
+
+        "Your future is built by what you do today."
+
+    ]);
+
+}
+
+
+
+
+
+
+
+function conversationResponse(text){
+
+
+    if(text.includes("how are you")){
+
+        return "I'm working perfectly offline 🤖 Ready to help.";
+
+    }
+
+
+    return "That's great! What would you like to work on next?";
+
+
+}
+
+
+
+
+
+
+
+
+function timeResponse(){
+
+    return (
+        "Current time: " +
+        new Date().toLocaleTimeString()
     );
 
 }
 
-// ===================================
-// SIMPLE MATH
-// ===================================
 
-function solveMath(text) {
 
-    const expression = text.match(/[0-9+\-*/(). ]+/);
 
-    if (!expression) {
 
-        return null;
 
-    }
+function dateResponse(){
 
-    try {
-
-        const result = Function(
-            "return " + expression[0]
-        )();
-
-        if (result === undefined) {
-
-            return null;
-
-        }
-
-        if (isNaN(result)) {
-
-            return null;
-
-        }
-
-        return result;
-
-    }
-
-    catch {
-
-        return null;
-
-    }
+    return (
+        "Today is " +
+        new Date().toDateString()
+    );
 
 }
 
+
+
+
+
+
+
+function fallbackResponse(){
+
+
+    return randomReply([
+
+        "I'm learning more every day. Can you explain what you need?",
+
+        "Interesting question. Let's explore it together.",
+
+        "I can help you create, learn and solve problems."
+
+    ]);
+
+
+}
+
+
+
+
+
+
+
 // ===================================
-// EXPORT
+// HELPERS
+// ===================================
+
+
+function normalizeMessage(text){
+
+    return text
+    .toLowerCase()
+    .trim();
+
+}
+
+
+
+
+
+
+function hasWords(text,list){
+
+
+    return list.some(word =>
+        text.includes(word)
+    );
+
+
+}
+
+
+
+
+
+
+function randomReply(list){
+
+
+    return list[
+        Math.floor(
+            Math.random()*list.length
+        )
+    ];
+
+
+}
+
+
+
+
+
+
+function solveMath(text){
+
+
+    const expression =
+    text.match(/[0-9+\-*/(). ]+/);
+
+
+
+    if(!expression){
+
+        return null;
+
+    }
+
+
+
+    try{
+
+
+        const result =
+        Function(
+            "return " + expression[0]
+        )();
+
+
+
+        if(
+            typeof result === "number" &&
+            !isNaN(result)
+        ){
+
+            return result;
+
+        }
+
+
+    }
+
+    catch(error){
+
+
+        return null;
+
+
+    }
+
+
+    return null;
+
+
+}
+
+
+
+
+
+
+
+// ===================================
+// EXPORT TO CHATTBM
 // ===================================
 
 window.offlineBrain = offlineBrain;
