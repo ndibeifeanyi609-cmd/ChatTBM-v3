@@ -22,6 +22,31 @@ function offlineBrain(message){
     const text =
     normalizeMessage(message);
 
+   // ===================================
+// CHECK CONTEXT FIRST
+// ===================================
+
+if(
+    typeof window.contextEngine === "function"
+){
+
+    const contextResult =
+    window.contextEngine(
+        message,
+        getChatHistory()
+    );
+
+
+    if(
+        contextResult.matched
+    ){
+
+        return contextResult.response;
+
+    }
+
+}
+
 
 
     // ===================================
