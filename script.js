@@ -109,6 +109,13 @@ async function sendMessage(){
         "user"
     );
 
+   if (window.conversationManager) {
+    window.conversationManager.addMessage(
+        "user",
+        message
+    );
+}
+
 
 
     userInput.value = "";
