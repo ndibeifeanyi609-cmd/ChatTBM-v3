@@ -135,6 +135,8 @@ function clearConversationHistory(){
 
 }
 
+window.clearChatTBM = clearConversationHistory;
+
 
 
 // =====================================
