@@ -1,13 +1,13 @@
 /* =====================================
-   ChatTBM V5.9.4.4
-   Context Engine V5
+   ChatTBM V6.0.1
+   Context Engine V5.1
 
    Upgrade:
-   - Reads previous assistant output
    - Better follow-up understanding
-   - Creator content editing support
+   - Previous response memory
+   - Creator editing support
    - Editor Brain connection
-   - Cleaner context handling
+   - Style modification support
 ===================================== */
 
 
@@ -38,16 +38,8 @@ function contextEngine(
 
 
 
-    // ===============================
-    // CONTEXT EDITING CHECK
-    // ===============================
+    if(!previous){
 
-
-    if(
-
-        !previous
-
-    ){
 
         return {
 
@@ -57,7 +49,182 @@ function contextEngine(
 
         };
 
+
     }
+
+
+
+
+
+
+
+    // ===============================
+    // EDIT COMMANDS
+    // ===============================
+
+
+    if(hasWords(text,[
+
+        "shorter",
+        "shorten",
+        "make it short",
+        "brief",
+        "summarize"
+
+    ])){
+
+
+        return {
+
+            matched:true,
+
+            response:
+            runEditor(
+                message,
+                previous
+            )
+
+        };
+
+
+    }
+
+
+
+
+
+
+
+    if(hasWords(text,[
+
+        "rewrite",
+        "rewrite it",
+        "improve",
+        "make it better",
+        "fix this"
+
+    ])){
+
+
+        return {
+
+            matched:true,
+
+            response:
+            runEditor(
+                message,
+                previous
+            )
+
+        };
+
+
+    }
+
+
+
+
+
+
+
+    if(hasWords(text,[
+
+        "expand",
+        "longer",
+        "more details",
+        "explain more"
+
+    ])){
+
+
+        return {
+
+            matched:true,
+
+            response:
+            runEditor(
+                message,
+                previous
+            )
+
+        };
+
+
+    }
+
+
+
+
+
+
+
+    // ===============================
+    // STYLE CHANGES
+    // ===============================
+
+
+    if(hasWords(text,[
+
+        "cinematic",
+        "movie style",
+        "dramatic"
+
+    ])){
+
+
+        return {
+
+            matched:true,
+
+            response:
+
+            runEditor(
+
+                "cinematic",
+
+                previous
+
+            )
+
+        };
+
+
+    }
+
+
+
+
+
+
+
+    if(hasWords(text,[
+
+        "motivational",
+        "inspiring",
+        "powerful"
+
+    ])){
+
+
+        return {
+
+            matched:true,
+
+            response:
+
+            runEditor(
+
+                "motivational",
+
+                previous
+
+            )
+
+        };
+
+
+    }
+
 
 
 
@@ -84,111 +251,13 @@ function contextEngine(
 
             response:
 
-            runEditor(message, previous)
+            runEditor(
 
-        };
+                message,
 
+                previous
 
-    }
-
-
-
-
-
-
-
-    // ===============================
-    // REWRITE
-    // ===============================
-
-
-    if(hasWords(text,[
-
-        "rewrite",
-        "improve",
-        "make it better",
-        "fix this"
-
-    ])){
-
-
-        return {
-
-            matched:true,
-
-            response:
-
-            runEditor(message, previous)
-
-        };
-
-
-    }
-
-
-
-
-
-
-
-    // ===============================
-    // SHORTEN
-    // ===============================
-
-
-    if(hasWords(text,[
-
-        "shorter",
-        "shorten",
-        "make it short",
-        "make it brief",
-        "summarize",
-        "short"
-
-    ])){
-
-
-        return {
-
-            matched:true,
-
-            response:
-
-            runEditor(message, previous)
-
-        };
-
-
-    }
-
-
-
-
-
-
-
-    // ===============================
-    // EXPAND
-    // ===============================
-
-
-    if(hasWords(text,[
-
-        "expand",
-        "more details",
-        "make it longer",
-        "explain more"
-
-    ])){
-
-
-        return {
-
-            matched:true,
-
-            response:
-
-            runEditor(message, previous)
+            )
 
         };
 
@@ -208,9 +277,9 @@ function contextEngine(
 
     if(hasWords(text,[
 
-        "what were we talking about",
         "last topic",
-        "previous topic"
+        "previous topic",
+        "what were we talking about"
 
     ])){
 
@@ -269,7 +338,10 @@ function runEditor(
 ){
 
 
+
     if(
+
+        window.editorBrain &&
 
         typeof window.editorBrain === "function"
 
@@ -303,18 +375,24 @@ function runEditor(
 
 
 // =====================================
-// FIND PREVIOUS ASSISTANT RESPONSE
+// GET LAST ASSISTANT MESSAGE
 // =====================================
 
 
 function getPreviousContext(history){
 
 
-    if(!Array.isArray(history)){
+
+    if(
+
+        !Array.isArray(history)
+
+    ){
 
         return "";
 
     }
+
 
 
 
@@ -331,8 +409,11 @@ function getPreviousContext(history){
     ){
 
 
+
         const item =
         history[i];
+
+
 
 
 
@@ -353,7 +434,9 @@ function getPreviousContext(history){
 
 
 
+
     return "";
+
 
 }
 
@@ -373,7 +456,7 @@ function getPreviousContext(history){
 function normalize(text){
 
 
-    return text
+    return String(text)
 
     .toLowerCase()
 
@@ -387,7 +470,7 @@ function normalize(text){
 
 
 
-function hasWords(text, words){
+function hasWords(text,words){
 
 
     return words.some(word =>
@@ -398,6 +481,8 @@ function hasWords(text, words){
 
 
 }
+
+
 
 
 
