@@ -1,18 +1,21 @@
 /* =====================================
-   ChatTBM V5.9.4.3
-   Context Engine V4
+   ChatTBM V5.9.4.4
+   Context Engine V5
 
    Upgrade:
    - Reads previous assistant output
    - Better follow-up understanding
    - Creator content editing support
    - Editor Brain connection
+   - Cleaner context handling
 ===================================== */
+
 
 
 // =====================================
 // MAIN CONTEXT ENGINE
 // =====================================
+
 
 function contextEngine(
 
@@ -36,8 +39,35 @@ function contextEngine(
 
 
     // ===============================
+    // CONTEXT EDITING CHECK
+    // ===============================
+
+
+    if(
+
+        !previous
+
+    ){
+
+        return {
+
+            matched:false,
+
+            response:null
+
+        };
+
+    }
+
+
+
+
+
+
+    // ===============================
     // CONTINUE
     // ===============================
+
 
     if(hasWords(text,[
 
@@ -54,11 +84,7 @@ function contextEngine(
 
             response:
 
-            typeof window.editorBrain === "function"
-
-            ? window.editorBrain(message, previous)
-
-            : previous
+            runEditor(message, previous)
 
         };
 
@@ -69,9 +95,12 @@ function contextEngine(
 
 
 
+
+
     // ===============================
     // REWRITE
     // ===============================
+
 
     if(hasWords(text,[
 
@@ -89,16 +118,14 @@ function contextEngine(
 
             response:
 
-            typeof window.editorBrain === "function"
-
-            ? window.editorBrain(message, previous)
-
-            : previous
+            runEditor(message, previous)
 
         };
 
 
     }
+
+
 
 
 
@@ -108,27 +135,26 @@ function contextEngine(
     // SHORTEN
     // ===============================
 
-  if(hasWords(text,[
 
-    "shorter",
-    "shorten",
-    "make it short",
-    "make it brief",
-    "summarize",
-    "short"
+    if(hasWords(text,[
 
-])){
+        "shorter",
+        "shorten",
+        "make it short",
+        "make it brief",
+        "summarize",
+        "short"
+
+    ])){
+
+
         return {
 
             matched:true,
 
             response:
 
-            typeof window.editorBrain === "function"
-
-            ? window.editorBrain(message, previous)
-
-            : previous
+            runEditor(message, previous)
 
         };
 
@@ -139,9 +165,12 @@ function contextEngine(
 
 
 
+
+
     // ===============================
     // EXPAND
     // ===============================
+
 
     if(hasWords(text,[
 
@@ -159,11 +188,7 @@ function contextEngine(
 
             response:
 
-            typeof window.editorBrain === "function"
-
-            ? window.editorBrain(message, previous)
-
-            : previous
+            runEditor(message, previous)
 
         };
 
@@ -174,9 +199,12 @@ function contextEngine(
 
 
 
+
+
     // ===============================
     // LAST TOPIC
     // ===============================
+
 
     if(hasWords(text,[
 
@@ -195,12 +223,14 @@ function contextEngine(
 
             "Your previous content was:\n\n" +
 
-            (previous || "No previous content found.")
+            previous
 
         };
 
 
     }
+
+
 
 
 
@@ -226,8 +256,56 @@ function contextEngine(
 
 
 // =====================================
+// EDITOR CONNECTION
+// =====================================
+
+
+function runEditor(
+
+    command,
+
+    content
+
+){
+
+
+    if(
+
+        typeof window.editorBrain === "function"
+
+    ){
+
+
+        return window.editorBrain(
+
+            command,
+
+            content
+
+        );
+
+
+    }
+
+
+
+    return content;
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
 // FIND PREVIOUS ASSISTANT RESPONSE
 // =====================================
+
 
 function getPreviousContext(history){
 
@@ -237,6 +315,8 @@ function getPreviousContext(history){
         return "";
 
     }
+
+
 
 
 
@@ -258,7 +338,9 @@ function getPreviousContext(history){
 
         if(
 
-            item.role === "assistant"
+            item.role === "assistant" &&
+
+            item.message
 
         ){
 
@@ -287,6 +369,7 @@ function getPreviousContext(history){
 // HELPERS
 // =====================================
 
+
 function normalize(text){
 
 
@@ -304,7 +387,7 @@ function normalize(text){
 
 
 
-function hasWords(text,words){
+function hasWords(text, words){
 
 
     return words.some(word =>
@@ -322,9 +405,9 @@ function hasWords(text,words){
 
 
 
-
 // =====================================
 // EXPORT
 // =====================================
+
 
 window.contextEngine = contextEngine;
