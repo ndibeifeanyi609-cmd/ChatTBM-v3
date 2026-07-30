@@ -661,9 +661,10 @@ function fallbackResponse(){
 
 function getChatHistory(){
 
-    if(
-        window.conversationManager
-    ){
+    if (
+        window.conversationManager &&
+        typeof window.conversationManager.getHistory === "function"
+    ) {
 
         return window.conversationManager.getHistory();
 
@@ -672,7 +673,6 @@ function getChatHistory(){
     return [];
 
 }
-
 
 
 function normalizeMessage(text){
