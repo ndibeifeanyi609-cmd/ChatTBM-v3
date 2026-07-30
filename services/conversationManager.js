@@ -1,15 +1,19 @@
 /* =====================================
-   ChatTBM V5.9.4.1
+   ChatTBM V6.0.1
    Conversation Manager
 
-   Purpose:
-   - Store conversation history
-   - Retrieve history
-   - Clear history
-   - Prepare for Memory Engine
+   Upgrade:
+   - Better conversation storage
+   - Context Engine ready
+   - Memory Engine ready
+   - Cleaner history handling
+   - Future User Profile support
 ===================================== */
 
-const CHAT_HISTORY_KEY = "ChatTBM_Conversation_History";
+
+const CHAT_HISTORY_KEY =
+"ChatTBM_Conversation_History";
+
 
 
 
@@ -19,16 +23,22 @@ const CHAT_HISTORY_KEY = "ChatTBM_Conversation_History";
 
 function loadConversationHistory(){
 
+
     const saved =
+
     localStorage.getItem(
         CHAT_HISTORY_KEY
     );
+
+
 
     if(!saved){
 
         return [];
 
     }
+
+
 
     try{
 
@@ -38,11 +48,21 @@ function loadConversationHistory(){
 
     catch(error){
 
+        console.log(
+            "History load error:",
+            error
+        );
+
         return [];
 
     }
 
+
 }
+
+
+
+
 
 
 
@@ -52,6 +72,7 @@ function loadConversationHistory(){
 
 function saveConversationHistory(history){
 
+
     localStorage.setItem(
 
         CHAT_HISTORY_KEY,
@@ -60,7 +81,12 @@ function saveConversationHistory(history){
 
     );
 
+
 }
+
+
+
+
 
 
 
@@ -76,8 +102,12 @@ function addConversationMessage(
 
 ){
 
-    const history =
+
+    let history =
+
     loadConversationHistory();
+
+
 
 
 
@@ -87,19 +117,27 @@ function addConversationMessage(
 
         message: message,
 
-        time: Date.now()
+        timestamp:
+        new Date().toISOString()
+
 
     });
 
 
 
-    // Keep last 20 messages
 
-    if(history.length > 20){
 
-        history.shift();
+
+    // Keep memory clean
+
+    if(history.length > 50){
+
+        history =
+        history.slice(-50);
 
     }
+
+
 
 
 
@@ -107,7 +145,12 @@ function addConversationMessage(
         history
     );
 
+
 }
+
+
+
+
 
 
 
@@ -117,9 +160,48 @@ function addConversationMessage(
 
 function getConversationHistory(){
 
+
     return loadConversationHistory();
 
+
 }
+
+
+
+
+
+
+
+// =====================================
+// GET LAST MESSAGE
+// =====================================
+
+function getLastMessage(){
+
+
+    const history =
+    loadConversationHistory();
+
+
+
+    if(history.length === 0){
+
+        return null;
+
+    }
+
+
+
+    return history[
+        history.length - 1
+    ];
+
+
+}
+
+
+
+
 
 
 
@@ -129,13 +211,19 @@ function getConversationHistory(){
 
 function clearConversationHistory(){
 
+
     localStorage.removeItem(
+
         CHAT_HISTORY_KEY
+
     );
+
 
 }
 
-window.clearChatTBM = clearConversationHistory;
+
+
+
 
 
 
@@ -143,15 +231,35 @@ window.clearChatTBM = clearConversationHistory;
 // EXPORT
 // =====================================
 
+
 window.conversationManager = {
 
+
     addMessage:
+
     addConversationMessage,
 
+
     getHistory:
+
     getConversationHistory,
 
+
+    getLast:
+
+    getLastMessage,
+
+
     clear:
+
     clearConversationHistory
 
+
 };
+
+
+
+// Global clear shortcut
+
+window.clearChatTBM =
+clearConversationHistory;
