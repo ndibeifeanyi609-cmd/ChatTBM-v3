@@ -1,18 +1,46 @@
 /* =====================================
-   ChatTBM V6.0
-   Creator Style Memory
+   ChatTBM V6.0.2
+   Creator Style Memory Engine
 
-   Upgrade:
-   - Better creator preference learning
-   - Cinematic style detection
-   - Motivational tone detection
-   - Content niche memory
-   - Personal writing style
+   Purpose:
+   - Learn creator preferences
+   - Remember writing style
+   - Store content direction
+   - Support Creator Brain
 ===================================== */
 
 
 const CREATOR_MEMORY_KEY =
 "ChatTBM_Creator_Style";
+
+
+
+
+// =====================================
+// DEFAULT MEMORY
+// =====================================
+
+function defaultCreatorMemory(){
+
+    return {
+
+        tone:"motivational",
+
+        style:"short",
+
+        niche:"creator",
+
+        emoji:true,
+
+        topics:[],
+
+        keywords:[]
+
+    };
+
+}
+
+
 
 
 
@@ -25,52 +53,42 @@ function loadCreatorMemory(){
 
 
     const saved =
+
     localStorage.getItem(
         CREATOR_MEMORY_KEY
     );
 
 
+
     if(!saved){
 
-        return {
-
-            tone:"motivational",
-
-            style:"short",
-
-            niche:"creator",
-
-            emoji:true,
-
-            topics:[]
-
-        };
+        return defaultCreatorMemory();
 
     }
+
 
 
 
     try{
 
-        return JSON.parse(saved);
-
-    }
-
-    catch(error){
 
         return {
 
-            tone:"motivational",
+            ...defaultCreatorMemory(),
 
-            style:"short",
-
-            niche:"creator",
-
-            emoji:true,
-
-            topics:[]
+            ...JSON.parse(saved)
 
         };
+
+
+    }
+
+
+    catch(error){
+
+
+        return defaultCreatorMemory();
+
 
     }
 
@@ -111,7 +129,7 @@ function saveCreatorMemory(memory){
 
 
 // =====================================
-// LEARN FROM MESSAGE
+// LEARN CREATOR STYLE
 // =====================================
 
 function learnCreatorStyle(message){
@@ -131,54 +149,29 @@ function learnCreatorStyle(message){
 
 
 
-    // Topic memory
+    // ===============================
+    // TONE DETECTION
+    // ===============================
+
 
     if(
-
-        text.includes("journey") ||
-
-        text.includes("story") ||
-
-        text.includes("building")
-
-    ){
-
-        if(
-            !memory.topics.includes("journey")
-        ){
-
-            memory.topics.push(
-                "journey"
-            );
-
-        }
-
-    }
-
-
-
-
-
-
-
-
-    // Tone detection
-
-    if(
-
-        text.includes("motivational") ||
 
         text.includes("motivation") ||
 
+        text.includes("motivational") ||
+
         text.includes("success") ||
 
-        text.includes("inspire")
+        text.includes("inspire") ||
+
+        text.includes("journey")
 
     ){
 
         memory.tone =
         "motivational";
 
+
     }
 
 
@@ -187,8 +180,10 @@ function learnCreatorStyle(message){
 
 
 
+    // ===============================
+    // CINEMATIC STYLE
+    // ===============================
 
-    // Cinematic style
 
     if(
 
@@ -196,13 +191,16 @@ function learnCreatorStyle(message){
 
         text.includes("movie") ||
 
-        text.includes("film")
+        text.includes("film") ||
+
+        text.includes("realistic")
 
     ){
 
         memory.style =
         "cinematic";
 
+
     }
 
 
@@ -211,20 +209,25 @@ function learnCreatorStyle(message){
 
 
 
+    // ===============================
+    // SHORT STYLE
+    // ===============================
 
-    // Short style
 
     if(
 
         text.includes("short") ||
 
-        text.includes("brief")
+        text.includes("brief") ||
+
+        text.includes("caption")
 
     ){
 
         memory.style =
         "short";
 
+
     }
 
 
@@ -233,23 +236,118 @@ function learnCreatorStyle(message){
 
 
 
+    // ===============================
+    // CREATOR NICHE
+    // ===============================
 
-    // Action creator niche
 
     if(
 
-        text.includes("action") ||
-
         text.includes("video") ||
 
-        text.includes("reel")
+        text.includes("reel") ||
+
+        text.includes("creator") ||
+
+        text.includes("content")
 
     ){
 
         memory.niche =
-        "action content creator";
+        "content creator";
+
 
     }
+
+
+
+
+
+
+
+    // ===============================
+    // TOPIC MEMORY
+    // ===============================
+
+
+    const topics = [
+
+        "journey",
+
+        "story",
+
+        "building",
+
+        "success",
+
+        "action",
+
+        "cinematic"
+
+    ];
+
+
+
+
+
+    topics.forEach(topic=>{
+
+
+        if(
+
+            text.includes(topic) &&
+
+            !memory.topics.includes(topic)
+
+        ){
+
+            memory.topics.push(topic);
+
+        }
+
+
+    });
+
+
+
+
+
+
+
+
+    // ===============================
+    // KEYWORD MEMORY
+    // ===============================
+
+
+    if(
+
+        message.trim() !== ""
+
+    ){
+
+
+        memory.keywords.push(message);
+
+
+    }
+
+
+
+
+
+
+
+    // Keep memory clean
+
+    if(memory.keywords.length > 20){
+
+
+        memory.keywords.shift();
+
+
+    }
+
 
 
 
@@ -270,7 +368,7 @@ function learnCreatorStyle(message){
 
 
 // =====================================
-// GET STYLE
+// GET MEMORY
 // =====================================
 
 function getCreatorStyle(){
@@ -280,6 +378,7 @@ function getCreatorStyle(){
 
 
 }
+
 
 
 
@@ -303,6 +402,7 @@ function clearCreatorMemory(){
 
 
 }
+
 
 
 
