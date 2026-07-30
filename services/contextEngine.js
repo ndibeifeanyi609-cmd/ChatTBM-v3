@@ -69,17 +69,14 @@ function contextEngine(
 
         return {
 
-            matched:true,
+    matched: true,
 
-            response:
+    response:
+        typeof window.editorBrain === "function"
+        ? window.editorBrain(message, previous)
+        : previous
 
-            "I'll improve this content:\n\n" +
-
-            (previous || "No previous content found.")
-
-        };
-
-
+};
     }
 
 
