@@ -1,27 +1,39 @@
 /* ===================================
-   ChatTBM - Core AI Assistant
-   CLEAN script.js
+   ChatTBM V5.9.3
 
-   PART 1/3
+   script.js
+   Part 4A
+
+   Upgrade:
+   - Offline Brain Connection
+   - Backend + Offline fallback
 =================================== */
-
 
 
 // ===============================
 // CONNECT ELEMENTS
 // ===============================
 
-const chatBox = document.getElementById("chat-box");
+const chatBox =
+document.getElementById("chat-box");
 
-const userInput = document.getElementById("user-input");
 
-const sendBtn = document.getElementById("send-btn");
+const userInput =
+document.getElementById("user-input");
 
-const toolButtons = document.querySelectorAll(".tool-btn");
+
+const sendBtn =
+document.getElementById("send-btn");
+
+
+const toolButtons =
+document.querySelectorAll(".tool-btn");
 
 
 
 let lastUserMessage = "";
+
+
 
 
 
@@ -41,6 +53,8 @@ sendBtn.addEventListener(
 
 
 
+
+
 // ===============================
 // ENTER KEY
 // ===============================
@@ -53,15 +67,15 @@ userInput.addEventListener(
 
         if(event.key === "Enter"){
 
-
             sendMessage();
-
 
         }
 
 
     }
 );
+
+
 
 
 
@@ -76,7 +90,8 @@ userInput.addEventListener(
 async function sendMessage(){
 
 
-    const message = userInput.value.trim();
+    const message =
+    userInput.value.trim();
 
 
 
@@ -84,7 +99,8 @@ async function sendMessage(){
 
 
 
-    lastUserMessage = message;
+    lastUserMessage =
+    message;
 
 
 
@@ -103,7 +119,8 @@ async function sendMessage(){
 
 
 
-    const response = await generateAIResponse(message);
+    const response =
+    await generateAIResponse(message);
 
 
 
@@ -122,6 +139,7 @@ async function sendMessage(){
 
 
 }
+
 
 
 
@@ -157,7 +175,6 @@ function addMessage(text, sender){
 
     messageDiv.innerHTML = `
 
-
         <p>${text}</p>
 
 
@@ -185,18 +202,18 @@ function addMessage(text, sender){
 
         }
 
-
     `;
 
 
 
-    chatBox.appendChild(messageDiv);
+    chatBox.appendChild(
+        messageDiv
+    );
 
 
 
     chatBox.scrollTop =
     chatBox.scrollHeight;
-
 
 
 }
@@ -208,22 +225,27 @@ function addMessage(text, sender){
 
 
 
-// ===============================
-// CONNECT TO CHATTBM V5 BACKEND
-// ===============================
-
 
 // ===============================
-// CREATE UNIQUE USER ID
+// USER ID
 // ===============================
+
 
 function createUserId(){
 
+
     const id =
+
     "user-" +
+
     Date.now() +
+
     "-" +
-    Math.floor(Math.random() * 10000);
+
+    Math.floor(
+        Math.random()*10000
+    );
+
 
 
     localStorage.setItem(
@@ -232,15 +254,24 @@ function createUserId(){
     );
 
 
+
     return id;
+
 
 }
 
 
 
+
+
+
+
+
+
 // ===============================
-// CONNECT TO CHATTBM V5 BACKEND
+// AI RESPONSE ENGINE
 // ===============================
+
 
 async function generateAIResponse(message){
 
@@ -249,38 +280,65 @@ async function generateAIResponse(message){
 
 
         const conversationId =
-        localStorage.getItem("ChatTBM_user")
-        || createUserId();
+
+        localStorage.getItem(
+            "ChatTBM_user"
+        )
+
+        ||
+
+        createUserId();
+
+
+
+
 
 
         const response =
+
         await fetch(
 
-            "https://chattbm-backend.onrender.com/api/chat",
+        "https://chattbm-backend.onrender.com/api/chat",
 
-            {
+        {
 
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type":
-                    "application/json"
-
-                },
+            method:"POST",
 
 
-                body: JSON.stringify({
+            headers:{
 
-                    message: message,
+                "Content-Type":
+                "application/json"
 
-                    conversationId: conversationId
+            },
 
-                })
 
-            }
+            body:JSON.stringify({
+
+                message:message,
+
+                conversationId:
+                conversationId
+
+            })
+
+        }
 
         );
+
+
+
+
+
+        if(!response.ok){
+
+            throw new Error(
+                "Backend unavailable"
+            );
+
+        }
+
+
 
 
 
@@ -290,19 +348,32 @@ async function generateAIResponse(message){
 
 
 
-        console.log(
-            "ChatTBM AI:",
-            data
+
+
+        if(
+            data.reply
+        ){
+
+            console.log(
+                "ChatTBM Backend:",
+                data
+            );
+
+
+            return data.reply;
+
+        }
+
+
+
+        throw new Error(
+            "No backend reply"
         );
 
 
 
-        return data.reply;
-
-
-
-
     }
+
 
 
     catch(error){
@@ -310,34 +381,59 @@ async function generateAIResponse(message){
 
         console.log(
 
-            "Backend Error:",
+            "Switching to Offline Brain:",
+
             error
 
         );
 
 
 
+
+        if(
+            typeof window.offlineBrain === "function"
+        ){
+
+
+            return window.offlineBrain(
+                message
+            );
+
+
+        }
+
+
+
+
         return (
 
-            "ChatTBM cannot connect " +
-            "to the AI server right now."
+            "ChatTBM offline brain " +
+
+            "is loading..."
 
         );
+
 
 
     }
 
 
+
 }
+
 /* ===================================
-   ChatTBM - Core AI Assistant
+   ChatTBM V5.9.3
 
-   CLEAN script.js
+   script.js
+   Part 4B
 
-   PART 2/3
+   - Tool buttons
+   - Loading
+   - Copy
+   - Regenerate
+   - History
+   - Service Worker
 =================================== */
-
-
 
 
 
@@ -350,7 +446,9 @@ toolButtons.forEach(button => {
 
 
     button.addEventListener(
+
         "click",
+
         function(){
 
 
@@ -360,6 +458,7 @@ toolButtons.forEach(button => {
 
 
             userInput.value =
+
             "Create " + tool;
 
 
@@ -374,6 +473,8 @@ toolButtons.forEach(button => {
 
 
 });
+
+
 
 
 
@@ -414,7 +515,9 @@ function showLoading(){
 
 
 
-    chatBox.appendChild(loading);
+    chatBox.appendChild(
+        loading
+    );
 
 
 
@@ -434,7 +537,10 @@ function removeLoading(){
 
 
     const loading =
-    document.getElementById("loading");
+
+    document.getElementById(
+        "loading"
+    );
 
 
 
@@ -456,6 +562,7 @@ function removeLoading(){
 
 
 
+
 // ===============================
 // COPY RESPONSE
 // ===============================
@@ -464,24 +571,24 @@ function removeLoading(){
 function copyResponse(button){
 
 
-
     const text =
 
     button.parentElement
+
     .querySelector("p")
+
     .innerText;
 
 
 
-
-    navigator.clipboard.writeText(text);
-
+    navigator.clipboard.writeText(
+        text
+    );
 
 
 
     button.innerText =
     "Copied!";
-
 
 
 
@@ -497,6 +604,7 @@ function copyResponse(button){
 
 
 }
+
 
 
 
@@ -526,7 +634,9 @@ async function regenerateResponse(){
         const response =
 
         await generateAIResponse(
+
             lastUserMessage
+
         );
 
 
@@ -547,25 +657,24 @@ async function regenerateResponse(){
 
 
 
+        saveChat();
+
+
     }
 
 
 }
 
-/* ===================================
-   ChatTBM - Core AI Assistant
 
-   CLEAN script.js
 
-   PART 3/3
-=================================== */
+
 
 
 
 
 
 // ===============================
-// CHAT HISTORY STORAGE
+// CHAT HISTORY
 // ===============================
 
 
@@ -582,6 +691,7 @@ function saveChat(){
 
 
 }
+
 
 
 
@@ -619,8 +729,7 @@ function loadChat(){
 
 
 
-
-// Load previous conversations
+// Load old conversations
 
 loadChat();
 
@@ -631,8 +740,9 @@ loadChat();
 
 
 
+
 // ===============================
-// SERVICE WORKER REGISTRATION
+// SERVICE WORKER
 // ===============================
 
 
@@ -649,6 +759,7 @@ if(
 
 
             navigator.serviceWorker
+
             .register(
                 "service-worker.js"
             )
@@ -673,6 +784,7 @@ if(
                 console.log(
 
                     "Service Worker Error:",
+
                     error
 
                 );
