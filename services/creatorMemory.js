@@ -1,11 +1,13 @@
 /* =====================================
-   ChatTBM V5.9.7
+   ChatTBM V6.0
    Creator Style Memory
 
-   Purpose:
-   - Store creator preferences
-   - Remember writing style
-   - Learn from interactions
+   Upgrade:
+   - Better creator preference learning
+   - Cinematic style detection
+   - Motivational tone detection
+   - Content niche memory
+   - Personal writing style
 ===================================== */
 
 
@@ -23,7 +25,6 @@ function loadCreatorMemory(){
 
 
     const saved =
-
     localStorage.getItem(
         CREATOR_MEMORY_KEY
     );
@@ -36,6 +37,8 @@ function loadCreatorMemory(){
             tone:"motivational",
 
             style:"short",
+
+            niche:"creator",
 
             emoji:true,
 
@@ -55,12 +58,25 @@ function loadCreatorMemory(){
 
     catch(error){
 
-        return {};
+        return {
+
+            tone:"motivational",
+
+            style:"short",
+
+            niche:"creator",
+
+            emoji:true,
+
+            topics:[]
+
+        };
 
     }
 
 
 }
+
 
 
 
@@ -92,6 +108,8 @@ function saveCreatorMemory(memory){
 
 
 
+
+
 // =====================================
 // LEARN FROM MESSAGE
 // =====================================
@@ -99,7 +117,7 @@ function saveCreatorMemory(memory){
 function learnCreatorStyle(message){
 
 
-    const memory =
+    let memory =
     loadCreatorMemory();
 
 
@@ -109,6 +127,11 @@ function learnCreatorStyle(message){
 
 
 
+
+
+
+
+    // Topic memory
 
     if(
 
@@ -120,9 +143,15 @@ function learnCreatorStyle(message){
 
     ){
 
-        memory.topics.push(
-            "journey"
-        );
+        if(
+            !memory.topics.includes("journey")
+        ){
+
+            memory.topics.push(
+                "journey"
+            );
+
+        }
 
     }
 
@@ -131,9 +160,17 @@ function learnCreatorStyle(message){
 
 
 
+
+
+    // Tone detection
+
     if(
 
         text.includes("motivational") ||
+
+        text.includes("motivation") ||
+
+        text.includes("success") ||
 
         text.includes("inspire")
 
@@ -149,9 +186,39 @@ function learnCreatorStyle(message){
 
 
 
+
+
+    // Cinematic style
+
     if(
 
-        text.includes("short")
+        text.includes("cinematic") ||
+
+        text.includes("movie") ||
+
+        text.includes("film")
+
+    ){
+
+        memory.style =
+        "cinematic";
+
+    }
+
+
+
+
+
+
+
+
+    // Short style
+
+    if(
+
+        text.includes("short") ||
+
+        text.includes("brief")
 
     ){
 
@@ -164,10 +231,37 @@ function learnCreatorStyle(message){
 
 
 
+
+
+
+    // Action creator niche
+
+    if(
+
+        text.includes("action") ||
+
+        text.includes("video") ||
+
+        text.includes("reel")
+
+    ){
+
+        memory.niche =
+        "action content creator";
+
+    }
+
+
+
+
+
+
     saveCreatorMemory(memory);
 
 
 }
+
+
 
 
 
@@ -193,16 +287,47 @@ function getCreatorStyle(){
 
 
 
+
+// =====================================
+// CLEAR MEMORY
+// =====================================
+
+function clearCreatorMemory(){
+
+
+    localStorage.removeItem(
+
+        CREATOR_MEMORY_KEY
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
 // =====================================
 // EXPORT
 // =====================================
 
 window.creatorMemory = {
 
+
     learn:
     learnCreatorStyle,
 
+
     get:
-    getCreatorStyle
+    getCreatorStyle,
+
+
+    clear:
+    clearCreatorMemory
+
 
 };
