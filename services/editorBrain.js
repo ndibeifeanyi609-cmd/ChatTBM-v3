@@ -1,13 +1,14 @@
 /* =====================================
-   ChatTBM V5.9.6.1
+   ChatTBM V6.0.1
    Smart Editor Brain
 
    Upgrade:
    - Natural shortening
-   - Better caption editing
+   - Caption editing
    - Rewrite styles
    - Expand ideas
-   - Tone changing
+   - Cinematic tone
+   - Motivational tone
 ===================================== */
 
 
@@ -16,10 +17,14 @@
 // MAIN EDITOR
 // =====================================
 
+
 function editorBrain(command, text){
 
 
-    if(!text || text.trim() === ""){
+    if(
+        !text ||
+        text.trim() === ""
+    ){
 
         return "I need content to edit.";
 
@@ -33,16 +38,20 @@ function editorBrain(command, text){
 
 
 
-    if(
 
-        cmd.includes("short") ||
-        cmd.includes("summarize") ||
-        cmd.includes("brief")
+    if(hasWords(cmd,[
 
-    ){
+        "short",
+        "shorter",
+        "summarize",
+        "brief"
+
+    ])){
+
 
         return shortenText(text);
 
+
     }
 
 
@@ -50,16 +59,20 @@ function editorBrain(command, text){
 
 
 
-    if(
 
-        cmd.includes("expand") ||
-        cmd.includes("longer") ||
-        cmd.includes("more details")
+    if(hasWords(cmd,[
 
-    ){
+        "expand",
+        "longer",
+        "more details",
+        "explain"
+
+    ])){
+
 
         return expandText(text);
 
+
     }
 
 
@@ -67,16 +80,20 @@ function editorBrain(command, text){
 
 
 
-    if(
 
-        cmd.includes("rewrite") ||
-        cmd.includes("improve") ||
-        cmd.includes("better")
+    if(hasWords(cmd,[
 
-    ){
+        "rewrite",
+        "improve",
+        "better",
+        "fix"
+
+    ])){
+
 
         return rewriteText(text);
 
+
     }
 
 
@@ -84,27 +101,18 @@ function editorBrain(command, text){
 
 
 
-    if(
 
-        cmd.includes("motivational") ||
-        cmd.includes("motivation")
+    if(hasWords(cmd,[
 
-    ){
+        "motivational",
+        "motivation",
+        "inspiring"
+
+    ])){
+
 
         return motivationalText(text);
 
-    }
-
-
-
-
-
-
-    if(
-        cmd.includes("viral")
-    ){
-
-        return viralText(text);
 
     }
 
@@ -113,13 +121,40 @@ function editorBrain(command, text){
 
 
 
-    if(
-        cmd.includes("cinematic")
-    ){
+
+    if(hasWords(cmd,[
+
+        "cinematic",
+        "movie",
+        "dramatic"
+
+    ])){
+
 
         return cinematicText(text);
 
+
     }
+
+
+
+
+
+
+
+    if(hasWords(cmd,[
+
+        "viral"
+
+    ])){
+
+
+        return viralText(text);
+
+
+    }
+
+
 
 
 
@@ -134,12 +169,15 @@ function editorBrain(command, text){
 
 
 
+
+
 // =====================================
-// NATURAL SHORTEN
+// SHORTEN
 // =====================================
 
 
 function shortenText(text){
+
 
 
     const lower =
@@ -147,23 +185,15 @@ function shortenText(text){
 
 
 
-    if(
-        lower.includes("no shortcuts")
-    ){
+
+
+    if(lower.includes(
+        "no shortcuts"
+    )){
+
 
         return "No shortcuts. Just consistency. 🚀";
 
-    }
-
-
-
-
-
-    if(
-        lower.includes("small actions")
-    ){
-
-        return "Small steps. Big results. 🔥";
 
     }
 
@@ -171,13 +201,30 @@ function shortenText(text){
 
 
 
-    if(
-        lower.includes("journey")
-    ){
 
-        return "The journey continues. 🚀";
+    if(lower.includes(
+        "small actions"
+    )){
+
+
+        return "Small actions. Big results.";
 
     }
+
+
+
+
+
+
+    if(lower.includes(
+        "building my dream"
+    )){
+
+
+        return "Building my dream step by step. 🔥";
+
+    }
+
 
 
 
@@ -188,13 +235,31 @@ function shortenText(text){
 
 
 
-    return words
-    .slice(0,5)
-    .join(" ")
-    + "...";
+
+    if(words.length <= 5){
+
+        return text;
+
+    }
+
+
+
+    return (
+
+        words
+        .slice(0,5)
+        .join(" ")
+
+        +
+
+        "..."
+
+    );
 
 
 }
+
+
 
 
 
@@ -214,14 +279,16 @@ function expandText(text){
 
         text +
 
-        "\n\nEvery step matters. " +
+        "\n\nEvery step is part of the journey. " +
 
-        "Growth comes from consistency, patience, and dedication."
+        "Consistency, patience, and dedication create lasting results."
 
     );
 
 
 }
+
+
 
 
 
@@ -243,7 +310,7 @@ function rewriteText(text){
 
         text +
 
-        "\n\nA new chapter, a stronger version of the story."
+        "\n\nTurning challenges into growth and dreams into reality."
 
     );
 
@@ -256,8 +323,10 @@ function rewriteText(text){
 
 
 
+
+
 // =====================================
-// TONE STYLES
+// MOTIVATIONAL
 // =====================================
 
 
@@ -272,7 +341,7 @@ function motivationalText(text){
 
         "\n\nKeep pushing forward. " +
 
-        "Every step is building something bigger."
+        "Every effort is building your future."
 
     );
 
@@ -283,24 +352,13 @@ function motivationalText(text){
 
 
 
-function viralText(text){
-
-
-    return (
-
-        "🚀 " +
-
-        text +
-
-        "\n\nWatch the journey. The best is coming."
-
-    );
-
-
-}
 
 
 
+
+// =====================================
+// CINEMATIC
+// =====================================
 
 
 function cinematicText(text){
@@ -312,7 +370,7 @@ function cinematicText(text){
 
         text +
 
-        "\n\nA story written through challenges, growth, and determination."
+        "\n\nA story built through struggle, growth, and determination."
 
     );
 
@@ -325,8 +383,65 @@ function cinematicText(text){
 
 
 
+
+
+// =====================================
+// VIRAL
+// =====================================
+
+
+function viralText(text){
+
+
+    return (
+
+        "🚀 " +
+
+        text +
+
+        "\n\nFollow the journey. The next chapter is coming."
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// HELPER
+// =====================================
+
+
+function hasWords(text,list){
+
+
+    return list.some(word =>
+
+        text.includes(word)
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
 // =====================================
 // EXPORT
 // =====================================
+
 
 window.editorBrain = editorBrain;
