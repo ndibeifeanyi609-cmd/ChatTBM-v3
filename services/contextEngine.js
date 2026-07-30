@@ -108,16 +108,16 @@ function contextEngine(
     // SHORTEN
     // ===============================
 
-    if(hasWords(text,[
+  if(hasWords(text,[
 
-        "shorter",
-        "shorten",
-        "make it brief",
-        "summarize"
+    "shorter",
+    "shorten",
+    "make it short",
+    "make it brief",
+    "summarize",
+    "short"
 
-    ])){
-
-
+])){
         return {
 
             matched:true,
