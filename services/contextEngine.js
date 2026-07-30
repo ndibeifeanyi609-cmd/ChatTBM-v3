@@ -1,18 +1,13 @@
 /* =====================================
-   ChatTBM V5.9.4.1
-   Context Engine V2
+   ChatTBM V5.9.4.2
+   Context Engine V3
 
    Upgrade:
-   - Correct previous topic detection
-   - Follow-up understanding
-   - Better conversation flow
+   - Reads previous assistant output
+   - Better follow-up understanding
+   - Creator content editing support
 ===================================== */
 
-
-
-// =====================================
-// MAIN CONTEXT ENGINE
-// =====================================
 
 
 function contextEngine(
@@ -30,7 +25,8 @@ function contextEngine(
 
 
     const previous =
-    getPreviousUserMessage(history);
+    getPreviousContext(history);
+
 
 
 
@@ -39,8 +35,7 @@ function contextEngine(
 
         "continue",
         "keep going",
-        "go on",
-        "continue from there"
+        "go on"
 
     ])){
 
@@ -51,9 +46,7 @@ function contextEngine(
 
             response:
 
-            "I'll continue from where we stopped.\n\n" +
-
-            "Previous topic:\n" +
+            "I'll continue from the previous content:\n\n" +
 
             (previous || "our last conversation")
 
@@ -83,9 +76,9 @@ function contextEngine(
 
             response:
 
-            "I'll improve the previous content:\n\n" +
+            "I'll improve this content:\n\n" +
 
-            (previous || "No previous request found.")
+            (previous || "No previous content found.")
 
         };
 
@@ -115,7 +108,7 @@ function contextEngine(
 
             "I'll create a shorter version of:\n\n" +
 
-            (previous || "your previous request")
+            (previous || "your previous content")
 
         };
 
@@ -143,9 +136,9 @@ function contextEngine(
 
             response:
 
-            "I'll expand this idea:\n\n" +
+            "I'll expand this content:\n\n" +
 
-            (previous || "your previous request")
+            (previous || "your previous content")
 
         };
 
@@ -156,11 +149,9 @@ function contextEngine(
 
 
 
-
     if(hasWords(text,[
 
         "what were we talking about",
-        "what was i saying",
         "last topic"
 
     ])){
@@ -172,9 +163,9 @@ function contextEngine(
 
             response:
 
-            "Your previous topic was:\n\n" +
+            "Your previous content was:\n\n" +
 
-            (previous || "No previous topic found.")
+            (previous || "No previous content found.")
 
         };
 
@@ -201,12 +192,13 @@ function contextEngine(
 
 
 
+
 // =====================================
-// GET PREVIOUS USER MESSAGE
+// FIND PREVIOUS USEFUL CONTENT
 // =====================================
 
 
-function getPreviousUserMessage(history){
+function getPreviousContext(history){
 
 
     if(!Array.isArray(history)){
@@ -217,7 +209,8 @@ function getPreviousUserMessage(history){
 
 
 
-    let foundCurrent = false;
+
+    let skippedCurrent = false;
 
 
 
@@ -232,27 +225,43 @@ function getPreviousUserMessage(history){
     ){
 
 
-        if(history[i].role === "user"){
+        const item =
+        history[i];
 
 
 
-            if(!foundCurrent){
+        // Skip current user command
 
+        if(
 
-                foundCurrent = true;
+            item.role === "user" &&
 
+            !skippedCurrent
 
-                continue;
+        ){
 
+            skippedCurrent = true;
 
-            }
-
-
-
-            return history[i].message;
-
+            continue;
 
         }
+
+
+
+
+
+        // Prefer assistant output
+
+        if(
+
+            item.role === "assistant"
+
+        ){
+
+            return item.message;
+
+        }
+
 
 
     }
@@ -261,7 +270,6 @@ function getPreviousUserMessage(history){
 
     return "";
 
-
 }
 
 
@@ -269,10 +277,6 @@ function getPreviousUserMessage(history){
 
 
 
-
-// =====================================
-// HELPERS
-// =====================================
 
 
 function normalize(text){
@@ -286,6 +290,7 @@ function normalize(text){
 
 
 }
+
 
 
 
@@ -308,11 +313,6 @@ function hasWords(text,words){
 
 
 
-
-
-// =====================================
-// EXPORT
-// =====================================
 
 
 window.contextEngine = contextEngine;
