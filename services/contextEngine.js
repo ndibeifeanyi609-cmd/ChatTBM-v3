@@ -42,17 +42,14 @@ function contextEngine(
 
         return {
 
-            matched:true,
+    matched: true,
 
-            response:
+    response:
+        typeof window.editorBrain === "function"
+        ? window.editorBrain(message, previous)
+        : previous
 
-            "I'll continue from the previous content:\n\n" +
-
-            (previous || "our last conversation")
-
-        };
-
-
+};
     }
 
 
