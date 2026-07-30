@@ -1,13 +1,15 @@
 /* ===================================
-   ChatTBM V5.9.4
+   ChatTBM V6.0.1
    Offline Smart Response Brain
 
    Upgrade:
-   - Context Engine connection
-   - Creator Brain connection
-   - Better conversation flow
-   - Offline intelligence expansion
+   - Context Engine V4 connection
+   - Creator Brain V5.9.7.1 connection
+   - Creator Memory support
+   - Editor Brain support
+   - Better offline conversation flow
 =================================== */
+
 
 
 // ===================================
@@ -24,21 +26,29 @@ function offlineBrain(message){
 
 
     // ===================================
-    // CHECK CONTEXT FIRST
+    // CONTEXT ENGINE FIRST
     // ===================================
+
 
     if(
         typeof window.contextEngine === "function"
     ){
 
+
         const contextResult =
+
         window.contextEngine(
+
             message,
+
             getChatHistory()
+
         );
 
 
+
         if(
+            contextResult &&
             contextResult.matched
         ){
 
@@ -46,17 +56,21 @@ function offlineBrain(message){
 
         }
 
+
     }
 
 
 
 
+
     // ===================================
-    // NORMAL INTENT DETECTION
+    // DETECT INTENT
     // ===================================
+
 
     const intent =
     detectIntent(text);
+
 
 
 
@@ -78,7 +92,7 @@ function offlineBrain(message){
 
         case "creator":
 
-            return handleCreatorRequest(text);
+            return handleCreatorRequest(message);
 
 
 
@@ -106,6 +120,12 @@ function offlineBrain(message){
 
 
 
+        case "personal":
+
+            return personalResponse();
+
+
+
         case "time":
 
             return timeResponse();
@@ -118,12 +138,6 @@ function offlineBrain(message){
 
 
 
-        case "personal":
-
-            return personalResponse(text);
-
-
-
         default:
 
             return fallbackResponse();
@@ -132,8 +146,8 @@ function offlineBrain(message){
     }
 
 
-}
 
+}
 
 
 
@@ -157,8 +171,7 @@ function detectIntent(text){
         "hello",
         "hey",
         "morning",
-        "afternoon",
-        "evening"
+        "good morning"
 
     ])){
 
@@ -171,17 +184,17 @@ function detectIntent(text){
 
 
 
-    if(
+    if(hasWords(text,[
 
-        text.includes("who are you") ||
+        "who are you",
+        "your name",
+        "what are you"
 
-        text.includes("your name") ||
+    ])){
 
-        text.includes("what are you")
-
-    ){
 
         return "identity";
+
 
     }
 
@@ -193,16 +206,17 @@ function detectIntent(text){
     if(hasWords(text,[
 
         "caption",
-        "hashtag",
         "script",
-        "content",
+        "hashtag",
         "video",
         "reel",
+        "content",
         "post",
         "advert",
         "hook",
+        "idea",
         "calendar",
-        "idea"
+        "viral"
 
     ])){
 
@@ -219,9 +233,9 @@ function detectIntent(text){
 
     if(hasWords(text,[
 
-        "javascript",
         "html",
         "css",
+        "javascript",
         "code",
         "program"
 
@@ -253,7 +267,6 @@ function detectIntent(text){
 
     if(hasWords(text,[
 
-        "motivate",
         "motivation",
         "motivational",
         "success",
@@ -276,9 +289,8 @@ function detectIntent(text){
 
         "my journey",
         "my story",
-        "i want",
-        "i need",
-        "i am building"
+        "i am building",
+        "my project"
 
     ])){
 
@@ -304,14 +316,9 @@ function detectIntent(text){
 
 
 
-
-
     if(
-
         text.includes("date") ||
-
         text.includes("today")
-
     ){
 
 
@@ -319,7 +326,6 @@ function detectIntent(text){
 
 
     }
-
 
 
 
@@ -354,13 +360,13 @@ function detectIntent(text){
 
 
 
-
 // ===================================
 // CREATOR BRAIN CONNECTION
 // ===================================
 
 
-function handleCreatorRequest(text){
+function handleCreatorRequest(message){
+
 
 
     if(
@@ -370,17 +376,24 @@ function handleCreatorRequest(text){
     ){
 
 
-        return window.creatorBrain(text);
+        return window.creatorBrain(message);
 
 
     }
 
 
 
-    return "Creator Brain is not loaded yet.";
+
+    return (
+
+        "Creator Brain is loading...\n\n" +
+
+        "Please check services/creatorBrain.js"
+
+    );
+
 
 }
-
 
 
 
@@ -394,24 +407,24 @@ function handleCreatorRequest(text){
 // ===================================
 
 
-function personalResponse(text){
+function personalResponse(){
 
 
     return (
 
-        "That sounds like an important part of your journey. " +
+        "Your journey can become powerful content. 🔥\n\n" +
 
-        "Your story can become powerful content.\n\n" +
+        "I can turn your story into:\n\n" +
 
-        "Would you like me to turn it into a caption, " +
-
-        "video script, or content idea?"
+        "• Caption\n" +
+        "• Video script\n" +
+        "• Viral idea\n" +
+        "• Personal brand content"
 
     );
 
 
 }
-
 
 
 
@@ -430,18 +443,16 @@ function greetingResponse(){
 
     return randomReply([
 
-        "Hello 👋 I'm ChatTBM. What can we create today?",
+        "Hello 👋 I'm ChatTBM. What are we creating today?",
 
-        "Welcome back! I'm ready to help you.",
+        "Welcome back! Let's create something powerful.",
 
-        "Hi! Let's build something amazing."
+        "Hi 👋 Ready to build your next idea?"
 
     ]);
 
 
 }
-
-
 
 
 
@@ -454,17 +465,14 @@ function identityResponse(){
 
         "I'm ChatTBM 🤖\n\n" +
 
-        "Your AI Content Assistant designed " +
+        "Your AI Content Assistant for captions, " +
 
-        "to help with ideas, captions, scripts, " +
-
-        "coding and creative projects."
+        "scripts, ideas, coding and creative projects."
 
     );
 
 
 }
-
 
 
 
@@ -476,15 +484,55 @@ function codingResponse(){
 
     return (
 
-        "I can help with coding.\n\n" +
+        "I can help with HTML, CSS, JavaScript " +
 
-        "HTML, CSS, JavaScript, or ChatTBM development."
+        "and ChatTBM development."
 
     );
 
 
 }
 
+
+
+
+
+
+function motivationResponse(){
+
+
+    return randomReply([
+
+        "Consistency creates results. Keep building. 🚀",
+
+        "Every big project begins with a small step.",
+
+        "Your future is created by today's actions."
+
+    ]);
+
+
+}
+
+
+
+
+
+
+function conversationResponse(text){
+
+
+    if(text.includes("how are you")){
+
+        return "I'm running with my offline brain 🤖 Ready to help.";
+
+    }
+
+
+    return "Great! What would you like to create next?";
+
+
+}
 
 
 
@@ -516,58 +564,12 @@ function mathResponse(text){
 
 
 
-
-function motivationResponse(){
-
-
-    return randomReply([
-
-        "Consistency creates results. Keep building.",
-
-        "Every big project begins with a small step.",
-
-        "Your future is built by what you do today."
-
-    ]);
-
-
-}
-
-
-
-
-
-
-
-function conversationResponse(text){
-
-
-    if(text.includes("how are you")){
-
-
-        return "I'm working perfectly offline 🤖 Ready to help.";
-
-    }
-
-
-
-    return "That's great! What would you like to work on next?";
-
-}
-
-
-
-
-
-
-
 function timeResponse(){
 
-
-    return "Current time: " + new Date().toLocaleTimeString();
+    return "Current time: " +
+    new Date().toLocaleTimeString();
 
 }
-
 
 
 
@@ -576,11 +578,10 @@ function timeResponse(){
 
 function dateResponse(){
 
-
-    return "Today is " + new Date().toDateString();
+    return "Today is " +
+    new Date().toDateString();
 
 }
-
 
 
 
@@ -592,9 +593,9 @@ function fallbackResponse(){
 
     return randomReply([
 
-        "I'm learning more every day. Can you explain what you need?",
+        "I'm learning more every day. Tell me what you need.",
 
-        "Interesting question. Let's explore it together.",
+        "Let's explore that together.",
 
         "I can help you create, learn and solve problems."
 
@@ -610,7 +611,6 @@ function fallbackResponse(){
 
 
 
-
 // ===================================
 // HELPERS
 // ===================================
@@ -618,14 +618,20 @@ function fallbackResponse(){
 
 function getChatHistory(){
 
+
     if(
+
         window.conversationManager &&
+
         typeof window.conversationManager.getHistory === "function"
+
     ){
 
         return window.conversationManager.getHistory();
 
     }
+
+
 
     return [];
 
@@ -638,11 +644,13 @@ function getChatHistory(){
 
 function normalizeMessage(text){
 
+
     return text
 
     .toLowerCase()
 
     .trim();
+
 
 }
 
@@ -653,11 +661,13 @@ function normalizeMessage(text){
 
 function hasWords(text,list){
 
+
     return list.some(word =>
 
         text.includes(word)
 
     );
+
 
 }
 
@@ -668,6 +678,7 @@ function hasWords(text,list){
 
 function randomReply(list){
 
+
     return list[
 
         Math.floor(
@@ -677,6 +688,7 @@ function randomReply(list){
         )
 
     ];
+
 
 }
 
@@ -689,6 +701,7 @@ function solveMath(text){
 
 
     const expression =
+
     text.match(/[0-9+\-*/(). ]+/);
 
 
@@ -705,8 +718,11 @@ function solveMath(text){
 
 
         const result =
+
         Function(
+
             "return " + expression[0]
+
         )();
 
 
@@ -728,7 +744,9 @@ function solveMath(text){
 
     catch(error){
 
+
         return null;
+
 
     }
 
@@ -736,9 +754,8 @@ function solveMath(text){
 
     return null;
 
+
 }
-
-
 
 
 
@@ -749,5 +766,6 @@ function solveMath(text){
 // ===================================
 // EXPORT
 // ===================================
+
 
 window.offlineBrain = offlineBrain;
