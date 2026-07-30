@@ -114,32 +114,32 @@ function contextEngine(
 
 
 
-    if(hasWords(text,[
+ if(hasWords(text,[
 
-        "expand",
-        "more details",
-        "make it longer",
-        "explain more"
+    "shorter",
+    "shorten",
+    "make it brief",
+    "summarize"
 
-    ])){
-
-
-        return {
-
-            matched:true,
-
-            response:
-
-            "I'll expand this content:\n\n" +
-
-            (previous || "your previous content")
-
-        };
+])){
 
 
-    }
+    return {
+
+        matched:true,
+
+        response:
+
+        typeof window.editorBrain === "function"
+
+        ? window.editorBrain(message, previous)
+
+        : previous
+
+    };
 
 
+}
 
 
 
