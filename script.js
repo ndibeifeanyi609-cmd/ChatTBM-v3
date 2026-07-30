@@ -135,22 +135,23 @@ async function sendMessage(){
 
 
 
-    addMessage(
-        response,
-        "bot"
-    );
+    removeLoading();
 
-   if (window.conversationManager) {
+addMessage(
+    response,
+    "bot"
+);
+
+if (window.conversationManager) {
+
     window.conversationManager.addMessage(
         "assistant",
         response
     );
+
 }
 
-
-
-    saveChat();
-
+saveChat();
 
 }
 
