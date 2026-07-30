@@ -1,16 +1,51 @@
 /* =====================================
-   ChatTBM V5.9.8
-   User Profile Memory
+   ChatTBM V6.0.2
+   User Profile Memory Engine
 
    Purpose:
    - Store creator identity
-   - Remember preferences
-   - Build personalized AI responses
+   - Learn user preferences
+   - Build personalized responses
+   - Prepare for account memory
 ===================================== */
 
 
 const USER_PROFILE_KEY =
 "ChatTBM_User_Profile";
+
+
+
+
+// =====================================
+// DEFAULT PROFILE
+// =====================================
+
+function defaultUserProfile(){
+
+
+    return {
+
+        name:"",
+
+        niche:"",
+
+        tone:"motivational",
+
+        style:"",
+
+        interests:[],
+
+        goals:[]
+
+
+    };
+
+
+}
+
+
+
+
 
 
 
@@ -29,35 +64,41 @@ function loadUserProfile(){
     );
 
 
+
     if(!saved){
 
-        return {
-
-            name:"",
-            niche:"",
-            tone:"motivational",
-            topics:[]
-
-        };
+        return defaultUserProfile();
 
     }
+
 
 
 
     try{
 
-        return JSON.parse(saved);
+
+        return {
+
+            ...defaultUserProfile(),
+
+            ...JSON.parse(saved)
+
+        };
+
 
     }
 
     catch(error){
 
-        return {};
+
+        return defaultUserProfile();
+
 
     }
 
 
 }
+
 
 
 
@@ -89,15 +130,18 @@ function saveUserProfile(profile){
 
 
 
+
+
 // =====================================
-// LEARN USER INFORMATION
+// LEARN USER PROFILE
 // =====================================
 
 function learnUserProfile(message){
 
 
-    const profile =
+    let profile =
     loadUserProfile();
+
 
 
     const text =
@@ -107,7 +151,12 @@ function learnUserProfile(message){
 
 
 
-    // Detect niche
+
+
+    // ===============================
+    // CONTENT NICHE
+    // ===============================
+
 
     if(
 
@@ -120,7 +169,8 @@ function learnUserProfile(message){
     ){
 
         profile.niche =
-        "action content";
+        "action content creator";
+
 
     }
 
@@ -128,9 +178,38 @@ function learnUserProfile(message){
 
 
 
-    // Detect motivational style
 
     if(
+
+        text.includes("video") ||
+
+        text.includes("reel") ||
+
+        text.includes("content")
+
+    ){
+
+        profile.niche =
+        "content creator";
+
+
+    }
+
+
+
+
+
+
+
+
+    // ===============================
+    // TONE
+    // ===============================
+
+
+    if(
+
+        text.includes("motivation") ||
 
         text.includes("motivational") ||
 
@@ -143,23 +222,100 @@ function learnUserProfile(message){
         profile.tone =
         "motivational";
 
+
     }
 
 
 
 
 
-    // Save topics
+
+
+
+    // ===============================
+    // STYLE
+    // ===============================
+
 
     if(
-        text.includes("journey")
+
+        text.includes("cinematic")
+
     ){
 
-        profile.topics.push(
-            "journey"
-        );
+        profile.style =
+        "cinematic";
+
 
     }
+
+
+
+
+
+
+    if(
+
+        text.includes("short")
+
+    ){
+
+        profile.style =
+        "short";
+
+
+    }
+
+
+
+
+
+
+
+
+    // ===============================
+    // INTEREST MEMORY
+    // ===============================
+
+
+    const interests = [
+
+        "journey",
+
+        "story",
+
+        "building",
+
+        "legacy",
+
+        "creator"
+
+    ];
+
+
+
+
+
+    interests.forEach(item=>{
+
+
+        if(
+
+            text.includes(item) &&
+
+            !profile.interests.includes(item)
+
+        ){
+
+            profile.interests.push(item);
+
+        }
+
+
+    });
+
+
+
 
 
 
@@ -169,6 +325,8 @@ function learnUserProfile(message){
 
 
 }
+
+
 
 
 
@@ -194,6 +352,32 @@ function getUserProfile(){
 
 
 
+
+
+// =====================================
+// CLEAR PROFILE
+// =====================================
+
+function clearUserProfile(){
+
+
+    localStorage.removeItem(
+
+        USER_PROFILE_KEY
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
 // =====================================
 // EXPORT
 // =====================================
@@ -206,7 +390,11 @@ window.userProfileMemory = {
 
 
     get:
-    getUserProfile
+    getUserProfile,
+
+
+    clear:
+    clearUserProfile
 
 
 };
