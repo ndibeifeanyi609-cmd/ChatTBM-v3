@@ -1,8 +1,11 @@
 /* ===================================
-   ChatTBM V5.9.3
-   Creator Brain V1
+   ChatTBM V5.9.7.1
+   Creator Brain
 
-   Offline Content Creation Engine
+   Upgrade:
+   - Creator Style Memory connected
+   - Learns user preferences
+   - Personalized content generation
 
    Features:
    - Captions
@@ -28,19 +31,46 @@ function creatorBrain(request){
 
 
 
+    // Learn creator style
+
+    if(
+
+        window.creatorMemory &&
+
+        typeof window.creatorMemory.learn === "function"
+
+    ){
+
+        window.creatorMemory.learn(
+            request
+        );
+
+    }
+
+
+
+
+
+
+
     if(text.includes("caption")){
 
 
-        return generateCaption(text);
+        return generateCaption();
 
 
     }
 
 
 
+
+
     if(
+
         text.includes("hook") ||
+
         text.includes("viral")
+
     ){
 
 
@@ -51,9 +81,14 @@ function creatorBrain(request){
 
 
 
+
+
     if(
+
         text.includes("script") ||
+
         text.includes("video")
+
     ){
 
 
@@ -64,9 +99,9 @@ function creatorBrain(request){
 
 
 
-    if(
-        text.includes("hashtag")
-    ){
+
+
+    if(text.includes("hashtag")){
 
 
         return generateHashtags();
@@ -76,9 +111,14 @@ function creatorBrain(request){
 
 
 
+
+
     if(
+
         text.includes("advert") ||
+
         text.includes("ad")
+
     ){
 
 
@@ -89,9 +129,14 @@ function creatorBrain(request){
 
 
 
+
+
     if(
+
         text.includes("calendar") ||
+
         text.includes("plan")
+
     ){
 
 
@@ -102,15 +147,17 @@ function creatorBrain(request){
 
 
 
-    if(
-        text.includes("idea")
-    ){
+
+
+    if(text.includes("idea")){
 
 
         return generateIdeas();
 
 
     }
+
+
 
 
 
@@ -136,6 +183,8 @@ function creatorBrain(request){
 
 
 
+
+
 // ===================================
 // CAPTION GENERATOR
 // ===================================
@@ -144,23 +193,86 @@ function creatorBrain(request){
 function generateCaption(){
 
 
+
+    let memory = null;
+
+
+
+    if(
+
+        window.creatorMemory &&
+
+        typeof window.creatorMemory.get === "function"
+
+    ){
+
+        memory =
+        window.creatorMemory.get();
+
+    }
+
+
+
+
+
+
     const captions = [
+
 
         "🔥 Building my dream one step at a time.",
 
+
         "No shortcuts. Just consistency and hard work. 🚀",
+
 
         "The journey is the story. Keep watching.",
 
+
         "Creating today what people will remember tomorrow.",
 
+
         "Small actions. Big results."
+
 
     ];
 
 
 
-    return randomPick(captions);
+
+
+
+    let caption =
+    randomPick(captions);
+
+
+
+
+
+
+    // Add creator style influence
+
+
+    if(
+
+        memory &&
+
+        memory.tone === "motivational"
+
+    ){
+
+
+        caption =
+        "🔥 " + caption;
+
+
+    }
+
+
+
+
+
+
+    return caption;
 
 
 }
@@ -171,8 +283,10 @@ function generateCaption(){
 
 
 
+
+
 // ===================================
-// VIRAL HOOK GENERATOR
+// VIRAL HOOK
 // ===================================
 
 
@@ -212,8 +326,10 @@ function generateHook(){
 
 
 
+
+
 // ===================================
-// VIDEO SCRIPT GENERATOR
+// VIDEO SCRIPT
 // ===================================
 
 
@@ -224,17 +340,11 @@ function generateScript(){
 
         "🎬 Short Video Script\n\n" +
 
-        "HOOK:\n" +
+        "HOOK:\nGrab attention in the first 3 seconds.\n\n" +
 
-        "Grab attention in the first 3 seconds.\n\n" +
+        "BODY:\nShow the process, story or transformation.\n\n" +
 
-        "BODY:\n" +
-
-        "Show the process, story or transformation.\n\n" +
-
-        "ENDING:\n" +
-
-        "Give viewers a reason to follow or comment."
+        "ENDING:\nGive viewers a reason to follow or comment."
 
     );
 
@@ -247,8 +357,10 @@ function generateScript(){
 
 
 
+
+
 // ===================================
-// HASHTAG GENERATOR
+// HASHTAGS
 // ===================================
 
 
@@ -265,9 +377,7 @@ function generateHashtags(){
 
         "#VideoCreator\n" +
 
-        "#TrendingNow\n" +
-
-        "#SocialMediaGrowth"
+        "#TrendingNow"
 
     );
 
@@ -280,8 +390,10 @@ function generateHashtags(){
 
 
 
+
+
 // ===================================
-// ADVERT GENERATOR
+// ADVERT
 // ===================================
 
 
@@ -292,11 +404,9 @@ function generateAdvert(){
 
         "📢 Advert Template\n\n" +
 
-        "Need better content?\n\n" +
+        "Create better content faster with AI assistance.\n\n" +
 
-        "Create professional posts, videos and ideas faster with AI assistance.\n\n" +
-
-        "Start creating today."
+        "Start building your audience today."
 
     );
 
@@ -309,8 +419,10 @@ function generateAdvert(){
 
 
 
+
+
 // ===================================
-// CONTENT IDEA GENERATOR
+// IDEAS
 // ===================================
 
 
@@ -319,15 +431,13 @@ function generateIdeas(){
 
     const ideas = [
 
-        "Behind-the-scenes video showing your process.",
+        "Share your personal journey story.",
 
-        "Before and after transformation content.",
+        "Show your behind-the-scenes process.",
 
-        "Share 3 mistakes beginners make.",
+        "Create a before and after transformation.",
 
-        "Tell your personal journey story.",
-
-        "Create a challenge for your audience."
+        "Share lessons from your experience."
 
     ];
 
@@ -350,8 +460,10 @@ function generateIdeas(){
 
 
 
+
+
 // ===================================
-// CONTENT CALENDAR
+// CALENDAR
 // ===================================
 
 
@@ -362,24 +474,26 @@ function generateContentPlan(){
 
         "7-Day Content Plan:\n\n" +
 
-        "Day 1: Introduction post\n" +
+        "Day 1: Your story\n" +
 
-        "Day 2: Educational video\n" +
+        "Day 2: Behind the scenes\n" +
 
-        "Day 3: Behind the scenes\n" +
+        "Day 3: Educational content\n" +
 
-        "Day 4: Personal story\n" +
+        "Day 4: Personal experience\n" +
 
-        "Day 5: Audience question\n" +
+        "Day 5: Audience engagement\n" +
 
-        "Day 6: Product/service promotion\n" +
+        "Day 6: Promotion\n" +
 
-        "Day 7: Best moments recap"
+        "Day 7: Weekly recap"
 
     );
 
 
 }
+
+
 
 
 
@@ -398,13 +512,17 @@ function randomPick(list){
     return list[
 
         Math.floor(
+
             Math.random()*list.length
+
         )
 
     ];
 
 
 }
+
+
 
 
 
