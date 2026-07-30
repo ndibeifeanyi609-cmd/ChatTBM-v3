@@ -1,69 +1,127 @@
-/* ===================================
-   ChatTBM V5.9.8
-   Creator Brain
+/* =====================================
+   ChatTBM V5.9.9
+   Creator Memory Engine
 
-   Upgrade:
-   - Creator Style Memory connected
-   - User Profile Memory connected
-   - Personalized content generation
-   - Learns creator preferences
+   Purpose:
+   - Learn creator preferences
+   - Store writing style
+   - Remember content direction
+   - Prepare for long-term memory
+===================================== */
 
-   Features:
-   - Captions
-   - Hooks
-   - Scripts
-   - Hashtags
-   - Ads
-   - Content ideas
-=================================== */
+
+const CREATOR_MEMORY_KEY =
+"ChatTBM_Creator_Memory";
 
 
 
-// ===================================
-// MAIN CREATOR BRAIN
-// ===================================
+
+// =====================================
+// LOAD MEMORY
+// =====================================
+
+function loadCreatorMemory(){
 
 
-function creatorBrain(request){
+    const saved =
+    localStorage.getItem(
+        CREATOR_MEMORY_KEY
+    );
+
+
+    if(!saved){
+
+        return {
+
+            tone:"",
+            niche:"",
+            style:"",
+            keywords:[]
+
+        };
+
+    }
+
+
+
+    try{
+
+        return JSON.parse(saved);
+
+    }
+
+    catch(error){
+
+        return {};
+
+    }
+
+
+}
+
+
+
+
+
+
+// =====================================
+// SAVE MEMORY
+// =====================================
+
+function saveCreatorMemory(memory){
+
+
+    localStorage.setItem(
+
+        CREATOR_MEMORY_KEY,
+
+        JSON.stringify(memory)
+
+    );
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// LEARN FROM MESSAGE
+// =====================================
+
+function learnCreatorStyle(message){
 
 
     const text =
-    request.toLowerCase().trim();
+    message.toLowerCase();
 
 
 
-    // Learn creator style
-
-    if(
-
-        window.creatorMemory &&
-
-        typeof window.creatorMemory.learn === "function"
-
-    ){
-
-        window.creatorMemory.learn(
-            request
-        );
-
-    }
+    let memory =
+    loadCreatorMemory();
 
 
 
 
-    // Learn user profile
+
+
+    // Detect tone
 
     if(
 
-        window.userProfileMemory &&
+        text.includes("motivation") ||
 
-        typeof window.userProfileMemory.learn === "function"
+        text.includes("journey") ||
+
+        text.includes("success")
 
     ){
 
-        window.userProfileMemory.learn(
-            request
-        );
+        memory.tone =
+        "motivational";
 
     }
 
@@ -72,41 +130,40 @@ function creatorBrain(request){
 
 
 
-    if(text.includes("caption")){
 
-        return generateCaption();
-
-    }
-
-
-
-
+    // Detect content niche
 
     if(
 
-        text.includes("hook") ||
+        text.includes("video") ||
 
-        text.includes("viral")
+        text.includes("reel") ||
+
+        text.includes("creator")
 
     ){
 
-        return generateHook();
+        memory.niche =
+        "content creator";
 
     }
 
 
 
 
+
+
+
+    // Detect style
 
     if(
 
-        text.includes("script") ||
-
-        text.includes("video")
+        text.includes("cinematic")
 
     ){
 
-        return generateScript();
+        memory.style =
+        "cinematic";
 
     }
 
@@ -114,68 +171,66 @@ function creatorBrain(request){
 
 
 
-    if(text.includes("hashtag")){
 
-        return generateHashtags();
 
-    }
+    memory.keywords.push(message);
 
 
 
 
+    // Keep memory clean
 
-    if(
+    if(memory.keywords.length > 20){
 
-        text.includes("advert") ||
-
-        text.includes("ad")
-
-    ){
-
-        return generateAdvert();
+        memory.keywords.shift();
 
     }
 
 
 
 
+    saveCreatorMemory(memory);
 
-    if(
 
-        text.includes("calendar") ||
-
-        text.includes("plan")
-
-    ){
-
-        return generateContentPlan();
-
-    }
+}
 
 
 
 
 
-    if(text.includes("idea")){
-
-        return generateIdeas();
-
-    }
 
 
 
 
+// =====================================
+// GET MEMORY
+// =====================================
 
-    return (
+function getCreatorMemory(){
 
-        "I can help you create:\n\n" +
 
-        "• Captions\n" +
-        "• Video hooks\n" +
-        "• Scripts\n" +
-        "• Hashtags\n" +
-        "• Advert ideas\n" +
-        "• Content plans"
+    return loadCreatorMemory();
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// CLEAR MEMORY
+// =====================================
+
+function clearCreatorMemory(){
+
+
+    localStorage.removeItem(
+
+        CREATOR_MEMORY_KEY
 
     );
 
@@ -189,385 +244,24 @@ function creatorBrain(request){
 
 
 
-
-// ===================================
-// CAPTION GENERATOR
-// ===================================
-
-
-function generateCaption(){
-
-
-
-    let styleMemory = null;
-
-    let profile = null;
-
-
-
-
-
-    if(
-
-        window.creatorMemory &&
-
-        typeof window.creatorMemory.get === "function"
-
-    ){
-
-        styleMemory =
-        window.creatorMemory.get();
-
-    }
-
-
-
-
-
-
-    if(
-
-        window.userProfileMemory &&
-
-        typeof window.userProfileMemory.get === "function"
-
-    ){
-
-        profile =
-        window.userProfileMemory.get();
-
-    }
-
-
-
-
-
-
-
-    let captions = [
-
-        "🔥 Building my dream one step at a time.",
-
-        "No shortcuts. Just consistency and hard work. 🚀",
-
-        "The journey is the story. Keep watching.",
-
-        "Creating today what people will remember tomorrow.",
-
-        "Small actions. Big results."
-
-    ];
-
-
-
-
-
-
-
-
-    // Motivational creator style
-
-    if(
-
-        styleMemory &&
-
-        styleMemory.tone === "motivational"
-
-    ){
-
-        captions.push(
-
-            "🔥 Every challenge is building the next version of me."
-
-        );
-
-    }
-
-
-
-
-
-
-
-    // Personal creator profile influence
-
-    if(profile){
-
-        captions.push(
-
-            "🚀 My journey, my story. Building something bigger every day."
-
-        );
-
-    }
-
-
-
-
-
-
-
-    return randomPick(captions);
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===================================
-// VIRAL HOOK
-// ===================================
-
-
-function generateHook(){
-
-
-    const hooks = [
-
-        "Stop scrolling... you need to see this.",
-
-        "Nobody talks about this part.",
-
-        "I tried this and the result surprised me.",
-
-        "Watch until the end because this changes everything.",
-
-        "The biggest mistake people make is this."
-
-    ];
-
-
-
-    return (
-
-        "Viral Hook:\n\n" +
-
-        randomPick(hooks)
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===================================
-// VIDEO SCRIPT
-// ===================================
-
-
-function generateScript(){
-
-
-    return (
-
-        "🎬 Short Video Script\n\n" +
-
-        "HOOK:\nGrab attention in the first 3 seconds.\n\n" +
-
-        "BODY:\nShow the process, story or transformation.\n\n" +
-
-        "ENDING:\nGive viewers a reason to follow or comment."
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===================================
-// HASHTAGS
-// ===================================
-
-
-function generateHashtags(){
-
-
-    return (
-
-        "#ContentCreator\n" +
-
-        "#ViralContent\n" +
-
-        "#CreativeIdeas\n" +
-
-        "#VideoCreator\n" +
-
-        "#TrendingNow"
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===================================
-// ADVERT
-// ===================================
-
-
-function generateAdvert(){
-
-
-    return (
-
-        "📢 Advert Template\n\n" +
-
-        "Create better content faster with AI assistance.\n\n" +
-
-        "Start building your audience today."
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===================================
-// IDEAS
-// ===================================
-
-
-function generateIdeas(){
-
-
-    const ideas = [
-
-        "Share your personal journey story.",
-
-        "Show your behind-the-scenes process.",
-
-        "Create a before and after transformation.",
-
-        "Share lessons from your experience."
-
-    ];
-
-
-
-    return (
-
-        "Content Idea:\n\n" +
-
-        randomPick(ideas)
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===================================
-// CALENDAR
-// ===================================
-
-
-function generateContentPlan(){
-
-
-    return (
-
-        "7-Day Content Plan:\n\n" +
-
-        "Day 1: Your story\n" +
-
-        "Day 2: Behind the scenes\n" +
-
-        "Day 3: Educational content\n" +
-
-        "Day 4: Personal experience\n" +
-
-        "Day 5: Audience engagement\n" +
-
-        "Day 6: Promotion\n" +
-
-        "Day 7: Weekly recap"
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===================================
-// HELPER
-// ===================================
-
-
-function randomPick(list){
-
-
-    return list[
-
-        Math.floor(
-
-            Math.random()*list.length
-
-        )
-
-    ];
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===================================
+// =====================================
 // EXPORT
-// ===================================
+// =====================================
 
 
-window.creatorBrain = creatorBrain;
+window.creatorMemory = {
+
+
+    learn:
+    learnCreatorStyle,
+
+
+    get:
+    getCreatorMemory,
+
+
+    clear:
+    clearCreatorMemory
+
+
+};
