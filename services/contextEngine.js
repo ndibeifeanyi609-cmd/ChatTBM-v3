@@ -1,12 +1,11 @@
 /* =====================================
-   ChatTBM V5.9.4
-   Context Engine V1
+   ChatTBM V5.9.4.1
+   Context Engine V2
 
    Upgrade:
-   - Conversation follow-ups
-   - Topic awareness
-   - Previous message handling
-   - Browser compatible
+   - Correct previous topic detection
+   - Follow-up understanding
+   - Better conversation flow
 ===================================== */
 
 
@@ -35,8 +34,6 @@ function contextEngine(
 
 
 
-
-    // CONTINUE CONVERSATION
 
     if(hasWords(text,[
 
@@ -70,8 +67,6 @@ function contextEngine(
 
 
 
-    // REWRITE
-
     if(hasWords(text,[
 
         "rewrite",
@@ -88,9 +83,9 @@ function contextEngine(
 
             response:
 
-            "I'll improve this based on your previous request:\n\n" +
+            "I'll improve the previous content:\n\n" +
 
-            (previous || "No previous message found.")
+            (previous || "No previous request found.")
 
         };
 
@@ -101,9 +96,6 @@ function contextEngine(
 
 
 
-
-
-    // SHORTEN
 
     if(hasWords(text,[
 
@@ -123,7 +115,7 @@ function contextEngine(
 
             "I'll create a shorter version of:\n\n" +
 
-            (previous || "your previous message")
+            (previous || "your previous request")
 
         };
 
@@ -134,10 +126,6 @@ function contextEngine(
 
 
 
-
-
-
-    // EXPAND
 
     if(hasWords(text,[
 
@@ -169,9 +157,6 @@ function contextEngine(
 
 
 
-
-    // REMEMBER LAST TOPIC
-
     if(hasWords(text,[
 
         "what were we talking about",
@@ -199,9 +184,6 @@ function contextEngine(
 
 
 
-
-
-
     return {
 
         matched:false,
@@ -219,7 +201,6 @@ function contextEngine(
 
 
 
-
 // =====================================
 // GET PREVIOUS USER MESSAGE
 // =====================================
@@ -228,13 +209,15 @@ function contextEngine(
 function getPreviousUserMessage(history){
 
 
-
     if(!Array.isArray(history)){
 
         return "";
 
     }
 
+
+
+    let foundCurrent = false;
 
 
 
@@ -249,11 +232,21 @@ function getPreviousUserMessage(history){
     ){
 
 
-        if(
+        if(history[i].role === "user"){
 
-            history[i].role === "user"
 
-        ){
+
+            if(!foundCurrent){
+
+
+                foundCurrent = true;
+
+
+                continue;
+
+
+            }
+
 
 
             return history[i].message;
@@ -310,7 +303,6 @@ function hasWords(text,words){
 
 
 }
-
 
 
 
