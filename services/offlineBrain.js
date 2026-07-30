@@ -1,13 +1,12 @@
 /* ===================================
    ChatTBM V5.9.3
    Offline Smart Response Brain
-   Part 1B
+   Part 3
 
    Upgrade:
-   - Better intent detection
-   - Creator assistant brain
-   - More natural replies
-   - Offline intelligence expansion
+   - Connected Creator Brain
+   - Better modular AI routing
+   - Offline content assistant
 =================================== */
 
 
@@ -21,7 +20,6 @@ function offlineBrain(message) {
     const text = normalizeMessage(message);
 
 
-
     const intent = detectIntent(text);
 
 
@@ -30,52 +28,62 @@ function offlineBrain(message) {
 
 
         case "greeting":
+
             return greetingResponse();
 
 
 
         case "identity":
+
             return identityResponse();
 
 
 
         case "creator":
-            return creatorResponse(text);
+
+            return handleCreatorRequest(text);
 
 
 
         case "coding":
-            return codingResponse(text);
+
+            return codingResponse();
 
 
 
         case "math":
+
             return mathResponse(text);
 
 
 
         case "motivation":
+
             return motivationResponse();
 
 
 
         case "conversation":
+
             return conversationResponse(text);
 
 
 
         case "time":
+
             return timeResponse();
 
 
 
         case "date":
+
             return dateResponse();
 
 
 
         default:
-            return fallbackResponse(text);
+
+            return fallbackResponse();
 
 
     }
@@ -96,13 +104,16 @@ function offlineBrain(message) {
 function detectIntent(text){
 
 
+
     if(hasWords(text,[
+
         "hi",
         "hello",
         "hey",
         "morning",
         "afternoon",
         "evening"
+
     ])){
 
         return "greeting";
@@ -112,9 +123,13 @@ function detectIntent(text){
 
 
     if(
+
         text.includes("who are you") ||
+
         text.includes("your name") ||
+
         text.includes("what are you")
+
     ){
 
         return "identity";
@@ -123,85 +138,125 @@ function detectIntent(text){
 
 
 
+
     if(hasWords(text,[
+
         "caption",
         "hashtag",
         "script",
         "content",
-        "video idea",
+        "video",
         "reel",
         "post",
-        "advert"
+        "advert",
+        "hook",
+        "calendar",
+        "idea"
+
     ])){
 
+
         return "creator";
+
 
     }
 
 
 
+
     if(hasWords(text,[
+
         "javascript",
         "html",
         "css",
         "code",
         "program"
+
     ])){
+
 
         return "coding";
 
+
     }
+
+
 
 
 
     if(/[0-9]+[+\-*/][0-9]+/.test(text)){
 
+
         return "math";
 
+
     }
+
+
 
 
 
     if(hasWords(text,[
+
         "motivate",
         "motivation",
         "success",
         "inspire"
+
     ])){
+
 
         return "motivation";
 
+
     }
+
+
 
 
 
     if(text.includes("time")){
 
+
         return "time";
 
+
     }
+
+
 
 
 
     if(
+
         text.includes("date") ||
+
         text.includes("today")
+
     ){
 
+
         return "date";
+
 
     }
 
 
 
+
+
     if(hasWords(text,[
+
         "how are you",
         "good",
         "nice",
         "great"
+
     ])){
 
+
         return "conversation";
+
 
     }
 
@@ -219,11 +274,53 @@ function detectIntent(text){
 
 
 // ===================================
-// RESPONSE SYSTEMS
+// CREATOR BRAIN CONNECTION
+// ===================================
+
+
+function handleCreatorRequest(text){
+
+
+    if(
+
+        typeof window.creatorBrain === "function"
+
+    ){
+
+
+        return window.creatorBrain(text);
+
+
+    }
+
+
+
+    return (
+
+        "Creator Brain is not loaded yet.\n\n" +
+
+        "Please make sure services/creatorBrain.js " +
+
+        "is connected."
+
+    );
+
+
+}
+
+
+
+
+
+
+
+// ===================================
+// NORMAL RESPONSES
 // ===================================
 
 
 function greetingResponse(){
+
 
     return randomReply([
 
@@ -235,7 +332,9 @@ function greetingResponse(){
 
     ]);
 
+
 }
+
 
 
 
@@ -246,98 +345,19 @@ function identityResponse(){
 
 
     return (
+
         "I'm ChatTBM 🤖\n\n" +
-        "Your AI Content Assistant designed to help " +
-        "with ideas, captions, scripts, coding and creative projects."
-    );
 
+        "Your AI Content Assistant designed " +
 
-}
+        "to help with ideas, captions, scripts, " +
 
-
-
-
-
-
-
-function creatorResponse(text){
-
-
-
-    if(text.includes("caption")){
-
-
-        return randomReply([
-
-            "🔥 Built different. Creating my own path.",
-
-            "Dream big. Create bigger. 🚀",
-
-            "Every story starts with one post."
-
-        ]);
-
-    }
-
-
-
-
-    if(text.includes("hashtag")){
-
-
-        return (
-            "#ContentCreator " +
-            "#ViralIdeas " +
-            "#CreativeLife " +
-            "#Trending"
-        );
-
-
-    }
-
-
-
-
-
-    if(
-        text.includes("script")
-    ){
-
-
-        return (
-
-            "Video Script Idea:\n\n" +
-
-            "Hook (0-3 seconds): " +
-            "Stop scrolling, watch this.\n\n" +
-
-            "Middle: Show the process or story.\n\n" +
-
-            "Ending: Ask viewers to follow for more."
-
-        );
-
-
-    }
-
-
-
-
-    return (
-
-        "I can help you create:\n\n" +
-
-        "• Viral video ideas\n" +
-        "• Captions\n" +
-        "• Scripts\n" +
-        "• Advert copy\n" +
-        "• Content plans"
+        "coding and creative projects."
 
     );
 
 
 }
-
 
 
 
@@ -352,7 +372,7 @@ function codingResponse(){
 
         "I can help with coding.\n\n" +
 
-        "Tell me the language or problem:\n" +
+        "Tell me the language or problem:\n\n" +
 
         "HTML, CSS, JavaScript, or ChatTBM development."
 
@@ -367,24 +387,25 @@ function codingResponse(){
 
 
 
-
 function mathResponse(text){
 
 
-    const result =
-    solveMath(text);
+    const result = solveMath(text);
 
 
 
     if(result !== null){
 
+
         return "The answer is " + result;
+
 
     }
 
 
 
     return "I couldn't calculate that yet.";
+
 
 }
 
@@ -407,6 +428,7 @@ function motivationResponse(){
 
     ]);
 
+
 }
 
 
@@ -418,18 +440,33 @@ function motivationResponse(){
 function conversationResponse(text){
 
 
+
     if(text.includes("how are you")){
 
-        return "I'm working perfectly offline 🤖 Ready to help.";
+
+        return (
+
+            "I'm working perfectly offline 🤖 " +
+
+            "Ready to help."
+
+        );
+
 
     }
 
 
-    return "That's great! What would you like to work on next?";
+
+    return (
+
+        "That's great! What would you " +
+
+        "like to work on next?"
+
+    );
 
 
 }
-
 
 
 
@@ -439,10 +476,15 @@ function conversationResponse(text){
 
 function timeResponse(){
 
+
     return (
+
         "Current time: " +
+
         new Date().toLocaleTimeString()
+
     );
+
 
 }
 
@@ -451,12 +493,18 @@ function timeResponse(){
 
 
 
+
 function dateResponse(){
 
+
     return (
+
         "Today is " +
+
         new Date().toDateString()
+
     );
+
 
 }
 
@@ -495,11 +543,16 @@ function fallbackResponse(){
 
 function normalizeMessage(text){
 
+
     return text
+
     .toLowerCase()
+
     .trim();
 
+
 }
+
 
 
 
@@ -510,7 +563,9 @@ function hasWords(text,list){
 
 
     return list.some(word =>
+
         text.includes(word)
+
     );
 
 
@@ -521,13 +576,18 @@ function hasWords(text,list){
 
 
 
+
 function randomReply(list){
 
 
     return list[
+
         Math.floor(
+
             Math.random()*list.length
+
         )
+
     ];
 
 
@@ -538,19 +598,26 @@ function randomReply(list){
 
 
 
+
 function solveMath(text){
 
 
+
     const expression =
+
     text.match(/[0-9+\-*/(). ]+/);
+
 
 
 
     if(!expression){
 
+
         return null;
 
+
     }
+
 
 
 
@@ -558,23 +625,33 @@ function solveMath(text){
 
 
         const result =
+
         Function(
+
             "return " + expression[0]
+
         )();
 
 
 
+
         if(
+
             typeof result === "number" &&
+
             !isNaN(result)
+
         ){
 
+
             return result;
+
 
         }
 
 
     }
+
 
     catch(error){
 
@@ -583,6 +660,7 @@ function solveMath(text){
 
 
     }
+
 
 
     return null;
@@ -597,7 +675,7 @@ function solveMath(text){
 
 
 // ===================================
-// EXPORT TO CHATTBM
+// EXPORT
 // ===================================
 
 window.offlineBrain = offlineBrain;
