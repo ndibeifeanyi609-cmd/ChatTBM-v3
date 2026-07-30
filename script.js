@@ -1,18 +1,23 @@
 /* ===================================
-   ChatTBM V5.9.3
+   ChatTBM V6.0.1
 
    script.js
-   Part 4A
 
    Upgrade:
-   - Offline Brain Connection
-   - Backend + Offline fallback
+   - Offline Brain First
+   - Creator Brain Support
+   - Creator Memory Connection
+   - Context Engine Support
+   - Backend Backup
+   - Chat History
+   - Creator Tools
 =================================== */
 
 
 // ===============================
 // CONNECT ELEMENTS
 // ===============================
+
 
 const chatBox =
 document.getElementById("chat-box");
@@ -40,7 +45,7 @@ let lastUserMessage = "";
 
 
 // ===============================
-// SEND BUTTON
+// SEND EVENTS
 // ===============================
 
 
@@ -51,19 +56,9 @@ sendBtn.addEventListener(
 
 
 
-
-
-
-
-// ===============================
-// ENTER KEY
-// ===============================
-
-
 userInput.addEventListener(
     "keypress",
     function(event){
-
 
         if(event.key === "Enter"){
 
@@ -71,9 +66,9 @@ userInput.addEventListener(
 
         }
 
-
     }
 );
+
 
 
 
@@ -109,12 +104,18 @@ async function sendMessage(){
         "user"
     );
 
-   if (window.conversationManager) {
-    window.conversationManager.addMessage(
-        "user",
-        message
-    );
-}
+
+
+
+    if(window.conversationManager){
+
+        window.conversationManager.addMessage(
+            "user",
+            message
+        );
+
+    }
+
 
 
 
@@ -126,151 +127,39 @@ async function sendMessage(){
 
 
 
+
     const response =
     await generateAIResponse(message);
 
 
 
-    removeLoading();
-
-
 
     removeLoading();
 
-addMessage(
-    response,
-    "bot"
-);
-
-if (window.conversationManager) {
-
-    window.conversationManager.addMessage(
-        "assistant",
-        response
-    );
-
-}
-
-saveChat();
-
-}
 
 
 
-
-
-
-
-
-
-// ===============================
-// MESSAGE DISPLAY
-// ===============================
-
-
-function addMessage(text, sender){
-
-
-    const messageDiv =
-    document.createElement("div");
-
-
-
-    messageDiv.classList.add(
-
-        "message",
-
-        sender === "user"
-        ? "user-message"
-        : "bot-message"
-
+    addMessage(
+        response,
+        "bot"
     );
 
 
 
-    messageDiv.innerHTML = `
-
-        <p>${text}</p>
 
 
-        ${
-            sender === "bot"
+    if(window.conversationManager){
 
-            ?
+        window.conversationManager.addMessage(
+            "assistant",
+            response
+        );
 
-            `
-
-            <button onclick="copyResponse(this)">
-            Copy
-            </button>
-
-
-            <button onclick="regenerateResponse()">
-            Regenerate
-            </button>
-
-            `
-
-            :
-
-            ""
-
-        }
-
-    `;
+    }
 
 
 
-    chatBox.appendChild(
-        messageDiv
-    );
-
-
-
-    chatBox.scrollTop =
-    chatBox.scrollHeight;
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// USER ID
-// ===============================
-
-
-function createUserId(){
-
-
-    const id =
-
-    "user-" +
-
-    Date.now() +
-
-    "-" +
-
-    Math.floor(
-        Math.random()*10000
-    );
-
-
-
-    localStorage.setItem(
-        "ChatTBM_user",
-        id
-    );
-
-
-
-    return id;
+    saveChat();
 
 
 }
@@ -291,7 +180,47 @@ function createUserId(){
 async function generateAIResponse(message){
 
 
-    try {
+
+    // ===============================
+    // OFFLINE BRAIN FIRST
+    // ===============================
+
+
+    if(
+        typeof window.offlineBrain === "function"
+    ){
+
+
+        const offlineResponse =
+
+        window.offlineBrain(
+            message
+        );
+
+
+
+        if(offlineResponse){
+
+            return offlineResponse;
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+    // ===============================
+    // BACKEND BACKUP
+    // ===============================
+
+
+    try{
 
 
         const conversationId =
@@ -319,7 +248,6 @@ async function generateAIResponse(message){
 
             method:"POST",
 
-
             headers:{
 
                 "Content-Type":
@@ -337,21 +265,8 @@ async function generateAIResponse(message){
 
             })
 
-        }
 
-        );
-
-
-
-
-
-        if(!response.ok){
-
-            throw new Error(
-                "Backend unavailable"
-            );
-
-        }
+        });
 
 
 
@@ -365,15 +280,7 @@ async function generateAIResponse(message){
 
 
 
-        if(
-            data.reply
-        ){
-
-            console.log(
-                "ChatTBM Backend:",
-                data
-            );
-
+        if(data.reply){
 
             return data.reply;
 
@@ -381,90 +288,137 @@ async function generateAIResponse(message){
 
 
 
-        throw new Error(
-            "No backend reply"
-        );
-
-
-
     }
-
-
 
     catch(error){
 
 
         console.log(
 
-            "Switching to Offline Brain:",
+            "Offline mode:",
 
             error
 
         );
 
 
-
-
-        if(
-            typeof window.offlineBrain === "function"
-        ){
-
-
-            return window.offlineBrain(
-                message
-            );
-
-
-        }
-
-
-
-
-        return (
-
-            "ChatTBM offline brain " +
-
-            "is loading..."
-
-        );
-
-
-
     }
 
 
 
+
+
+
+    return (
+
+        "ChatTBM is ready to help you create content 🤖"
+
+    );
+
+
 }
 
-/* ===================================
-   ChatTBM V5.9.3
 
-   script.js
-   Part 4B
 
-   - Tool buttons
-   - Loading
-   - Copy
-   - Regenerate
-   - History
-   - Service Worker
-=================================== */
+
+
+
 
 
 
 // ===============================
-// CREATOR TOOL BUTTONS
+// DISPLAY MESSAGE
 // ===============================
 
 
-toolButtons.forEach(button => {
+function addMessage(text,sender){
+
+
+    const messageDiv =
+    document.createElement("div");
+
+
+
+    messageDiv.classList.add(
+
+        "message",
+
+        sender === "user"
+
+        ? "user-message"
+
+        : "bot-message"
+
+    );
+
+
+
+
+
+    messageDiv.innerHTML = `
+
+    <p>${text}</p>
+
+
+    ${
+        sender === "bot"
+
+        ?
+
+        `
+        <button onclick="copyResponse(this)">
+        Copy
+        </button>
+
+
+        <button onclick="regenerateResponse()">
+        Regenerate
+        </button>
+        `
+
+        :
+
+        ""
+
+    }
+
+    `;
+
+
+
+
+
+    chatBox.appendChild(
+        messageDiv
+    );
+
+
+
+    chatBox.scrollTop =
+    chatBox.scrollHeight;
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// CREATOR TOOLS
+// ===============================
+
+
+toolButtons.forEach(button=>{
 
 
     button.addEventListener(
-
         "click",
-
-        function(){
+        ()=>{
 
 
             const tool =
@@ -473,13 +427,11 @@ toolButtons.forEach(button => {
 
 
             userInput.value =
-
             "Create " + tool;
 
 
 
             sendMessage();
-
 
 
         }
@@ -498,7 +450,7 @@ toolButtons.forEach(button => {
 
 
 // ===============================
-// LOADING ANIMATION
+// LOADING
 // ===============================
 
 
@@ -520,13 +472,9 @@ function showLoading(){
 
 
 
-    loading.innerHTML = `
+    loading.innerHTML =
 
-        <p>
-        ChatTBM is thinking... 🤖
-        </p>
-
-    `;
+    "<p>ChatTBM is thinking... 🤖</p>";
 
 
 
@@ -535,14 +483,7 @@ function showLoading(){
     );
 
 
-
-    chatBox.scrollTop =
-    chatBox.scrollHeight;
-
-
 }
-
-
 
 
 
@@ -552,18 +493,14 @@ function removeLoading(){
 
 
     const loading =
-
     document.getElementById(
         "loading"
     );
 
 
-
     if(loading){
 
-
         loading.remove();
-
 
     }
 
@@ -601,7 +538,6 @@ function copyResponse(button){
     );
 
 
-
     button.innerText =
     "Copied!";
 
@@ -609,13 +545,11 @@ function copyResponse(button){
 
     setTimeout(()=>{
 
-
         button.innerText =
         "Copy";
 
 
     },1500);
-
 
 
 }
@@ -629,31 +563,25 @@ function copyResponse(button){
 
 
 // ===============================
-// REGENERATE RESPONSE
+// REGENERATE
 // ===============================
 
 
 async function regenerateResponse(){
 
 
-
     if(lastUserMessage){
-
 
 
         showLoading();
 
 
 
-
         const response =
 
         await generateAIResponse(
-
             lastUserMessage
-
         );
-
 
 
 
@@ -661,21 +589,52 @@ async function regenerateResponse(){
 
 
 
-
         addMessage(
-
             response,
-
             "bot"
-
         );
 
 
-
-        saveChat();
-
-
     }
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// USER ID
+// ===============================
+
+
+function createUserId(){
+
+
+    const id =
+
+    "user-" +
+
+    Date.now();
+
+
+
+    localStorage.setItem(
+
+        "ChatTBM_user",
+
+        id
+
+    );
+
+
+
+    return id;
 
 
 }
@@ -713,11 +672,10 @@ function saveChat(){
 
 
 
-
 function loadChat(){
 
 
-    const savedChat =
+    const saved =
 
     localStorage.getItem(
 
@@ -727,24 +685,16 @@ function loadChat(){
 
 
 
-    if(savedChat){
-
+    if(saved){
 
         chatBox.innerHTML =
-        savedChat;
-
+        saved;
 
     }
 
 
 }
 
-
-
-
-
-
-// Load old conversations
 
 loadChat();
 
@@ -762,56 +712,27 @@ loadChat();
 
 
 if(
-    "serviceWorker" in navigator
+"serviceWorker" in navigator
 ){
 
 
-    window.addEventListener(
+window.addEventListener(
 
-        "load",
+"load",
 
-        ()=>{
-
-
-            navigator.serviceWorker
-
-            .register(
-                "service-worker.js"
-            )
+()=>{
 
 
-            .then(()=>{
+navigator.serviceWorker.register(
+
+"service-worker.js"
+
+);
 
 
-                console.log(
+}
 
-                    "ChatTBM App Ready 🚀"
-
-                );
-
-
-            })
-
-
-            .catch(error=>{
-
-
-                console.log(
-
-                    "Service Worker Error:",
-
-                    error
-
-                );
-
-
-            });
-
-
-
-        }
-
-    );
+);
 
 
 }
