@@ -1,11 +1,12 @@
 /* ===================================
-   ChatTBM V5.9.7.1
+   ChatTBM V5.9.8
    Creator Brain
 
    Upgrade:
    - Creator Style Memory connected
-   - Learns user preferences
+   - User Profile Memory connected
    - Personalized content generation
+   - Learns creator preferences
 
    Features:
    - Captions
@@ -50,14 +51,30 @@ function creatorBrain(request){
 
 
 
+    // Learn user profile
+
+    if(
+
+        window.userProfileMemory &&
+
+        typeof window.userProfileMemory.learn === "function"
+
+    ){
+
+        window.userProfileMemory.learn(
+            request
+        );
+
+    }
+
+
+
 
 
 
     if(text.includes("caption")){
 
-
         return generateCaption();
-
 
     }
 
@@ -73,9 +90,7 @@ function creatorBrain(request){
 
     ){
 
-
         return generateHook();
-
 
     }
 
@@ -91,9 +106,7 @@ function creatorBrain(request){
 
     ){
 
-
         return generateScript();
-
 
     }
 
@@ -103,9 +116,7 @@ function creatorBrain(request){
 
     if(text.includes("hashtag")){
 
-
         return generateHashtags();
-
 
     }
 
@@ -121,9 +132,7 @@ function creatorBrain(request){
 
     ){
 
-
         return generateAdvert();
-
 
     }
 
@@ -139,9 +148,7 @@ function creatorBrain(request){
 
     ){
 
-
         return generateContentPlan();
-
 
     }
 
@@ -151,9 +158,7 @@ function creatorBrain(request){
 
     if(text.includes("idea")){
 
-
         return generateIdeas();
-
 
     }
 
@@ -194,7 +199,11 @@ function generateCaption(){
 
 
 
-    let memory = null;
+    let styleMemory = null;
+
+    let profile = null;
+
+
 
 
 
@@ -206,7 +215,7 @@ function generateCaption(){
 
     ){
 
-        memory =
+        styleMemory =
         window.creatorMemory.get();
 
     }
@@ -216,54 +225,16 @@ function generateCaption(){
 
 
 
-    const captions = [
-
-
-        "🔥 Building my dream one step at a time.",
-
-
-        "No shortcuts. Just consistency and hard work. 🚀",
-
-
-        "The journey is the story. Keep watching.",
-
-
-        "Creating today what people will remember tomorrow.",
-
-
-        "Small actions. Big results."
-
-
-    ];
-
-
-
-
-
-
-    let caption =
-    randomPick(captions);
-
-
-
-
-
-
-    // Add creator style influence
-
-
     if(
 
-        memory &&
+        window.userProfileMemory &&
 
-        memory.tone === "motivational"
+        typeof window.userProfileMemory.get === "function"
 
     ){
 
-
-        caption =
-        "🔥 " + caption;
-
+        profile =
+        window.userProfileMemory.get();
 
     }
 
@@ -272,7 +243,71 @@ function generateCaption(){
 
 
 
-    return caption;
+
+    let captions = [
+
+        "🔥 Building my dream one step at a time.",
+
+        "No shortcuts. Just consistency and hard work. 🚀",
+
+        "The journey is the story. Keep watching.",
+
+        "Creating today what people will remember tomorrow.",
+
+        "Small actions. Big results."
+
+    ];
+
+
+
+
+
+
+
+
+    // Motivational creator style
+
+    if(
+
+        styleMemory &&
+
+        styleMemory.tone === "motivational"
+
+    ){
+
+        captions.push(
+
+            "🔥 Every challenge is building the next version of me."
+
+        );
+
+    }
+
+
+
+
+
+
+
+    // Personal creator profile influence
+
+    if(profile){
+
+        captions.push(
+
+            "🚀 My journey, my story. Building something bigger every day."
+
+        );
+
+    }
+
+
+
+
+
+
+
+    return randomPick(captions);
 
 
 }
