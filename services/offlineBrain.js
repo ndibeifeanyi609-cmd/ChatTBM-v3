@@ -10,7 +10,6 @@
 =================================== */
 
 
-
 // ===================================
 // MAIN OFFLINE BRAIN
 // ===================================
@@ -22,76 +21,39 @@ function offlineBrain(message){
     const text =
     normalizeMessage(message);
 
-   // ===================================
-// CHECK CONTEXT FIRST
-// ===================================
-
-if(
-    typeof window.contextEngine === "function"
-){
-
-    const contextResult =
-    window.contextEngine(
-        message,
-        getChatHistory()
-    );
-
-
-    if(
-        contextResult.matched
-    ){
-
-        return contextResult.response;
-
-    }
-
-}
-
 
 
     // ===================================
     // CHECK CONTEXT FIRST
     // ===================================
 
-
     if(
-
         typeof window.contextEngine === "function"
-
     ){
 
-
         const contextResult =
-
         window.contextEngine(
-
             message,
-
             getChatHistory()
-
         );
 
 
-
         if(
-
             contextResult.matched
-
         ){
-
 
             return contextResult.response;
 
-
         }
-
 
     }
 
 
 
 
-
+    // ===================================
+    // NORMAL INTENT DETECTION
+    // ===================================
 
     const intent =
     detectIntent(text);
@@ -102,11 +64,9 @@ if(
     switch(intent){
 
 
-
         case "greeting":
 
             return greetingResponse();
-
 
 
 
@@ -116,11 +76,9 @@ if(
 
 
 
-
         case "creator":
 
             return handleCreatorRequest(text);
-
 
 
 
@@ -130,11 +88,9 @@ if(
 
 
 
-
         case "math":
 
             return mathResponse(text);
-
 
 
 
@@ -144,11 +100,9 @@ if(
 
 
 
-
         case "conversation":
 
             return conversationResponse(text);
-
 
 
 
@@ -158,11 +112,9 @@ if(
 
 
 
-
         case "date":
 
             return dateResponse();
-
 
 
 
@@ -172,17 +124,16 @@ if(
 
 
 
-
         default:
 
             return fallbackResponse();
-
 
 
     }
 
 
 }
+
 
 
 
@@ -211,9 +162,7 @@ function detectIntent(text){
 
     ])){
 
-
         return "greeting";
-
 
     }
 
@@ -232,9 +181,7 @@ function detectIntent(text){
 
     ){
 
-
         return "identity";
-
 
     }
 
@@ -308,6 +255,7 @@ function detectIntent(text){
 
         "motivate",
         "motivation",
+        "motivational",
         "success",
         "inspire"
 
@@ -415,7 +363,6 @@ function detectIntent(text){
 function handleCreatorRequest(text){
 
 
-
     if(
 
         typeof window.creatorBrain === "function"
@@ -430,13 +377,7 @@ function handleCreatorRequest(text){
 
 
 
-
-    return (
-
-        "Creator Brain is not loaded yet."
-
-    );
-
+    return "Creator Brain is not loaded yet.";
 
 }
 
@@ -449,12 +390,11 @@ function handleCreatorRequest(text){
 
 
 // ===================================
-// PERSONAL MESSAGE RESPONSE
+// PERSONAL RESPONSE
 // ===================================
 
 
 function personalResponse(text){
-
 
 
     return (
@@ -561,16 +501,13 @@ function mathResponse(text){
 
     if(result !== null){
 
-
         return "The answer is " + result;
-
 
     }
 
 
 
     return "I couldn't calculate that yet.";
-
 
 }
 
@@ -610,13 +547,11 @@ function conversationResponse(text){
 
         return "I'm working perfectly offline 🤖 Ready to help.";
 
-
     }
 
 
 
     return "That's great! What would you like to work on next?";
-
 
 }
 
@@ -631,7 +566,6 @@ function timeResponse(){
 
     return "Current time: " + new Date().toLocaleTimeString();
 
-
 }
 
 
@@ -645,9 +579,7 @@ function dateResponse(){
 
     return "Today is " + new Date().toDateString();
 
-
 }
-
 
 
 
@@ -686,10 +618,10 @@ function fallbackResponse(){
 
 function getChatHistory(){
 
-    if (
+    if(
         window.conversationManager &&
         typeof window.conversationManager.getHistory === "function"
-    ) {
+    ){
 
         return window.conversationManager.getHistory();
 
@@ -700,8 +632,11 @@ function getChatHistory(){
 }
 
 
-function normalizeMessage(text){
 
+
+
+
+function normalizeMessage(text){
 
     return text
 
@@ -709,9 +644,7 @@ function normalizeMessage(text){
 
     .trim();
 
-
 }
-
 
 
 
@@ -720,13 +653,11 @@ function normalizeMessage(text){
 
 function hasWords(text,list){
 
-
     return list.some(word =>
 
         text.includes(word)
 
     );
-
 
 }
 
@@ -735,9 +666,7 @@ function hasWords(text,list){
 
 
 
-
 function randomReply(list){
-
 
     return list[
 
@@ -749,9 +678,7 @@ function randomReply(list){
 
     ];
 
-
 }
-
 
 
 
@@ -762,7 +689,6 @@ function solveMath(text){
 
 
     const expression =
-
     text.match(/[0-9+\-*/(). ]+/);
 
 
@@ -779,11 +705,8 @@ function solveMath(text){
 
 
         const result =
-
         Function(
-
             "return " + expression[0]
-
         )();
 
 
@@ -805,9 +728,7 @@ function solveMath(text){
 
     catch(error){
 
-
         return null;
-
 
     }
 
@@ -815,8 +736,8 @@ function solveMath(text){
 
     return null;
 
-
 }
+
 
 
 
@@ -828,6 +749,5 @@ function solveMath(text){
 // ===================================
 // EXPORT
 // ===================================
-
 
 window.offlineBrain = offlineBrain;
