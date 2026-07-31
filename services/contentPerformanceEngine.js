@@ -1,52 +1,57 @@
 // =====================================
-// ChatTBM V6.4
+// ChatTBM V6.5
 // Content Performance Memory Engine
 //
 // Purpose:
-// - Store successful content history
-// - Remember what works
-// - Track audience reactions
-// - Store winning hooks
-// - Support creator strategy
+// - Remember creator content history
+// - Learn what performs well
+// - Store winning formulas
+// - Support strategy generation
 //
-// Future upgrade:
+// Future:
 // MongoDB / PostgreSQL / Firebase
 // =====================================
 
 
 
-// =====================================
-// CONTENT PERFORMANCE DATABASE
-// =====================================
-
-const contentPerformanceDatabase = {};
-
-
-
-
-
 
 // =====================================
-// CREATE CREATOR PERFORMANCE SPACE
+// CONTENT MEMORY DATABASE
 // =====================================
 
 
-function createPerformanceProfile(userId){
+const contentMemoryDatabase = {};
 
 
-    if(!contentPerformanceDatabase[userId]){
 
 
-        contentPerformanceDatabase[userId] = {
+
+
+
+// =====================================
+// CREATE CREATOR SPACE
+// =====================================
+
+
+function createCreatorMemory(userId){
+
+
+    if(!contentMemoryDatabase[userId]){
+
+
+        contentMemoryDatabase[userId] = {
 
 
             userId,
 
 
-            contents: [],
+            contentHistory: [],
 
 
-            patterns: [],
+            winningPatterns: [],
+
+
+            strategies: [],
 
 
             created:
@@ -66,7 +71,7 @@ function createPerformanceProfile(userId){
 
 
 
-    return contentPerformanceDatabase[userId];
+    return contentMemoryDatabase[userId];
 
 
 }
@@ -91,9 +96,9 @@ function saveContentPerformance(
 ){
 
 
-    const profile =
+    const memory =
 
-    createPerformanceProfile(
+    createCreatorMemory(
 
         userId
 
@@ -114,7 +119,7 @@ function saveContentPerformance(
 
         title:
 
-        data.title || "Untitled Content",
+        data.title || "",
 
 
 
@@ -128,7 +133,7 @@ function saveContentPerformance(
 
         platform:
 
-        data.platform || "unknown",
+        data.platform || "",
 
 
 
@@ -140,13 +145,6 @@ function saveContentPerformance(
 
 
 
-        successReason:
-
-        data.successReason || "",
-
-
-
-
         hook:
 
         data.hook || "",
@@ -154,16 +152,23 @@ function saveContentPerformance(
 
 
 
+        formula:
+
+        data.formula || "",
+
+
+
+
+        successReason:
+
+        data.successReason || "",
+
+
+
+
         audienceReaction:
 
         data.audienceReaction || "",
-
-
-
-
-        strategy:
-
-        data.strategy || "",
 
 
 
@@ -180,8 +185,7 @@ function saveContentPerformance(
 
 
 
-
-    profile.contents.push(
+    memory.contentHistory.push(
 
         content
 
@@ -189,8 +193,7 @@ function saveContentPerformance(
 
 
 
-
-    profile.updated =
+    memory.updated =
 
     new Date().toISOString();
 
@@ -219,46 +222,13 @@ function saveContentPerformance(
 
 
 
-// =====================================
-// GET ALL CONTENT MEMORY
-// =====================================
-
-
-function getContentPerformance(
-
-    userId
-
-){
-
-
-    const profile =
-
-    createPerformanceProfile(
-
-        userId
-
-    );
-
-
-
-    return profile.contents;
-
-
-}
-
-
-
-
-
-
-
 
 // =====================================
-// SAVE VIRAL PATTERN
+// SAVE WINNING PATTERN
 // =====================================
 
 
-function saveViralPattern(
+function saveWinningPattern(
 
     userId,
 
@@ -267,9 +237,9 @@ function saveViralPattern(
 ){
 
 
-    const profile =
+    const memory =
 
-    createPerformanceProfile(
+    createCreatorMemory(
 
         userId
 
@@ -278,10 +248,11 @@ function saveViralPattern(
 
 
 
-    profile.patterns.push({
+
+    memory.winningPatterns.push({
 
 
-        pattern,
+        ...pattern,
 
 
         created:
@@ -317,20 +288,20 @@ function saveViralPattern(
 
 
 // =====================================
-// GET VIRAL PATTERNS
+// GET CONTENT HISTORY
 // =====================================
 
 
-function getViralPatterns(
+function getContentHistory(
 
     userId
 
 ){
 
 
-    const profile =
+    const memory =
 
-    createPerformanceProfile(
+    createCreatorMemory(
 
         userId
 
@@ -338,7 +309,7 @@ function getViralPatterns(
 
 
 
-    return profile.patterns;
+    return memory.contentHistory;
 
 
 }
@@ -349,21 +320,22 @@ function getViralPatterns(
 
 
 
+
 // =====================================
-// FIND BEST CONTENT
+// GET WINNING PATTERNS
 // =====================================
 
 
-function getBestPerformingContent(
+function getWinningPatterns(
 
     userId
 
 ){
 
 
-    const contents =
+    const memory =
 
-    getContentPerformance(
+    createCreatorMemory(
 
         userId
 
@@ -371,18 +343,49 @@ function getBestPerformingContent(
 
 
 
-    return contents.filter(
+    return memory.winningPatterns;
 
-        item =>
 
-        item.result === "viral" ||
+}
 
-        item.result === "high"
+
+
+
+
+
+
+
+// =====================================
+// GET SUCCESSFUL CONTENT
+// =====================================
+
+
+function getSuccessfulContent(
+
+    userId
+
+){
+
+
+    return getContentHistory(
+
+        userId
+
+    )
+
+    .filter(content =>
+
+
+        content.result === "viral" ||
+
+        content.result === "high"
+
 
     );
 
 
 }
+
 
 
 
@@ -395,16 +398,16 @@ function getBestPerformingContent(
 // =====================================
 
 
-function getPerformanceStats(
+function getContentStats(
 
     userId
 
 ){
 
 
-    const contents =
+    const history =
 
-    getContentPerformance(
+    getContentHistory(
 
         userId
 
@@ -417,19 +420,19 @@ function getPerformanceStats(
 
         total:
 
-        contents.length,
+        history.length,
 
 
 
         successful:
 
-        contents.filter(
+        history.filter(item =>
 
-            item =>
 
             item.result === "viral" ||
 
             item.result === "high"
+
 
         ).length
 
@@ -446,6 +449,7 @@ function getPerformanceStats(
 
 
 
+
 // =====================================
 // EXPORT
 // =====================================
@@ -454,25 +458,25 @@ function getPerformanceStats(
 module.exports = {
 
 
-    createPerformanceProfile,
+    createCreatorMemory,
 
 
     saveContentPerformance,
 
 
-    getContentPerformance,
+    saveWinningPattern,
 
 
-    saveViralPattern,
+    getContentHistory,
 
 
-    getViralPatterns,
+    getWinningPatterns,
 
 
-    getBestPerformingContent,
+    getSuccessfulContent,
 
 
-    getPerformanceStats
+    getContentStats
 
 
 };
