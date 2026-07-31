@@ -2,19 +2,24 @@
 // ChatTBM V6.4
 // Performance Learning Engine
 //
-// Learns:
-// - Winning Content Patterns
-// - Strong Hooks
-// - Audience Reactions
-// - Successful Strategies
+// Purpose:
+// - Analyze creator feedback
+// - Detect winning patterns
+// - Learn why content works
+// - Build creator strategy memory
 // =====================================
+
 
 
 const {
 
     saveContentPerformance,
 
-    getContentPerformance
+    saveViralPattern,
+
+    getBestPerformingContent,
+
+    getViralPatterns
 
 } = require("./contentPerformanceEngine");
 
@@ -22,9 +27,13 @@ const {
 
 
 
+
+
+
 // =====================================
-// ANALYZE CONTENT FEEDBACK
+// ANALYZE CREATOR PERFORMANCE FEEDBACK
 // =====================================
+
 
 function analyzePerformanceFeedback(
 
@@ -37,21 +46,35 @@ function analyzePerformanceFeedback(
 
     const text =
 
-    feedback.toLowerCase();
+    String(feedback)
+
+    .toLowerCase();
 
 
 
-    const data = {
 
-        type:"general",
 
-        performance:"",
+    const learning = {
 
-        reason:"",
+
+        category:"general",
+
+
+        result:"unknown",
+
+
+        successReason:"",
+
+
+        hook:"",
+
 
         audienceReaction:"",
 
-        hook:""
+
+        strategy:""
+
+
 
     };
 
@@ -59,24 +82,16 @@ function analyzePerformanceFeedback(
 
 
 
+
+
     // ===============================
-    // CONTENT TYPE DETECTION
+    // CONTENT TYPE
     // ===============================
 
 
     if(
 
-        text.includes("video")
-
-    ){
-
-        data.type = "video";
-
-    }
-
-
-
-    if(
+        text.includes("video") ||
 
         text.includes("reel") ||
 
@@ -84,9 +99,15 @@ function analyzePerformanceFeedback(
 
     ){
 
-        data.type = "short video";
+
+        learning.category =
+
+        "short video";
+
 
     }
+
+
 
 
 
@@ -98,7 +119,11 @@ function analyzePerformanceFeedback(
 
     ){
 
-        data.type = "action content";
+
+        learning.category =
+
+        "action content";
+
 
     }
 
@@ -106,8 +131,32 @@ function analyzePerformanceFeedback(
 
 
 
+    if(
+
+        text.includes("comedy") ||
+
+        text.includes("funny")
+
+    ){
+
+
+        learning.category =
+
+        "comedy content";
+
+
+    }
+
+
+
+
+
+
+
+
+
     // ===============================
-    // PERFORMANCE DETECTION
+    // PERFORMANCE RESULT
     // ===============================
 
 
@@ -115,16 +164,37 @@ function analyzePerformanceFeedback(
 
         text.includes("viral") ||
 
-        text.includes("views") ||
+        text.includes("many views") ||
 
-        text.includes("popular")
+        text.includes("blew up")
 
     ){
 
 
-        data.performance =
+        learning.result =
 
-        "high performance";
+        "viral";
+
+
+    }
+
+
+
+
+    else if(
+
+        text.includes("good") ||
+
+        text.includes("worked") ||
+
+        text.includes("success")
+
+    ){
+
+
+        learning.result =
+
+        "high";
 
 
     }
@@ -133,7 +203,9 @@ function analyzePerformanceFeedback(
 
 
 
-    if(
+
+
+    else if(
 
         text.includes("failed") ||
 
@@ -142,9 +214,9 @@ function analyzePerformanceFeedback(
     ){
 
 
-        data.performance =
+        learning.result =
 
-        "low performance";
+        "low";
 
 
     }
@@ -153,8 +225,11 @@ function analyzePerformanceFeedback(
 
 
 
+
+
+
     // ===============================
-    // REASON DETECTION
+    // SUCCESS REASON
     // ===============================
 
 
@@ -165,17 +240,17 @@ function analyzePerformanceFeedback(
     ){
 
 
-        data.reason =
+        learning.successReason =
 
         "Strong opening hook";
 
 
-        data.hook =
+        learning.hook =
 
-        "High impact hook";
-
+        "High impact opening";
 
     }
+
 
 
 
@@ -188,9 +263,9 @@ function analyzePerformanceFeedback(
     ){
 
 
-        data.reason =
+        learning.successReason =
 
-        "Comedy element";
+        "Comedy and entertainment";
 
 
     }
@@ -206,12 +281,38 @@ function analyzePerformanceFeedback(
     ){
 
 
-        data.reason =
+        learning.successReason =
 
         "Emotional connection";
 
 
     }
+
+
+
+
+
+
+    if(
+
+        text.includes("surprise")
+
+    ){
+
+
+        learning.successReason =
+
+        "Unexpected moment";
+
+
+        learning.strategy =
+
+        "Use surprise elements";
+
+
+    }
+
+
 
 
 
@@ -226,12 +327,14 @@ function analyzePerformanceFeedback(
 
         text.includes("comments") ||
 
+        text.includes("shares") ||
+
         text.includes("engagement")
 
     ){
 
 
-        data.audienceReaction =
+        learning.audienceReaction =
 
         "Strong audience interaction";
 
@@ -242,13 +345,76 @@ function analyzePerformanceFeedback(
 
 
 
-    return saveContentPerformance(
+
+
+
+    // ===============================
+    // SAVE LEARNING
+    // ===============================
+
+
+    const saved =
+
+    saveContentPerformance(
 
         userId,
 
-        data
+        learning
 
     );
+
+
+
+
+
+
+    // Save viral pattern separately
+
+    if(
+
+        learning.result === "viral"
+
+    ){
+
+
+        saveViralPattern(
+
+            userId,
+
+            {
+
+
+                category:
+
+                learning.category,
+
+
+                reason:
+
+                learning.successReason,
+
+
+                hook:
+
+                learning.hook
+
+
+
+            }
+
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    return saved;
 
 
 }
@@ -257,9 +423,14 @@ function analyzePerformanceFeedback(
 
 
 
+
+
+
+
 // =====================================
-// GET WINNING CONTENT
+// GET CREATOR WINNING PATTERNS
 // =====================================
+
 
 function getWinningPatterns(
 
@@ -268,25 +439,29 @@ function getWinningPatterns(
 ){
 
 
-    const contents =
-
-    getContentPerformance(
-
-        userId
-
-    );
+    return {
 
 
+        successfulContent:
 
-    return contents.filter(
+        getBestPerformingContent(
 
-        item =>
+            userId
 
-        item.performance ===
+        ),
 
-        "high performance"
 
-    );
+
+        viralPatterns:
+
+        getViralPatterns(
+
+            userId
+
+        )
+
+
+    };
 
 
 }
@@ -295,9 +470,13 @@ function getWinningPatterns(
 
 
 
+
+
+
 // =====================================
 // EXPORT
 // =====================================
+
 
 module.exports = {
 
