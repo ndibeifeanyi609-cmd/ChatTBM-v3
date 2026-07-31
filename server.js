@@ -1,7 +1,13 @@
 // =====================================
-// ChatTBM V6.2
+// ChatTBM V6.3
 // Personal AI Brain Backend
-// Memory + Learning + User Profile
+//
+// Connected Systems:
+// - Response Engine
+// - Memory Brain
+// - Feedback Learning
+// - User Profile
+// - Creator Memory
 // =====================================
 
 
@@ -12,9 +18,11 @@ const express = require("express");
 const cors = require("cors");
 
 
+
 // ===============================
 // SERVICES
 // ===============================
+
 
 const {
 
@@ -50,6 +58,15 @@ const {
 
 
 
+const {
+
+    analyzeCreatorInput
+
+} = require("./services/creatorLearningEngine");
+
+
+
+
 
 // ===============================
 // APP SETUP
@@ -60,7 +77,9 @@ const app = express();
 
 app.use(cors());
 
+
 app.use(express.json());
+
 
 
 
@@ -76,22 +95,140 @@ app.get("/",(req,res)=>{
 
         app:"ChatTBM AI Backend",
 
-        version:"V6.2",
+        version:"V6.3",
 
-        status:"Online 🚀"
+        status:"Creator Brain Online 🚀"
 
     });
 
 
 });
 
+// =====================================
+// ChatTBM V6.3
+// Personal AI Brain Backend
+//
+// Systems Connected:
+// - Response Engine
+// - Memory Brain
+// - Feedback Learning
+// - User Profile
+// - Creator Memory
+// =====================================
+
+
+require("dotenv").config();
+
+
+const express = require("express");
+
+const cors = require("cors");
+
+
+
+// =====================================
+// SERVICES
+// =====================================
+
+
+const {
+
+    generateResponse
+
+} = require("./services/responseEngine");
+
+
+
+const {
+
+    saveFeedback,
+
+    analyzeFeedback
+
+} = require("./services/feedbackEngine");
+
+
+
+const {
+
+    analyzeUserFeedback
+
+} = require("./services/profileLearningBridge");
+
+
+
+const {
+
+    getProfile
+
+} = require("./services/userProfileEngine");
+
+
+
+const {
+
+    analyzeCreatorInput
+
+} = require("./services/creatorLearningEngine");
 
 
 
 
-// ===============================
+
+// =====================================
+// APP CONFIGURATION
+// =====================================
+
+
+const app = express();
+
+
+
+app.use(cors());
+
+
+
+app.use(express.json());
+
+
+
+
+
+// =====================================
+// SERVER STATUS
+// =====================================
+
+
+app.get("/",(req,res)=>{
+
+
+    res.json({
+
+
+        app:
+
+        "ChatTBM AI Backend",
+
+
+        version:
+
+        "V6.3",
+
+
+        status:
+
+        "Creator Brain Online 🚀"
+
+
+    });
+
+
+});
+
+// =====================================
 // CHAT ENGINE
-// ===============================
+// =====================================
+
 
 app.post("/api/chat",(req,res)=>{
 
@@ -101,7 +238,9 @@ app.post("/api/chat",(req,res)=>{
 
         const {
 
+
             message,
+
 
             userId="guest"
 
@@ -111,14 +250,20 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
         if(!message){
 
 
             return res.json({
 
+
                 success:false,
 
-                message:"No message received"
+
+                message:
+
+                "No message received"
+
 
             });
 
@@ -129,7 +274,31 @@ app.post("/api/chat",(req,res)=>{
 
 
 
-        let intent="general";
+        // =====================================
+        // CREATOR MEMORY LEARNING
+        // =====================================
+
+
+        const creatorMemory =
+
+        analyzeCreatorInput(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+        // =====================================
+        // INTENT DETECTION
+        // =====================================
+
+
+        let intent = "general";
 
 
 
@@ -141,28 +310,16 @@ app.post("/api/chat",(req,res)=>{
 
 
 
-        if(text.includes("script")){
+        if(
+
+            text.includes("script")
+
+        ){
 
 
-            intent="script_generation";
+            intent =
 
-
-        }
-
-
-        else if(text.includes("caption")){
-
-
-            intent="caption_generation";
-
-
-        }
-
-
-        else if(text.includes("idea")){
-
-
-            intent="idea_generation";
+            "script_generation";
 
 
         }
@@ -170,15 +327,82 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
+        else if(
+
+            text.includes("caption")
+
+        ){
+
+
+            intent =
+
+            "caption_generation";
+
+
+        }
+
+
+
+
+
+        else if(
+
+            text.includes("idea")
+
+        ){
+
+
+            intent =
+
+            "idea_generation";
+
+
+        }
+
+
+
+
+
+        else if(
+
+            text.includes("advert")
+
+        ){
+
+
+            intent =
+
+            "advert_generation";
+
+
+        }
+
+
+
+
+
+        // =====================================
+        // USER PROFILE
+        // =====================================
 
 
         const profile =
 
-        getProfile(userId);
+        getProfile(
+
+            userId
+
+        );
 
 
 
 
+
+
+        // =====================================
+        // AI RESPONSE
+        // =====================================
 
 
         const response =
@@ -187,25 +411,42 @@ app.post("/api/chat",(req,res)=>{
 
             intent,
 
+
             message,
 
-            {},
-
-            [],
 
             {},
 
+
             [],
+
 
             {},
 
+
             [],
+
+
+            {},
+
+
+            [],
+
 
             {
 
-                profile
+
+                userId,
+
+
+                profile,
+
+
+                creatorMemory
+
 
             }
+
 
         );
 
@@ -215,11 +456,17 @@ app.post("/api/chat",(req,res)=>{
 
         res.json({
 
+
             success:true,
+
 
             response,
 
-            profile
+
+            profile,
+
+
+            creatorMemory
 
 
         });
@@ -228,21 +475,29 @@ app.post("/api/chat",(req,res)=>{
 
     }
 
+
+
     catch(error){
 
 
         console.error(
+
+            "ChatTBM Chat Error:",
 
             error
 
         );
 
 
+
         res.status(500).json({
+
 
             success:false,
 
+
             error:error.message
+
 
         });
 
@@ -252,14 +507,10 @@ app.post("/api/chat",(req,res)=>{
 
 });
 
+// =====================================
+// FEEDBACK + LEARNING ENGINE
+// =====================================
 
-
-
-
-
-// ===============================
-// FEEDBACK + LEARNING
-// ===============================
 
 app.post("/api/feedback",(req,res)=>{
 
@@ -269,22 +520,57 @@ app.post("/api/feedback",(req,res)=>{
 
         const {
 
+
             userId="guest",
 
+
             correction
+
 
         } = req.body;
 
 
 
 
+
+        if(!correction){
+
+
+            return res.json({
+
+
+                success:false,
+
+
+                message:
+
+                "No feedback provided"
+
+
+            });
+
+
+        }
+
+
+
+
+
+        // ===============================
+        // SAVE GENERAL FEEDBACK
+        // ===============================
+
+
         const feedback =
 
         saveFeedback({
 
+
             userId,
 
+
             correction
+
 
         });
 
@@ -292,7 +578,14 @@ app.post("/api/feedback",(req,res)=>{
 
 
 
-        const learning =
+
+
+        // ===============================
+        // PROFILE LEARNING
+        // ===============================
+
+
+        const profileLearning =
 
         analyzeUserFeedback(
 
@@ -306,13 +599,42 @@ app.post("/api/feedback",(req,res)=>{
 
 
 
+
+
+        // ===============================
+        // CREATOR BRAIN LEARNING
+        // ===============================
+
+
+        const creatorLearning =
+
+        analyzeCreatorInput(
+
+            userId,
+
+            correction
+
+        );
+
+
+
+
+
+
         res.json({
+
 
             success:true,
 
+
             feedback,
 
-            learning
+
+            profileLearning,
+
+
+            creatorLearning
+
 
 
         });
@@ -320,21 +642,38 @@ app.post("/api/feedback",(req,res)=>{
 
 
     }
+
 
 
     catch(error){
 
 
+
+        console.error(
+
+            "Feedback Error:",
+
+            error
+
+        );
+
+
+
         res.status(500).json({
+
 
             success:false,
 
+
             error:error.message
+
 
         });
 
 
+
     }
+
 
 
 });
@@ -345,9 +684,10 @@ app.post("/api/feedback",(req,res)=>{
 
 
 
-// ===============================
+// =====================================
 // FEEDBACK ANALYTICS
-// ===============================
+// =====================================
+
 
 app.get("/api/feedback",(req,res)=>{
 
@@ -367,9 +707,11 @@ app.get("/api/feedback",(req,res)=>{
 
 
 
-// ===============================
-// USER PROFILE
-// ===============================
+
+// =====================================
+// USER PROFILE ACCESS
+// =====================================
+
 
 app.get("/api/profile/:userId",
 
@@ -388,11 +730,16 @@ app.get("/api/profile/:userId",
 
     res.json({
 
+
         success:true,
+
 
         profile
 
+
+
     });
+
 
 
 });
@@ -403,9 +750,9 @@ app.get("/api/profile/:userId",
 
 
 
-// ===============================
+// =====================================
 // START SERVER
-// ===============================
+// =====================================
 
 
 const PORT =
@@ -419,7 +766,7 @@ app.listen(PORT,()=>{
 
     console.log(
 
-`🚀 ChatTBM V6.2 running on port ${PORT}`
+`🚀 ChatTBM V6.3 running on port ${PORT}`
 
     );
 
