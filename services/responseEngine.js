@@ -1,7 +1,7 @@
 // =====================================
-// ChatTBM V5.9.2
+// ChatTBM V6.1
 // Response Intelligence Engine
-// Personal Brain Connected
+// Learning Brain Connected
 // Memory + Context + Personality
 // =====================================
 
@@ -11,6 +11,14 @@ const {
     handleContextRequest
 
 } = require("./contextEngine");
+
+
+
+const {
+
+    buildLearningContext
+
+} = require("./learningEngine");
 
 
 
@@ -38,7 +46,9 @@ function generateResponse(
 
     longTermMemory = [],
 
-    brainContext = {}
+    brainContext = {},
+
+    userId = "guest"
 
 ){
 
@@ -52,8 +62,20 @@ function generateResponse(
 
 
     // =====================================
-    // CONTEXT FOLLOW UP
+    // LEARNING BRAIN
     // =====================================
+
+    const learningContext =
+
+    buildLearningContext(
+
+        userId
+
+    );
+
+// =====================================
+// CONTEXT FOLLOW UP
+// =====================================
 
     const context =
 
@@ -89,9 +111,9 @@ function generateResponse(
 
 
 
-    // =====================================
-    // GREETING
-    // =====================================
+// =====================================
+// GREETING
+// =====================================
 
     if(
 
@@ -125,9 +147,9 @@ What are we creating today?`;
 
 
 
-    // =====================================
-    // SCRIPT GENERATION
-    // =====================================
+// =====================================
+// SCRIPT GENERATION
+// =====================================
 
     else if(
 
@@ -155,7 +177,7 @@ Tell me:
 4️⃣ Style
 
 
-I'll structure the complete script for you.`;
+I'll structure it using your preferred style.`;
 
     }
 
@@ -163,9 +185,9 @@ I'll structure the complete script for you.`;
 
 
 
-    // =====================================
-    // CAPTION GENERATION
-    // =====================================
+// =====================================
+// CAPTION GENERATION
+// =====================================
 
     else if(
 
@@ -187,7 +209,7 @@ Tell me:
 • Tone
 
 
-I'll create captions that match your audience.`;
+I'll create a caption matching your content style.`;
 
     }
 
@@ -195,9 +217,9 @@ I'll create captions that match your audience.`;
 
 
 
-    // =====================================
-    // IDEA GENERATION
-    // =====================================
+// =====================================
+// IDEA GENERATION
+// =====================================
 
     else if(
 
@@ -219,7 +241,7 @@ Tell me:
 • Your platform
 
 
-I'll create ideas designed for growth.`;
+I'll create ideas based on your goals.`;
 
     }
 
@@ -227,9 +249,9 @@ I'll create ideas designed for growth.`;
 
 
 
-    // =====================================
-    // DEFAULT RESPONSE
-    // =====================================
+// =====================================
+// DEFAULT RESPONSE
+// =====================================
 
     else {
 
@@ -238,7 +260,25 @@ I'll create ideas designed for growth.`;
 
 `I understand your request.
 
-I'll help you with that.`;
+I'll help you create the best response possible.`;
+
+    }
+
+// =====================================
+// APPLY LEARNED PREFERENCES
+// =====================================
+
+    if(
+
+        learningContext
+
+    ){
+
+        response +=
+
+`\n\n🧠 Learned Preferences:
+
+${learningContext}`;
 
     }
 
@@ -246,10 +286,9 @@ I'll help you with that.`;
 
 
 
-    // =====================================
-    // PERSONAL BRAIN MEMORY
-    // =====================================
-
+// =====================================
+// MEMORY BRAIN CONTEXT
+// =====================================
 
     if(
 
@@ -261,7 +300,7 @@ I'll help you with that.`;
 
         response +=
 
-`\n\n🧠 Personal Brain:
+`\n\n📚 Memory Context:
 
 ${brainContext.memoryContext}`;
 
@@ -271,9 +310,9 @@ ${brainContext.memoryContext}`;
 
 
 
-    // =====================================
-    // RELATIONSHIP MEMORY
-    // =====================================
+// =====================================
+// RELATIONSHIP MEMORY
+// =====================================
 
     if(
 
@@ -287,7 +326,7 @@ ${brainContext.memoryContext}`;
 
         response +=
 
-`\n\n🔗 I understand this connects with your previous work.`;
+`\n\n🔗 Connected with your previous conversations.`;
 
     }
 
@@ -295,9 +334,9 @@ ${brainContext.memoryContext}`;
 
 
 
-    // =====================================
-    // AI PROFILE PERSONALIZATION
-    // =====================================
+// =====================================
+// AI PERSONALITY CONTEXT
+// =====================================
 
     if(
 
@@ -309,31 +348,7 @@ ${brainContext.memoryContext}`;
 
         response +=
 
-`\n\n🤖 Response adapted to your preferences.`;
-
-    }
-
-
-
-
-
-    // =====================================
-    // PREVIOUS FACTS
-    // =====================================
-
-    if(
-
-        facts &&
-
-        facts.lastMessage
-
-    ){
-
-        response +=
-
-`\n\n📚 Previous discussion:
-
-"${facts.lastMessage}"`;
+`\n\n🤖 Response adapted to your AI profile.`;
 
     }
 
@@ -350,9 +365,14 @@ ${brainContext.memoryContext}`;
 
 
 
+// =====================================
+// EXPORT
+// =====================================
+
 module.exports = {
 
 
     generateResponse
+
 
 };
