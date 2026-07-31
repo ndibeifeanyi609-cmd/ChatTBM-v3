@@ -1,84 +1,376 @@
 // =====================================
-// ChatTBM V6.0.4
-// Memory Learning Feedback Loop
+// ChatTBM V6.1
+// Feedback Engine
+// Adaptive Learning System
 // =====================================
 
-// This engine learns from user feedback
-// and helps ChatTBM improve future responses.
+
+const {
+
+    learnPreference,
+
+    learnCorrection
+
+} = require("./learningEngine");
+
+
+
+// =====================================
+// FEEDBACK STORAGE
+// =====================================
 
 const feedbackMemory = [];
 
+
+
+
 // =====================================
-// SAVE USER FEEDBACK
+// ANALYZE USER FEEDBACK
 // =====================================
 
-function saveFeedback(data = {}) {
+function analyzeUserFeedback(
+
+    userId,
+
+    feedback
+
+){
+
+
+    const text =
+
+    feedback.toLowerCase();
+
+
+
+
+    // ===============================
+    // RESPONSE LENGTH
+    // ===============================
+
+    if(
+
+        text.includes("short") ||
+
+        text.includes("brief")
+
+    ){
+
+        learnPreference(
+
+            userId,
+
+            "response_length",
+
+            "short"
+
+        );
+
+    }
+
+
+
+
+
+    if(
+
+        text.includes("detailed") ||
+
+        text.includes("long")
+
+    ){
+
+        learnPreference(
+
+            userId,
+
+            "response_length",
+
+            "detailed"
+
+        );
+
+    }
+
+
+
+
+
+    // ===============================
+    // STYLE PREFERENCE
+    // ===============================
+
+    if(
+
+        text.includes("cinematic")
+
+    ){
+
+        learnPreference(
+
+            userId,
+
+            "writing_style",
+
+            "cinematic"
+
+        );
+
+    }
+
+
+
+    if(
+
+        text.includes("professional")
+
+    ){
+
+        learnPreference(
+
+            userId,
+
+            "writing_style",
+
+            "professional"
+
+        );
+
+    }
+
+// =====================================
+// EMOJI PREFERENCE LEARNING
+// =====================================
+
+    if(
+
+        text.includes("emoji") ||
+
+        text.includes("emojis")
+
+    ){
+
+        learnPreference(
+
+            userId,
+
+            "emoji_usage",
+
+            "enabled"
+
+        );
+
+    }
+
+
+
+
+
+// =====================================
+// CORRECTION LEARNING
+// =====================================
+
+    learnCorrection(
+
+        userId,
+
+        "previous_response",
+
+        feedback
+
+    );
+
+
+
+    return {
+
+        success:true,
+
+        message:"Feedback analyzed and learned"
+
+    };
+
+}
+
+
+
+
+
+// =====================================
+// SAVE FEEDBACK
+// =====================================
+
+function saveFeedback(
+
+    data = {}
+
+){
+
 
     const feedback = {
-        userId: data.userId || "guest",
-        message: data.message || "",
-        response: data.response || "",
-        rating: data.rating || null,
-        correction: data.correction || null,
-        timestamp: new Date()
+
+
+        userId:
+
+        data.userId || "guest",
+
+
+        message:
+
+        data.message || "",
+
+
+        response:
+
+        data.response || "",
+
+
+        rating:
+
+        data.rating || null,
+
+
+        correction:
+
+        data.correction || null,
+
+
+        timestamp:
+
+        new Date().toISOString()
+
+
     };
 
-    feedbackMemory.push(feedback);
 
-    return {
-        success: true,
-        message: "Feedback saved successfully",
+
+    feedbackMemory.push(
+
         feedback
-    };
-}
+
+    );
 
 
-// =====================================
-// ANALYZE FEEDBACK
-// =====================================
 
-function analyzeFeedback() {
 
-    const total = feedbackMemory.length;
+    if(
 
-    const positive = feedbackMemory.filter(
-        item => item.rating === "good"
-    ).length;
+        feedback.correction
 
-    const negative = feedbackMemory.filter(
-        item => item.rating === "bad"
-    ).length;
+    ){
+
+        analyzeUserFeedback(
+
+            feedback.userId,
+
+            feedback.correction
+
+        );
+
+    }
+
+
+
+    if(
+
+        feedback.message
+
+    ){
+
+        analyzeUserFeedback(
+
+            feedback.userId,
+
+            feedback.message
+
+        );
+
+    }
+
 
 
     return {
-        totalFeedback: total,
-        positive,
-        negative,
-        learningStatus:
-            total > 0
-            ? "ChatTBM is learning from user interactions"
-            : "No feedback collected yet"
+
+
+        success:true,
+
+
+        message:
+
+        "Feedback saved and learning updated",
+
+
+        feedback
+
+
     };
+
+
 }
 
 
+
+
+
 // =====================================
-// GET LEARNING DATA
+// FEEDBACK ANALYTICS
 // =====================================
 
-function getFeedbackMemory() {
+function analyzeFeedback(){
+
+
+    return {
+
+
+        totalFeedback:
+
+        feedbackMemory.length,
+
+
+        recent:
+
+        feedbackMemory.slice(-5)
+
+
+    };
+
+
+}
+
+
+
+
+
+// =====================================
+// GET ALL FEEDBACK
+// =====================================
+
+function getFeedbackMemory(){
+
 
     return feedbackMemory;
 
+
 }
 
 
+
+
+
 // =====================================
-// EXPORT ENGINE
+// EXPORT
 // =====================================
 
 module.exports = {
+
+
     saveFeedback,
+
     analyzeFeedback,
-    getFeedbackMemory
+
+    getFeedbackMemory,
+
+    analyzeUserFeedback
+
+
 };
