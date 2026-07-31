@@ -1,9 +1,15 @@
 // =====================================
-// ChatTBM V6.1
+// ChatTBM V6.2
 // Response Intelligence Engine
-// Learning Brain Connected
-// Memory + Context + Personality
+// Personal Brain Edition
+//
+// Features:
+// - Context Understanding
+// - Creator Profile Awareness
+// - Memory Support
+// - Personality Adaptation
 // =====================================
+
 
 
 const {
@@ -16,10 +22,9 @@ const {
 
 const {
 
-    buildLearningContext
+    createProfilePrompt
 
-} = require("./learningEngine");
-
+} = require("./profileContextEngine");
 
 
 
@@ -27,6 +32,7 @@ const {
 // =====================================
 // MAIN RESPONSE GENERATOR
 // =====================================
+
 
 function generateResponse(
 
@@ -46,9 +52,7 @@ function generateResponse(
 
     longTermMemory = [],
 
-    brainContext = {},
-
-    userId = "guest"
+    brainContext = {}
 
 ){
 
@@ -60,22 +64,40 @@ function generateResponse(
 
 
 
+    // =====================================
+    // PROFILE CONTEXT
+    // =====================================
+
+    let profilePrompt = "";
+
+
+
+    if(
+
+        brainContext &&
+
+        brainContext.userId
+
+    ){
+
+
+        profilePrompt =
+
+        createProfilePrompt(
+
+            brainContext.userId
+
+        );
+
+
+    }
+
+
+
 
     // =====================================
-    // LEARNING BRAIN
+    // FOLLOW UP CONTEXT
     // =====================================
-
-    const learningContext =
-
-    buildLearningContext(
-
-        userId
-
-    );
-
-// =====================================
-// CONTEXT FOLLOW UP
-// =====================================
 
     const context =
 
@@ -104,28 +126,25 @@ function generateResponse(
 
 
 
-
     let response = "";
 
-
-
-
-
 // =====================================
-// GREETING
+// GREETING SYSTEM
 // =====================================
 
-    if(
 
-        text === "hi" ||
+if(
 
-        text === "hello" ||
+    text === "hi" ||
 
-        text === "hey"
+    text === "hello" ||
 
-    ){
+    text === "hey"
 
-        response =
+){
+
+
+    response =
 
 `Hello 👋
 
@@ -141,7 +160,7 @@ I can help you create:
 
 What are we creating today?`;
 
-    }
+}
 
 
 
@@ -151,24 +170,26 @@ What are we creating today?`;
 // SCRIPT GENERATION
 // =====================================
 
-    else if(
 
-        intent === "script_generation" ||
+else if(
 
-        text.includes("script") ||
+    intent === "script_generation" ||
 
-        text.includes("video")
+    text.includes("script") ||
 
-    ){
+    text.includes("video")
 
-        response =
+){
 
-`Let's create your script 🎬
+
+    response =
+
+`Let's create your video script 🎬
 
 
 Tell me:
 
-1️⃣ Video topic
+1️⃣ Topic
 
 2️⃣ Duration
 
@@ -177,9 +198,9 @@ Tell me:
 4️⃣ Style
 
 
-I'll structure it using your preferred style.`;
+I'll structure a complete script for you.`;
 
-    }
+}
 
 
 
@@ -189,47 +210,51 @@ I'll structure it using your preferred style.`;
 // CAPTION GENERATION
 // =====================================
 
-    else if(
 
-        intent === "caption_generation" ||
+else if(
 
-        text.includes("caption")
+    intent === "caption_generation" ||
 
-    ){
+    text.includes("caption")
 
-        response =
+){
+
+
+    response =
 
 `Let's create your caption ✍️
 
 
 Tell me:
 
-• What is the post about?
-• Platform
-• Tone
+• What is the content about?
+• Which platform?
+• What tone do you want?
 
 
-I'll create a caption matching your content style.`;
+I'll create a caption that matches your audience.`;
 
-    }
+}
 
 
 
 
 
 // =====================================
-// IDEA GENERATION
+// CONTENT IDEA GENERATION
 // =====================================
 
-    else if(
 
-        intent === "idea_generation" ||
+else if(
 
-        text.includes("idea")
+    intent === "idea_generation" ||
 
-    ){
+    text.includes("idea")
 
-        response =
+){
+
+
+    response =
 
 `Let's generate content ideas 💡
 
@@ -241,70 +266,110 @@ Tell me:
 • Your platform
 
 
-I'll create ideas based on your goals.`;
+I'll create ideas designed for growth.`;
 
-    }
+}
 
 
 
 
 
 // =====================================
-// DEFAULT RESPONSE
+// ADVERT CREATION
 // =====================================
 
-    else {
+
+else if(
+
+    text.includes("advert") ||
+
+    text.includes("promotion") ||
+
+    text.includes("marketing")
+
+){
 
 
-        response =
+    response =
+
+`Let's create your advert 📢
+
+
+Tell me:
+
+• Product/service
+• Target audience
+• Platform
+• Style
+
+
+I'll help create a strong marketing message.`;
+
+}
+
+
+
+
+
+// =====================================
+// DEFAULT INTELLIGENT RESPONSE
+// =====================================
+
+
+else {
+
+
+    response =
 
 `I understand your request.
 
-I'll help you create the best response possible.`;
+I'll help you create something valuable.
 
-    }
+Tell me more details so I can give you the best result.`;
 
-// =====================================
-// APPLY LEARNED PREFERENCES
-// =====================================
-
-    if(
-
-        learningContext
-
-    ){
-
-        response +=
-
-`\n\n🧠 Learned Preferences:
-
-${learningContext}`;
-
-    }
-
-
-
-
+}
 
 // =====================================
-// MEMORY BRAIN CONTEXT
+// ADD CREATOR PROFILE PERSONALIZATION
 // =====================================
 
-    if(
 
-        brainContext &&
+if(profilePrompt){
 
-        brainContext.memoryContext
 
-    ){
+    response +=
 
-        response +=
 
-`\n\n📚 Memory Context:
+    `\n\n🧠 Creator Profile Applied:\n${profilePrompt}`;
 
-${brainContext.memoryContext}`;
 
-    }
+}
+
+
+
+
+
+// =====================================
+// MEMORY CONTEXT
+// =====================================
+
+
+if(
+
+    brainContext &&
+
+    brainContext.memoryContext
+
+){
+
+
+    response +=
+
+
+    `\n\n🗂️ Memory Context:\n${brainContext.memoryContext}`;
+
+
+}
 
 
 
@@ -314,49 +379,88 @@ ${brainContext.memoryContext}`;
 // RELATIONSHIP MEMORY
 // =====================================
 
-    if(
 
-        brainContext &&
+if(
 
-        brainContext.relationships &&
+    brainContext &&
 
-        brainContext.relationships.length > 0
+    brainContext.relationships &&
 
-    ){
+    brainContext.relationships.length > 0
 
-        response +=
+){
 
-`\n\n🔗 Connected with your previous conversations.`;
 
-    }
+    response +=
+
+
+    `\n\n🔗 Connected with your previous work.`;
+
+
+}
 
 
 
 
 
 // =====================================
-// AI PERSONALITY CONTEXT
+// AI PREFERENCE ADAPTATION
 // =====================================
 
-    if(
 
-        aiContext &&
+if(
 
-        aiContext.enhancedPrompt
+    aiContext &&
 
-    ){
+    aiContext.enhancedPrompt
 
-        response +=
-
-`\n\n🤖 Response adapted to your AI profile.`;
-
-    }
+){
 
 
+    response +=
+
+
+    `\n\n🤖 Response adjusted to your preferences.`;
+
+
+}
 
 
 
-    return response;
+
+
+// =====================================
+// PREVIOUS DISCUSSION CONTEXT
+// =====================================
+
+
+if(
+
+    facts &&
+
+    facts.lastMessage
+
+){
+
+
+    response +=
+
+
+    `\n\n📚 Previous discussion:\n"${facts.lastMessage}"`;
+
+
+}
+
+
+
+
+
+// =====================================
+// FINAL RESPONSE
+// =====================================
+
+
+return response;
 
 
 }
@@ -368,6 +472,7 @@ ${brainContext.memoryContext}`;
 // =====================================
 // EXPORT
 // =====================================
+
 
 module.exports = {
 
