@@ -1,114 +1,168 @@
 // =====================================
-// ChatTBM V6.0.5
+// ChatTBM V6.1
 // Personal AI Brain Backend
-// Memory Brain + Feedback Loop
+// Memory + Learning + Feedback System
 // =====================================
+
 
 require("dotenv").config();
 
+
 const express = require("express");
+
 const cors = require("cors");
+
 
 
 // =====================================
 // SERVICES
 // =====================================
 
+
 const {
+
     generateResponse
+
 } = require("./services/responseEngine");
 
 
+
+
 const {
+
     buildMemoryContext,
+
     saveMemory
+
 } = require("./services/memoryEngine");
 
 
+
+
 const {
+
     saveFeedback,
+
     analyzeFeedback
+
 } = require("./services/feedbackEngine");
+
+
+
 
 
 // =====================================
 // APP SETUP
 // =====================================
 
+
 const app = express();
 
+
 app.use(cors());
+
+
 app.use(express.json());
+
+
+
 
 
 // =====================================
 // HEALTH CHECK
 // =====================================
 
-app.get("/", (req, res) => {
+
+app.get("/", (req,res)=>{
+
 
     res.json({
 
-        app: "ChatTBM AI Backend",
+        app:"ChatTBM AI Backend",
 
-        version: "V6.0.5",
+        version:"V6.1",
 
-        status: "Online 🚀"
+        status:"Online 🚀",
+
+        systems:[
+
+            "Memory Brain",
+
+            "Learning Brain",
+
+            "Feedback Loop",
+
+            "Response Engine"
+
+        ]
 
     });
+
 
 });
 
 
+
+
+
 // =====================================
-// SIMPLE INTENT DETECTOR
+// INTENT DETECTOR
 // =====================================
 
-function detectIntent(message) {
 
-    const text = message.toLowerCase();
+function detectIntent(message){
 
-    if (text.includes("script")) {
+
+    const text =
+
+    message.toLowerCase();
+
+
+
+    if(text.includes("script"))
 
         return "script_generation";
 
-    }
 
-    if (text.includes("caption")) {
+
+    if(text.includes("caption"))
 
         return "caption_generation";
 
-    }
 
-    if (text.includes("idea")) {
+
+    if(text.includes("idea"))
 
         return "idea_generation";
 
-    }
 
-    if (text.includes("advert")) {
+
+    if(text.includes("advert"))
 
         return "advert_generation";
 
-    }
 
-    if (text.includes("calendar")) {
+
+    if(text.includes("calendar"))
 
         return "calendar_generation";
 
-    }
+
 
     return "general";
+
 
 }
 
 // =====================================
-// CHAT ENGINE
+// CHAT API
 // =====================================
 
-app.post("/api/chat", (req, res) => {
+app.post("/api/chat",(req,res)=>{
 
-    try {
+
+    try{
+
 
         const {
 
@@ -116,161 +170,268 @@ app.post("/api/chat", (req, res) => {
 
             userId = "guest"
 
+
         } = req.body;
 
 
 
-        if (!message) {
+
+        if(!message){
+
 
             return res.status(400).json({
 
-                success: false,
 
-                message: "No message received."
+                success:false,
+
+
+                message:"No message received"
+
 
             });
+
 
         }
 
 
 
-        // ===============================
-        // DETECT USER INTENT
-        // ===============================
-
-        const intent = detectIntent(message);
-
 
 
         // ===============================
-        // BUILD MEMORY CONTEXT
+        // DETECT INTENT
         // ===============================
 
-        const memoryContext = buildMemoryContext(userId);
+        const intent =
+
+        detectIntent(
+
+            message
+
+        );
+
+
+
+
+
+        // ===============================
+        // LOAD MEMORY BRAIN
+        // ===============================
+
+        const memoryContext =
+
+        buildMemoryContext(
+
+            userId
+
+        );
+
+
 
 
 
         const brainContext = {
 
+
             memoryContext,
 
-            relationships: []
+
+            relationships:[]
+
 
         };
 
 
 
+
+
         // ===============================
-        // GENERATE AI RESPONSE
+        // GENERATE PERSONALIZED RESPONSE
         // ===============================
 
-        const response = generateResponse(
+        const response =
+
+        generateResponse(
+
 
             intent,
 
+
             message,
 
-            {},
-
-            [],
 
             {},
 
+
             [],
+
 
             {},
 
+
             [],
 
-            brainContext
+
+            {},
+
+
+            [],
+
+
+            brainContext,
+
+
+            userId
+
 
         );
 
 
 
+
+
         // ===============================
-        // LEARN FROM USER MESSAGE
+        // SAVE USER MEMORY
         // ===============================
 
         saveMemory(
 
+
             userId,
 
-            "last_message",
+
+            "conversation",
+
 
             message,
 
+
             {
 
-                score: 5,
 
-                level: "TEMPORARY"
+                score:5,
+
+
+                level:"TEMPORARY"
+
 
             }
+
 
         );
 
 
 
+
+
         // ===============================
-        // SEND RESPONSE
+        // RETURN RESPONSE
         // ===============================
 
         res.json({
 
-            success: true,
+
+            success:true,
+
 
             response
 
+
         });
+
+
 
     }
 
-    catch (error) {
 
-        console.error("ChatTBM Error:", error);
+
+    catch(error){
+
+
+        console.error(
+
+            "ChatTBM Error:",
+
+            error
+
+        );
+
+
 
         res.status(500).json({
 
-            success: false,
 
-            message: "Internal server error."
+            success:false,
+
+
+            message:"Server error"
+
 
         });
 
+
     }
+
 
 });
 
 // =====================================
-// FEEDBACK API
+// FEEDBACK LEARNING API
 // =====================================
 
-app.post("/api/feedback", (req, res) => {
+app.post("/api/feedback",(req,res)=>{
 
-    try {
 
-        const result = saveFeedback(req.body);
+    try{
+
+
+        const result =
+
+        saveFeedback(
+
+            req.body
+
+        );
+
+
 
         res.json(result);
 
+
+
     }
 
-    catch (error) {
 
-        console.error("Feedback Error:", error);
+    catch(error){
+
+
+        console.error(
+
+            "Feedback Error:",
+
+            error
+
+        );
+
+
 
         res.status(500).json({
 
-            success: false,
 
-            message: "Unable to save feedback."
+            success:false,
+
+
+            message:"Feedback processing failed"
+
 
         });
 
+
     }
 
+
 });
+
+
 
 
 
@@ -278,55 +439,76 @@ app.post("/api/feedback", (req, res) => {
 // FEEDBACK ANALYTICS
 // =====================================
 
-app.get("/api/feedback", (req, res) => {
+app.get("/api/feedback",(req,res)=>{
 
-    try {
 
-        const report = analyzeFeedback();
+    try{
+
 
         res.json({
 
-            success: true,
 
-            report
+            success:true,
+
+
+            data:
+
+            analyzeFeedback()
+
 
         });
 
+
+
     }
 
-    catch (error) {
 
-        console.error("Analytics Error:", error);
+    catch(error){
+
 
         res.status(500).json({
 
-            success: false,
 
-            message: "Unable to analyze feedback."
+            success:false,
+
+
+            message:"Unable to load feedback data"
+
 
         });
 
+
     }
+
 
 });
 
 
 
+
+
 // =====================================
-// UNKNOWN ROUTES
+// 404 HANDLER
 // =====================================
 
-app.use((req, res) => {
+app.use((req,res)=>{
+
 
     res.status(404).json({
 
-        success: false,
 
-        message: "Endpoint not found."
+        success:false,
+
+
+        message:"Route not found"
+
 
     });
 
+
 });
+
+
 
 
 
@@ -334,21 +516,34 @@ app.use((req, res) => {
 // START SERVER
 // =====================================
 
-const PORT = process.env.PORT || 3000;
+const PORT =
 
-app.listen(PORT, () => {
+process.env.PORT || 3000;
+
+
+
+app.listen(PORT,()=>{
+
 
     console.log("");
 
-    console.log("=====================================");
-    console.log("🚀 ChatTBM V6.0.5 Backend Started");
-    console.log("=====================================");
-    console.log(`🌐 Port: ${PORT}`);
-    console.log("🧠 Memory Brain: Connected");
-    console.log("💬 Response Engine: Connected");
-    console.log("📚 Memory Engine: Connected");
-    console.log("📝 Feedback Engine: Connected");
-    console.log("✅ Server Ready");
-    console.log("=====================================");
+    console.log("================================");
+
+    console.log("🚀 ChatTBM V6.1 Backend Online");
+
+    console.log("================================");
+
+    console.log(`Port: ${PORT}`);
+
+    console.log("🧠 Memory Brain: ACTIVE");
+
+    console.log("📚 Learning Brain: ACTIVE");
+
+    console.log("🔄 Feedback Loop: ACTIVE");
+
+    console.log("🤖 Response Engine: ACTIVE");
+
+    console.log("================================");
+
 
 });
