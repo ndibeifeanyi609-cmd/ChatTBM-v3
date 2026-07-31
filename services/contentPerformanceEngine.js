@@ -2,45 +2,51 @@
 // ChatTBM V6.4
 // Content Performance Memory Engine
 //
-// Learns:
-// - Successful Content
-// - Audience Reaction
-// - Winning Patterns
-// - Content Results
-// =====================================
-
-
-
-// =====================================
-// TEMPORARY PERFORMANCE DATABASE
+// Purpose:
+// - Store successful content history
+// - Remember what works
+// - Track audience reactions
+// - Store winning hooks
+// - Support creator strategy
 //
 // Future upgrade:
 // MongoDB / PostgreSQL / Firebase
 // =====================================
 
-const contentPerformanceDB = {};
+
+
+// =====================================
+// CONTENT PERFORMANCE DATABASE
+// =====================================
+
+const contentPerformanceDatabase = {};
+
 
 
 
 
 
 // =====================================
-// CREATE USER CONTENT MEMORY
+// CREATE CREATOR PERFORMANCE SPACE
 // =====================================
 
-function createContentMemory(userId){
+
+function createPerformanceProfile(userId){
 
 
-    if(!contentPerformanceDB[userId]){
+    if(!contentPerformanceDatabase[userId]){
 
 
-        contentPerformanceDB[userId] = {
+        contentPerformanceDatabase[userId] = {
 
 
             userId,
 
 
             contents: [],
+
+
+            patterns: [],
 
 
             created:
@@ -60,10 +66,12 @@ function createContentMemory(userId){
 
 
 
-    return contentPerformanceDB[userId];
+    return contentPerformanceDatabase[userId];
 
 
 }
+
+
 
 
 
@@ -73,18 +81,19 @@ function createContentMemory(userId){
 // SAVE CONTENT PERFORMANCE
 // =====================================
 
+
 function saveContentPerformance(
 
     userId,
 
-    data
+    data = {}
 
 ){
 
 
-    const memory =
+    const profile =
 
-    createContentMemory(
+    createPerformanceProfile(
 
         userId
 
@@ -105,31 +114,43 @@ function saveContentPerformance(
 
         title:
 
-        data.title || "",
+        data.title || "Untitled Content",
 
 
 
-        type:
 
-        data.type || "general",
+        category:
+
+        data.category || "general",
+
 
 
 
         platform:
 
-        data.platform || "",
+        data.platform || "unknown",
 
 
 
-        performance:
 
-        data.performance || "",
+        result:
+
+        data.result || "unknown",
 
 
 
-        reason:
 
-        data.reason || "",
+        successReason:
+
+        data.successReason || "",
+
+
+
+
+        hook:
+
+        data.hook || "",
+
 
 
 
@@ -139,9 +160,11 @@ function saveContentPerformance(
 
 
 
-        hook:
 
-        data.hook || "",
+        strategy:
+
+        data.strategy || "",
+
 
 
 
@@ -156,7 +179,9 @@ function saveContentPerformance(
 
 
 
-    memory.contents.push(
+
+
+    profile.contents.push(
 
         content
 
@@ -164,7 +189,8 @@ function saveContentPerformance(
 
 
 
-    memory.updated =
+
+    profile.updated =
 
     new Date().toISOString();
 
@@ -172,7 +198,17 @@ function saveContentPerformance(
 
 
 
-    return content;
+    return {
+
+
+        success:true,
+
+
+        content
+
+
+
+    };
 
 
 }
@@ -181,9 +217,12 @@ function saveContentPerformance(
 
 
 
+
+
 // =====================================
-// GET CONTENT HISTORY
+// GET ALL CONTENT MEMORY
 // =====================================
+
 
 function getContentPerformance(
 
@@ -192,9 +231,9 @@ function getContentPerformance(
 ){
 
 
-    const memory =
+    const profile =
 
-    createContentMemory(
+    createPerformanceProfile(
 
         userId
 
@@ -202,10 +241,206 @@ function getContentPerformance(
 
 
 
-    return memory.contents;
+    return profile.contents;
 
 
 }
+
+
+
+
+
+
+
+
+// =====================================
+// SAVE VIRAL PATTERN
+// =====================================
+
+
+function saveViralPattern(
+
+    userId,
+
+    pattern
+
+){
+
+
+    const profile =
+
+    createPerformanceProfile(
+
+        userId
+
+    );
+
+
+
+
+    profile.patterns.push({
+
+
+        pattern,
+
+
+        created:
+
+        new Date().toISOString()
+
+
+    });
+
+
+
+
+
+    return {
+
+
+        success:true,
+
+
+        pattern
+
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// GET VIRAL PATTERNS
+// =====================================
+
+
+function getViralPatterns(
+
+    userId
+
+){
+
+
+    const profile =
+
+    createPerformanceProfile(
+
+        userId
+
+    );
+
+
+
+    return profile.patterns;
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// FIND BEST CONTENT
+// =====================================
+
+
+function getBestPerformingContent(
+
+    userId
+
+){
+
+
+    const contents =
+
+    getContentPerformance(
+
+        userId
+
+    );
+
+
+
+    return contents.filter(
+
+        item =>
+
+        item.result === "viral" ||
+
+        item.result === "high"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// CONTENT STATISTICS
+// =====================================
+
+
+function getPerformanceStats(
+
+    userId
+
+){
+
+
+    const contents =
+
+    getContentPerformance(
+
+        userId
+
+    );
+
+
+
+    return {
+
+
+        total:
+
+        contents.length,
+
+
+
+        successful:
+
+        contents.filter(
+
+            item =>
+
+            item.result === "viral" ||
+
+            item.result === "high"
+
+        ).length
+
+
+
+    };
+
+
+}
+
+
 
 
 
@@ -215,16 +450,29 @@ function getContentPerformance(
 // EXPORT
 // =====================================
 
+
 module.exports = {
 
 
-    createContentMemory,
+    createPerformanceProfile,
 
 
     saveContentPerformance,
 
 
-    getContentPerformance
+    getContentPerformance,
+
+
+    saveViralPattern,
+
+
+    getViralPatterns,
+
+
+    getBestPerformingContent,
+
+
+    getPerformanceStats
 
 
 };
