@@ -425,36 +425,20 @@ function hasWords(text, words) {
 // EXPORT SYSTEM
 // =====================================
 
+// Node.js backend support
 
-// Node.js backend
-
-if (
-
-    typeof module !== "undefined" &&
-
-    module.exports
-
-) {
-
+if (typeof module !== "undefined" && module.exports) {
 
     module.exports = {
-
         contextEngine
-
     };
 
 }
 
 
+// Browser support
 
-// Browser frontend
-
-if (
-
-    typeof window !== "undefined"
-
-) {
-
+if (typeof window !== "undefined") {
 
     window.contextEngine = contextEngine;
 
