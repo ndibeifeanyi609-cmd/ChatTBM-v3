@@ -1,16 +1,30 @@
 // =====================================
-// ChatTBM V6.6
+// ChatTBM V6.6.1
 // Audience Prediction Engine
 //
-// Purpose:
-// - Predict target audience
-// - Estimate confidence
-// - Suggest audience category
+// Uses:
+// - Intelligence Core
 // =====================================
 
-function predictAudience(content) {
 
-    const text = String(content).toLowerCase();
+const {
+
+    analyzeContent
+
+} = require("./intelligenceCore");
+
+
+
+
+
+function predictAudience(content){
+
+
+    const analysis =
+
+    analyzeContent(content);
+
+
 
     let audience = "General";
 
@@ -18,142 +32,117 @@ function predictAudience(content) {
 
     const reasons = [];
 
-    // ===============================
-    // ACTION
-    // ===============================
 
-    if (
 
-        text.includes("fight") ||
 
-        text.includes("battle") ||
 
-        text.includes("war")
+    if(analysis.category){
 
-    ) {
+
+        audience =
+
+        analysis.category;
+
+
+        confidence =
+
+        "Medium";
+
+
+        reasons.push(
+
+            "Content signals detected"
+
+        );
+
+
+    }
+
+
+
+
+
+    if(
+
+        analysis.hook === "Action Hook"
+
+    ){
+
 
         audience = "Action";
 
+
         confidence = "High";
 
+
         reasons.push(
-            "Action keywords detected."
+
+            "Action content pattern"
+
         );
+
 
     }
 
-    // ===============================
-    // MOTIVATION
-    // ===============================
 
-    else if (
 
-        text.includes("dream") ||
 
-        text.includes("success") ||
 
-        text.includes("growth") ||
+    if(
 
-        text.includes("journey")
+        analysis.emotion === "Inspiration"
 
-    ) {
+    ){
+
 
         audience = "Motivation";
 
-        confidence = "High";
-
-        reasons.push(
-            "Motivational language detected."
-        );
-
-    }
-
-    // ===============================
-    // COMEDY
-    // ===============================
-
-    else if (
-
-        text.includes("funny") ||
-
-        text.includes("laugh") ||
-
-        text.includes("comedy")
-
-    ) {
-
-        audience = "Comedy";
 
         confidence = "High";
 
+
         reasons.push(
-            "Comedy elements detected."
+
+            "Inspirational pattern"
+
         );
+
 
     }
 
-    // ===============================
-    // EDUCATION
-    // ===============================
 
-    else if (
 
-        text.includes("learn") ||
 
-        text.includes("tutorial") ||
-
-        text.includes("guide")
-
-    ) {
-
-        audience = "Education";
-
-        confidence = "Medium";
-
-        reasons.push(
-            "Educational content detected."
-        );
-
-    }
-
-    // ===============================
-    // BUSINESS
-    // ===============================
-
-    else if (
-
-        text.includes("business") ||
-
-        text.includes("money") ||
-
-        text.includes("marketing")
-
-    ) {
-
-        audience = "Business";
-
-        confidence = "Medium";
-
-        reasons.push(
-            "Business-related content."
-        );
-
-    }
 
     return {
 
+
         audience,
+
 
         confidence,
 
-        reasons
+
+        reasons,
+
+
+        analysis
+
 
     };
 
+
 }
+
+
+
+
+
 
 module.exports = {
 
+
     predictAudience
+
 
 };
