@@ -4,14 +4,10 @@
 //
 // Purpose:
 // - Build creator identity
-// - Store creator style
-// - Detect creator preferences
+// - Learn creator preferences
+// - Store creator profile
 // =====================================
 
-
-
-// Temporary memory storage
-// Later this can connect to a database
 
 const creatorProfiles = {};
 
@@ -19,7 +15,7 @@ const creatorProfiles = {};
 
 
 // =====================================
-// CREATE DEFAULT PROFILE
+// CREATE PROFILE
 // =====================================
 
 function createCreatorProfile(userId){
@@ -33,30 +29,23 @@ function createCreatorProfile(userId){
 
             creatorName:"",
 
-
             niche:"",
-
 
             contentStyle:"",
 
-
             personality:"",
-
 
             audience:"",
 
-
             tone:"",
-
 
             preferredTopics:[],
 
-
             brandKeywords:[],
 
+            createdAt:new Date(),
 
-            createdAt:new Date()
-
+            updatedAt:new Date()
 
 
         };
@@ -68,7 +57,6 @@ function createCreatorProfile(userId){
 
     return creatorProfiles[userId];
 
-
 }
 
 
@@ -77,14 +65,14 @@ function createCreatorProfile(userId){
 
 
 // =====================================
-// UPDATE CREATOR IDENTITY
+// UPDATE PROFILE
 // =====================================
 
 function updateCreatorIdentity(
 
     userId,
 
-    data
+    data={}
 
 ){
 
@@ -95,7 +83,9 @@ function updateCreatorIdentity(
 
 
 
-    Object.keys(data).forEach(key=>{
+    Object.keys(data)
+
+    .forEach(key=>{
 
 
         if(data[key] !== undefined){
@@ -111,6 +101,12 @@ function updateCreatorIdentity(
 
 
 
+    profile.updatedAt =
+
+    new Date();
+
+
+
     return profile;
 
 
@@ -122,7 +118,7 @@ function updateCreatorIdentity(
 
 
 // =====================================
-// LEARN FROM CONTENT
+// LEARN CREATOR IDENTITY
 // =====================================
 
 function learnCreatorIdentity(
@@ -136,13 +132,22 @@ function learnCreatorIdentity(
 
     const text =
 
-    String(content)
+    String(content || "")
 
     .toLowerCase();
 
 
 
     const updates = {};
+
+
+
+    const topics = [];
+
+
+
+    const keywords = [];
+
 
 
 
@@ -158,34 +163,40 @@ function learnCreatorIdentity(
 
     ){
 
-
         updates.niche =
 
         "Action Content";
 
 
+        topics.push("Action");
+
     }
+
+
 
 
 
 
     if(
 
-        text.includes("funny") ||
-
         text.includes("comedy") ||
+
+        text.includes("funny") ||
 
         text.includes("laugh")
 
     ){
-
 
         updates.personality =
 
         "Entertainment";
 
 
+        topics.push("Comedy");
+
     }
+
+
 
 
 
@@ -194,19 +205,22 @@ function learnCreatorIdentity(
 
         text.includes("journey") ||
 
-        text.includes("struggle") ||
+        text.includes("growth") ||
 
-        text.includes("growth")
+        text.includes("struggle")
 
     ){
-
 
         updates.tone =
 
         "Motivational";
 
 
+        keywords.push("Growth");
+
     }
+
+
 
 
 
@@ -219,17 +233,22 @@ function learnCreatorIdentity(
 
     ){
 
-
         updates.contentStyle =
 
         "Cinematic Realistic";
 
 
+        keywords.push("Cinematic");
+
     }
 
 
 
-    return updateCreatorIdentity(
+
+
+    const profile =
+
+    updateCreatorIdentity(
 
         userId,
 
@@ -238,6 +257,56 @@ function learnCreatorIdentity(
     );
 
 
+
+
+
+    profile.preferredTopics =
+
+    [
+
+        ...new Set(
+
+            [
+
+                ...profile.preferredTopics,
+
+                ...topics
+
+            ]
+
+        )
+
+    ];
+
+
+
+
+
+    profile.brandKeywords =
+
+    [
+
+        ...new Set(
+
+            [
+
+                ...profile.brandKeywords,
+
+                ...keywords
+
+            ]
+
+        )
+
+    ];
+
+
+
+
+
+    return profile;
+
+
 }
 
 
@@ -246,17 +315,13 @@ function learnCreatorIdentity(
 
 
 // =====================================
-// GET CREATOR IDENTITY
+// GET PROFILE
 // =====================================
 
 function getCreatorIdentity(userId){
 
 
-    return createCreatorProfile(
-
-        userId
-
-    );
+    return createCreatorProfile(userId);
 
 
 }
@@ -265,22 +330,15 @@ function getCreatorIdentity(userId){
 
 
 
-
-// =====================================
-// EXPORT
-// =====================================
 
 module.exports = {
 
 
     createCreatorProfile,
 
-
     updateCreatorIdentity,
 
-
     learnCreatorIdentity,
-
 
     getCreatorIdentity
 
