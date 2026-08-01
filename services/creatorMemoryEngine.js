@@ -4,9 +4,9 @@
 //
 // Purpose:
 // - Store creator knowledge
-// - Learn content preferences
-// - Recall creator patterns
+// - Learn creator preferences
 // - Support Creator Learning Engine
+// - Build creator intelligence profile
 // =====================================
 
 
@@ -61,7 +61,6 @@ function createMemoryProfile(userId){
 
     return creatorMemories[userId];
 
-
 }
 
 
@@ -70,14 +69,14 @@ function createMemoryProfile(userId){
 
 // =====================================
 // UPDATE CREATOR MEMORY
-// Used by Creator Learning Engine
+// Used by creatorLearningEngine.js
 // =====================================
 
 function updateCreatorMemory(
 
     userId,
 
-    data
+    data = {}
 
 ){
 
@@ -98,29 +97,11 @@ function updateCreatorMemory(
         ){
 
 
-            if(Array.isArray(data[key])){
+            memory[key].push(
 
+                data[key]
 
-                memory[key].push(
-
-                    ...data[key]
-
-                );
-
-
-            }
-
-            else {
-
-
-                memory[key].push(
-
-                    data[key]
-
-                );
-
-
-            }
+            );
 
 
 
@@ -190,13 +171,17 @@ function saveCreatorMemory(
 
     if(
 
-        Array.isArray(memory[type])
-
-        &&
-
-        information
+        !memory[type]
 
     ){
+
+        memory[type] = [];
+
+    }
+
+
+
+    if(information){
 
 
         memory[type].push(
@@ -204,7 +189,6 @@ function saveCreatorMemory(
             information
 
         );
-
 
 
         memory[type] =
@@ -266,21 +250,17 @@ function learnCreatorMemory(
 
 
 
-
-
     if(text.includes("cinematic")){
 
 
         memory.preferences.push(
 
-            "Prefers cinematic style"
+            "Cinematic style"
 
         );
 
 
     }
-
-
 
 
 
@@ -289,14 +269,12 @@ function learnCreatorMemory(
 
         memory.preferences.push(
 
-            "Prefers realistic content"
+            "Realistic style"
 
         );
 
 
     }
-
-
 
 
 
@@ -305,14 +283,12 @@ function learnCreatorMemory(
 
         memory.favoriteTopics.push(
 
-            "Action"
+            "Action content"
 
         );
 
 
     }
-
-
 
 
 
@@ -321,40 +297,12 @@ function learnCreatorMemory(
 
         memory.contentLessons.push(
 
-            "Uses journey storytelling"
+            "Transformation storytelling"
 
         );
 
 
     }
-
-
-
-
-
-    Object.keys(memory).forEach(key=>{
-
-
-        if(Array.isArray(memory[key])){
-
-
-            memory[key] =
-
-            [
-
-                ...new Set(
-
-                    memory[key]
-
-                )
-
-            ];
-
-
-        }
-
-
-    });
 
 
 
@@ -408,11 +356,13 @@ function searchMemory(
 
 
 
-    const results=[];
+    const results = [];
 
 
 
-    Object.values(memory).forEach(item=>{
+    Object.values(memory)
+
+    .forEach(item=>{
 
 
         if(Array.isArray(item)){
