@@ -1,233 +1,157 @@
 // =====================================
-// ChatTBM V6.6
+// ChatTBM V6.6.1
 // Hook Scoring Engine
 //
-// Purpose:
-// - Score content hooks
-// - Detect hook style
-// - Explain score
-// - Recommend improvements
+// Uses:
+// - Intelligence Core
 // =====================================
 
 
+const {
 
-// =====================================
-// SCORE HOOK
-// =====================================
+    analyzeContent
+
+} = require("./intelligenceCore");
+
+
+
+
 
 function scoreHook(hook){
 
-    const text =
-    String(hook)
-    .toLowerCase();
+
+    const analysis =
+
+    analyzeContent(hook);
+
+
 
     let score = 0;
+
 
     const strengths = [];
 
     const improvements = [];
 
-    let type = "General";
 
 
 
-    // ===============================
-    // CURIOSITY
-    // ===============================
 
-    if(
+    if(analysis.hook){
 
-        text.includes("nobody") ||
 
-        text.includes("no one") ||
+        score += 50;
 
-        text.includes("secret") ||
 
-        text.includes("never")
+        strengths.push(
 
-    ){
+            analysis.hook
+
+        );
+
+
+    }
+
+    else{
+
+
+        improvements.push(
+
+            "Create a curiosity or action-based opening"
+
+        );
+
+
+    }
+
+
+
+
+
+    if(analysis.emotion){
+
 
         score += 25;
 
-        type = "Curiosity";
 
         strengths.push(
 
-            "Creates curiosity"
+            "Emotional connection detected"
 
         );
 
-    }
-
-
-
-    // ===============================
-    // ACTION
-    // ===============================
-
-    if(
-
-        text.includes("fight") ||
-
-        text.includes("battle") ||
-
-        text.includes("challenge")
-
-    ){
-
-        score += 20;
-
-        type = "Action";
-
-        strengths.push(
-
-            "Creates excitement"
-
-        );
 
     }
 
+    else{
 
-
-    // ===============================
-    // EMOTION
-    // ===============================
-
-    if(
-
-        text.includes("dream") ||
-
-        text.includes("struggle") ||
-
-        text.includes("family") ||
-
-        text.includes("journey")
-
-    ){
-
-        score += 20;
-
-        strengths.push(
-
-            "Builds emotional connection"
-
-        );
-
-    }
-
-
-
-    // ===============================
-    // SURPRISE
-    // ===============================
-
-    if(
-
-        text.includes("unexpected") ||
-
-        text.includes("surprise") ||
-
-        text.includes("suddenly")
-
-    ){
-
-        score += 20;
-
-        strengths.push(
-
-            "Adds surprise"
-
-        );
-
-    }
-
-
-
-    // ===============================
-    // CALL TO ACTION
-    // ===============================
-
-    if(
-
-        text.includes("watch") ||
-
-        text.includes("wait") ||
-
-        text.includes("follow")
-
-    ){
-
-        score += 15;
-
-        strengths.push(
-
-            "Encourages viewer retention"
-
-        );
-
-    }
-
-
-
-    // ===============================
-    // LIMIT SCORE
-    // ===============================
-
-    if(score > 100){
-
-        score = 100;
-
-    }
-
-
-
-    if(score < 40){
 
         improvements.push(
 
-            "Increase curiosity."
+            "Add emotional impact"
 
         );
+
 
     }
 
 
 
-    if(score < 60){
+
+
+    if(analysis.trigger){
+
+
+        score += 25;
+
+
+        strengths.push(
+
+            "Strong engagement trigger"
+
+        );
+
+
+    }
+
+    else{
+
 
         improvements.push(
 
-            "Add stronger emotion."
+            "Give viewers a reason to continue"
 
         );
+
 
     }
 
 
-
-    if(score < 80){
-
-        improvements.push(
-
-            "Make the opening more memorable."
-
-        );
-
-    }
 
 
 
     return {
 
+
         score,
 
-        type,
+
+        type:
+
+        analysis.hook || "General",
+
 
         strengths,
 
-        improvements
+
+        improvements,
+
+
+        analysis
+
 
     };
+
 
 }
 
@@ -236,27 +160,23 @@ function scoreHook(hook){
 
 
 
-// =====================================
-// COMPARE HOOKS
-// =====================================
-
 function compareHooks(hooks=[]){
+
 
     return hooks
 
-    .map(hook=>{
+    .map(hook=>({
 
-        return{
 
-            hook,
+        hook,
 
-            analysis:
 
-            scoreHook(hook)
+        analysis:
 
-        };
+        scoreHook(hook)
 
-    })
+
+    }))
 
     .sort(
 
@@ -268,6 +188,7 @@ function compareHooks(hooks=[]){
 
     );
 
+
 }
 
 
@@ -275,14 +196,13 @@ function compareHooks(hooks=[]){
 
 
 
-// =====================================
-// EXPORT
-// =====================================
+module.exports = {
 
-module.exports={
 
     scoreHook,
 
+
     compareHooks
+
 
 };
