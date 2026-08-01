@@ -1,20 +1,18 @@
 // =====================================
-// ChatTBM V6.6
+// ChatTBM V6.6.1
 // Growth Recommendation Engine
 //
-// Purpose:
-// - Combine all AI analysis
-// - Recommend creator improvements
-// - Generate growth advice
+// Uses:
+// - All Intelligence Systems
 // =====================================
+
 
 const {
 
-    predictContent,
-
-    recommendImprovements
+    predictContent
 
 } = require("./predictionEngine");
+
 
 const {
 
@@ -22,11 +20,13 @@ const {
 
 } = require("./hookScoringEngine");
 
+
 const {
 
     scoreContent
 
 } = require("./contentScoreEngine");
+
 
 const {
 
@@ -37,93 +37,125 @@ const {
 
 
 
-// =====================================
-// GENERATE GROWTH REPORT
-// =====================================
+
 
 function generateGrowthReport(content){
 
+
     const prediction =
+
     predictContent(content);
 
-    const contentScore =
-    scoreContent(content);
 
-    const audience =
-    predictAudience(content);
 
     const hook =
+
     scoreHook(content);
+
+
+
+    const contentScore =
+
+    scoreContent(content);
+
+
+
+    const audience =
+
+    predictAudience(content);
+
+
 
     const recommendations = [];
 
 
 
-    recommendations.push(
-
-        ...recommendImprovements(
-
-            prediction
-
-        )
-
-    );
 
 
+    if(prediction.score < 80){
 
-    recommendations.push(
-
-        ...contentScore.improvements
-
-    );
-
-
-
-    if(hook.score < 70){
 
         recommendations.push(
 
-            "Rewrite the opening hook to increase curiosity."
+            "Improve viral signals"
 
         );
 
+
     }
+
+
+
+
+
+    if(hook.score < 80){
+
+
+        recommendations.push(
+
+            "Create a stronger opening hook"
+
+        );
+
+
+    }
+
+
+
+
+
+    if(contentScore.score < 80){
+
+
+        recommendations.push(
+
+            "Improve story structure and emotion"
+
+        );
+
+
+    }
+
+
 
 
 
     if(audience.confidence === "Low"){
 
+
         recommendations.push(
 
-            "Target a clearer audience."
+            "Target a clearer audience"
 
         );
+
 
     }
 
 
 
-    return{
+
+
+    return {
+
 
         prediction,
 
+
         hook,
+
 
         contentScore,
 
+
         audience,
 
-        recommendations:[
 
-            ...new Set(
+        recommendations
 
-                recommendations
-
-            )
-
-        ]
 
     };
+
 
 }
 
@@ -131,18 +163,15 @@ function generateGrowthReport(content){
 
 
 
-// =====================================
-// QUICK SUMMARY
-// =====================================
-
 function generateSummary(report){
 
-    return{
+
+    return {
+
 
         viralScore:
 
         report.prediction.score,
-
 
 
         hookScore:
@@ -150,24 +179,18 @@ function generateSummary(report){
         report.hook.score,
 
 
-
         contentScore:
 
         report.contentScore.score,
 
 
-
         audience:
 
-        report.audience.audience,
+        report.audience.audience
 
-
-
-        confidence:
-
-        report.audience.confidence
 
     };
+
 
 }
 
@@ -175,14 +198,13 @@ function generateSummary(report){
 
 
 
-// =====================================
-// EXPORT
-// =====================================
+module.exports = {
 
-module.exports={
 
     generateGrowthReport,
 
+
     generateSummary
+
 
 };
