@@ -3,15 +3,10 @@
 // Brand Voice Engine
 //
 // Purpose:
-// - Learn creator writing style
-// - Maintain consistent tone
-// - Generate voice profile
+// - Learn creator communication style
+// - Maintain creator tone
 // =====================================
 
-
-
-// Temporary memory storage
-// Later connects to database
 
 const brandVoices = {};
 
@@ -19,7 +14,7 @@ const brandVoices = {};
 
 
 // =====================================
-// CREATE DEFAULT VOICE
+// CREATE VOICE
 // =====================================
 
 function createBrandVoice(userId){
@@ -39,15 +34,13 @@ function createBrandVoice(userId){
 
             emotions:[],
 
-
             commonWords:[],
-
 
             writingPattern:"",
 
+            audienceConnection:"",
 
-            audienceConnection:""
-
+            updatedAt:new Date()
 
 
         };
@@ -68,7 +61,7 @@ function createBrandVoice(userId){
 
 
 // =====================================
-// LEARN BRAND VOICE
+// LEARN VOICE
 // =====================================
 
 function learnBrandVoice(
@@ -82,7 +75,7 @@ function learnBrandVoice(
 
     const text =
 
-    String(content)
+    String(content || "")
 
     .toLowerCase();
 
@@ -96,18 +89,14 @@ function learnBrandVoice(
 
 
 
-    // ===============================
-    // TONE
-    // ===============================
-
 
     if(
 
-        text.includes("never give up") ||
+        text.includes("journey") ||
 
-        text.includes("keep pushing") ||
+        text.includes("growth") ||
 
-        text.includes("journey")
+        text.includes("never give up")
 
     ){
 
@@ -117,6 +106,8 @@ function learnBrandVoice(
 
 
     }
+
+
 
 
 
@@ -142,10 +133,6 @@ function learnBrandVoice(
 
 
 
-    // ===============================
-    // STYLE
-    // ===============================
-
 
     if(
 
@@ -166,36 +153,10 @@ function learnBrandVoice(
 
 
 
-    if(
-
-        text.includes("fast") ||
-
-        text.includes("action")
-
-    ){
-
-        voice.style =
-
-        "High Energy";
-
-
-    }
-
-
-
-
-
-
-    // ===============================
-    // ENERGY
-    // ===============================
-
 
     if(
 
-        text.includes("🔥") ||
-
-        text.includes("!") ||
+        text.includes("action") ||
 
         text.includes("epic")
 
@@ -212,11 +173,6 @@ function learnBrandVoice(
 
 
 
-    // ===============================
-    // EMOTION MEMORY
-    // ===============================
-
-
     if(
 
         text.includes("struggle")
@@ -229,7 +185,9 @@ function learnBrandVoice(
 
         );
 
+
     }
+
 
 
 
@@ -245,23 +203,32 @@ function learnBrandVoice(
 
         );
 
+
     }
 
 
 
 
 
-    // Remove duplicates
-
     voice.emotions =
 
-    [...new Set(
+    [
 
-        voice.emotions
+        ...new Set(
 
-    )];
+            voice.emotions
+
+        )
+
+    ];
 
 
+
+
+
+    voice.updatedAt =
+
+    new Date();
 
 
 
@@ -275,9 +242,8 @@ function learnBrandVoice(
 
 
 
-
 // =====================================
-// APPLY BRAND VOICE
+// APPLY VOICE
 // =====================================
 
 function applyBrandVoice(
@@ -306,7 +272,7 @@ function applyBrandVoice(
 
         instruction:
 
-        `Write using a ${voice.tone || "natural"} tone with ${voice.style || "clear"} style.`
+        `Write using ${voice.tone || "natural"} tone with ${voice.style || "clear"} style.`
 
 
     };
@@ -318,11 +284,6 @@ function applyBrandVoice(
 
 
 
-
-
-// =====================================
-// GET VOICE
-// =====================================
 
 function getBrandVoice(userId){
 
@@ -337,21 +298,14 @@ function getBrandVoice(userId){
 
 
 
-// =====================================
-// EXPORT
-// =====================================
-
 module.exports = {
 
 
     createBrandVoice,
 
-
     learnBrandVoice,
 
-
     applyBrandVoice,
-
 
     getBrandVoice
 
