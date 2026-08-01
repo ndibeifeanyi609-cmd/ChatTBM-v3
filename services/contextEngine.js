@@ -24,7 +24,9 @@ function contextEngine(
 
 ) {
 
+
     const text = normalize(message);
+
 
     const previous = getPreviousContext(history);
 
@@ -34,9 +36,9 @@ function contextEngine(
 
         return {
 
-            matched: false,
+            matched:false,
 
-            response: null
+            response:null
 
         };
 
@@ -49,7 +51,7 @@ function contextEngine(
     // ===============================
 
 
-    if (hasWords(text, [
+    if (hasWords(text,[
 
         "shorter",
         "shorten",
@@ -62,9 +64,9 @@ function contextEngine(
 
         return {
 
-            matched: true,
+            matched:true,
 
-            response: runEditor(
+            response:runEditor(
 
                 message,
 
@@ -78,7 +80,7 @@ function contextEngine(
 
 
 
-    if (hasWords(text, [
+    if (hasWords(text,[
 
         "rewrite",
         "rewrite it",
@@ -91,9 +93,9 @@ function contextEngine(
 
         return {
 
-            matched: true,
+            matched:true,
 
-            response: runEditor(
+            response:runEditor(
 
                 message,
 
@@ -107,7 +109,7 @@ function contextEngine(
 
 
 
-    if (hasWords(text, [
+    if (hasWords(text,[
 
         "expand",
         "longer",
@@ -119,9 +121,9 @@ function contextEngine(
 
         return {
 
-            matched: true,
+            matched:true,
 
-            response: runEditor(
+            response:runEditor(
 
                 message,
 
@@ -140,7 +142,7 @@ function contextEngine(
     // ===============================
 
 
-    if (hasWords(text, [
+    if (hasWords(text,[
 
         "cinematic",
         "movie style",
@@ -151,9 +153,9 @@ function contextEngine(
 
         return {
 
-            matched: true,
+            matched:true,
 
-            response: runEditor(
+            response:runEditor(
 
                 "cinematic",
 
@@ -167,7 +169,7 @@ function contextEngine(
 
 
 
-    if (hasWords(text, [
+    if (hasWords(text,[
 
         "motivational",
         "inspiring",
@@ -178,9 +180,9 @@ function contextEngine(
 
         return {
 
-            matched: true,
+            matched:true,
 
-            response: runEditor(
+            response:runEditor(
 
                 "motivational",
 
@@ -197,7 +199,7 @@ function contextEngine(
     // ===============================
 
 
-    if (hasWords(text, [
+    if (hasWords(text,[
 
         "continue",
         "keep going",
@@ -208,9 +210,9 @@ function contextEngine(
 
         return {
 
-            matched: true,
+            matched:true,
 
-            response: runEditor(
+            response:runEditor(
 
                 message,
 
@@ -229,7 +231,7 @@ function contextEngine(
     // ===============================
 
 
-    if (hasWords(text, [
+    if (hasWords(text,[
 
         "last topic",
         "previous topic",
@@ -240,13 +242,13 @@ function contextEngine(
 
         return {
 
-            matched: true,
+            matched:true,
 
             response:
 
-                "Your previous content was:\n\n" +
+            "Your previous content was:\n\n" +
 
-                previous
+            previous
 
         };
 
@@ -256,9 +258,9 @@ function contextEngine(
 
     return {
 
-        matched: false,
+        matched:false,
 
-        response: null
+        response:null
 
     };
 
@@ -277,14 +279,12 @@ function runEditor(
 
     content
 
-) {
+){
 
 
     let editorBrain = null;
 
 
-
-    // Browser support
 
     if (
 
@@ -292,7 +292,7 @@ function runEditor(
 
         typeof window.editorBrain === "function"
 
-    ) {
+    ){
 
         editorBrain = window.editorBrain;
 
@@ -300,15 +300,13 @@ function runEditor(
 
 
 
-    // Node.js support
-
     if (
 
         typeof global !== "undefined" &&
 
         typeof global.editorBrain === "function"
 
-    ) {
+    ){
 
         editorBrain = global.editorBrain;
 
@@ -316,7 +314,7 @@ function runEditor(
 
 
 
-    if (editorBrain) {
+    if(editorBrain){
 
 
         return editorBrain(
@@ -339,13 +337,13 @@ function runEditor(
 
 
 // =====================================
-// MEMORY CONTEXT RETRIEVAL
+// GET PREVIOUS ASSISTANT RESPONSE
 // =====================================
 
-function getPreviousContext(history) {
+function getPreviousContext(history){
 
 
-    if (!Array.isArray(history)) {
+    if(!Array.isArray(history)){
 
         return "";
 
@@ -353,7 +351,7 @@ function getPreviousContext(history) {
 
 
 
-    for (
+    for(
 
         let i = history.length - 1;
 
@@ -361,20 +359,20 @@ function getPreviousContext(history) {
 
         i--
 
-    ) {
+    ){
 
 
         const item = history[i];
 
 
 
-        if (
+        if(
 
             item.role === "assistant" &&
 
             item.message
 
-        ) {
+        ){
 
             return item.message;
 
@@ -394,21 +392,21 @@ function getPreviousContext(history) {
 // HELPERS
 // =====================================
 
-function normalize(text) {
+function normalize(text){
 
 
     return String(text)
 
-        .toLowerCase()
+    .toLowerCase()
 
-        .trim();
+    .trim();
 
 
 }
 
 
 
-function hasWords(text, words) {
+function hasWords(text,words){
 
 
     return words.some(word =>
@@ -425,21 +423,39 @@ function hasWords(text, words) {
 // EXPORT SYSTEM
 // =====================================
 
-// Node.js backend support
 
-if (typeof module !== "undefined" && module.exports) {
+// Node.js backend export
+
+if(
+
+    typeof module !== "undefined" &&
+
+    module.exports
+
+){
+
 
     module.exports = {
+
         contextEngine
+
     };
+
 
 }
 
 
-// Browser support
 
-if (typeof window !== "undefined") {
+// Browser export
+
+if(
+
+    typeof window !== "undefined"
+
+){
+
 
     window.contextEngine = contextEngine;
+
 
 }
