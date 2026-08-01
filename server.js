@@ -1,28 +1,31 @@
 // =====================================
-// ChatTBM V6.6.1
-// Core Cleanup Backend
+// ChatTBM V6.7
+// Creator Memory Backend
 //
 // Systems:
 // - AI Response
-// - Memory Learning
+// - Feedback Learning
 // - Creator Intelligence
-// - Predictive Intelligence
+// - Viral Memory
+// - Creator Memory Upgrade
 // =====================================
 
 
 require("dotenv").config();
 
+
 const express = require("express");
 
 const cors = require("cors");
 
-const app = express();
 
+const app = express();
 
 
 app.use(cors());
 
 app.use(express.json());
+
 
 
 
@@ -40,8 +43,10 @@ const {
 
 
 
+
+
 // =====================================
-// MEMORY + LEARNING
+// LEARNING SYSTEM
 // =====================================
 
 
@@ -54,11 +59,13 @@ const {
 } = require("./services/feedbackEngine");
 
 
+
 const {
 
     analyzeUserFeedback
 
 } = require("./services/profileLearningBridge");
+
 
 
 const {
@@ -68,11 +75,13 @@ const {
 } = require("./services/userProfileEngine");
 
 
+
 const {
 
     analyzeCreatorInput
 
 } = require("./services/creatorLearningEngine");
+
 
 
 const {
@@ -82,6 +91,7 @@ const {
 } = require("./services/performanceLearningEngine");
 
 
+
 const {
 
     learnViralPattern,
@@ -89,6 +99,8 @@ const {
     getCreatorViralMemory
 
 } = require("./services/viralMemoryBridge");
+
+
 
 
 
@@ -109,44 +121,42 @@ const {
 
 
 
+
+
 // =====================================
-// V6.6.1 INTELLIGENCE
+// V6.7 CREATOR MEMORY
 // =====================================
 
 
 const {
 
-    predictContent
+    learnCreatorIdentity,
 
-} = require("./services/predictionEngine");
+    getCreatorIdentity
 
+} = require("./services/creatorIdentityEngine");
 
-const {
-
-    scoreHook
-
-} = require("./services/hookScoringEngine");
 
 
 const {
 
-    scoreContent
+    learnBrandVoice,
 
-} = require("./services/contentScoreEngine");
+    getBrandVoice
 
+} = require("./services/brandVoiceEngine");
 
-const {
-
-    predictAudience
-
-} = require("./services/audiencePredictionEngine");
 
 
 const {
 
-    generateGrowthReport
+    learnCreatorMemory,
 
-} = require("./services/growthRecommendationEngine");
+    getCreatorMemory
+
+} = require("./services/creatorMemoryEngine");
+
+
 
 
 
@@ -163,9 +173,10 @@ app.get("/",(req,res)=>{
 
         app:"ChatTBM AI Backend",
 
-        version:"V6.6.1",
+        version:"V6.7",
 
-        status:"Core Intelligence Online 🚀"
+        status:"Creator Memory Online 🚀"
+
 
     });
 
@@ -176,83 +187,151 @@ app.get("/",(req,res)=>{
 
 
 
+
+
 // =====================================
-// CHAT
+// CHAT ENGINE
 // =====================================
 
 
 app.post("/api/chat",(req,res)=>{
 
 
-    const {
-
-        userId="guest",
-
-        message
-
-    } = req.body;
+    try{
 
 
+        const {
 
-    analyzeCreatorInput(
 
-        userId,
+            userId="guest",
 
-        message
+            message
 
-    );
+
+        } = req.body;
 
 
 
-    const strategy =
 
-    generateCreatorStrategy(userId);
-
-
-
-    const response =
-
-    generateResponse(
-
-        "general",
-
-        message,
-
-        {},
-
-        [],
-
-        {},
-
-        [],
-
-        {},
-
-        [],
-
-        {
+        analyzeCreatorInput(
 
             userId,
 
-            strategy,
+            message
 
-            profile:getProfile(userId)
-
-        }
-
-    );
+        );
 
 
 
-    res.json({
+        // Learn creator style
 
-        success:true,
+        learnCreatorIdentity(
 
-        response,
+            userId,
 
-        strategy
+            message
 
-    });
+        );
+
+
+        learnBrandVoice(
+
+            userId,
+
+            message
+
+        );
+
+
+        learnCreatorMemory(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+        const strategy =
+
+        generateCreatorStrategy(
+
+            userId
+
+        );
+
+
+
+
+
+        const response =
+
+        generateResponse(
+
+            "general",
+
+            message,
+
+            {},
+
+            [],
+
+            {},
+
+            [],
+
+            {},
+
+            [],
+
+            {
+
+                userId,
+
+                strategy,
+
+                profile:getProfile(userId)
+
+            }
+
+        );
+
+
+
+
+
+        res.json({
+
+            success:true,
+
+            response,
+
+            strategy
+
+
+        });
+
+
+
+    }
+
+    catch(error){
+
+
+        res.status(500).json({
+
+            success:false,
+
+            error:error.message
+
+
+        });
+
+
+    }
 
 
 });
@@ -261,54 +340,70 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
+
 // =====================================
-// V6.6.1 CONTENT ANALYSIS
+// CREATOR MEMORY LEARNING
 // =====================================
 
 
-app.post("/api/analyze",(req,res)=>{
+app.post("/api/creator-memory",(req,res)=>{
 
 
     const {
 
+
+        userId="guest",
+
         content
+
 
     } = req.body;
 
 
 
+
+
     res.json({
+
 
         success:true,
 
 
-        prediction:
 
-        predictContent(content),
+        identity:
 
+        learnCreatorIdentity(
 
+            userId,
 
-        hook:
+            content
 
-        scoreHook(content),
-
-
-
-        contentScore:
-
-        scoreContent(content),
+        ),
 
 
 
-        audience:
+        voice:
 
-        predictAudience(content),
+        learnBrandVoice(
+
+            userId,
+
+            content
+
+        ),
 
 
 
-        growth:
+        memory:
 
-        generateGrowthReport(content)
+        learnCreatorMemory(
+
+            userId,
+
+            content
+
+        )
 
 
     });
@@ -320,8 +415,60 @@ app.post("/api/analyze",(req,res)=>{
 
 
 
+
+
 // =====================================
-// FEEDBACK LEARNING
+// CREATOR BRAIN
+// =====================================
+
+
+app.get("/api/creator-brain/:userId",(req,res)=>{
+
+
+    const userId =
+
+    req.params.userId;
+
+
+
+    res.json({
+
+
+        success:true,
+
+
+
+        identity:
+
+        getCreatorIdentity(userId),
+
+
+
+        voice:
+
+        getBrandVoice(userId),
+
+
+
+        memory:
+
+        getCreatorMemory(userId)
+
+
+
+    });
+
+
+});
+
+
+
+
+
+
+
+// =====================================
+// FEEDBACK
 // =====================================
 
 
@@ -330,11 +477,14 @@ app.post("/api/feedback",(req,res)=>{
 
     const {
 
+
         userId="guest",
 
         correction
 
+
     } = req.body;
+
 
 
 
@@ -350,6 +500,7 @@ app.post("/api/feedback",(req,res)=>{
 
 
 
+
     analyzeUserFeedback(
 
         userId,
@@ -357,6 +508,7 @@ app.post("/api/feedback",(req,res)=>{
         correction
 
     );
+
 
 
 
@@ -370,6 +522,7 @@ app.post("/api/feedback",(req,res)=>{
 
 
 
+
     learnViralPattern(
 
         userId,
@@ -380,16 +533,21 @@ app.post("/api/feedback",(req,res)=>{
 
 
 
+
     res.json({
+
 
         success:true,
 
         feedback
 
+
     });
 
 
 });
+
+
 
 
 
@@ -409,13 +567,18 @@ app.get("/api/strategy/:userId",(req,res)=>{
 
 
 
+
     res.json({
 
+
         success:true,
+
+
 
         strategy:
 
         generateCreatorStrategy(userId),
+
 
 
         ideas:
@@ -423,14 +586,19 @@ app.get("/api/strategy/:userId",(req,res)=>{
         generateContentIdeas(userId),
 
 
+
         script:
 
         generateScriptOutline(userId)
+
+
 
     });
 
 
 });
+
+
 
 
 
@@ -446,7 +614,9 @@ app.get("/api/profile/:userId",(req,res)=>{
 
     res.json({
 
+
         success:true,
+
 
         profile:
 
@@ -456,10 +626,13 @@ app.get("/api/profile/:userId",(req,res)=>{
 
         )
 
+
     });
 
 
 });
+
+
 
 
 
@@ -475,7 +648,9 @@ app.get("/api/viral-memory/:userId",(req,res)=>{
 
     res.json({
 
+
         success:true,
+
 
         memory:
 
@@ -484,6 +659,7 @@ app.get("/api/viral-memory/:userId",(req,res)=>{
             req.params.userId
 
         )
+
 
     });
 
@@ -494,8 +670,10 @@ app.get("/api/viral-memory/:userId",(req,res)=>{
 
 
 
+
+
 // =====================================
-// FEEDBACK STATS
+// FEEDBACK ANALYTICS
 // =====================================
 
 
@@ -515,8 +693,10 @@ app.get("/api/feedback",(req,res)=>{
 
 
 
+
+
 // =====================================
-// SERVER START
+// START SERVER
 // =====================================
 
 
@@ -531,7 +711,7 @@ app.listen(PORT,()=>{
 
     console.log(
 
-        `🚀 ChatTBM V6.6.1 running on port ${PORT}`
+        `🚀 ChatTBM V7.0 Creator Brain running on port ${PORT}`
 
     );
 
