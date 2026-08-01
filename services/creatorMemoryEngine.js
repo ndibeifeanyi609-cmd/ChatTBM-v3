@@ -21,12 +21,11 @@ const creatorMemories = {};
 
 function createMemoryProfile(userId){
 
-
     if(!creatorMemories[userId]){
-
 
         creatorMemories[userId] = {
 
+            userId,
 
             preferences:[],
 
@@ -52,9 +51,7 @@ function createMemoryProfile(userId){
 
             lastUpdated:new Date()
 
-
         };
-
 
     }
 
@@ -80,21 +77,13 @@ function updateCreatorMemory(
 
 ){
 
-
-    const memory =
-
-    createMemoryProfile(userId);
-
+    const memory = createMemoryProfile(userId);
 
 
     Object.keys(data).forEach(key=>{
 
 
-        if(
-
-            Array.isArray(memory[key])
-
-        ){
+        if(Array.isArray(memory[key])){
 
 
             memory[key].push(
@@ -104,10 +93,7 @@ function updateCreatorMemory(
             );
 
 
-
-            memory[key] =
-
-            [
+            memory[key] = [
 
                 ...new Set(
 
@@ -120,7 +106,7 @@ function updateCreatorMemory(
 
         }
 
-        else {
+        else{
 
 
             memory[key] = data[key];
@@ -132,15 +118,10 @@ function updateCreatorMemory(
     });
 
 
-
-    memory.lastUpdated =
-
-    new Date();
-
+    memory.lastUpdated = new Date();
 
 
     return memory;
-
 
 }
 
@@ -162,27 +143,17 @@ function saveCreatorMemory(
 
 ){
 
-
-    const memory =
-
-    createMemoryProfile(userId);
+    const memory = createMemoryProfile(userId);
 
 
-
-    if(
-
-        !memory[type]
-
-    ){
+    if(!memory[type]){
 
         memory[type] = [];
 
     }
 
 
-
     if(information){
-
 
         memory[type].push(
 
@@ -191,9 +162,7 @@ function saveCreatorMemory(
         );
 
 
-        memory[type] =
-
-        [
+        memory[type] = [
 
             ...new Set(
 
@@ -203,19 +172,13 @@ function saveCreatorMemory(
 
         ];
 
-
     }
 
 
-
-    memory.lastUpdated =
-
-    new Date();
-
+    memory.lastUpdated = new Date();
 
 
     return memory;
-
 
 }
 
@@ -235,23 +198,16 @@ function learnCreatorMemory(
 
 ){
 
-
-    const text =
-
-    String(content || "")
+    const text = String(content || "")
 
     .toLowerCase();
 
 
-
-    const memory =
-
-    createMemoryProfile(userId);
+    const memory = createMemoryProfile(userId);
 
 
 
     if(text.includes("cinematic")){
-
 
         memory.preferences.push(
 
@@ -259,13 +215,11 @@ function learnCreatorMemory(
 
         );
 
-
     }
 
 
 
     if(text.includes("realistic")){
-
 
         memory.preferences.push(
 
@@ -273,13 +227,11 @@ function learnCreatorMemory(
 
         );
 
-
     }
 
 
 
     if(text.includes("action")){
-
 
         memory.favoriteTopics.push(
 
@@ -287,13 +239,11 @@ function learnCreatorMemory(
 
         );
 
-
     }
 
 
 
     if(text.includes("journey")){
-
 
         memory.contentLessons.push(
 
@@ -301,19 +251,14 @@ function learnCreatorMemory(
 
         );
 
-
     }
 
 
 
-    memory.lastUpdated =
-
-    new Date();
-
+    memory.lastUpdated = new Date();
 
 
     return memory;
-
 
 }
 
@@ -327,9 +272,7 @@ function learnCreatorMemory(
 
 function getCreatorMemory(userId){
 
-
     return createMemoryProfile(userId);
-
 
 }
 
@@ -349,20 +292,13 @@ function searchMemory(
 
 ){
 
-
-    const memory =
-
-    createMemoryProfile(userId);
-
+    const memory = createMemoryProfile(userId);
 
 
     const results = [];
 
 
-
-    Object.values(memory)
-
-    .forEach(item=>{
+    Object.values(memory).forEach(item=>{
 
 
         if(Array.isArray(item)){
@@ -387,9 +323,7 @@ function searchMemory(
 
                 ){
 
-
                     results.push(value);
-
 
                 }
 
@@ -403,9 +337,7 @@ function searchMemory(
     });
 
 
-
     return results;
-
 
 }
 
