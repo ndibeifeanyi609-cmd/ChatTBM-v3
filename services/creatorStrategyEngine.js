@@ -1,128 +1,146 @@
 // =====================================
-// ChatTBM V6.5
+// ChatTBM V6.7
 // Creator Strategy Engine
 //
-// Purpose:
-// - Build creator strategies
-// - Recommend better content
-// - Suggest stronger hooks
-// - Learn from previous success
+// Connected Systems:
+// - Creator Identity
+// - Brand Voice
+// - Creator Memory
 // =====================================
+
 
 const {
 
-    getContentHistory,
+    getCreatorIdentity
 
-    getWinningPatterns,
+} = require("./creatorIdentityEngine");
 
-    getSuccessfulContent
 
-} = require("./contentPerformanceEngine");
+const {
+
+    getBrandVoice
+
+} = require("./brandVoiceEngine");
+
+
+const {
+
+    getCreatorMemory
+
+} = require("./creatorMemoryEngine");
+
 
 
 
 // =====================================
-// BUILD CREATOR STRATEGY
+// GENERATE CREATOR STRATEGY
 // =====================================
 
 function generateCreatorStrategy(userId){
 
-    const history =
-    getContentHistory(userId);
 
-    const winning =
-    getWinningPatterns(userId);
+    const identity =
 
-    const successful =
-    getSuccessfulContent(userId);
+    getCreatorIdentity(userId);
 
 
 
-    const strategy = {
+    const voice =
 
-        totalContent:
-        history.length,
+    getBrandVoice(userId);
 
-        successfulContent:
-        successful.length,
 
-        recommendedHook:
-        "",
 
-        recommendedStructure:
-        "",
+    const memory =
 
-        recommendedEmotion:
-        "",
+    getCreatorMemory(userId);
 
-        strongestFormula:
-        "",
 
-        nextSuggestion:
-        "",
 
-        confidence:
-        "Learning"
+
+    return {
+
+
+        creatorProfile: {
+
+
+            niche:
+
+            identity.niche || "Unknown",
+
+
+            style:
+
+            identity.contentStyle || "General",
+
+
+            personality:
+
+            identity.personality || "Natural",
+
+
+            audience:
+
+            identity.audience || "General"
+
+
+        },
+
+
+
+        brandVoice:{
+
+
+            tone:
+
+            voice.tone || "Natural",
+
+
+            energy:
+
+            voice.energy || "Medium",
+
+
+            writingStyle:
+
+            voice.style || "Simple"
+
+
+        },
+
+
+
+        learnedMemory:{
+
+
+            preferences:
+
+            memory.preferences,
+
+
+            topics:
+
+            memory.favoriteTopics,
+
+
+            lessons:
+
+            memory.contentLessons
+
+
+        }
+
+
 
     };
 
 
-
-    if(winning.length){
-
-        const latest =
-        winning[winning.length - 1];
-
-        strategy.recommendedHook =
-        latest.hook || "";
-
-        strategy.recommendedStructure =
-        latest.structure || "";
-
-        strategy.recommendedEmotion =
-        latest.emotion || "";
-
-        strategy.strongestFormula =
-        latest.formula || "";
-    }
-
-
-
-    if(successful.length >= 10){
-
-        strategy.confidence =
-        "High";
-
-    }
-
-    else if(successful.length >= 5){
-
-        strategy.confidence =
-        "Medium";
-
-    }
-
-
-
-    if(strategy.recommendedHook){
-
-        strategy.nextSuggestion =
-        `Create another post using "${strategy.recommendedHook}" with a stronger ending.`;
-
-    }
-
-    else{
-
-        strategy.nextSuggestion =
-        "Keep publishing content so I can learn your best-performing style.";
-
-    }
-
-
-
-    return strategy;
-
 }
+
+
+
+
+
 
 
 
@@ -132,51 +150,160 @@ function generateCreatorStrategy(userId){
 
 function generateContentIdeas(userId){
 
+
     const strategy =
+
     generateCreatorStrategy(userId);
 
-    return [
 
-        `Create a video using ${strategy.recommendedHook || "a strong opening hook"}.`,
 
-        `Follow the structure ${strategy.recommendedStructure || "Hook → Story → Ending"}.`,
+    const ideas = [];
 
-        `Focus on ${strategy.recommendedEmotion || "audience emotion"} throughout the content.`
 
-    ];
+
+
+
+    if(
+
+        strategy.creatorProfile.niche
+
+        ===
+
+        "Action Content"
+
+    ){
+
+
+        ideas.push(
+
+            "Create a cinematic action story with a surprising ending."
+
+        );
+
+
+    }
+
+
+
+
+
+    if(
+
+        strategy.creatorProfile.personality
+
+        ===
+
+        "Entertainment"
+
+    ){
+
+
+        ideas.push(
+
+            "Create a funny challenge that feels realistic."
+
+        );
+
+
+    }
+
+
+
+
+
+    if(
+
+        strategy.brandVoice.tone
+
+        ===
+
+        "Motivational"
+
+    ){
+
+
+        ideas.push(
+
+            "Create a struggle-to-success story."
+
+        );
+
+
+    }
+
+
+
+
+
+    if(ideas.length === 0){
+
+
+        ideas.push(
+
+            "Create a unique story based on your personal journey."
+
+        );
+
+
+    }
+
+
+
+
+
+    return ideas;
+
 
 }
 
 
 
+
+
+
+
+
 // =====================================
-// GENERATE SCRIPT OUTLINE
+// SCRIPT OUTLINE
 // =====================================
 
 function generateScriptOutline(userId){
 
+
     const strategy =
+
     generateCreatorStrategy(userId);
+
+
 
     return {
 
-        hook:
-        strategy.recommendedHook ||
 
-        "Strong opening",
+        hook:
+
+        `Nobody expected this from a ${strategy.creatorProfile.niche} creator.`,
+
+
 
         body:
-        strategy.recommendedStructure ||
 
-        "Build value step by step",
+        "Show the challenge, process and transformation.",
+
+
 
         ending:
 
-        "Finish with a clear call to action"
+        "Invite the audience to follow the journey."
 
     };
 
+
 }
+
+
+
+
+
 
 
 
@@ -186,10 +313,14 @@ function generateScriptOutline(userId){
 
 module.exports = {
 
+
     generateCreatorStrategy,
+
 
     generateContentIdeas,
 
+
     generateScriptOutline
+
 
 };
