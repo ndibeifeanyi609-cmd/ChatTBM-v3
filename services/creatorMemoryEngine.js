@@ -3,15 +3,11 @@
 // Creator Memory Engine
 //
 // Purpose:
-// - Store creator memories
-// - Remember important preferences
-// - Retrieve creator knowledge
+// - Store creator knowledge
+// - Learn content preferences
+// - Recall creator patterns
 // =====================================
 
-
-
-// Temporary memory storage
-// Later this can connect to database
 
 const creatorMemories = {};
 
@@ -33,21 +29,17 @@ function createMemoryProfile(userId){
 
             preferences:[],
 
-
             successfulPatterns:[],
-
 
             contentLessons:[],
 
-
             favoriteTopics:[],
-
 
             audienceInsights:[],
 
+            createdAt:new Date(),
 
             lastUpdated:new Date()
-
 
 
         };
@@ -59,9 +51,7 @@ function createMemoryProfile(userId){
 
     return creatorMemories[userId];
 
-
 }
-
 
 
 
@@ -91,9 +81,11 @@ function saveCreatorMemory(
 
     if(
 
-        memory[type] &&
-
         Array.isArray(memory[type])
+
+        &&
+
+        information
 
     ){
 
@@ -105,6 +97,19 @@ function saveCreatorMemory(
         );
 
 
+
+        memory[type] =
+
+        [
+
+            ...new Set(
+
+                memory[type]
+
+            )
+
+        ];
+
     }
 
 
@@ -112,7 +117,6 @@ function saveCreatorMemory(
     memory.lastUpdated =
 
     new Date();
-
 
 
 
@@ -126,9 +130,8 @@ function saveCreatorMemory(
 
 
 
-
 // =====================================
-// LEARN FROM CONTENT
+// LEARN MEMORY
 // =====================================
 
 function learnCreatorMemory(
@@ -142,11 +145,9 @@ function learnCreatorMemory(
 
     const text =
 
-    String(content)
+    String(content || "")
 
     .toLowerCase();
-
-
 
 
 
@@ -170,7 +171,9 @@ function learnCreatorMemory(
 
         );
 
+
     }
+
 
 
 
@@ -186,6 +189,7 @@ function learnCreatorMemory(
             "Prefers realistic content"
 
         );
+
 
     }
 
@@ -205,6 +209,7 @@ function learnCreatorMemory(
 
         );
 
+
     }
 
 
@@ -213,17 +218,16 @@ function learnCreatorMemory(
 
     if(
 
-        text.includes("motivation") ||
-
-        text.includes("journey")
+        text.includes("action")
 
     ){
 
-        memory.contentLessons.push(
+        memory.favoriteTopics.push(
 
-            "Uses inspirational storytelling"
+            "Action"
 
         );
+
 
     }
 
@@ -231,35 +235,52 @@ function learnCreatorMemory(
 
 
 
-    // Remove duplicates
+    if(
 
-    memory.preferences =
+        text.includes("growth") ||
 
-    [...new Set(
+        text.includes("journey")
 
-        memory.preferences
+    ){
 
-    )];
+        memory.contentLessons.push(
+
+            "Uses transformation storytelling"
+
+        );
 
 
-
-    memory.favoriteTopics =
-
-    [...new Set(
-
-        memory.favoriteTopics
-
-    )];
+    }
 
 
 
-    memory.contentLessons =
 
-    [...new Set(
 
-        memory.contentLessons
 
-    )];
+    Object.keys(memory)
+
+    .forEach(key=>{
+
+
+        if(Array.isArray(memory[key])){
+
+
+            memory[key] =
+
+            [
+
+                ...new Set(
+
+                    memory[key]
+
+                )
+
+            ];
+
+        }
+
+
+    });
 
 
 
@@ -268,8 +289,6 @@ function learnCreatorMemory(
     memory.lastUpdated =
 
     new Date();
-
-
 
 
 
@@ -283,8 +302,6 @@ function learnCreatorMemory(
 
 
 
-
-
 // =====================================
 // GET MEMORY
 // =====================================
@@ -292,16 +309,10 @@ function learnCreatorMemory(
 function getCreatorMemory(userId){
 
 
-    return createMemoryProfile(
-
-        userId
-
-    );
+    return createMemoryProfile(userId);
 
 
 }
-
-
 
 
 
@@ -327,7 +338,7 @@ function searchMemory(
 
 
 
-    const results = [];
+    const results=[];
 
 
 
@@ -336,13 +347,10 @@ function searchMemory(
     .forEach(item=>{
 
 
-
         if(Array.isArray(item)){
 
 
-
             item.forEach(value=>{
-
 
 
                 if(
@@ -353,7 +361,9 @@ function searchMemory(
 
                     .includes(
 
-                        keyword.toLowerCase()
+                        String(keyword)
+
+                        .toLowerCase()
 
                     )
 
@@ -372,9 +382,7 @@ function searchMemory(
         }
 
 
-
     });
-
 
 
 
@@ -388,25 +396,16 @@ function searchMemory(
 
 
 
-
-// =====================================
-// EXPORT
-// =====================================
-
 module.exports = {
 
 
     createMemoryProfile,
 
-
     saveCreatorMemory,
-
 
     learnCreatorMemory,
 
-
     getCreatorMemory,
-
 
     searchMemory
 
