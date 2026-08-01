@@ -2,7 +2,7 @@
 // ChatTBM V6.7
 // Creator Strategy Engine
 //
-// Connected Systems:
+// Connected:
 // - Creator Identity
 // - Brand Voice
 // - Creator Memory
@@ -32,8 +32,10 @@ const {
 
 
 
+
+
 // =====================================
-// GENERATE CREATOR STRATEGY
+// STRATEGY GENERATOR
 // =====================================
 
 function generateCreatorStrategy(userId){
@@ -58,30 +60,31 @@ function generateCreatorStrategy(userId){
 
 
 
+
     return {
 
 
-        creatorProfile: {
+        creatorProfile:{
 
 
             niche:
 
-            identity.niche || "Unknown",
+            identity.niche || "General Creator",
 
 
             style:
 
-            identity.contentStyle || "General",
+            identity.contentStyle || "Natural",
 
 
             personality:
 
-            identity.personality || "Natural",
+            identity.personality || "Balanced",
 
 
             audience:
 
-            identity.audience || "General"
+            identity.audience || "General Audience"
 
 
         },
@@ -96,21 +99,21 @@ function generateCreatorStrategy(userId){
             voice.tone || "Natural",
 
 
+            style:
+
+            voice.style || "Clear",
+
+
             energy:
 
-            voice.energy || "Medium",
-
-
-            writingStyle:
-
-            voice.style || "Simple"
+            voice.energy || "Medium"
 
 
         },
 
 
 
-        learnedMemory:{
+        memory:{
 
 
             preferences:
@@ -131,7 +134,6 @@ function generateCreatorStrategy(userId){
         }
 
 
-
     };
 
 
@@ -142,10 +144,8 @@ function generateCreatorStrategy(userId){
 
 
 
-
-
 // =====================================
-// GENERATE CONTENT IDEAS
+// CONTENT IDEAS
 // =====================================
 
 function generateContentIdeas(userId){
@@ -157,7 +157,7 @@ function generateContentIdeas(userId){
 
 
 
-    const ideas = [];
+    const ideas=[];
 
 
 
@@ -173,34 +173,9 @@ function generateContentIdeas(userId){
 
     ){
 
-
         ideas.push(
 
-            "Create a cinematic action story with a surprising ending."
-
-        );
-
-
-    }
-
-
-
-
-
-    if(
-
-        strategy.creatorProfile.personality
-
-        ===
-
-        "Entertainment"
-
-    ){
-
-
-        ideas.push(
-
-            "Create a funny challenge that feels realistic."
+            "Create a cinematic action story with a powerful ending."
 
         );
 
@@ -221,10 +196,9 @@ function generateContentIdeas(userId){
 
     ){
 
-
         ideas.push(
 
-            "Create a struggle-to-success story."
+            "Create a struggle-to-success journey."
 
         );
 
@@ -235,12 +209,35 @@ function generateContentIdeas(userId){
 
 
 
-    if(ideas.length === 0){
+    if(
+
+        strategy.brandVoice.tone
+
+        ===
+
+        "Funny"
+
+    ){
+
+        ideas.push(
+
+            "Create a realistic comedy challenge."
+
+        );
+
+
+    }
+
+
+
+
+
+    if(ideas.length===0){
 
 
         ideas.push(
 
-            "Create a unique story based on your personal journey."
+            "Create a story based on your creator journey."
 
         );
 
@@ -255,8 +252,6 @@ function generateContentIdeas(userId){
 
 
 }
-
-
 
 
 
@@ -281,19 +276,18 @@ function generateScriptOutline(userId){
 
         hook:
 
-        `Nobody expected this from a ${strategy.creatorProfile.niche} creator.`,
-
+        `Nobody expected this ${strategy.creatorProfile.niche} story.`,
 
 
         body:
 
-        "Show the challenge, process and transformation.",
-
+        "Show the struggle, process and transformation.",
 
 
         ending:
 
-        "Invite the audience to follow the journey."
+        "Invite viewers to follow the journey."
+
 
     };
 
@@ -305,20 +299,12 @@ function generateScriptOutline(userId){
 
 
 
-
-
-// =====================================
-// EXPORT
-// =====================================
-
-module.exports = {
+module.exports={
 
 
     generateCreatorStrategy,
 
-
     generateContentIdeas,
-
 
     generateScriptOutline
 
