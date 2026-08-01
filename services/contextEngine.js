@@ -1,21 +1,21 @@
 /* =====================================
-   ChatTBM V6.0.1
-   Context Engine V5.1
+   ChatTBM V6.7.1
+   Context Engine V5.2
 
-   Upgrade:
-   - Better follow-up understanding
+   Features:
+   - Follow-up understanding
    - Previous response memory
    - Creator editing support
    - Editor Brain connection
    - Style modification support
+   - Node.js backend compatibility
+   - Browser compatibility
 ===================================== */
-
 
 
 // =====================================
 // MAIN CONTEXT ENGINE
 // =====================================
-
 
 function contextEngine(
 
@@ -23,38 +23,24 @@ function contextEngine(
 
     history = []
 
-){
+) {
+
+    const text = normalize(message);
+
+    const previous = getPreviousContext(history);
 
 
-    const text =
-    normalize(message);
-
-
-
-    const previous =
-    getPreviousContext(history);
-
-
-
-
-
-    if(!previous){
-
+    if (!previous) {
 
         return {
 
-            matched:false,
+            matched: false,
 
-            response:null
+            response: null
 
         };
 
-
     }
-
-
-
-
 
 
 
@@ -63,7 +49,7 @@ function contextEngine(
     // ===============================
 
 
-    if(hasWords(text,[
+    if (hasWords(text, [
 
         "shorter",
         "shorten",
@@ -71,31 +57,29 @@ function contextEngine(
         "brief",
         "summarize"
 
-    ])){
+    ])) {
 
 
         return {
 
-            matched:true,
+            matched: true,
 
-            response:
-            runEditor(
+            response: runEditor(
+
                 message,
+
                 previous
+
             )
 
         };
-
 
     }
 
 
 
 
-
-
-
-    if(hasWords(text,[
+    if (hasWords(text, [
 
         "rewrite",
         "rewrite it",
@@ -103,82 +87,76 @@ function contextEngine(
         "make it better",
         "fix this"
 
-    ])){
+    ])) {
 
 
         return {
 
-            matched:true,
+            matched: true,
 
-            response:
-            runEditor(
+            response: runEditor(
+
                 message,
+
                 previous
+
             )
 
         };
-
 
     }
 
 
 
 
-
-
-
-    if(hasWords(text,[
+    if (hasWords(text, [
 
         "expand",
         "longer",
         "more details",
         "explain more"
 
-    ])){
+    ])) {
 
 
         return {
 
-            matched:true,
+            matched: true,
 
-            response:
-            runEditor(
+            response: runEditor(
+
                 message,
+
                 previous
+
             )
 
         };
-
 
     }
 
 
 
 
-
-
-
     // ===============================
-    // STYLE CHANGES
+    // STYLE MODIFICATION
     // ===============================
 
 
-    if(hasWords(text,[
+    if (hasWords(text, [
 
         "cinematic",
         "movie style",
         "dramatic"
 
-    ])){
+    ])) {
 
 
         return {
 
-            matched:true,
+            matched: true,
 
-            response:
-
-            runEditor(
+            response: runEditor(
 
                 "cinematic",
 
@@ -188,31 +166,25 @@ function contextEngine(
 
         };
 
-
     }
 
 
 
 
-
-
-
-    if(hasWords(text,[
+    if (hasWords(text, [
 
         "motivational",
         "inspiring",
         "powerful"
 
-    ])){
+    ])) {
 
 
         return {
 
-            matched:true,
+            matched: true,
 
-            response:
-
-            runEditor(
+            response: runEditor(
 
                 "motivational",
 
@@ -222,36 +194,30 @@ function contextEngine(
 
         };
 
-
     }
 
 
 
 
-
-
-
     // ===============================
-    // CONTINUE
+    // CONTINUATION
     // ===============================
 
 
-    if(hasWords(text,[
+    if (hasWords(text, [
 
         "continue",
         "keep going",
         "go on"
 
-    ])){
+    ])) {
 
 
         return {
 
-            matched:true,
+            matched: true,
 
-            response:
-
-            runEditor(
+            response: runEditor(
 
                 message,
 
@@ -261,73 +227,56 @@ function contextEngine(
 
         };
 
-
     }
 
 
 
 
-
-
-
     // ===============================
-    // LAST TOPIC
+    // PREVIOUS TOPIC
     // ===============================
 
 
-    if(hasWords(text,[
+    if (hasWords(text, [
 
         "last topic",
         "previous topic",
         "what were we talking about"
 
-    ])){
+    ])) {
 
 
         return {
 
-            matched:true,
+            matched: true,
 
             response:
 
-            "Your previous content was:\n\n" +
+                "Your previous content was:\n\n" +
 
-            previous
+                previous
 
         };
-
 
     }
 
 
 
-
-
-
-
     return {
 
-        matched:false,
+        matched: false,
 
-        response:null
+        response: null
 
     };
-
 
 }
 
 
 
-
-
-
-
-
-
 // =====================================
-// EDITOR CONNECTION
+// EDITOR BRAIN CONNECTION
 // =====================================
-
 
 function runEditor(
 
@@ -335,27 +284,55 @@ function runEditor(
 
     content
 
-){
+) {
+
+
+    let editorBrain = null;
 
 
 
-    if(
+    // Browser environment
 
-        window.editorBrain &&
+    if (
+
+        typeof window !== "undefined" &&
 
         typeof window.editorBrain === "function"
 
-    ){
+    ) {
+
+        editorBrain = window.editorBrain;
+
+    }
 
 
-        return window.editorBrain(
+
+    // Node.js environment
+
+    if (
+
+        typeof global !== "undefined" &&
+
+        typeof global.editorBrain === "function"
+
+    ) {
+
+        editorBrain = global.editorBrain;
+
+    }
+
+
+
+    if (editorBrain) {
+
+
+        return editorBrain(
 
             command,
 
             content
 
         );
-
 
     }
 
@@ -368,26 +345,14 @@ function runEditor(
 
 
 
-
-
-
-
-
-
 // =====================================
-// GET LAST ASSISTANT MESSAGE
+// MEMORY RETRIEVAL
 // =====================================
 
-
-function getPreviousContext(history){
-
+function getPreviousContext(history) {
 
 
-    if(
-
-        !Array.isArray(history)
-
-    ){
+    if (!Array.isArray(history)) {
 
         return "";
 
@@ -395,10 +360,7 @@ function getPreviousContext(history){
 
 
 
-
-
-
-    for(
+    for (
 
         let i = history.length - 1;
 
@@ -406,45 +368,33 @@ function getPreviousContext(history){
 
         i--
 
-    ){
+    ) {
+
+
+        const item = history[i];
 
 
 
-        const item =
-        history[i];
-
-
-
-
-
-        if(
+        if (
 
             item.role === "assistant" &&
 
             item.message
 
-        ){
+        ) {
+
 
             return item.message;
 
         }
 
-
     }
-
 
 
 
     return "";
 
-
 }
-
-
-
-
-
-
 
 
 
@@ -452,25 +402,21 @@ function getPreviousContext(history){
 // HELPERS
 // =====================================
 
-
-function normalize(text){
+function normalize(text) {
 
 
     return String(text)
 
-    .toLowerCase()
+        .toLowerCase()
 
-    .trim();
+        .trim();
 
 
 }
 
 
 
-
-
-
-function hasWords(text,words){
+function hasWords(text, words) {
 
 
     return words.some(word =>
@@ -479,20 +425,40 @@ function hasWords(text,words){
 
     );
 
+}
+
+
+
+// =====================================
+// EXPORT SYSTEM
+// =====================================
+
+if (
+
+    typeof module !== "undefined" &&
+
+    module.exports
+
+) {
+
+
+    module.exports = {
+
+        contextEngine
+
+    };
 
 }
 
 
 
+if (
+
+    typeof window !== "undefined"
+
+) {
 
 
+    window.contextEngine = contextEngine;
 
-
-
-
-// =====================================
-// EXPORT
-// =====================================
-
-
-window.contextEngine = contextEngine;
+}
