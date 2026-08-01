@@ -1,19 +1,18 @@
 // =====================================
-// ChatTBM V6.6
+// ChatTBM V6.6.1
 // Prediction Engine
 //
-// Purpose:
-// - Predict content performance
-// - Estimate viral potential
-// - Explain prediction
-// - Recommend improvements
+// Uses:
+// - Intelligence Core
 // =====================================
+
 
 const {
 
-    analyzeViralPattern
+    analyzeContent
 
-} = require("./viralMemoryBridge");
+} = require("./intelligenceCore");
+
 
 
 
@@ -23,26 +22,29 @@ const {
 
 function predictContent(content){
 
-    const pattern =
-    analyzeViralPattern(content);
+
+    const analysis =
+
+    analyzeContent(content);
+
+
 
     let score = 50;
+
 
     const reasons = [];
 
 
 
-    // ===============================
-    // HOOK SCORE
-    // ===============================
 
-    if(pattern.hook){
+
+    if(analysis.hook){
 
         score += 15;
 
         reasons.push(
 
-            "Strong opening hook"
+            "Strong hook detected"
 
         );
 
@@ -50,17 +52,14 @@ function predictContent(content){
 
 
 
-    // ===============================
-    // STORY STRUCTURE
-    // ===============================
 
-    if(pattern.structure){
+    if(analysis.structure){
 
         score += 15;
 
         reasons.push(
 
-            "Clear story structure"
+            "Clear content structure"
 
         );
 
@@ -68,11 +67,8 @@ function predictContent(content){
 
 
 
-    // ===============================
-    // EMOTION
-    // ===============================
 
-    if(pattern.emotion){
+    if(analysis.emotion){
 
         score += 10;
 
@@ -86,11 +82,8 @@ function predictContent(content){
 
 
 
-    // ===============================
-    // ENGAGEMENT
-    // ===============================
 
-    if(pattern.trigger){
+    if(analysis.trigger){
 
         score += 10;
 
@@ -104,7 +97,6 @@ function predictContent(content){
 
 
 
-    // Limit score
 
     if(score > 100){
 
@@ -114,7 +106,10 @@ function predictContent(content){
 
 
 
+
     let level = "Low";
+
+
 
     if(score >= 80){
 
@@ -130,6 +125,7 @@ function predictContent(content){
 
 
 
+
     return {
 
         score,
@@ -138,29 +134,32 @@ function predictContent(content){
 
         reasons,
 
-        pattern
+        analysis
 
     };
+
 
 }
 
 
 
+
 // =====================================
-// CONTENT IMPROVEMENT
+// IMPROVEMENTS
 // =====================================
 
-function recommendImprovements(prediction){
+function recommendImprovements(result){
+
 
     const tips = [];
 
 
 
-    if(!prediction.pattern.hook){
+    if(!result.analysis.hook){
 
         tips.push(
 
-            "Use a stronger opening hook."
+            "Improve the opening hook"
 
         );
 
@@ -168,11 +167,11 @@ function recommendImprovements(prediction){
 
 
 
-    if(!prediction.pattern.structure){
+    if(!result.analysis.structure){
 
         tips.push(
 
-            "Create a clearer beginning, middle and ending."
+            "Add a clearer story structure"
 
         );
 
@@ -180,11 +179,11 @@ function recommendImprovements(prediction){
 
 
 
-    if(!prediction.pattern.emotion){
+    if(!result.analysis.emotion){
 
         tips.push(
 
-            "Add emotion that viewers can relate to."
+            "Add more emotion"
 
         );
 
@@ -192,23 +191,11 @@ function recommendImprovements(prediction){
 
 
 
-    if(!prediction.pattern.trigger){
+    if(!result.analysis.trigger){
 
         tips.push(
 
-            "Finish with a reason to comment, share or follow."
-
-        );
-
-    }
-
-
-
-    if(tips.length === 0){
-
-        tips.push(
-
-            "Content already has strong prediction signals."
+            "Add a call to action"
 
         );
 
@@ -218,18 +205,19 @@ function recommendImprovements(prediction){
 
     return tips;
 
+
 }
 
 
 
-// =====================================
-// EXPORT
-// =====================================
+
 
 module.exports = {
+
 
     predictContent,
 
     recommendImprovements
+
 
 };
