@@ -1,65 +1,53 @@
 // =====================================
-// ChatTBM V6.3
-// Advanced Creator Memory System
-// Creator Brain Foundation
-// =====================================
-
-
-// =====================================
-// TEMPORARY CREATOR DATABASE
+// ChatTBM V6.7
+// Creator Memory Engine
 //
-// Future:
-// MongoDB / PostgreSQL / Firebase
+// Purpose:
+// - Store creator memories
+// - Remember important preferences
+// - Retrieve creator knowledge
 // =====================================
 
-const creatorMemory = {};
 
+
+// Temporary memory storage
+// Later this can connect to database
+
+const creatorMemories = {};
 
 
 
 
 // =====================================
-// CREATE CREATOR MEMORY SPACE
+// CREATE MEMORY PROFILE
 // =====================================
 
-function createCreatorMemory(userId){
+function createMemoryProfile(userId){
 
 
-    if(!creatorMemory[userId]){
+    if(!creatorMemories[userId]){
 
 
-        creatorMemory[userId] = {
+        creatorMemories[userId] = {
 
 
-            userId,
+            preferences:[],
 
 
-            brandVoice: "",
+            successfulPatterns:[],
 
 
-            contentStyle: "",
+            contentLessons:[],
 
 
-            audience: "",
+            favoriteTopics:[],
 
 
-            successfulContent: [],
+            audienceInsights:[],
 
 
-            viralPatterns: [],
+            lastUpdated:new Date()
 
-
-            strategies: [],
-
-
-            created:
-
-            new Date().toISOString(),
-
-
-            updated:
-
-            new Date().toISOString()
 
 
         };
@@ -69,7 +57,7 @@ function createCreatorMemory(userId){
 
 
 
-    return creatorMemory[userId];
+    return creatorMemories[userId];
 
 
 }
@@ -78,70 +66,53 @@ function createCreatorMemory(userId){
 
 
 
-// =====================================
-// GET CREATOR MEMORY
-// =====================================
-
-function getCreatorMemory(userId){
-
-
-    return createCreatorMemory(
-
-        userId
-
-    );
-
-
-}
-
-
-
 
 
 // =====================================
-// UPDATE CREATOR MEMORY
+// SAVE MEMORY
 // =====================================
 
-function updateCreatorMemory(
+function saveCreatorMemory(
 
     userId,
 
-    data
+    type,
+
+    information
 
 ){
 
 
     const memory =
 
-    createCreatorMemory(
-
-        userId
-
-    );
+    createMemoryProfile(userId);
 
 
 
-    Object.keys(data)
+    if(
 
-    .forEach(key=>{
+        memory[type] &&
 
+        Array.isArray(memory[type])
 
-        if(data[key] !== undefined){
-
-
-            memory[key] = data[key];
+    ){
 
 
-        }
+        memory[type].push(
+
+            information
+
+        );
 
 
-    });
+    }
 
 
 
-    memory.updated =
+    memory.lastUpdated =
 
-    new Date().toISOString();
+    new Date();
+
 
 
 
@@ -149,3 +120,295 @@ function updateCreatorMemory(
 
 
 }
+
+
+
+
+
+
+
+// =====================================
+// LEARN FROM CONTENT
+// =====================================
+
+function learnCreatorMemory(
+
+    userId,
+
+    content
+
+){
+
+
+    const text =
+
+    String(content)
+
+    .toLowerCase();
+
+
+
+
+
+    const memory =
+
+    createMemoryProfile(userId);
+
+
+
+
+
+    if(
+
+        text.includes("cinematic")
+
+    ){
+
+        memory.preferences.push(
+
+            "Prefers cinematic style"
+
+        );
+
+    }
+
+
+
+
+    if(
+
+        text.includes("realistic")
+
+    ){
+
+        memory.preferences.push(
+
+            "Prefers realistic content"
+
+        );
+
+    }
+
+
+
+
+
+    if(
+
+        text.includes("comedy")
+
+    ){
+
+        memory.favoriteTopics.push(
+
+            "Comedy"
+
+        );
+
+    }
+
+
+
+
+
+    if(
+
+        text.includes("motivation") ||
+
+        text.includes("journey")
+
+    ){
+
+        memory.contentLessons.push(
+
+            "Uses inspirational storytelling"
+
+        );
+
+    }
+
+
+
+
+
+    // Remove duplicates
+
+    memory.preferences =
+
+    [...new Set(
+
+        memory.preferences
+
+    )];
+
+
+
+    memory.favoriteTopics =
+
+    [...new Set(
+
+        memory.favoriteTopics
+
+    )];
+
+
+
+    memory.contentLessons =
+
+    [...new Set(
+
+        memory.contentLessons
+
+    )];
+
+
+
+
+
+    memory.lastUpdated =
+
+    new Date();
+
+
+
+
+
+    return memory;
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// GET MEMORY
+// =====================================
+
+function getCreatorMemory(userId){
+
+
+    return createMemoryProfile(
+
+        userId
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// SEARCH MEMORY
+// =====================================
+
+function searchMemory(
+
+    userId,
+
+    keyword
+
+){
+
+
+    const memory =
+
+    createMemoryProfile(userId);
+
+
+
+    const results = [];
+
+
+
+    Object.values(memory)
+
+    .forEach(item=>{
+
+
+
+        if(Array.isArray(item)){
+
+
+
+            item.forEach(value=>{
+
+
+
+                if(
+
+                    String(value)
+
+                    .toLowerCase()
+
+                    .includes(
+
+                        keyword.toLowerCase()
+
+                    )
+
+                ){
+
+
+                    results.push(value);
+
+
+                }
+
+
+            });
+
+
+        }
+
+
+
+    });
+
+
+
+
+    return results;
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// EXPORT
+// =====================================
+
+module.exports = {
+
+
+    createMemoryProfile,
+
+
+    saveCreatorMemory,
+
+
+    learnCreatorMemory,
+
+
+    getCreatorMemory,
+
+
+    searchMemory
+
+
+};
