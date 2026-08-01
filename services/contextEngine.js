@@ -9,7 +9,6 @@
    - Editor Brain connection
    - Style modification support
    - Node.js backend compatibility
-   - Browser compatibility
 ===================================== */
 
 
@@ -30,6 +29,7 @@ function contextEngine(
     const previous = getPreviousContext(history);
 
 
+
     if (!previous) {
 
         return {
@@ -45,7 +45,7 @@ function contextEngine(
 
 
     // ===============================
-    // EDIT COMMANDS
+    // EDIT REQUESTS
     // ===============================
 
 
@@ -78,7 +78,6 @@ function contextEngine(
 
 
 
-
     if (hasWords(text, [
 
         "rewrite",
@@ -105,7 +104,6 @@ function contextEngine(
         };
 
     }
-
 
 
 
@@ -137,9 +135,8 @@ function contextEngine(
 
 
 
-
     // ===============================
-    // STYLE MODIFICATION
+    // STYLE CONTROL
     // ===============================
 
 
@@ -170,7 +167,6 @@ function contextEngine(
 
 
 
-
     if (hasWords(text, [
 
         "motivational",
@@ -196,11 +192,8 @@ function contextEngine(
 
     }
 
-
-
-
     // ===============================
-    // CONTINUATION
+    // CONTINUE REQUESTS
     // ===============================
 
 
@@ -228,7 +221,6 @@ function contextEngine(
         };
 
     }
-
 
 
 
@@ -270,6 +262,7 @@ function contextEngine(
 
     };
 
+
 }
 
 
@@ -291,7 +284,7 @@ function runEditor(
 
 
 
-    // Browser environment
+    // Browser support
 
     if (
 
@@ -307,7 +300,7 @@ function runEditor(
 
 
 
-    // Node.js environment
+    // Node.js support
 
     if (
 
@@ -346,7 +339,7 @@ function runEditor(
 
 
 // =====================================
-// MEMORY RETRIEVAL
+// MEMORY CONTEXT RETRIEVAL
 // =====================================
 
 function getPreviousContext(history) {
@@ -382,7 +375,6 @@ function getPreviousContext(history) {
             item.message
 
         ) {
-
 
             return item.message;
 
@@ -433,6 +425,9 @@ function hasWords(text, words) {
 // EXPORT SYSTEM
 // =====================================
 
+
+// Node.js backend
+
 if (
 
     typeof module !== "undefined" &&
@@ -451,6 +446,8 @@ if (
 }
 
 
+
+// Browser frontend
 
 if (
 
