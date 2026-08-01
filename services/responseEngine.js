@@ -1,15 +1,13 @@
 // =====================================
-// ChatTBM V6.2
+// ChatTBM V6.7.1
 // Response Intelligence Engine
-// Personal Brain Edition
 //
 // Features:
-// - Context Understanding
-// - Creator Profile Awareness
-// - Memory Support
-// - Personality Adaptation
+// - Creator Content Generation
+// - Memory Awareness
+// - Profile Adaptation
+// - Smart Responses
 // =====================================
-
 
 
 const {
@@ -29,10 +27,11 @@ const {
 
 
 
+
+
 // =====================================
 // MAIN RESPONSE GENERATOR
 // =====================================
-
 
 function generateResponse(
 
@@ -59,7 +58,17 @@ function generateResponse(
 
     const text =
 
-    message.toLowerCase().trim();
+    String(message || "")
+
+    .toLowerCase();
+
+
+
+
+
+    let response = "";
+
+
 
 
 
@@ -73,8 +82,6 @@ function generateResponse(
 
 
     if(
-
-        brainContext &&
 
         brainContext.userId
 
@@ -95,9 +102,13 @@ function generateResponse(
 
 
 
+
+
+
     // =====================================
-    // FOLLOW UP CONTEXT
+    // CONTEXT MEMORY
     // =====================================
+
 
     const context =
 
@@ -126,25 +137,20 @@ function generateResponse(
 
 
 
-    let response = "";
-
-// =====================================
-// GREETING SYSTEM
-// =====================================
 
 
-if(
-
-    text === "hi" ||
-
-    text === "hello" ||
-
-    text === "hey"
-
-){
 
 
-    response =
+
+    // =====================================
+    // GREETING
+    // =====================================
+
+
+    if(intent === "greeting"){
+
+
+        response =
 
 `Hello 👋
 
@@ -154,299 +160,286 @@ I can help you create:
 
 🎬 Video scripts
 ✍️ Captions
-💡 Viral ideas
-📢 Advert content
-📅 Content plans
+🔥 Viral ideas
+📢 Marketing content
 
 What are we creating today?`;
 
-}
 
 
+    }
 
 
 
-// =====================================
-// SCRIPT GENERATION
-// =====================================
 
 
-else if(
 
-    intent === "script_generation" ||
 
-    text.includes("script") ||
+    // =====================================
+    // SCRIPT GENERATION
+    // =====================================
 
-    text.includes("video")
 
-){
+    else if(
 
+        intent === "script_generation"
 
-    response =
+    ){
 
-`Let's create your video script 🎬
 
+        response =
 
-Tell me:
 
-1️⃣ Topic
+`🎬 Video Script
 
-2️⃣ Duration
 
-3️⃣ Platform
+🔥 HOOK:
 
-4️⃣ Style
+Nobody sees the beginning. They only see the results.
 
 
-I'll structure a complete script for you.`;
+🎭 BODY:
 
-}
+Show the struggle, the failures, the lessons, and the process behind the growth.
 
+Let people see the moments when you had to keep going even when nobody was watching.
 
 
+🚀 ENDING:
 
+The journey is still being written.
 
-// =====================================
-// CAPTION GENERATION
-// =====================================
+Follow the journey and watch the transformation happen.
 
 
-else if(
 
-    intent === "caption_generation" ||
+`;
 
-    text.includes("caption")
 
-){
 
+    }
 
-    response =
 
-`Let's create your caption ✍️
 
 
-Tell me:
 
-• What is the content about?
-• Which platform?
-• What tone do you want?
 
 
-I'll create a caption that matches your audience.`;
+    // =====================================
+    // CAPTION GENERATION
+    // =====================================
 
-}
 
+    else if(
 
+        intent === "caption_generation"
 
+    ){
 
 
-// =====================================
-// CONTENT IDEA GENERATION
-// =====================================
+        response =
 
 
-else if(
+`🔥 Caption:
 
-    intent === "idea_generation" ||
+Nobody saw the days I struggled.
 
-    text.includes("idea")
+They only see the moment I succeed.
 
-){
+Every step, every failure, every lesson built this journey.
 
+The process is the story. 🚀`;
 
-    response =
 
-`Let's generate content ideas 💡
 
+    }
 
-Tell me:
 
-• Your niche
-• Your audience
-• Your platform
 
 
-I'll create ideas designed for growth.`;
 
-}
 
 
 
+    // =====================================
+    // IDEA GENERATION
+    // =====================================
 
 
-// =====================================
-// ADVERT CREATION
-// =====================================
+    else if(
 
+        intent === "idea_generation"
 
-else if(
+    ){
 
-    text.includes("advert") ||
 
-    text.includes("promotion") ||
+        response =
 
-    text.includes("marketing")
 
-){
+`🔥 Viral Content Ideas:
 
 
-    response =
+1. Nobody believed in me story
 
-`Let's create your advert 📢
+2. Before vs After transformation
 
+3. Behind the scenes struggle
 
-Tell me:
+4. Failed attempt that became success
 
-• Product/service
-• Target audience
-• Platform
-• Style
+5. My journey nobody saw
 
 
-I'll help create a strong marketing message.`;
 
-}
+Choose one and I'll build the full script.`;
 
 
 
+    }
 
 
-// =====================================
-// DEFAULT INTELLIGENT RESPONSE
-// =====================================
 
 
-else {
 
 
-    response =
 
-`I understand your request.
 
-I'll help you create something valuable.
+    // =====================================
+    // MARKETING
+    // =====================================
 
-Tell me more details so I can give you the best result.`;
 
-}
+    else if(
 
-// =====================================
-// ADD CREATOR PROFILE PERSONALIZATION
-// =====================================
+        intent === "marketing"
 
+    ){
 
-if(profilePrompt){
 
+        response =
 
-    response +=
 
+`📢 Marketing Script:
 
-    `\n\n🧠 Creator Profile Applied:\n${profilePrompt}`;
 
+Problem:
 
-}
+Show the audience a challenge they face.
 
 
+Solution:
 
+Present your product or service as the answer.
 
 
-// =====================================
-// MEMORY CONTEXT
-// =====================================
+Action:
 
+Tell them the next step to take.`;
 
-if(
 
-    brainContext &&
 
-    brainContext.memoryContext
+    }
 
-){
 
 
-    response +=
 
 
-    `\n\n🗂️ Memory Context:\n${brainContext.memoryContext}`;
 
 
-}
 
+    // =====================================
+    // CREATOR STRATEGY
+    // =====================================
 
 
+    else if(
 
+        intent === "creator_strategy"
 
-// =====================================
-// RELATIONSHIP MEMORY
-// =====================================
+    ){
 
 
-if(
+        response =
 
-    brainContext &&
 
-    brainContext.relationships &&
+`🚀 Creator Growth Strategy:
 
-    brainContext.relationships.length > 0
 
-){
+1. Build a recognizable style.
 
+2. Create consistently.
 
-    response +=
+3. Study audience reactions.
 
+4. Improve every video.
 
-    `\n\n🔗 Connected with your previous work.`;
+5. Turn your journey into your brand.`;
 
 
-}
 
+    }
 
 
 
 
-// =====================================
-// AI PREFERENCE ADAPTATION
-// =====================================
 
 
-if(
 
-    aiContext &&
 
-    aiContext.enhancedPrompt
+    // =====================================
+    // DEFAULT
+    // =====================================
 
-){
 
+    else {
 
-    response +=
 
+        response =
 
-    `\n\n🤖 Response adjusted to your preferences.`;
 
+`I understand.
 
-}
+I can help you turn this into:
 
+🎬 A video script
+✍️ A caption
+🔥 Viral content idea
+📢 Marketing content
 
+Tell me what you want to create.`;
 
 
 
-// =====================================
-// PREVIOUS DISCUSSION CONTEXT
-// =====================================
+    }
 
 
-if(
 
-    facts &&
 
-    facts.lastMessage
 
-){
 
 
-    response +=
 
 
-    `\n\n📚 Previous discussion:\n"${facts.lastMessage}"`;
+    // =====================================
+    // ADD PROFILE
+    // =====================================
+
+
+    if(profilePrompt){
+
+
+        response +=
+
+        `\n\n🧠 Creator Profile:\n${profilePrompt}`;
+
+
+    }
+
+
+
+
+
+    return response;
 
 
 }
@@ -455,23 +448,6 @@ if(
 
 
 
-// =====================================
-// FINAL RESPONSE
-// =====================================
-
-
-return response;
-
-
-}
-
-
-
-
-
-// =====================================
-// EXPORT
-// =====================================
 
 
 module.exports = {
