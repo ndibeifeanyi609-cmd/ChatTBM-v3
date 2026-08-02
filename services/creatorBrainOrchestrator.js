@@ -1,5 +1,5 @@
 // =========================================
-// ChatTBM V6.8.1
+// ChatTBM V7.0
 // Creator Brain Orchestrator
 //
 // Purpose:
@@ -7,6 +7,13 @@
 // - Coordinate creator systems
 // - Build complete creator context
 // - Prepare AI decisions
+//
+// Connected:
+// - Identity Intelligence
+// - Memory Intelligence
+// - Brand Intelligence
+// - Growth Intelligence
+// - Strategy Intelligence
 // =========================================
 
 
@@ -43,9 +50,21 @@ const {
 
 const {
 
-    getGrowthProfile
+    getGrowthProfile,
+
+    buildGrowthStrategy
 
 } = require("./creatorGrowthEngine");
+
+
+
+
+
+const {
+
+    generateCreatorStrategy
+
+} = require("./creatorStrategyEngine");
 
 
 
@@ -62,22 +81,33 @@ require("./intelligenceFusionEngine");
 
 
 
+
 class CreatorBrainOrchestrator {
 
 
 
-    constructor(){
 
 
-        this.fusion =
-
-        new IntelligenceFusionEngine();
+constructor(){
 
 
-    }
+    this.fusion =
+
+    new IntelligenceFusionEngine();
+
+
+}
+
+
+
+
+
+
+
+
 
 // =====================================
-// BUILD CREATOR BRAIN PROFILE
+// BUILD CREATOR PROFILE
 // =====================================
 
 
@@ -132,6 +162,18 @@ buildCreatorProfile(userId){
 
 
 
+    const strategy =
+
+    generateCreatorStrategy(
+
+        userId
+
+    );
+
+
+
+
+
 
 
 
@@ -158,6 +200,10 @@ buildCreatorProfile(userId){
 
 
 
+        strategy,
+
+
+
         createdAt:new Date()
 
 
@@ -166,6 +212,14 @@ buildCreatorProfile(userId){
 
 
 }
+
+
+
+
+
+
+
+
 
 // =====================================
 // ANALYZE CREATOR BRAIN
@@ -176,7 +230,7 @@ analyze(
 
     userId,
 
-    request = ""
+    request=""
 
 ){
 
@@ -185,6 +239,21 @@ analyze(
     const profile =
 
     this.buildCreatorProfile(
+
+        userId
+
+    );
+
+
+
+
+
+
+
+
+    const growthDirection =
+
+    buildGrowthStrategy(
 
         userId
 
@@ -226,7 +295,17 @@ analyze(
 
             growth:
 
-            profile.growth || {}
+            profile.growth || {},
+
+
+
+            strategy:
+
+            profile.strategy || {},
+
+
+
+            growthDirection
 
 
 
@@ -318,9 +397,16 @@ buildInstructions(context){
 
 
 
+        strategy:
+
+        context.strategy,
+
+
+
         rule:
 
-        "Always create content matching the creator identity."
+
+        "Always create content matching the creator identity, audience, brand voice and growth direction."
 
 
 
@@ -328,6 +414,14 @@ buildInstructions(context){
 
 
 }
+
+
+
+
+
+
+
+
 
 // =====================================
 // UPDATE CREATOR BRAIN
@@ -338,7 +432,7 @@ learn(
 
     userId,
 
-    data = {}
+    data={}
 
 ){
 
@@ -358,83 +452,15 @@ learn(
 
 
 
-    if(data.identity){
+    Object.keys(data)
+
+    .forEach(key=>{
 
 
-        context.identity =
-
-        data.identity;
+        context[key] = data[key];
 
 
-    }
-
-
-
-
-
-
-
-
-    if(data.memory){
-
-
-        context.memory =
-
-        data.memory;
-
-
-    }
-
-
-
-
-
-
-
-
-    if(data.voice){
-
-
-        context.voice =
-
-        data.voice;
-
-
-    }
-
-
-
-
-
-
-
-
-    if(data.growth){
-
-
-        context.growth =
-
-        data.growth;
-
-
-    }
-
-
-
-
-
-
-
-
-    if(data.strategy){
-
-
-        context.strategy =
-
-        data.strategy;
-
-
-    }
+    });
 
 
 
@@ -547,9 +573,22 @@ getBrainStatus(userId){
 
 }
 
-// =====================================
-// MODULE EXPORT
-// =====================================
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
 
 
 module.exports = CreatorBrainOrchestrator;
