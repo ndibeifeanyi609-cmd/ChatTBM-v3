@@ -1,28 +1,177 @@
 // =====================================
-// ChatTBM V6.8.3
+// ChatTBM V6.8.5
 // Growth Controller
 //
-// Purpose:
-// - Handle creator growth requests
+// Systems:
+// - Growth Intelligence
+// - Content Performance
+// - Recommendations
 // =====================================
 
 
-function growthHandler(req, res){
 
-    res.json({
+const {
 
-        success:true,
+    analyzeContentPerformance,
 
-        message:"Growth controller ready"
+    generateGrowthRecommendations,
 
-    });
+    getGrowthProfile
+
+} = require("../services/creatorGrowthEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// GROWTH HANDLER
+// =====================================
+
+
+function growthHandler(req,res){
+
+
+    try{
+
+
+        const {
+
+
+            userId="guest",
+
+
+            content=""
+
+
+        } = req.body;
+
+
+
+
+
+
+
+
+        const performance =
+
+        analyzeContentPerformance(
+
+            userId,
+
+            content
+
+        );
+
+
+
+
+
+
+
+
+        const recommendations =
+
+        generateGrowthRecommendations(
+
+            userId
+
+        );
+
+
+
+
+
+
+
+
+        const profile =
+
+        getGrowthProfile(
+
+            userId
+
+        );
+
+
+
+
+
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            version:"V6.8.5",
+
+
+            growth:{
+
+
+                performance,
+
+
+                recommendations,
+
+
+                profile
+
+
+            }
+
+
+        });
+
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            error:error.message
+
+
+        });
+
+
+    }
+
+
 
 }
 
 
 
+
+
+
+
+
+
 module.exports = {
 
+
     growthHandler
+
 
 };
