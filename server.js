@@ -6,6 +6,8 @@
 // - Response Intelligence
 // - Creator Identity
 // - Creator Memory
+// - Brand Voice
+// - Adaptive Response
 // - Adaptive Brain
 // - Relationship Intelligence
 // - Growth Intelligence
@@ -35,6 +37,8 @@ app.use(express.json());
 
 
 
+
+
 // =====================================
 // RESPONSE ENGINE
 // =====================================
@@ -56,6 +60,40 @@ const {
 
 
 // =====================================
+// ADAPTIVE IDENTITY BRIDGE
+// =====================================
+
+
+const AdaptiveIdentityBridge =
+
+require("./services/adaptiveIdentityBridge");
+
+
+
+
+
+const identityBridge =
+
+new AdaptiveIdentityBridge();
+
+
+
+
+
+connectAdaptiveEngine(
+
+    identityBridge
+
+);
+
+
+
+
+
+
+
+
+// =====================================
 // INTENT ENGINE
 // =====================================
 
@@ -66,6 +104,17 @@ const {
 
 } = require("./services/intentEngine");
 
+// =====================================
+// CREATOR LEARNING ENGINE
+// =====================================
+
+
+const {
+
+    analyzeCreatorInput
+
+} = require("./services/creatorLearningEngine");
+
 
 
 
@@ -74,7 +123,7 @@ const {
 
 
 // =====================================
-// CREATOR IDENTITY
+// CREATOR IDENTITY ENGINE
 // =====================================
 
 
@@ -94,7 +143,7 @@ const {
 
 
 // =====================================
-// CREATOR MEMORY
+// CREATOR MEMORY ENGINE
 // =====================================
 
 
@@ -105,6 +154,83 @@ const {
     getCreatorMemory
 
 } = require("./services/creatorMemoryEngine");
+
+
+
+
+
+
+
+
+// =====================================
+// BRAND VOICE ENGINE
+// =====================================
+
+
+const {
+
+    learnBrandVoice,
+
+    getBrandVoice
+
+} = require("./services/brandVoiceEngine");
+
+
+
+
+
+
+
+
+// =====================================
+// USER PROFILE ENGINE
+// =====================================
+
+
+const {
+
+    getProfile
+
+} = require("./services/userProfileEngine");
+
+
+
+
+
+
+
+
+// =====================================
+// CREATOR STRATEGY ENGINE
+// =====================================
+
+
+const {
+
+    generateCreatorStrategy,
+
+    generateContentIdeas,
+
+    generateScriptOutline
+
+} = require("./services/creatorStrategyEngine");
+
+// =====================================
+// RELATIONSHIP INTELLIGENCE
+// =====================================
+
+
+const RelationshipIntelligenceEngine =
+
+require("./services/relationshipIntelligenceEngine");
+
+
+
+
+
+const relationshipEngine =
+
+new RelationshipIntelligenceEngine();
 
 
 
@@ -128,19 +254,6 @@ const {
 
 } = require("./services/creatorGrowthEngine");
 
-// =====================================
-// BRAND VOICE SYSTEM
-// =====================================
-
-
-const {
-
-    learnBrandVoice,
-
-    getBrandVoice
-
-} = require("./services/brandVoiceEngine");
-
 
 
 
@@ -149,47 +262,7 @@ const {
 
 
 // =====================================
-// CREATOR STRATEGY SYSTEM
-// =====================================
-
-
-const {
-
-    generateCreatorStrategy,
-
-    generateContentIdeas,
-
-    generateScriptOutline
-
-} = require("./services/creatorStrategyEngine");
-
-
-
-
-
-
-
-
-// =====================================
-// USER PROFILE SYSTEM
-// =====================================
-
-
-const {
-
-    getProfile
-
-} = require("./services/userProfileEngine");
-
-
-
-
-
-
-
-
-// =====================================
-// FEEDBACK LEARNING SYSTEM
+// FEEDBACK ENGINE
 // =====================================
 
 
@@ -209,7 +282,7 @@ const {
 
 
 // =====================================
-// PERFORMANCE LEARNING
+// PERFORMANCE LEARNING ENGINE
 // =====================================
 
 
@@ -227,60 +300,7 @@ const {
 
 
 // =====================================
-// RELATIONSHIP INTELLIGENCE
-// =====================================
-
-
-const RelationshipIntelligenceEngine =
-
-require("./services/relationshipIntelligenceEngine");
-
-
-
-
-const relationshipEngine =
-
-new RelationshipIntelligenceEngine();
-
-
-
-
-
-
-
-
-// =====================================
-// CREATOR LEARNING
-// =====================================
-
-
-const {
-
-    analyzeCreatorInput
-
-} = require("./services/creatorLearningEngine");
-
-
-
-
-
-
-
-
-
-// =====================================
-// CONNECT RESPONSE INTELLIGENCE
-// =====================================
-
-
-connectAdaptiveEngine(
-
-    require("./services/creatorIdentityEngine")
-
-);
-
-// =====================================
-// HEALTH CHECK
+// SERVER HEALTH CHECK
 // =====================================
 
 
@@ -296,21 +316,14 @@ app.get("/",(req,res)=>{
         version:"V6.7.7",
 
 
-        status:"Creator Growth Intelligence Online 🚀"
+        status:"Creator Intelligence Online 🚀"
+
 
 
     });
 
 
 });
-
-
-
-
-
-
-
-
 
 // =====================================
 // CHAT ENGINE V6.7.7
@@ -340,6 +353,7 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
         if(!message){
 
 
@@ -350,6 +364,7 @@ app.post("/api/chat",(req,res)=>{
 
 
                 message:"No message received"
+
 
 
             });
@@ -364,8 +379,9 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
         // =====================================
-        // CREATOR LEARNING
+        // LEARNING SYSTEMS
         // =====================================
 
 
@@ -479,114 +495,113 @@ app.post("/api/chat",(req,res)=>{
 
         );
 
-// =====================================
-// RESPONSE GENERATION
-// =====================================
 
 
-const response =
-
-generateResponse(
-
-    intent,
-
-    message,
-
-    {},
-
-    [],
-
-    {},
-
-    [],
-
-    {},
-
-    [],
-
-    {
 
 
-        userId,
 
 
-        strategy,
+
+        // =====================================
+        // RESPONSE GENERATION
+        // =====================================
 
 
-        profile:
+        const response =
 
-        getProfile(userId)
+        generateResponse(
+
+            intent,
+
+            message,
+
+            {},
+
+            [],
+
+            {},
+
+            [],
+
+            {},
+
+            [],
+
+            {
+
+
+                userId,
+
+
+                strategy,
+
+
+                profile:
+
+                getProfile(userId)
+
+
+
+            }
+
+        );
+
+
+
+
+
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            intent,
+
+
+            response,
+
+
+            strategy
+
+
+
+        });
 
 
 
     }
 
-);
+
+
+    catch(error){
+
+
+        console.error(error);
 
 
 
+        res.status(500).json({
+
+
+            success:false,
+
+
+            error:error.message
 
 
 
-
-res.json({
-
-
-    success:true,
+        });
 
 
-    intent,
-
-
-    response,
-
-
-    strategy
-
-
-
-});
-
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-    console.error(error);
-
-
-
-    res.status(500).json({
-
-
-        success:false,
-
-        error:error.message
-
-
-    });
-
-
-
-}
+    }
 
 
 
 });
-
-
-
-
-
-
-
-
 
 // =====================================
 // CREATOR GROWTH ANALYSIS
@@ -628,7 +643,6 @@ app.post("/api/growth/analyze",(req,res)=>{
 
 
 
-
         const growth =
 
         analyzeContentPerformance(
@@ -640,15 +654,11 @@ app.post("/api/growth/analyze",(req,res)=>{
 
                 content,
 
-
                 views,
-
 
                 likes,
 
-
                 comments,
-
 
                 feedback
 
@@ -671,6 +681,7 @@ app.post("/api/growth/analyze",(req,res)=>{
             userId
 
         );
+
 
 
 
@@ -707,7 +718,9 @@ app.post("/api/growth/analyze",(req,res)=>{
 
             success:false,
 
+
             error:error.message
+
 
 
         });
@@ -766,34 +779,6 @@ app.get("/api/growth/:userId",(req,res)=>{
 
 });
 
-// =====================================
-// CREATOR PROFILE
-// =====================================
-
-
-app.get("/api/profile/:userId",(req,res)=>{
-
-
-    res.json({
-
-
-        success:true,
-
-
-        profile:
-
-        getProfile(
-
-            req.params.userId
-
-        )
-
-
-    });
-
-
-});
-
 
 
 
@@ -827,41 +812,25 @@ app.get("/api/creator-brain/:userId",(req,res)=>{
 
         identity:
 
-        getCreatorIdentity(
-
-            userId
-
-        ),
+        getCreatorIdentity(userId),
 
 
 
         memory:
 
-        getCreatorMemory(
-
-            userId
-
-        ),
+        getCreatorMemory(userId),
 
 
 
         voice:
 
-        getBrandVoice(
-
-            userId
-
-        ),
+        getBrandVoice(userId),
 
 
 
         growth:
 
-        getGrowthProfile(
-
-            userId
-
-        )
+        getGrowthProfile(userId)
 
 
 
@@ -900,34 +869,21 @@ app.get("/api/strategy/:userId",(req,res)=>{
         success:true,
 
 
-
         strategy:
 
-        generateCreatorStrategy(
-
-            userId
-
-        ),
+        generateCreatorStrategy(userId),
 
 
 
         ideas:
 
-        generateContentIdeas(
-
-            userId
-
-        ),
+        generateContentIdeas(userId),
 
 
 
         script:
 
-        generateScriptOutline(
-
-            userId
-
-        )
+        generateScriptOutline(userId)
 
 
 
@@ -945,7 +901,7 @@ app.get("/api/strategy/:userId",(req,res)=>{
 
 
 // =====================================
-// FEEDBACK SYSTEM
+// FEEDBACK
 // =====================================
 
 
@@ -970,29 +926,6 @@ app.post("/api/feedback",(req,res)=>{
 
 
 
-        if(!correction){
-
-
-            return res.json({
-
-
-                success:false,
-
-
-                message:"No feedback received"
-
-
-            });
-
-
-        }
-
-
-
-
-
-
-
         const feedback =
 
         saveFeedback({
@@ -1000,12 +933,11 @@ app.post("/api/feedback",(req,res)=>{
 
             userId,
 
-
             correction
 
 
-
         });
+
 
 
 
@@ -1020,6 +952,7 @@ app.post("/api/feedback",(req,res)=>{
             correction
 
         );
+
 
 
 
@@ -1060,6 +993,7 @@ app.post("/api/feedback",(req,res)=>{
 
 
     }
+
 
 
 });
