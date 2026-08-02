@@ -1,14 +1,10 @@
 // =====================================
-// ChatTBM V6.8.6
+// ChatTBM V6.9.1
 // Creator Routes
-//
-// Connects:
-// Route → Controller → Creator Intelligence
 // =====================================
 
 
 const express = require("express");
-
 
 const router = express.Router();
 
@@ -26,17 +22,32 @@ const {
 
 
 
+const {
+
+    validateUserRequest
+
+} = require("../middleware/requestValidator");
 
 
 
 
-// GET /api/creator/:userId
+
+
+
+
+
+// =====================================
+// CREATOR PROFILE / BRAIN
+// =====================================
+
 
 router.get(
 
-    "/:userId",
+"/:userId",
 
-    creatorHandler
+validateUserRequest,
+
+creatorHandler
 
 );
 
