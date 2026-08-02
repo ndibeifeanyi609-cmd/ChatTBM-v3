@@ -1,14 +1,10 @@
 // =====================================
-// ChatTBM V6.8.6
+// ChatTBM V6.9.1
 // Feedback Routes
-//
-// Connects:
-// Route → Controller → Learning System
 // =====================================
 
 
 const express = require("express");
-
 
 const router = express.Router();
 
@@ -28,17 +24,32 @@ const {
 
 
 
+const {
+
+    validateUserRequest
+
+} = require("../middleware/requestValidator");
 
 
 
 
-// POST /api/feedback-v2
+
+
+
+
+
+// =====================================
+// SAVE FEEDBACK
+// =====================================
+
 
 router.post(
 
-    "/",
+"/",
 
-    feedbackHandler
+validateUserRequest,
+
+feedbackHandler
 
 );
 
@@ -50,13 +61,16 @@ router.post(
 
 
 
-// GET /api/feedback-v2/report
+// =====================================
+// FEEDBACK REPORT
+// =====================================
+
 
 router.get(
 
-    "/report",
+"/",
 
-    feedbackReport
+feedbackReport
 
 );
 
