@@ -1,28 +1,202 @@
 // =====================================
-// ChatTBM V6.8.3
+// ChatTBM V6.8.5
 // Feedback Controller
 //
-// Purpose:
-// - Handle learning feedback
+// Systems:
+// - Feedback Learning
+// - Performance Learning
+// - Response Improvement
 // =====================================
 
 
-function feedbackHandler(req, res){
 
-    res.json({
+const {
 
-        success:true,
+    saveFeedback,
 
-        message:"Feedback controller ready"
+    analyzeFeedback
 
-    });
+} = require("../services/feedbackEngine");
+
+
+
+
+
+const {
+
+    analyzePerformanceFeedback
+
+} = require("../services/performanceLearningEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// SAVE FEEDBACK
+// =====================================
+
+
+function feedbackHandler(req,res){
+
+
+    try{
+
+
+        const {
+
+
+            userId="guest",
+
+
+            correction
+
+
+        } = req.body;
+
+
+
+
+
+
+
+
+        const feedback =
+
+        saveFeedback({
+
+
+            userId,
+
+
+            correction
+
+
+        });
+
+
+
+
+
+
+
+
+        const learning =
+
+        analyzePerformanceFeedback(
+
+            userId,
+
+            correction
+
+        );
+
+
+
+
+
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            version:"V6.8.5",
+
+
+            feedback,
+
+
+            learning
+
+
+        });
+
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            error:error.message
+
+
+        });
+
+
+    }
+
+
 
 }
 
 
 
+
+
+
+
+
+
+// =====================================
+// FEEDBACK REPORT
+// =====================================
+
+
+function feedbackReport(req,res){
+
+
+    res.json({
+
+
+        success:true,
+
+
+        report:
+
+        analyzeFeedback()
+
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
 module.exports = {
 
-    feedbackHandler
+
+    feedbackHandler,
+
+
+    feedbackReport
+
 
 };
