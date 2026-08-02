@@ -1,12 +1,14 @@
 // =====================================
-// ChatTBM V6.8.5
+// ChatTBM V6.8.7
 // Chat Controller
 //
 // Systems:
 // - Creator Brain
-// - Intent Detection
 // - Response Intelligence
+// - Memory Learning
+// - Brand Intelligence
 // =====================================
+
 
 
 const {
@@ -32,6 +34,72 @@ const {
 const CreatorBrainOrchestrator =
 
 require("../services/creatorBrainOrchestrator");
+
+
+
+
+
+const {
+
+    analyzeCreatorInput
+
+} = require("../services/creatorLearningEngine");
+
+
+
+
+
+const {
+
+    learnCreatorIdentity
+
+} = require("../services/creatorIdentityEngine");
+
+
+
+
+
+const {
+
+    learnBrandVoice
+
+} = require("../services/brandVoiceEngine");
+
+
+
+
+
+const {
+
+    learnCreatorMemory
+
+} = require("../services/creatorMemoryEngine");
+
+
+
+
+
+const {
+
+    generateCreatorStrategy
+
+} = require("../services/creatorStrategyEngine");
+
+
+
+
+
+const RelationshipIntelligenceEngine =
+
+require("../services/relationshipIntelligenceEngine");
+
+
+
+
+
+const relationshipEngine =
+
+new RelationshipIntelligenceEngine();
 
 
 
@@ -102,6 +170,81 @@ function chatHandler(req,res){
 
 
 
+        analyzeCreatorInput(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+
+
+
+        learnCreatorIdentity(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+
+
+
+        learnBrandVoice(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+
+
+
+        learnCreatorMemory(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+
+
+
+        relationshipEngine.analyzeContent(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+
+
+
         const brain =
 
         creatorBrain.analyze(
@@ -134,6 +277,21 @@ function chatHandler(req,res){
 
 
 
+        const strategy =
+
+        generateCreatorStrategy(
+
+            userId
+
+        );
+
+
+
+
+
+
+
+
         const response =
 
         generateResponse(
@@ -142,7 +300,7 @@ function chatHandler(req,res){
 
             message,
 
-            {},
+            brain.profile.memory || {},
 
             [],
 
@@ -163,6 +321,10 @@ function chatHandler(req,res){
                 profile:
 
                 brain.profile,
+
+
+
+                strategy,
 
 
 
@@ -189,7 +351,7 @@ function chatHandler(req,res){
             success:true,
 
 
-            version:"V6.8.5",
+            version:"V6.8.7",
 
 
             intent,
@@ -198,9 +360,19 @@ function chatHandler(req,res){
             response,
 
 
+            strategy,
+
+
             creatorBrain:{
 
-                active:true
+
+                active:true,
+
+
+                context:
+
+                brain.brainContext
+
 
             }
 
