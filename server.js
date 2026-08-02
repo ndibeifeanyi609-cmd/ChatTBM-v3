@@ -1,14 +1,12 @@
- // =====================================
-// ChatTBM V6.7.8
+// =====================================
+// ChatTBM V6.8.2
 // Creator Intelligence Backend
 //
 // Systems:
+// - Creator Brain Orchestrator
 // - Response Intelligence
-// - Adaptive Brain
-// - Intelligence Fusion
-// - Creator Memory
-// - Creator Identity
-// - Relationship Intelligence
+// - Adaptive Intelligence
+// - Memory Intelligence
 // - Growth Intelligence
 // - Feedback Learning
 // =====================================
@@ -47,7 +45,7 @@ app.use(express.json());
 
 
 // =====================================
-// RESPONSE INTELLIGENCE
+// RESPONSE ENGINE
 // =====================================
 
 
@@ -92,7 +90,32 @@ const {
 
 
 // =====================================
-// CREATOR LEARNING SYSTEM
+// CREATOR BRAIN ORCHESTRATOR
+// =====================================
+
+
+const CreatorBrainOrchestrator =
+
+require("./services/creatorBrainOrchestrator");
+
+
+
+
+
+const creatorBrain =
+
+new CreatorBrainOrchestrator();
+
+
+
+
+
+
+
+
+
+// =====================================
+// CREATOR LEARNING
 // =====================================
 
 
@@ -152,7 +175,7 @@ const {
 
 } = require("./services/brandVoiceEngine");
 
- // =====================================
+// =====================================
 // CREATOR MEMORY SYSTEM
 // =====================================
 
@@ -204,28 +227,7 @@ const {
 
 
 // =====================================
-// USER PROFILE SYSTEM
-// =====================================
-
-
-const {
-
-
-    getProfile
-
-
-} = require("./services/userProfileEngine");
-
-
-
-
-
-
-
-
-
-// =====================================
-// CREATOR GROWTH INTELLIGENCE
+// CREATOR GROWTH SYSTEM
 // =====================================
 
 
@@ -252,28 +254,7 @@ const {
 
 
 // =====================================
-// GROWTH RECOMMENDATIONS
-// =====================================
-
-
-const {
-
-
-    generateGrowthReport
-
-
-} = require("./growthRecommendationEngine");
-
-
-
-
-
-
-
-
-
-// =====================================
-// FEEDBACK LEARNING
+// FEEDBACK LEARNING SYSTEM
 // =====================================
 
 
@@ -329,6 +310,29 @@ const relationshipEngine =
 
 new RelationshipIntelligenceEngine();
 
+
+
+
+
+
+
+
+
+// =====================================
+// CONNECT RESPONSE ENGINE
+// =====================================
+
+
+connectAdaptiveEngine(
+
+    {
+
+        creatorBrain
+
+    }
+
+);
+
 // =====================================
 // HEALTH CHECK
 // =====================================
@@ -343,10 +347,10 @@ app.get("/",(req,res)=>{
         app:"ChatTBM AI Backend",
 
 
-        version:"V6.7.8",
+        version:"V6.8.2",
 
 
-        status:"Creator Intelligence Online 🚀"
+        status:"Creator Brain Online 🚀"
 
 
 
@@ -364,7 +368,7 @@ app.get("/",(req,res)=>{
 
 
 // =====================================
-// CHAT ENGINE V6.7.8
+// CHAT ENGINE V6.8.2
 // =====================================
 
 
@@ -483,6 +487,7 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
         // =====================================
         // RELATIONSHIP LEARNING
         // =====================================
@@ -495,6 +500,30 @@ app.post("/api/chat",(req,res)=>{
             message
 
         );
+
+
+
+
+
+
+
+
+
+        // =====================================
+        // BUILD CREATOR BRAIN
+        // =====================================
+
+
+        const brain =
+
+        creatorBrain.analyze(
+
+            userId,
+
+            message
+
+        );
+
 
 
 
@@ -516,48 +545,14 @@ app.post("/api/chat",(req,res)=>{
 
         );
 
-
-
-
-
-
-
-
-        // =====================================
-        // CREATOR STRATEGY
-        // =====================================
-
-
-        const strategy =
-
-        generateCreatorStrategy(
-
-            userId
-
-        );
-
 // =====================================
-// BUILD CREATOR BRAIN CONTEXT
+// CREATOR STRATEGY
 // =====================================
 
 
-const profile =
+const strategy =
 
-getProfile(
-
-    userId
-
-);
-
-
-
-
-
-
-
-const memory =
-
-getCreatorMemory(
+generateCreatorStrategy(
 
     userId
 
@@ -572,7 +567,7 @@ getCreatorMemory(
 
 
 // =====================================
-// RESPONSE INTELLIGENCE
+// GENERATE AI RESPONSE
 // =====================================
 
 
@@ -584,7 +579,7 @@ generateResponse(
 
     message,
 
-    memory,
+    brain.profile.memory || {},
 
     [],
 
@@ -602,13 +597,19 @@ generateResponse(
         userId,
 
 
-        profile,
+        profile:
+
+        brain.profile,
+
 
 
         strategy,
 
 
-        memory
+
+        brainContext:
+
+        brain.brainContext
 
 
 
@@ -625,28 +626,7 @@ generateResponse(
 
 
 // =====================================
-// GROWTH INTELLIGENCE
-// =====================================
-
-
-const growth =
-
-getGrowthProfile(
-
-    userId
-
-);
-
-
-
-
-
-
-
-
-
-// =====================================
-// RETURN RESPONSE
+// RETURN CHAT RESPONSE
 // =====================================
 
 
@@ -656,7 +636,7 @@ res.json({
     success:true,
 
 
-    version:"V6.7.8",
+    version:"V6.8.2",
 
 
     intent,
@@ -668,7 +648,19 @@ res.json({
     strategy,
 
 
-    growth
+    creatorBrain:{
+
+
+        active:true,
+
+
+        context:
+
+        brain.brainContext
+
+
+
+    }
 
 
 
@@ -709,7 +701,7 @@ res.json({
 });
 
 // =====================================
-// CREATOR BRAIN PROFILE
+// CREATOR BRAIN STATUS
 // =====================================
 
 
@@ -730,27 +722,23 @@ app.get("/api/creator-brain/:userId",(req,res)=>{
         success:true,
 
 
-        identity:
+        brain:
 
-        getCreatorIdentity(userId),
+        creatorBrain.getBrainStatus(
 
+            userId
 
-
-        voice:
-
-        getBrandVoice(userId),
+        ),
 
 
 
-        memory:
+        profile:
 
-        getCreatorMemory(userId),
+        creatorBrain.buildCreatorProfile(
 
+            userId
 
-
-        growth:
-
-        getGrowthProfile(userId)
+        )
 
 
 
@@ -792,19 +780,31 @@ app.get("/api/strategy/:userId",(req,res)=>{
 
         strategy:
 
-        generateCreatorStrategy(userId),
+        generateCreatorStrategy(
+
+            userId
+
+        ),
 
 
 
         ideas:
 
-        generateContentIdeas(userId),
+        generateContentIdeas(
+
+            userId
+
+        ),
 
 
 
         script:
 
-        generateScriptOutline(userId)
+        generateScriptOutline(
+
+            userId
+
+        )
 
 
 
@@ -893,7 +893,6 @@ app.post("/api/growth/analyze",(req,res)=>{
     }
 
 
-
     catch(error){
 
 
@@ -931,99 +930,62 @@ app.post("/api/growth/analyze",(req,res)=>{
 app.post("/api/feedback",(req,res)=>{
 
 
-    try{
+    const {
 
 
-        const {
+        userId="guest",
 
 
-            userId="guest",
+        correction
 
 
-            correction
+    } = req.body;
 
 
-        } = req.body;
 
 
 
+    const feedback =
 
+    saveFeedback({
 
 
+        userId,
 
 
-        const feedback =
+        correction
 
-        saveFeedback({
 
 
-            userId,
+    });
 
 
-            correction
 
 
 
-        });
+    analyzePerformanceFeedback(
 
+        userId,
 
+        correction
 
+    );
 
 
 
 
 
-        analyzePerformanceFeedback(
+    res.json({
 
-            userId,
 
-            correction
+        success:true,
 
-        );
 
+        feedback
 
 
 
-
-
-
-
-        res.json({
-
-
-            success:true,
-
-
-            feedback
-
-
-
-        });
-
-
-
-    }
-
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-
-            error:error.message
-
-
-
-        });
-
-
-    }
-
+    });
 
 
 });
@@ -1062,7 +1024,7 @@ app.get("/api/feedback",(req,res)=>{
 
 
 // =====================================
-// SERVER START
+// START SERVER
 // =====================================
 
 
@@ -1081,7 +1043,7 @@ app.listen(PORT,()=>{
 
     console.log(
 
-        `🚀 ChatTBM V6.7.8 running on port ${PORT}`
+        `🚀 ChatTBM V6.8.2 running on port ${PORT}`
 
     );
 
