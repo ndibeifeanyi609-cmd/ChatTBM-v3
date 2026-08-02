@@ -1,11 +1,12 @@
-// =========================================
-// ChatTBM V6.7.8
+ // =========================================
+// ChatTBM V6.7.9
 // Intelligence Fusion Engine
 //
 // Purpose:
 // - Combine creator intelligence systems
-// - Build unified brain context
-// - Prepare response decisions
+// - Build unified Creator Brain Context
+// - Connect personalization decisions
+// - Prepare response intelligence
 // =========================================
 
 
@@ -64,7 +65,14 @@ class IntelligenceFusionEngine {
                 strategy:{},
 
 
+                personalization:{},
+
+
+                decision:{},
+
+
                 updatedAt:new Date()
+
 
 
             };
@@ -90,7 +98,7 @@ class IntelligenceFusionEngine {
 
 
     // =====================================
-    // FUSE INTELLIGENCE
+    // FUSE INTELLIGENCE DATA
     // =====================================
 
 
@@ -116,6 +124,9 @@ class IntelligenceFusionEngine {
 
 
 
+
+
+
         if(intelligence.identity){
 
 
@@ -125,6 +136,9 @@ class IntelligenceFusionEngine {
 
 
         }
+
+
+
 
 
 
@@ -146,6 +160,9 @@ class IntelligenceFusionEngine {
 
 
 
+
+
+
         if(intelligence.audience){
 
 
@@ -155,6 +172,9 @@ class IntelligenceFusionEngine {
 
 
         }
+
+
+
 
 
 
@@ -176,6 +196,9 @@ class IntelligenceFusionEngine {
 
 
 
+
+
+
         if(intelligence.voice){
 
 
@@ -191,6 +214,9 @@ class IntelligenceFusionEngine {
 
 
 
+
+
+
         if(intelligence.strategy){
 
 
@@ -200,6 +226,45 @@ class IntelligenceFusionEngine {
 
 
         }
+
+
+
+
+
+
+
+
+
+        if(intelligence.personalization){
+
+
+            context.personalization =
+
+            intelligence.personalization;
+
+
+        }
+
+
+
+
+
+
+
+
+
+        if(intelligence.decision){
+
+
+            context.decision =
+
+            intelligence.decision;
+
+
+        }
+
+
+
 
 
 
@@ -299,7 +364,19 @@ class IntelligenceFusionEngine {
 
             memory:
 
-            context.memory || {}
+            context.memory || {},
+
+
+
+            personalization:
+
+            context.personalization || {},
+
+
+
+            decision:
+
+            context.decision || {}
 
 
 
