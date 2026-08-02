@@ -1,251 +1,940 @@
-/* ===================================
-   ChatTBM V6.0.2
-
-   Main Application Engine
-
-   Upgrade:
-   - Offline Brain First
-   - Backend Backup
-   - Creator Brain Support
-   - Creator Memory Support
-   - Context Engine Support
-   - Chat History
-   - Creator Tools
-=================================== */
-
-
-// ===============================
-// CONNECT ELEMENTS
-// ===============================
-
-const chatBox =
-document.getElementById("chat-box");
-
-const userInput =
-document.getElementById("user-input");
-
-const sendBtn =
-document.getElementById("send-btn");
-
-const toolButtons =
-document.querySelectorAll(".tool-btn");
+// =====================================
+// ChatTBM V6.8.4
+// Creator Intelligence Backend
+//
+// Systems:
+// - Creator Brain Orchestrator
+// - Response Intelligence
+// - Adaptive Intelligence
+// - Memory Intelligence
+// - Growth Intelligence
+// - Feedback Learning
+// - Route Layer Integration
+// =====================================
 
 
-let lastUserMessage = "";
+
+require("dotenv").config();
+
+
+
+const express = require("express");
+
+const cors = require("cors");
 
 
 
 
-// ===============================
-// EVENTS
-// ===============================
+
+const app = express();
 
 
-sendBtn.addEventListener(
-    "click",
-    sendMessage
+
+
+
+// =====================================
+// MIDDLEWARE
+// =====================================
+
+
+app.use(cors());
+
+
+app.use(express.json());
+
+
+
+
+
+
+
+
+
+// =====================================
+// ROUTE LAYER V6.8.4
+// =====================================
+
+
+const chatRoutes =
+
+require("./routes/chatRoutes");
+
+
+
+const creatorRoutes =
+
+require("./routes/creatorRoutes");
+
+
+
+const growthRoutes =
+
+require("./routes/growthRoutes");
+
+
+
+const feedbackRoutes =
+
+require("./routes/feedbackRoutes");
+
+
+
+
+
+
+
+
+
+// =====================================
+// SERVICES
+// =====================================
+
+
+const {
+
+
+    generateResponse,
+
+
+    connectAdaptiveEngine
+
+
+} = require("./services/responseEngine");
+
+
+
+
+
+const {
+
+
+    detectIntent
+
+
+} = require("./services/intentEngine");
+
+
+
+
+
+const CreatorBrainOrchestrator =
+
+require("./services/creatorBrainOrchestrator");
+
+
+
+
+
+const creatorBrain =
+
+new CreatorBrainOrchestrator();
+
+// =====================================
+// CREATOR LEARNING SYSTEM
+// =====================================
+
+
+const {
+
+    analyzeCreatorInput
+
+} = require("./services/creatorLearningEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// CREATOR IDENTITY SYSTEM
+// =====================================
+
+
+const {
+
+    learnCreatorIdentity,
+
+    getCreatorIdentity
+
+} = require("./services/creatorIdentityEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// BRAND VOICE SYSTEM
+// =====================================
+
+
+const {
+
+    learnBrandVoice,
+
+    getBrandVoice
+
+} = require("./services/brandVoiceEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// CREATOR MEMORY SYSTEM
+// =====================================
+
+
+const {
+
+    learnCreatorMemory,
+
+    getCreatorMemory
+
+} = require("./services/creatorMemoryEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// CREATOR STRATEGY SYSTEM
+// =====================================
+
+
+const {
+
+    generateCreatorStrategy,
+
+    generateContentIdeas,
+
+    generateScriptOutline
+
+} = require("./services/creatorStrategyEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// CREATOR GROWTH SYSTEM
+// =====================================
+
+
+const {
+
+    analyzeContentPerformance,
+
+    generateGrowthRecommendations,
+
+    getGrowthProfile
+
+} = require("./services/creatorGrowthEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// FEEDBACK LEARNING SYSTEM
+// =====================================
+
+
+const {
+
+    saveFeedback,
+
+    analyzeFeedback
+
+} = require("./services/feedbackEngine");
+
+
+
+
+
+
+
+
+
+const {
+
+    analyzePerformanceFeedback
+
+} = require("./services/performanceLearningEngine");
+
+
+
+
+
+
+
+
+
+// =====================================
+// RELATIONSHIP INTELLIGENCE
+// =====================================
+
+
+const RelationshipIntelligenceEngine =
+
+require("./services/relationshipIntelligenceEngine");
+
+
+
+
+
+const relationshipEngine =
+
+new RelationshipIntelligenceEngine();
+
+
+
+
+
+
+
+
+
+// =====================================
+// CONNECT INTELLIGENCE
+// =====================================
+
+
+connectAdaptiveEngine({
+
+    creatorBrain
+
+});
+
+// =====================================
+// API ROUTE CONNECTION
+// =====================================
+// V6.8.4 Route Layer
+// Existing V6.8.2 routes remain active
+// =====================================
+
+
+app.use(
+
+    "/api/chat-v2",
+
+    chatRoutes
+
 );
 
 
-userInput.addEventListener(
-    "keypress",
-    function(event){
 
-        if(event.key === "Enter"){
+app.use(
 
-            sendMessage();
+    "/api/creator",
+
+    creatorRoutes
+
+);
+
+
+
+app.use(
+
+    "/api/growth-v2",
+
+    growthRoutes
+
+);
+
+
+
+app.use(
+
+    "/api/feedback-v2",
+
+    feedbackRoutes
+
+);
+
+
+
+
+
+
+
+
+
+// =====================================
+// HEALTH CHECK
+// =====================================
+
+
+app.get("/",(req,res)=>{
+
+
+    res.json({
+
+
+        app:"ChatTBM AI Backend",
+
+
+        version:"V6.8.4",
+
+
+        status:"Creator Intelligence Online 🚀"
+
+
+    });
+
+
+});
+
+
+
+
+
+
+
+
+
+// =====================================
+// ORIGINAL CHAT ENGINE
+// V6.8.2 CORE PRESERVED
+// =====================================
+
+
+app.post("/api/chat",(req,res)=>{
+
+
+    try{
+
+
+        const {
+
+
+            userId="guest",
+
+
+            message
+
+
+        } = req.body;
+
+
+
+
+
+
+
+
+        if(!message){
+
+
+            return res.json({
+
+
+                success:false,
+
+
+                message:"No message received"
+
+
+            });
+
 
         }
 
-    }
+
+
+
+
+
+
+
+        // =====================================
+        // CREATOR LEARNING
+        // =====================================
+
+
+        analyzeCreatorInput(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+        learnCreatorIdentity(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+        learnBrandVoice(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+        learnCreatorMemory(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+
+
+
+
+        // =====================================
+        // RELATIONSHIP LEARNING
+        // =====================================
+
+
+        relationshipEngine.analyzeContent(
+
+            userId,
+
+            message
+
+        );
+
+// =====================================
+// BUILD CREATOR BRAIN
+// =====================================
+
+
+const brain =
+
+creatorBrain.analyze(
+
+    userId,
+
+    message
+
 );
 
 
 
 
-// ===============================
-// SEND MESSAGE
-// ===============================
-
-
-async function sendMessage(){
-
-
-    const message =
-    userInput.value.trim();
 
 
 
-    if(!message) return;
+
+
+// =====================================
+// INTENT DETECTION
+// =====================================
+
+
+const intent =
+
+detectIntent(
+
+    message
+
+);
 
 
 
-    lastUserMessage =
-    message;
 
 
 
-    addMessage(
-        message,
-        "user"
-    );
 
 
 
-    saveConversation(
-        "user",
-        message
-    );
+// =====================================
+// CREATOR STRATEGY
+// =====================================
+
+
+const strategy =
+
+generateCreatorStrategy(
+
+    userId
+
+);
 
 
 
-    userInput.value = "";
 
 
 
-    showLoading();
 
 
 
-    const response =
-    await generateAIResponse(
-        message
-    );
+// =====================================
+// RESPONSE INTELLIGENCE
+// =====================================
+
+
+const response =
+
+generateResponse(
+
+    intent,
+
+    message,
+
+    brain.profile.memory || {},
+
+    [],
+
+    {},
+
+    [],
+
+    {},
+
+    [],
+
+    {
+
+
+        userId,
+
+
+        profile:
+
+        brain.profile,
 
 
 
-    removeLoading();
+        strategy,
 
 
 
-    addMessage(
-        response,
-        "bot"
-    );
+        brainContext:
+
+        brain.brainContext
 
 
 
-    saveConversation(
-        "assistant",
-        response
-    );
+    }
+
+);
 
 
-    saveChat();
+
+
+
+
+
+
+
+// =====================================
+// RETURN RESPONSE
+// =====================================
+
+
+res.json({
+
+
+    success:true,
+
+
+    version:"V6.8.4",
+
+
+    intent,
+
+
+    response,
+
+
+    strategy,
+
+
+    creatorBrain:{
+
+
+        active:true,
+
+
+        context:
+
+        brain.brainContext
+
+
+    }
+
+
+
+});
+
+
+
 
 
 }
 
 
 
+catch(error){
+
+
+    console.error(error);
 
 
 
+    res.status(500).json({
 
 
-// ===============================
-// AI RESPONSE ENGINE
-// ===============================
+        success:false,
 
 
-async function generateAIResponse(message){
+        error:error.message
 
 
-
-    // ===============================
-    // OFFLINE INTELLIGENCE FIRST
-    // ===============================
+    });
 
 
-    if(
-        typeof window.offlineBrain === "function"
-    ){
-
-
-        const offlineReply =
-
-        window.offlineBrain(
-            message
-        );
+}
 
 
 
-        if(offlineReply){
-
-            return offlineReply;
-
-        }
-
-    }
+});
 
 
 
 
 
 
-    // ===============================
-    // BACKEND FALLBACK
-    // ===============================
+
+
+
+// =====================================
+// CREATOR BRAIN STATUS
+// =====================================
+
+
+app.get(
+
+"/api/creator-brain/:userId",
+
+(req,res)=>{
+
+
+    const userId =
+
+    req.params.userId;
+
+
+
+
+
+    res.json({
+
+
+        success:true,
+
+
+        brain:
+
+        creatorBrain.getBrainStatus(
+
+            userId
+
+        ),
+
+
+
+        profile:
+
+        creatorBrain.buildCreatorProfile(
+
+            userId
+
+        )
+
+
+
+    });
+
+
+});
+
+// =====================================
+// CREATOR STRATEGY ROUTE
+// =====================================
+
+
+app.get(
+
+"/api/strategy/:userId",
+
+(req,res)=>{
+
+
+    const userId =
+
+    req.params.userId;
+
+
+
+
+
+    res.json({
+
+
+        success:true,
+
+
+
+        strategy:
+
+        generateCreatorStrategy(
+
+            userId
+
+        ),
+
+
+
+        ideas:
+
+        generateContentIdeas(
+
+            userId
+
+        ),
+
+
+
+        script:
+
+        generateScriptOutline(
+
+            userId
+
+        )
+
+
+
+    });
+
+
+});
+
+
+
+
+
+
+
+
+
+// =====================================
+// GROWTH ANALYSIS
+// =====================================
+
+
+app.post(
+
+"/api/growth/analyze",
+
+(req,res)=>{
 
 
     try{
 
 
-        const userId =
-
-        localStorage.getItem(
-            "ChatTBM_user"
-        )
-
-        ||
-
-        createUserId();
+        const {
 
 
+            userId="guest",
 
 
-        const response =
-
-        await fetch(
-
-        "https://chattbm-backend.onrender.com/api/chat",
-
-        {
-
-            method:"POST",
-
-            headers:{
-
-                "Content-Type":
-                "application/json"
-
-            },
+            content
 
 
-            body:JSON.stringify({
+        } = req.body;
 
-                message,
 
-                conversationId:userId
 
-            })
+
+
+        const performance =
+
+        analyzeContentPerformance(
+
+            userId,
+
+            content
+
+        );
+
+
+
+
+
+        const recommendations =
+
+        generateGrowthRecommendations(
+
+            userId
+
+        );
+
+
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            performance,
+
+
+            recommendations
 
 
         });
 
-
-
-        const data =
-        await response.json();
-
-
-
-
-        if(data.reply){
-
-            return data.reply;
-
-        }
 
 
     }
@@ -254,140 +943,125 @@ async function generateAIResponse(message){
     catch(error){
 
 
-        console.log(
-            "Backend unavailable",
-            error
-        );
+        res.status(500).json({
+
+
+            success:false,
+
+
+            error:error.message
+
+
+        });
 
 
     }
 
 
 
+});
 
 
-    return (
 
-        "I'm ready to help you create content 🤖"
+
+
+
+
+
+
+// =====================================
+// FEEDBACK LEARNING
+// =====================================
+
+
+app.post(
+
+"/api/feedback",
+
+(req,res)=>{
+
+
+    const {
+
+
+        userId="guest",
+
+
+        correction
+
+
+    } = req.body;
+
+
+
+
+
+    const feedback =
+
+    saveFeedback({
+
+
+        userId,
+
+
+        correction
+
+
+    });
+
+
+
+
+
+    analyzePerformanceFeedback(
+
+        userId,
+
+        correction
 
     );
 
 
-}
 
 
 
+    res.json({
 
 
+        success:true,
 
 
+        feedback
 
 
-// ===============================
-// MESSAGE DISPLAY
-// ===============================
+    });
 
 
-function addMessage(text, sender){
+});
 
 
-    const div =
-    document.createElement("div");
 
 
 
-    div.className =
 
-    sender === "user"
 
-    ?
 
-    "message user-message"
 
-    :
+// =====================================
+// FEEDBACK REPORT
+// =====================================
 
-    "message bot-message";
 
+app.get(
 
+"/api/feedback",
 
+(req,res)=>{
 
 
-    div.innerHTML = `
+    res.json(
 
-        <p>${text}</p>
-
-        ${
-            sender === "bot"
-
-            ?
-
-            `
-            <button onclick="copyResponse(this)">
-            Copy
-            </button>
-
-            <button onclick="regenerateResponse()">
-            Regenerate
-            </button>
-            `
-
-            :
-
-            ""
-
-        }
-
-    `;
-
-
-
-    chatBox.appendChild(div);
-
-
-
-    chatBox.scrollTop =
-    chatBox.scrollHeight;
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// CREATOR TOOL BUTTONS
-// ===============================
-
-
-toolButtons.forEach(button=>{
-
-
-    button.addEventListener(
-
-        "click",
-
-        ()=>{
-
-
-            const tool =
-            button.dataset.tool;
-
-
-
-            userInput.value =
-            "Create " + tool;
-
-
-
-            sendMessage();
-
-
-        }
+        analyzeFeedback()
 
     );
 
@@ -402,351 +1076,33 @@ toolButtons.forEach(button=>{
 
 
 
-// ===============================
-// LOADING
-// ===============================
+// =====================================
+// SERVER START
+// =====================================
 
 
-function showLoading(){
+const PORT =
 
+process.env.PORT || 3000;
 
-    const loading =
-    document.createElement("div");
 
 
 
-    loading.id =
-    "loading";
 
 
 
-    loading.className =
-    "message bot-message";
+app.listen(
 
-
-
-    loading.innerHTML =
-
-    "<p>ChatTBM is thinking... 🤖</p>";
-
-
-
-    chatBox.appendChild(
-        loading
-    );
-
-
-}
-
-
-
-
-
-function removeLoading(){
-
-
-    const loading =
-    document.getElementById(
-        "loading"
-    );
-
-
-
-    if(loading){
-
-        loading.remove();
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// COPY RESPONSE
-// ===============================
-
-
-function copyResponse(button){
-
-
-    const text =
-
-    button.parentElement
-
-    .querySelector("p")
-
-    .innerText;
-
-
-
-    navigator.clipboard.writeText(
-        text
-    );
-
-
-
-    button.innerText =
-    "Copied!";
-
-
-
-    setTimeout(()=>{
-
-
-        button.innerText =
-        "Copy";
-
-
-    },1500);
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// REGENERATE
-// ===============================
-
-
-async function regenerateResponse(){
-
-
-    if(!lastUserMessage)
-    return;
-
-
-
-    showLoading();
-
-
-
-    const response =
-
-    await generateAIResponse(
-        lastUserMessage
-    );
-
-
-
-    removeLoading();
-
-
-
-    addMessage(
-        response,
-        "bot"
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// USER ID
-// ===============================
-
-
-function createUserId(){
-
-
-    const id =
-
-    "user-" +
-
-    Date.now();
-
-
-
-    localStorage.setItem(
-
-        "ChatTBM_user",
-
-        id
-
-    );
-
-
-
-    return id;
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// CONVERSATION MEMORY
-// ===============================
-
-
-function saveConversation(
-role,
-message
-){
-
-
-    if(
-
-        window.conversationManager &&
-
-        typeof window.conversationManager.addMessage === "function"
-
-    ){
-
-        window.conversationManager.addMessage(
-
-            role,
-
-            message
-
-        );
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// CHAT HISTORY
-// ===============================
-
-
-function saveChat(){
-
-
-    localStorage.setItem(
-
-        "ChatTBM_history",
-
-        chatBox.innerHTML
-
-    );
-
-
-}
-
-
-
-
-
-function loadChat(){
-
-
-    const saved =
-
-    localStorage.getItem(
-
-        "ChatTBM_history"
-
-    );
-
-
-
-    if(saved){
-
-        chatBox.innerHTML =
-        saved;
-
-    }
-
-
-}
-
-
-
-loadChat();
-
-
-
-
-
-
-
-
-
-// ===============================
-// SERVICE WORKER
-// ===============================
-
-
-if(
-"serviceWorker" in navigator
-){
-
-
-window.addEventListener(
-
-"load",
+PORT,
 
 ()=>{
 
 
-navigator.serviceWorker.register(
+    console.log(
 
-"service-worker.js"
+        `🚀 ChatTBM V6.8.4 running on port ${PORT}`
 
-)
-
-.then(()=>{
-
-console.log(
-"ChatTBM PWA Ready 🚀"
-);
-
-
-})
-
-.catch(error=>{
-
-
-console.log(
-"Service Worker Error",
-error
-);
+    );
 
 
 });
-
-
-}
-
-);
-
-
-}
