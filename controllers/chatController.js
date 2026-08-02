@@ -1,31 +1,243 @@
 // =====================================
-// ChatTBM V6.8.3
+// ChatTBM V6.8.5
 // Chat Controller
 //
-// Purpose:
-// - Handle chat requests
-// - Connect routes to intelligence layer
+// Systems:
+// - Creator Brain
+// - Intent Detection
+// - Response Intelligence
 // =====================================
 
+
+const {
+
+    detectIntent
+
+} = require("../services/intentEngine");
+
+
+
+
+
+const {
+
+    generateResponse
+
+} = require("../services/responseEngine");
+
+
+
+
+
+const CreatorBrainOrchestrator =
+
+require("../services/creatorBrainOrchestrator");
+
+
+
+
+
+const creatorBrain =
+
+new CreatorBrainOrchestrator();
+
+
+
+
+
+
+
+
+
+// =====================================
+// CHAT HANDLER
+// =====================================
 
 
 function chatHandler(req,res){
 
 
-    res.json({
+    try{
 
 
-        success:true,
+        const {
 
 
-        message:"Chat controller ready"
+            userId="guest",
+
+
+            message
+
+
+        } = req.body;
 
 
 
-    });
+
+
+
+
+
+        if(!message){
+
+
+            return res.json({
+
+
+                success:false,
+
+
+                message:"No message received"
+
+
+            });
+
+
+        }
+
+
+
+
+
+
+
+
+        const brain =
+
+        creatorBrain.analyze(
+
+            userId,
+
+            message
+
+        );
+
+
+
+
+
+
+
+
+        const intent =
+
+        detectIntent(
+
+            message
+
+        );
+
+
+
+
+
+
+
+
+        const response =
+
+        generateResponse(
+
+            intent,
+
+            message,
+
+            {},
+
+            [],
+
+            {},
+
+            [],
+
+            {},
+
+            [],
+
+            {
+
+
+                userId,
+
+
+                profile:
+
+                brain.profile,
+
+
+
+                brainContext:
+
+                brain.brainContext
+
+
+
+            }
+
+        );
+
+
+
+
+
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            version:"V6.8.5",
+
+
+            intent,
+
+
+            response,
+
+
+            creatorBrain:{
+
+                active:true
+
+            }
+
+
+        });
+
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            error:error.message
+
+
+        });
+
+
+    }
+
 
 
 }
+
+
 
 
 
