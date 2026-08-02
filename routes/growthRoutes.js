@@ -1,14 +1,10 @@
 // =====================================
-// ChatTBM V6.8.6
+// ChatTBM V6.9.1
 // Growth Routes
-//
-// Connects:
-// Route → Controller → Growth Intelligence
 // =====================================
 
 
 const express = require("express");
-
 
 const router = express.Router();
 
@@ -26,17 +22,36 @@ const {
 
 
 
+const {
+
+    validateUserRequest,
+
+    validateContentRequest
+
+} = require("../middleware/requestValidator");
 
 
 
 
-// POST /api/growth-v2
+
+
+
+
+
+// =====================================
+// CONTENT GROWTH ANALYSIS
+// =====================================
+
 
 router.post(
 
-    "/",
+"/analyze",
 
-    growthHandler
+validateUserRequest,
+
+validateContentRequest,
+
+growthHandler
 
 );
 
