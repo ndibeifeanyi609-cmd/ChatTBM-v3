@@ -1,13 +1,14 @@
 // =====================================
-// ChatTBM V6.7.5
+// ChatTBM V6.7.6
 // Response Intelligence Engine
 //
-// Upgrade:
+// Systems:
 // - Adaptive Response Engine
 // - Adaptive Brain Engine
 // - Memory Intelligence
 // - Memory Retrieval
-// - Context Fusion
+// - Relationship Intelligence
+// - Creator Personalization
 // =====================================
 
 
@@ -46,6 +47,14 @@ require("./memoryRetrievalEngine");
 
 
 
+const RelationshipIntelligenceEngine =
+
+require("./relationshipIntelligenceEngine");
+
+
+
+
+
 
 
 
@@ -63,6 +72,9 @@ let adaptiveBrain = null;
 let memoryRetriever = null;
 
 
+let relationshipEngine = null;
+
+
 
 
 
@@ -75,6 +87,7 @@ let memoryRetriever = null;
 
 
 function connectAdaptiveEngine(identityEngine){
+
 
 
     adaptiveEngine =
@@ -100,6 +113,14 @@ function connectAdaptiveEngine(identityEngine){
     memoryRetriever =
 
     new MemoryRetrievalEngine();
+
+
+
+
+
+    relationshipEngine =
+
+    new RelationshipIntelligenceEngine();
 
 
 
@@ -146,6 +167,9 @@ function generateResponse(
     let memoryContext = null;
 
 
+    let audienceContext = null;
+
+
 
 
 
@@ -153,7 +177,7 @@ function generateResponse(
 
 
     // =====================================
-    // CONVERSATION CONTEXT
+    // CONTEXT MEMORY
     // =====================================
 
 
@@ -192,9 +216,8 @@ function generateResponse(
 
 
 
-
     // =====================================
-    // MEMORY RETRIEVAL + CONTEXT FUSION
+    // MEMORY RETRIEVAL
     // =====================================
 
 
@@ -205,7 +228,6 @@ function generateResponse(
         brainContext.userId
 
     ){
-
 
 
         memoryContext =
@@ -219,6 +241,37 @@ function generateResponse(
         );
 
 
+    }
+
+
+
+
+
+
+
+
+    // =====================================
+    // RELATIONSHIP INTELLIGENCE
+    // =====================================
+
+
+    if(
+
+        relationshipEngine &&
+
+        brainContext.userId
+
+    ){
+
+
+        audienceContext =
+
+        relationshipEngine.getRelationship(
+
+            brainContext.userId
+
+        );
+
 
     }
 
@@ -229,9 +282,8 @@ function generateResponse(
 
 
 
-
     // =====================================
-    // ADAPTIVE CREATOR PERSONALIZATION
+    // CREATOR ADAPTATION
     // =====================================
 
 
@@ -242,7 +294,6 @@ function generateResponse(
         brainContext.userId
 
     ){
-
 
 
         creatorContext =
@@ -256,9 +307,7 @@ function generateResponse(
         );
 
 
-
     }
-
 
 
 
@@ -281,7 +330,6 @@ function generateResponse(
     ){
 
 
-
         brainDecision =
 
         adaptiveBrain.decide(
@@ -291,7 +339,6 @@ function generateResponse(
             message
 
         );
-
 
 
     }
@@ -314,11 +361,11 @@ switch(intent){
 
 I'm ChatTBM, your AI Content Assistant.
 
-I can help you create:
+I help creators build:
 
 🎬 Video Scripts
 ✍️ Captions
-🔥 Viral Content Ideas
+🔥 Viral Ideas
 📢 Marketing Content
 
 What are we creating today?`;
@@ -342,19 +389,21 @@ What are we creating today?`;
 
 🔥 Hook:
 
-Nobody sees the work behind the transformation.
+Everyone sees the result.
+
+Nobody sees the journey behind it.
 
 
 🎭 Story:
 
-Use your real experiences, challenges and lessons to create a story people connect with.
+Turn your struggles, lessons and experiences into a story your audience can connect with.
 
 
 🚀 Ending:
 
-Your journey is your brand.
+Your story builds your brand.
 
-Keep building.`;
+Keep creating.`;
 
         break;
 
@@ -374,12 +423,12 @@ Keep building.`;
 
 They see the moment.
 
-They don't see the years behind it.
+They don't see the battles behind it.
 
-Every challenge created the mindset.
-Every lesson created the creator.
+Every challenge shaped the creator.
+Every lesson built the journey.
 
-The journey continues. 🚀`;
+The audience connects with the story. 🚀`;
 
         break;
 
@@ -398,18 +447,18 @@ The journey continues. 🚀`;
 `🔥 Viral Content Ideas:
 
 
-1. The story behind my success
+1. The journey nobody saw
 
-2. The struggle nobody saw
+2. The lesson behind my success
 
-3. What changed my mindset
+3. Behind the scenes reality
 
-4. Behind the scenes reality
+4. The transformation story
 
-5. My creator evolution
+5. What my audience should know
 
 
-Choose one and I'll build it.`;
+Choose one and I'll develop it.`;
 
         break;
 
@@ -430,7 +479,7 @@ Choose one and I'll build it.`;
 
 Problem:
 
-Identify what your audience needs.
+Identify the audience problem.
 
 
 Solution:
@@ -440,7 +489,7 @@ Show your value.
 
 Action:
 
-Guide them toward the next step.`;
+Guide people toward the next step.`;
 
         break;
 
@@ -459,15 +508,15 @@ Guide them toward the next step.`;
 `🚀 Creator Strategy:
 
 
-1. Strengthen your identity.
+1. Understand your audience.
 
-2. Build consistent content.
+2. Build recognizable content.
 
-3. Understand your audience.
+3. Create consistently.
 
-4. Analyze performance.
+4. Learn from feedback.
 
-5. Improve your brand.`;
+5. Strengthen your community.`;
 
         break;
 
@@ -507,7 +556,7 @@ Tell me what you want to create.`;
 
 
 // =====================================
-// MEMORY CONTEXT FUSION OUTPUT
+// MEMORY CONTEXT OUTPUT
 // =====================================
 
 
@@ -520,13 +569,12 @@ if(
 ){
 
 
-
     response +=
 
 
 `
 
-🧠 Relevant Creator Memory:
+🧠 Creator Memory Applied:
 
 ${memoryContext.memoryContext.join(", ")}
 
@@ -535,6 +583,77 @@ ${memoryContext.memoryContext.join(", ")}
 
 
 }
+
+
+
+
+
+
+
+
+
+// =====================================
+// AUDIENCE INTELLIGENCE OUTPUT
+// =====================================
+
+
+if(
+
+    audienceContext
+
+){
+
+
+    if(
+
+        audienceContext.audienceType
+
+    ){
+
+
+        response +=
+
+
+`
+
+👥 Audience Type:
+
+${audienceContext.audienceType}
+
+`;
+
+
+
+    }
+
+
+
+    if(
+
+        audienceContext.audienceNeeds.length
+
+    ){
+
+
+        response +=
+
+
+`
+
+❤️ Audience Needs:
+
+${audienceContext.audienceNeeds.join(", ")}
+
+`;
+
+
+
+    }
+
+
+
+}
+
 
 
 
@@ -556,9 +675,10 @@ if(brainDecision){
 
 `
 
-✨ Creator Style Adaptation:
+✨ Creator Style:
 
 ${brainDecision.creatorStyle}
+
 
 Tone:
 
