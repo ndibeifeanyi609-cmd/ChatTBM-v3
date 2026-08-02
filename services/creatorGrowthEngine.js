@@ -1,5 +1,5 @@
 // =====================================
-// ChatTBM V6.7.7
+// ChatTBM V6.9.2
 // Creator Growth Intelligence Engine
 //
 // Purpose:
@@ -9,115 +9,65 @@
 // - Improve future content decisions
 // =====================================
 
-
-
 const growthProfiles = {};
-
-
-
 
 
 // =====================================
 // CREATE GROWTH PROFILE
 // =====================================
 
+function createGrowthProfile(userId) {
 
-function createGrowthProfile(userId){
-
-
-    if(!growthProfiles[userId]){
-
+    if (!growthProfiles[userId]) {
 
         growthProfiles[userId] = {
 
-
             userId,
 
+            contentHistory: [],
 
-            contentHistory:[],
+            successfulContent: [],
 
+            weakContent: [],
 
-            successfulContent:[],
+            growthSignals: [],
 
+            recommendations: [],
 
-            weakContent:[],
+            audienceWins: [],
 
-
-            growthSignals:[],
-
-
-            recommendations:[],
-
-
-            audienceWins:[],
-
-
-            lastUpdated:new Date()
-
+            lastUpdated: new Date()
 
         };
 
-
     }
-
-
 
     return growthProfiles[userId];
 
-
 }
-
-
-
-
-
-
 
 
 // =====================================
 // ANALYZE CONTENT PERFORMANCE
 // =====================================
 
+function analyzeContentPerformance(userId, data = {}) {
 
-function analyzeContentPerformance(
-
-    userId,
-
-    data = {}
-
-){
-
-
-    const profile =
-
-    createGrowthProfile(
-
-        userId
-
-    );
-
-
-
-
+    const profile = createGrowthProfile(userId);
 
     const {
 
-        content="",
+        content = "",
 
-        engagement=0,
+        engagement = 0,
 
-        views=0,
+        views = 0,
 
-        feedback=""
+        feedback = ""
 
     } = data;
 
-
-
-
-
     profile.contentHistory.push({
-
 
         content,
 
@@ -127,204 +77,101 @@ function analyzeContentPerformance(
 
         feedback,
 
-        date:new Date()
-
+        date: new Date()
 
     });
 
+    if (engagement >= 70 || views >= 10000) {
 
-
-
-
-
-
-    if(
-
-        engagement >= 70 ||
-
-        views >= 10000
-
-    ){
-
-
-        profile.successfulContent.push(
-
-            content
-
-        );
-
+        profile.successfulContent.push(content);
 
         profile.growthSignals.push(
-
             "High performing content pattern"
-
         );
 
+    } else {
+
+        profile.weakContent.push(content);
 
     }
-
-    else{
-
-
-        profile.weakContent.push(
-
-            content
-
-        );
-
-
-    }
-
-
-
-
-
-
 
     profile.lastUpdated = new Date();
 
-
-
-
     return profile;
-
 
 }
 
 
-
-
-
-
-
 // =====================================
-// GENERATE GROWTH INSIGHTS
+// GENERATE GROWTH RECOMMENDATIONS
 // =====================================
 
+function generateGrowthRecommendations(userId) {
 
-function generateGrowthInsights(userId){
-
-
-    const profile =
-
-    createGrowthProfile(
-
-        userId
-
-    );
-
-
-
-
+    const profile = createGrowthProfile(userId);
 
     const recommendations = [];
 
-
-
-
-
-    if(
-
-        profile.successfulContent.length > 0
-
-    ){
-
+    if (profile.successfulContent.length > 0) {
 
         recommendations.push(
-
             "Create more content similar to your best performing style."
-
         );
-
 
     }
 
-
-
-
-
-
-    if(
-
-        profile.weakContent.length > 3
-
-    ){
-
+    if (profile.weakContent.length > 3) {
 
         recommendations.push(
-
-            "Review weaker content and improve hooks."
-
+            "Review weaker content and improve your hooks."
         );
-
 
     }
 
+    if (recommendations.length === 0) {
 
+        recommendations.push(
+            "Keep publishing consistently to gather more performance data."
+        );
 
-
-
+    }
 
     recommendations.push(
-
-        "Test new ideas while keeping your recognizable creator identity."
-
+        "Test new ideas while maintaining your recognizable creator identity."
     );
-
-
-
-
 
     profile.recommendations = recommendations;
 
-
+    profile.lastUpdated = new Date();
 
     return recommendations;
 
-
 }
-
-
-
-
 
 
 // =====================================
 // GET GROWTH PROFILE
 // =====================================
 
+function getGrowthProfile(userId) {
 
-function getGrowthProfile(userId){
-
-
-    return createGrowthProfile(
-
-        userId
-
-    );
-
+    return createGrowthProfile(userId);
 
 }
 
 
-
-
-
-
+// =====================================
+// MODULE EXPORTS
+// =====================================
 
 module.exports = {
 
-
     createGrowthProfile,
-
 
     analyzeContentPerformance,
 
-
-    generateGrowthInsights,
-
+    generateGrowthRecommendations,
 
     getGrowthProfile
-
 
 };
