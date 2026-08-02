@@ -2,12 +2,12 @@
 // ChatTBM V6.7.2
 // Response Intelligence Engine
 //
-// Upgrade:
-// - Adaptive Response Engine Connected
+// Systems:
+// - Adaptive Response Engine
 // - Creator Personalization
 // - Memory Awareness
-// - Profile Adaptation
-// - Smart Responses
+// - Context Intelligence
+// - Smart Creator Responses
 // =====================================
 
 
@@ -19,16 +19,6 @@ const {
 
 
 
-const {
-
-    createProfilePrompt
-
-} = require("./profileContextEngine");
-
-
-
-
-
 const AdaptiveResponseEngine =
 
 require("./adaptiveResponseEngine");
@@ -37,18 +27,19 @@ require("./adaptiveResponseEngine");
 
 
 
-
-
-// =====================================
-// ADAPTIVE ENGINE SETUP
-// =====================================
-
-
 let adaptiveEngine = null;
 
 
 
+
+
+// =====================================
+// CONNECT ADAPTIVE ENGINE
+// =====================================
+
+
 function connectAdaptiveEngine(identityEngine){
+
 
     adaptiveEngine =
 
@@ -57,6 +48,7 @@ function connectAdaptiveEngine(identityEngine){
         identityEngine
 
     );
+
 
 }
 
@@ -98,89 +90,6 @@ function generateResponse(
 
 
 
-    const text =
-
-    String(message || "")
-
-    .toLowerCase();
-
-
-
-
-
-
-
-    // =====================================
-    // ADAPTIVE PERSONALIZATION
-    // =====================================
-
-
-    let adaptiveContext = null;
-
-
-
-    if(
-
-        adaptiveEngine &&
-
-        brainContext.userId
-
-    ){
-
-
-        adaptiveContext =
-
-        adaptiveEngine.personalize(
-
-            brainContext.userId,
-
-            message
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // =====================================
-    // PROFILE CONTEXT
-    // =====================================
-
-
-    let profilePrompt = "";
-
-
-
-    if(
-
-        brainContext.userId
-
-    ){
-
-
-        profilePrompt =
-
-        createProfilePrompt(
-
-            brainContext.userId
-
-        );
-
-
-    }
-
-
-
-
-
-
 
 
 
@@ -219,31 +128,33 @@ function generateResponse(
 
 
 
-
-
     // =====================================
-    // GREETING
+    // ADAPTIVE CONTEXT
     // =====================================
 
 
-    if(intent === "greeting"){
+    let creatorContext = null;
 
 
-response =
 
-`Hello 👋
+    if(
 
-I'm ChatTBM, your AI Content Assistant.
+        adaptiveEngine &&
 
-I help creators build:
+        brainContext.userId
 
-🎬 Scripts
-✍️ Captions
-🔥 Viral ideas
-📢 Marketing content
+    ){
 
-What are we creating today?`;
 
+        creatorContext =
+
+        adaptiveEngine.personalize(
+
+            brainContext.userId,
+
+            message
+
+        );
 
 
     }
@@ -254,216 +165,190 @@ What are we creating today?`;
 
 
 
-
-
     // =====================================
-    // SCRIPT GENERATION
+    // RESPONSE TYPES
     // =====================================
 
 
-    else if(intent === "script_generation"){
+    switch(intent){
 
 
-response =
+        case "greeting":
+
+
+            response =
+
+`Hello 👋
+
+I'm ChatTBM, your AI Content Assistant.
+
+I can help you create:
+
+🎬 Video Scripts
+✍️ Captions
+🔥 Viral Content Ideas
+📢 Marketing Content
+
+What are we creating today?`;
+
+            break;
+
+
+
+
+
+
+        case "script_generation":
+
+
+            response =
 
 `🎬 Video Script
 
 
 🔥 Hook:
 
-Everyone sees the result.
-
-Nobody sees the struggle behind it.
+Nobody sees the struggle behind the success.
 
 
 🎭 Story:
 
-Show the challenges, failures, lessons and moments that built your journey.
+Show the journey, challenges, failures and lessons that created the transformation.
 
 
 🚀 Ending:
 
-Your story is still being created.
+The story is still being written.
 
 Keep building. Keep improving.`;
 
-
-
-    }
-
+            break;
 
 
 
 
 
 
+        case "caption_generation":
 
 
-    // =====================================
-    // CAPTION GENERATION
-    // =====================================
-
-
-    else if(intent === "caption_generation"){
-
-
-response =
+            response =
 
 `🔥 Caption:
 
-They see the achievement.
+They see the result.
 
-They don't see the sacrifice.
+They don't see the battles behind it.
 
-Every failure was training.
-Every setback was preparation.
+Every failure created strength.
+Every setback created growth.
 
-The journey created the person. 🚀`;
+The journey is the story. 🚀`;
 
-
-
-    }
+            break;
 
 
 
 
 
 
+        case "idea_generation":
 
 
-
-    // =====================================
-    // IDEA GENERATION
-    // =====================================
-
-
-    else if(intent === "idea_generation"){
-
-
-response =
+            response =
 
 `🔥 Viral Content Ideas:
 
 
 1. The struggle nobody saw
 
-2. My biggest mistake
+2. My biggest lesson
 
-3. Behind the scenes reality
+3. Behind the scenes
 
-4. Transformation journey
+4. Transformation story
 
-5. Lessons from failure
-
-
-Choose one and I'll create the full content.`;
+5. The journey nobody knows
 
 
+Choose one and I'll build it.`;
 
-    }
+            break;
 
 
 
 
 
 
+        case "marketing":
 
 
+            response =
 
-    // =====================================
-    // MARKETING
-    // =====================================
-
-
-    else if(intent === "marketing"){
-
-
-response =
-
-`📢 Marketing Structure:
+`📢 Marketing Framework:
 
 
 Problem:
 
-Show the audience their challenge.
+Identify the audience pain.
 
 
 Solution:
 
-Explain how your product helps.
+Show how your product helps.
 
 
 Action:
 
-Give them a reason to respond now.`;
+Give people the next step.`;
 
-
-
-    }
-
-
+            break;
 
 
 
 
 
 
-
-    // =====================================
-    // CREATOR STRATEGY
-    // =====================================
+        case "creator_strategy":
 
 
-    else if(intent === "creator_strategy"){
-
-
-response =
+            response =
 
 `🚀 Creator Strategy:
 
 
-1. Create a recognizable identity.
+1. Build a unique identity.
 
-2. Build a consistent content style.
+2. Create consistently.
 
 3. Understand your audience.
 
-4. Improve using feedback.
+4. Improve through feedback.
 
 5. Turn content into a brand.`;
 
-
-
-    }
-
+            break;
 
 
 
 
 
 
+        default:
 
 
-    // =====================================
-    // DEFAULT
-    // =====================================
-
-
-    else {
-
-
-response =
+            response =
 
 `I understand.
 
-I can help transform your idea into:
+I can help you create:
 
-🎬 Video Script
-✍️ Caption
-🔥 Viral Idea
+🎬 Scripts
+✍️ Captions
+🔥 Viral Ideas
 📢 Marketing Content
 
-Tell me what you want to create.`;
+Tell me what you want to build.`;
 
 
 
@@ -475,45 +360,20 @@ Tell me what you want to create.`;
 
 
 
-
-
     // =====================================
-    // ADD ADAPTIVE CONTEXT
+    // INTERNAL ADAPTIVE BOOST
     // =====================================
 
 
-    if(adaptiveContext){
+    if(creatorContext){
 
 
         response +=
 
-
-`\n\n🧠 Adaptive Creator Context:\n\n${adaptiveContext.enhancedPrompt}`;
-
-    }
-
-
-
-
-
-
-
-
-
-    // =====================================
-    // ADD PROFILE MEMORY
-    // =====================================
-
-
-    if(profilePrompt){
-
-
-        response +=
-
-
-`\n\n👤 Creator Profile:\n${profilePrompt}`;
+`\n\n✨ Personalized for your creator style.`;
 
     }
+
 
 
 
