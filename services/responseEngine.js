@@ -1,15 +1,16 @@
 // =====================================
-// ChatTBM V6.8.0
+// ChatTBM V7.0
 // Response Intelligence Engine
 //
-// Systems:
+// Connected:
 // - Adaptive Response Engine
 // - Adaptive Brain Engine
-// - Intelligence Fusion Engine
+// - Intelligence Fusion
 // - Memory Intelligence
-// - Memory Retrieval
 // - Relationship Intelligence
-// - Creator Personalization
+// - Creator Brain
+// - Growth Intelligence
+// - Strategy Intelligence
 // =====================================
 
 
@@ -22,17 +23,9 @@ const {
 
 
 
-
-
-
-
 const AdaptiveResponseEngine =
 
 require("./adaptiveResponseEngine");
-
-
-
-
 
 
 
@@ -42,27 +35,15 @@ require("./adaptiveBrainEngine");
 
 
 
-
-
-
-
 const MemoryRetrievalEngine =
 
 require("./memoryRetrievalEngine");
 
 
 
-
-
-
-
 const RelationshipIntelligenceEngine =
 
 require("./relationshipIntelligenceEngine");
-
-
-
-
 
 
 
@@ -78,22 +59,13 @@ require("./intelligenceFusionEngine");
 
 
 
-// =====================================
-// ENGINE INSTANCES
-// =====================================
-
-
 let adaptiveEngine = null;
-
 
 let adaptiveBrain = null;
 
-
 let memoryRetriever = null;
 
-
 let relationshipEngine = null;
-
 
 let intelligenceFusion = null;
 
@@ -103,11 +75,6 @@ let intelligenceFusion = null;
 
 
 
-
-
-// =====================================
-// CONNECT INTELLIGENCE ENGINES
-// =====================================
 
 
 function connectAdaptiveEngine(identityEngine){
@@ -122,15 +89,9 @@ function connectAdaptiveEngine(identityEngine){
     );
 
 
-
-
-
     adaptiveBrain =
 
     new AdaptiveBrainEngine();
-
-
-
 
 
     memoryRetriever =
@@ -138,15 +99,9 @@ function connectAdaptiveEngine(identityEngine){
     new MemoryRetrievalEngine();
 
 
-
-
-
     relationshipEngine =
 
     new RelationshipIntelligenceEngine();
-
-
-
 
 
     intelligenceFusion =
@@ -154,12 +109,14 @@ function connectAdaptiveEngine(identityEngine){
     new IntelligenceFusionEngine();
 
 
-
 }
 
-// =====================================
-// MAIN RESPONSE GENERATOR
-// =====================================
+
+
+
+
+
+
 
 
 function generateResponse(
@@ -185,23 +142,19 @@ function generateResponse(
 ){
 
 
-    let response = "";
+let response = "";
 
 
 
-    let creatorContext = null;
+let memoryContext = null;
 
+let audienceContext = null;
 
-    let brainDecision = null;
+let creatorContext = null;
 
+let brainDecision = null;
 
-    let memoryContext = null;
-
-
-    let audienceContext = null;
-
-
-    let creatorBrainContext = null;
+let fusedContext = null;
 
 
 
@@ -211,38 +164,69 @@ function generateResponse(
 
 
 
-    // =====================================
-    // CONTEXT MEMORY
-    // =====================================
+// =====================================
+// CONTEXT MEMORY
+// =====================================
 
 
-    const context =
+const context =
 
-    handleContextRequest(
+handleContextRequest(
 
-        message,
+    message,
 
-        history
+    history
+
+);
+
+
+
+if(
+
+    context &&
+
+    context.matched
+
+){
+
+    return context.response;
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// MEMORY RETRIEVAL
+// =====================================
+
+
+if(
+
+    memoryRetriever &&
+
+    brainContext.userId
+
+){
+
+
+    memoryContext =
+
+    memoryRetriever.buildContext(
+
+        brainContext.userId,
+
+        message
 
     );
 
 
-
-
-
-    if(
-
-        context &&
-
-        context.matched
-
-    ){
-
-
-        return context.response;
-
-
-    }
+}
 
 
 
@@ -252,135 +236,108 @@ function generateResponse(
 
 
 
-    // =====================================
-    // MEMORY RETRIEVAL
-    // =====================================
+// =====================================
+// AUDIENCE INTELLIGENCE
+// =====================================
 
 
-    if(
+if(
 
-        memoryRetriever &&
+    relationshipEngine &&
+
+    brainContext.userId
+
+){
+
+
+    audienceContext =
+
+    relationshipEngine.getRelationship(
 
         brainContext.userId
 
-    ){
+    );
 
 
-        memoryContext =
+}
 
-        memoryRetriever.buildContext(
 
-            brainContext.userId,
 
-            message
 
-        );
 
 
-    }
 
 
 
+// =====================================
+// ADAPTIVE PERSONALIZATION
+// =====================================
 
 
+if(
 
+    adaptiveEngine &&
 
+    brainContext.userId
 
+){
 
-    // =====================================
-    // AUDIENCE RELATIONSHIP
-    // =====================================
 
+    creatorContext =
 
-    if(
+    adaptiveEngine.personalize(
 
-        relationshipEngine &&
+        brainContext.userId,
 
-        brainContext.userId
+        message
 
-    ){
+    );
 
 
-        audienceContext =
+}
 
-        relationshipEngine.getRelationship(
 
-            brainContext.userId
 
-        );
 
 
-    }
 
 
 
 
+// =====================================
+// CREATOR DECISION
+// =====================================
 
 
+if(
 
+    adaptiveBrain &&
 
+    brainContext.profile
 
-    // =====================================
-    // ADAPTIVE PERSONALIZATION
-    // =====================================
+){
 
 
-    if(
+    brainDecision =
 
-        adaptiveEngine &&
+    adaptiveBrain.decide(
 
-        brainContext.userId
+        brainContext.profile,
 
-    ){
+        message
 
+    );
 
-        creatorContext =
 
-        adaptiveEngine.personalize(
+}
 
-            brainContext.userId,
 
-            message
 
-        );
 
 
-    }
 
 
 
-
-
-
-
-
-
-    // =====================================
-    // ADAPTIVE BRAIN DECISION
-    // =====================================
-
-
-    if(
-
-        adaptiveBrain &&
-
-        brainContext.profile
-
-    ){
-
-
-        brainDecision =
-
-        adaptiveBrain.decide(
-
-            brainContext.profile,
-
-            message
-
-        );
-
-
-    }
 
 // =====================================
 // INTELLIGENCE FUSION
@@ -396,54 +353,55 @@ if(
 ){
 
 
-    creatorBrainContext =
+fusedContext =
 
-    intelligenceFusion.fuse(
+intelligenceFusion.fuse(
 
-        brainContext.userId,
+brainContext.userId,
 
-        {
-
-
-            identity:
-
-            brainContext.profile || {},
+{
 
 
+identity:
 
-            memory:
-
-            memoryContext || {},
-
+brainContext.profile?.identity || {},
 
 
-            audience:
+memory:
 
-            audienceContext || {},
-
-
-
-            personalization:
-
-            creatorContext || {},
+memoryContext || {},
 
 
+audience:
 
-            decision:
-
-            brainDecision || {},
-
+audienceContext || {},
 
 
-            strategy:
+personalization:
 
-            brainContext.strategy || {}
+creatorContext || {},
+
+
+decision:
+
+brainDecision || {},
+
+
+strategy:
+
+brainContext.strategy || {},
+
+
+growth:
+
+brainContext.growth || {}
 
 
 
-        }
+}
 
-    );
+);
+
 
 
 }
@@ -457,7 +415,7 @@ if(
 
 
 // =====================================
-// RESPONSE INTELLIGENCE
+// CORE RESPONSE
 // =====================================
 
 
@@ -465,10 +423,10 @@ switch(intent){
 
 
 
-    case "greeting":
+case "greeting":
 
 
-        response =
+response =
 
 `Hello 👋
 
@@ -476,190 +434,179 @@ I'm ChatTBM, your AI Content Assistant.
 
 I help creators build:
 
-🎬 Video Scripts
-✍️ Captions
-🔥 Viral Content Ideas
-📢 Marketing Content
-
-What are we creating today?`;
-
-        break;
-
-
-
-
-
-
-
-
-
-    case "script_generation":
-
-
-        response =
-
-`🎬 Video Script
-
-
-🔥 Hook:
-
-Everyone sees the result.
-
-Nobody sees the journey behind it.
-
-
-🎭 Story:
-
-Turn your struggles, lessons and experiences into a story your audience can connect with.
-
-
-🚀 Ending:
-
-Your story builds your brand.
-
-Keep creating.`;
-
-        break;
-
-
-
-
-
-
-
-
-
-    case "caption_generation":
-
-
-        response =
-
-`🔥 Caption:
-
-They see the moment.
-
-They don't see the battles behind it.
-
-Every challenge shaped the creator.
-Every lesson built the journey.
-
-The audience connects with the story. 🚀`;
-
-        break;
-
-
-
-
-
-
-
-
-
-    case "idea_generation":
-
-
-        response =
-
-`🔥 Viral Content Ideas:
-
-
-1. The journey nobody saw
-
-2. The lesson behind my success
-
-3. Behind the scenes reality
-
-4. The transformation story
-
-5. What my audience should know
-
-
-Choose one and I'll develop it.`;
-
-        break;
-
-// =====================================
-// CONTINUE RESPONSE INTELLIGENCE
-// =====================================
-
-
-
-    case "marketing":
-
-
-        response =
-
-`📢 Marketing Framework:
-
-
-Problem:
-
-Identify the audience problem.
-
-
-Solution:
-
-Show your value.
-
-
-Action:
-
-Guide people toward the next step.`;
-
-        break;
-
-
-
-
-
-
-
-
-
-    case "creator_strategy":
-
-
-        response =
-
-`🚀 Creator Strategy:
-
-
-1. Understand your audience.
-
-2. Build recognizable content.
-
-3. Create consistently.
-
-4. Learn from feedback.
-
-5. Strengthen your community.`;
-
-        break;
-
-
-
-
-
-
-
-
-
-    default:
-
-
-        response =
-
-`I understand.
-
-I can help transform your idea into:
-
 🎬 Scripts
 ✍️ Captions
 🔥 Viral Ideas
 📢 Marketing Content
 
-Tell me what you want to create.`;
+Let's create something powerful today.`;
 
+
+break;
+
+
+
+
+
+
+
+
+
+case "script_generation":
+
+
+response =
+
+`🎬 Creator Script
+
+
+🔥 Hook:
+
+Nobody saw this journey coming.
+
+
+🎭 Story:
+
+Show the struggle, the process and the transformation.
+
+
+🚀 Ending:
+
+Make the audience remember your story.`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "caption_generation":
+
+
+response =
+
+`🔥 Caption:
+
+They see the result.
+
+They don't see the discipline behind it.
+
+Every challenge created the person you see today. 🚀`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "idea_generation":
+
+
+response =
+
+`🔥 Content Ideas:
+
+
+1. The story nobody knows
+
+2. Behind the scenes reality
+
+3. My biggest challenge
+
+4. The transformation journey
+
+5. What I learned creating content`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "marketing":
+
+
+response =
+
+`📢 Marketing Strategy:
+
+
+Problem → Solution → Trust → Action
+
+
+Show people why your brand matters.`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "creator_strategy":
+
+
+response =
+
+`🚀 Creator Growth Strategy:
+
+
+1. Build recognizable content.
+
+2. Study what performs.
+
+3. Improve your hooks.
+
+4. Understand your audience.
+
+5. Create consistently.`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+default:
+
+
+response =
+
+`I can help you create:
+
+🎬 Scripts
+
+✍️ Captions
+
+🔥 Viral Content Ideas
+
+📢 Marketing Strategies
+
+Tell me your idea.`;
 
 
 }
@@ -673,123 +620,46 @@ Tell me what you want to create.`;
 
 
 // =====================================
-// MEMORY INTELLIGENCE OUTPUT
+// INTELLIGENCE OUTPUT
 // =====================================
 
 
-if(
-
-    memoryContext &&
-
-    memoryContext.count > 0
-
-){
+if(memoryContext?.count > 0){
 
 
-    response +=
-
+response +=
 
 `
 
-🧠 Creator Memory Applied:
+🧠 Memory Applied:
 
 ${memoryContext.memoryContext.join(", ")}
 
 `;
 
+}
 
+
+
+if(audienceContext){
+
+
+response +=
+
+`
+
+👥 Audience Intelligence Active
+
+`;
 
 }
 
 
 
+if(brainDecision){
 
 
-
-
-
-
-// =====================================
-// AUDIENCE INTELLIGENCE OUTPUT
-// =====================================
-
-
-if(
-
-    audienceContext
-
-){
-
-
-    if(
-
-        audienceContext.audienceType
-
-    ){
-
-
-        response +=
-
-
-`
-
-👥 Audience Type:
-
-${audienceContext.audienceType}
-
-`;
-
-
-
-    }
-
-
-
-
-
-
-
-    if(
-
-        audienceContext.audienceNeeds &&
-
-        audienceContext.audienceNeeds.length
-
-    ){
-
-
-        response +=
-
-
-`
-
-❤️ Audience Needs:
-
-${audienceContext.audienceNeeds.join(", ")}
-
-`;
-
-
-
-    }
-
-
-}
-
-// =====================================
-// ADAPTIVE BRAIN OUTPUT
-// =====================================
-
-
-if(
-
-    brainDecision
-
-){
-
-
-    response +=
-
+response +=
 
 `
 
@@ -804,97 +674,35 @@ ${brainDecision.tone}
 
 `;
 
-
-
 }
 
 
 
+if(fusedContext){
 
 
-
-
-
-
-// =====================================
-// CREATOR BRAIN FUSION STATUS
-// =====================================
-
-
-if(
-
-    creatorBrainContext
-
-){
-
-
-    response +=
-
+response +=
 
 `
 
-🧠 Creator Brain Active:
+🧠 Creator Brain V7.0 Active:
 
 ✓ Identity
 
 ✓ Memory
 
-✓ Audience
+✓ Voice
 
-✓ Personalization
+✓ Growth
 
-✓ Adaptive Decision
+✓ Strategy
 
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================================
-// PERSONALIZATION STATUS
-// =====================================
-
-
-if(
-
-    creatorContext
-
-){
-
-
-    response +=
-
-
-`
-
-⚡ Creator Personalization Active
+✓ Adaptive Intelligence
 
 `;
 
-
-
 }
 
-
-
-
-
-
-
-
-
-// =====================================
-// RETURN RESPONSE
-// =====================================
 
 
 return response;
@@ -910,18 +718,13 @@ return response;
 
 
 
-// =====================================
-// MODULE EXPORT
-// =====================================
-
-
 module.exports = {
 
 
-    generateResponse,
+generateResponse,
 
 
-    connectAdaptiveEngine
+connectAdaptiveEngine
 
 
 };
