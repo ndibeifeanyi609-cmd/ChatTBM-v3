@@ -1,57 +1,192 @@
 // =========================================
-// ChatTBM V5.7
+// ChatTBM V6.7.2
 // Adaptive Response Engine
-// Part 4
+//
+// Upgrade:
+// - Creator Identity Compatible
+// - Profile Adaptation
+// - Content Style Learning
+// - Brand Voice Awareness
 // =========================================
+
 
 class AdaptiveResponseEngine {
 
-    constructor(identityEngine) {
+
+    constructor(identityEngine){
+
         this.identityEngine = identityEngine;
+
     }
 
-    buildContext(userId) {
 
-        const profile = this.identityEngine.getProfile(userId);
+
+
+
+
+    // =====================================
+    // BUILD CREATOR CONTEXT
+    // =====================================
+
+
+    buildContext(userId){
+
+
+        const profile =
+
+        this.identityEngine.getCreatorIdentity(
+
+            userId
+
+        ) || {};
+
+
+
+
 
         return {
-            platform: profile.favoritePlatform,
-            category: profile.favoriteCategory,
-            tone: profile.tone,
-            writingStyle: profile.writingStyle,
-            language: profile.language
+
+
+            creatorName:
+
+            profile.creatorName || "Creator",
+
+
+
+            niche:
+
+            profile.niche || "General Content",
+
+
+
+            style:
+
+            profile.contentStyle || "Creative",
+
+
+
+            personality:
+
+            profile.personality || "Authentic",
+
+
+
+            audience:
+
+            profile.audience || "General Audience",
+
+
+
+            tone:
+
+            profile.tone || "Natural",
+
+
+
+            topics:
+
+            profile.preferredTopics || [],
+
+
+
+            keywords:
+
+            profile.brandKeywords || []
+
+
         };
 
+
     }
 
-    personalize(userId, prompt) {
 
-        const context = this.buildContext(userId);
+
+
+
+
+
+
+    // =====================================
+    // PERSONALIZE REQUEST
+    // =====================================
+
+
+    personalize(userId, prompt){
+
+
+
+        const context =
+
+        this.buildContext(userId);
+
+
+
+
 
         return {
+
+
             originalPrompt: prompt,
 
+
+
             enhancedPrompt:
+
 `
-User Preference
+Creator Profile:
 
-Platform: ${context.platform}
+Name:
+${context.creatorName}
 
-Category: ${context.category}
 
-Tone: ${context.tone}
+Niche:
+${context.niche}
 
-Writing Style: ${context.writingStyle}
 
-Language: ${context.language}
+Content Style:
+${context.style}
 
-User Request:
+
+Personality:
+${context.personality}
+
+
+Audience:
+${context.audience}
+
+
+Tone:
+${context.tone}
+
+
+Preferred Topics:
+${context.topics.join(", ")}
+
+
+Brand Keywords:
+${context.keywords.join(", ")}
+
+
+
+Creator Request:
+
 ${prompt}
 `
+
+
         };
+
 
     }
 
+
+
 }
+
+
+
+
+
+
 
 module.exports = AdaptiveResponseEngine;
