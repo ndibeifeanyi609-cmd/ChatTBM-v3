@@ -1,9 +1,10 @@
 // =====================================
-// ChatTBM V6.7.1
+// ChatTBM V6.7.2
 // Response Intelligence Engine
 //
-// Features:
-// - Creator Content Generation
+// Upgrade:
+// - Adaptive Response Engine Connected
+// - Creator Personalization
 // - Memory Awareness
 // - Profile Adaptation
 // - Smart Responses
@@ -28,10 +29,47 @@ const {
 
 
 
+const AdaptiveResponseEngine =
+
+require("./adaptiveResponseEngine");
+
+
+
+
+
+
+
+// =====================================
+// ADAPTIVE ENGINE SETUP
+// =====================================
+
+
+let adaptiveEngine = null;
+
+
+
+function connectAdaptiveEngine(identityEngine){
+
+    adaptiveEngine =
+
+    new AdaptiveResponseEngine(
+
+        identityEngine
+
+    );
+
+}
+
+
+
+
+
+
 
 // =====================================
 // MAIN RESPONSE GENERATOR
 // =====================================
+
 
 function generateResponse(
 
@@ -56,6 +94,10 @@ function generateResponse(
 ){
 
 
+    let response = "";
+
+
+
     const text =
 
     String(message || "")
@@ -66,7 +108,41 @@ function generateResponse(
 
 
 
-    let response = "";
+
+
+    // =====================================
+    // ADAPTIVE PERSONALIZATION
+    // =====================================
+
+
+    let adaptiveContext = null;
+
+
+
+    if(
+
+        adaptiveEngine &&
+
+        brainContext.userId
+
+    ){
+
+
+        adaptiveContext =
+
+        adaptiveEngine.personalize(
+
+            brainContext.userId,
+
+            message
+
+        );
+
+
+    }
+
+
+
 
 
 
@@ -76,6 +152,7 @@ function generateResponse(
     // =====================================
     // PROFILE CONTEXT
     // =====================================
+
 
     let profilePrompt = "";
 
@@ -105,8 +182,10 @@ function generateResponse(
 
 
 
+
+
     // =====================================
-    // CONTEXT MEMORY
+    // MEMORY CONTEXT
     // =====================================
 
 
@@ -150,15 +229,15 @@ function generateResponse(
     if(intent === "greeting"){
 
 
-        response =
+response =
 
 `Hello 👋
 
 I'm ChatTBM, your AI Content Assistant.
 
-I can help you create:
+I help creators build:
 
-🎬 Video scripts
+🎬 Scripts
 ✍️ Captions
 🔥 Viral ideas
 📢 Marketing content
@@ -175,49 +254,44 @@ What are we creating today?`;
 
 
 
+
+
     // =====================================
     // SCRIPT GENERATION
     // =====================================
 
 
-    else if(
-
-        intent === "script_generation"
-
-    ){
+    else if(intent === "script_generation"){
 
 
-        response =
-
+response =
 
 `🎬 Video Script
 
 
-🔥 HOOK:
+🔥 Hook:
 
-Nobody sees the beginning. They only see the results.
+Everyone sees the result.
 
-
-🎭 BODY:
-
-Show the struggle, the failures, the lessons, and the process behind the growth.
-
-Let people see the moments when you had to keep going even when nobody was watching.
+Nobody sees the struggle behind it.
 
 
-🚀 ENDING:
+🎭 Story:
 
-The journey is still being written.
-
-Follow the journey and watch the transformation happen.
+Show the challenges, failures, lessons and moments that built your journey.
 
 
+🚀 Ending:
 
-`;
+Your story is still being created.
+
+Keep building. Keep improving.`;
 
 
 
     }
+
+
 
 
 
@@ -230,29 +304,26 @@ Follow the journey and watch the transformation happen.
     // =====================================
 
 
-    else if(
-
-        intent === "caption_generation"
-
-    ){
+    else if(intent === "caption_generation"){
 
 
-        response =
-
+response =
 
 `🔥 Caption:
 
-Nobody saw the days I struggled.
+They see the achievement.
 
-They only see the moment I succeed.
+They don't see the sacrifice.
 
-Every step, every failure, every lesson built this journey.
+Every failure was training.
+Every setback was preparation.
 
-The process is the story. 🚀`;
+The journey created the person. 🚀`;
 
 
 
     }
+
 
 
 
@@ -266,36 +337,31 @@ The process is the story. 🚀`;
     // =====================================
 
 
-    else if(
-
-        intent === "idea_generation"
-
-    ){
+    else if(intent === "idea_generation"){
 
 
-        response =
-
+response =
 
 `🔥 Viral Content Ideas:
 
 
-1. Nobody believed in me story
+1. The struggle nobody saw
 
-2. Before vs After transformation
+2. My biggest mistake
 
-3. Behind the scenes struggle
+3. Behind the scenes reality
 
-4. Failed attempt that became success
+4. Transformation journey
 
-5. My journey nobody saw
+5. Lessons from failure
 
 
-
-Choose one and I'll build the full script.`;
+Choose one and I'll create the full content.`;
 
 
 
     }
+
 
 
 
@@ -309,36 +375,32 @@ Choose one and I'll build the full script.`;
     // =====================================
 
 
-    else if(
-
-        intent === "marketing"
-
-    ){
+    else if(intent === "marketing"){
 
 
-        response =
+response =
 
-
-`📢 Marketing Script:
+`📢 Marketing Structure:
 
 
 Problem:
 
-Show the audience a challenge they face.
+Show the audience their challenge.
 
 
 Solution:
 
-Present your product or service as the answer.
+Explain how your product helps.
 
 
 Action:
 
-Tell them the next step to take.`;
+Give them a reason to respond now.`;
 
 
 
     }
+
 
 
 
@@ -352,32 +414,28 @@ Tell them the next step to take.`;
     // =====================================
 
 
-    else if(
-
-        intent === "creator_strategy"
-
-    ){
+    else if(intent === "creator_strategy"){
 
 
-        response =
+response =
+
+`🚀 Creator Strategy:
 
 
-`🚀 Creator Growth Strategy:
+1. Create a recognizable identity.
 
+2. Build a consistent content style.
 
-1. Build a recognizable style.
+3. Understand your audience.
 
-2. Create consistently.
+4. Improve using feedback.
 
-3. Study audience reactions.
-
-4. Improve every video.
-
-5. Turn your journey into your brand.`;
+5. Turn content into a brand.`;
 
 
 
     }
+
 
 
 
@@ -394,17 +452,16 @@ Tell them the next step to take.`;
     else {
 
 
-        response =
-
+response =
 
 `I understand.
 
-I can help you turn this into:
+I can help transform your idea into:
 
-🎬 A video script
-✍️ A caption
-🔥 Viral content idea
-📢 Marketing content
+🎬 Video Script
+✍️ Caption
+🔥 Viral Idea
+📢 Marketing Content
 
 Tell me what you want to create.`;
 
@@ -421,7 +478,30 @@ Tell me what you want to create.`;
 
 
     // =====================================
-    // ADD PROFILE
+    // ADD ADAPTIVE CONTEXT
+    // =====================================
+
+
+    if(adaptiveContext){
+
+
+        response +=
+
+
+`\n\n🧠 Adaptive Creator Context:\n\n${adaptiveContext.enhancedPrompt}`;
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================================
+    // ADD PROFILE MEMORY
     // =====================================
 
 
@@ -430,8 +510,8 @@ Tell me what you want to create.`;
 
         response +=
 
-        `\n\n🧠 Creator Profile:\n${profilePrompt}`;
 
+`\n\n👤 Creator Profile:\n${profilePrompt}`;
 
     }
 
@@ -453,7 +533,9 @@ Tell me what you want to create.`;
 module.exports = {
 
 
-    generateResponse
+    generateResponse,
+
+    connectAdaptiveEngine
 
 
 };
