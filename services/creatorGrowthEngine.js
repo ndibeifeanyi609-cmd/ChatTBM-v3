@@ -1,177 +1,549 @@
 // =====================================
-// ChatTBM V6.9.2
+// ChatTBM V7.0
 // Creator Growth Intelligence Engine
+//
+// Connected:
+// - Content Performance Memory
+// - Performance Learning
+// - Creator Strategy
+// - Growth Recommendations
 //
 // Purpose:
 // - Learn creator growth patterns
-// - Analyze content direction
-// - Generate growth recommendations
-// - Improve future content decisions
+// - Analyze winning content
+// - Recommend better decisions
 // =====================================
 
+
+
+const {
+
+    getSuccessfulContent,
+
+    getWinningPatterns
+
+} = require("./contentPerformanceEngine");
+
+
+
+
+
 const growthProfiles = {};
+
+
+
+
+
+
+
 
 
 // =====================================
 // CREATE GROWTH PROFILE
 // =====================================
 
-function createGrowthProfile(userId) {
 
-    if (!growthProfiles[userId]) {
+function createGrowthProfile(userId){
+
+
+    if(!growthProfiles[userId]){
+
 
         growthProfiles[userId] = {
 
+
             userId,
 
-            contentHistory: [],
 
-            successfulContent: [],
+            contentHistory:[],
 
-            weakContent: [],
 
-            growthSignals: [],
+            successfulContent:[],
 
-            recommendations: [],
 
-            audienceWins: [],
+            winningPatterns:[],
 
-            lastUpdated: new Date()
+
+            growthSignals:[],
+
+
+            recommendations:[],
+
+
+            audienceWins:[],
+
+
+            strategyDirection:"",
+
+
+            createdAt:new Date(),
+
+
+            lastUpdated:new Date()
+
+
 
         };
 
+
     }
+
+
 
     return growthProfiles[userId];
 
+
 }
+
+
+
+
+
+
+
 
 
 // =====================================
 // ANALYZE CONTENT PERFORMANCE
 // =====================================
 
-function analyzeContentPerformance(userId, data = {}) {
 
-    const profile = createGrowthProfile(userId);
+function analyzeContentPerformance(
 
-    const {
+    userId,
 
-        content = "",
+    data={}
 
-        engagement = 0,
+){
 
-        views = 0,
 
-        feedback = ""
+    const profile =
 
-    } = data;
+    createGrowthProfile(
 
-    profile.contentHistory.push({
+        userId
 
-        content,
+    );
 
-        engagement,
 
-        views,
 
-        feedback,
 
-        date: new Date()
 
-    });
+    const contentData = {
 
-    if (engagement >= 70 || views >= 10000) {
 
-        profile.successfulContent.push(content);
+        content:
 
-        profile.growthSignals.push(
-            "High performing content pattern"
+        data.content || "",
+
+
+        result:
+
+        data.result || "unknown",
+
+
+        category:
+
+        data.category || "general",
+
+
+        feedback:
+
+        data.feedback || "",
+
+
+        created:
+
+        new Date()
+
+
+
+    };
+
+
+
+
+
+    profile.contentHistory.push(
+
+        contentData
+
+    );
+
+
+
+
+
+
+
+
+    if(
+
+        contentData.result === "viral" ||
+
+        contentData.result === "high"
+
+    ){
+
+
+        profile.successfulContent.push(
+
+            contentData
+
         );
 
-    } else {
 
-        profile.weakContent.push(content);
+
+        profile.growthSignals.push(
+
+            "Successful content pattern detected"
+
+        );
+
 
     }
 
-    profile.lastUpdated = new Date();
+    else{
+
+
+        profile.growthSignals.push(
+
+            "Content improvement opportunity detected"
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    profile.lastUpdated =
+
+    new Date();
+
+
+
+
 
     return profile;
 
+
 }
+
+
+
+
+
+
+
+
+
+// =====================================
+// SYNC PERFORMANCE MEMORY
+// =====================================
+
+
+function syncPerformanceMemory(userId){
+
+
+    const profile =
+
+    createGrowthProfile(
+
+        userId
+
+    );
+
+
+
+
+
+    profile.successfulContent =
+
+    getSuccessfulContent(
+
+        userId
+
+    );
+
+
+
+
+
+    profile.winningPatterns =
+
+    getWinningPatterns(
+
+        userId
+
+    );
+
+
+
+
+
+    profile.lastUpdated =
+
+    new Date();
+
+
+
+    return profile;
+
+
+}
+
+
+
+
+
+
+
 
 
 // =====================================
 // GENERATE GROWTH RECOMMENDATIONS
 // =====================================
 
-function generateGrowthRecommendations(userId) {
 
-    const profile = createGrowthProfile(userId);
+function generateGrowthRecommendations(userId){
+
+
+    const profile =
+
+    syncPerformanceMemory(
+
+        userId
+
+    );
+
+
+
+
 
     const recommendations = [];
 
-    if (profile.successfulContent.length > 0) {
+
+
+
+
+
+
+
+    if(
+
+        profile.winningPatterns.length > 0
+
+    ){
+
 
         recommendations.push(
-            "Create more content similar to your best performing style."
+
+            "Repeat patterns from your highest performing content."
+
         );
+
 
     }
 
-    if (profile.weakContent.length > 3) {
+
+
+
+
+
+
+
+    if(
+
+        profile.successfulContent.length > 0
+
+    ){
+
 
         recommendations.push(
-            "Review weaker content and improve your hooks."
+
+            "Create more content using your proven creator style."
+
         );
+
 
     }
 
-    if (recommendations.length === 0) {
+
+
+
+
+
+
+
+    if(
+
+        profile.contentHistory.length < 5
+
+    ){
+
 
         recommendations.push(
-            "Keep publishing consistently to gather more performance data."
+
+            "Publish more content to improve prediction accuracy."
+
         );
 
+
     }
+
+
+
+
+
+
+
 
     recommendations.push(
-        "Test new ideas while maintaining your recognizable creator identity."
+
+        "Keep your creator identity consistent while testing new ideas."
+
     );
 
-    profile.recommendations = recommendations;
 
-    profile.lastUpdated = new Date();
+
+
+
+
+
+
+    profile.recommendations =
+
+    recommendations;
+
+
+
+    profile.lastUpdated =
+
+    new Date();
+
+
 
     return recommendations;
 
-}
-
-
-// =====================================
-// GET GROWTH PROFILE
-// =====================================
-
-function getGrowthProfile(userId) {
-
-    return createGrowthProfile(userId);
 
 }
 
 
+
+
+
+
+
+
+
 // =====================================
-// MODULE EXPORTS
+// BUILD GROWTH STRATEGY
 // =====================================
+
+
+function buildGrowthStrategy(userId){
+
+
+    const profile =
+
+    syncPerformanceMemory(
+
+        userId
+
+    );
+
+
+
+
+
+    return {
+
+
+        creator:userId,
+
+
+        strengths:
+
+        profile.growthSignals,
+
+
+
+        winningPatterns:
+
+        profile.winningPatterns,
+
+
+
+        nextActions:
+
+        profile.recommendations
+
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// GET PROFILE
+// =====================================
+
+
+function getGrowthProfile(userId){
+
+
+    return createGrowthProfile(
+
+        userId
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// EXPORT
+// =====================================
+
 
 module.exports = {
 
+
     createGrowthProfile,
+
 
     analyzeContentPerformance,
 
+
     generateGrowthRecommendations,
 
+
+    buildGrowthStrategy,
+
+
     getGrowthProfile
+
 
 };
