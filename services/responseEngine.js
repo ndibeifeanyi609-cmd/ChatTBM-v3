@@ -1,14 +1,15 @@
 // =====================================
-// ChatTBM V6.7.2
+// ChatTBM V6.7.3
 // Response Intelligence Engine
 //
-// Systems:
+// Upgrade:
 // - Adaptive Response Engine
+// - Adaptive Brain Engine
 // - Creator Personalization
-// - Memory Awareness
 // - Context Intelligence
-// - Smart Creator Responses
+// - Memory Ready Architecture
 // =====================================
+
 
 
 const {
@@ -16,6 +17,8 @@ const {
     handleContextRequest
 
 } = require("./contextEngine");
+
+
 
 
 
@@ -27,18 +30,41 @@ require("./adaptiveResponseEngine");
 
 
 
-let adaptiveEngine = null;
+const AdaptiveBrainEngine =
+
+require("./adaptiveBrainEngine");
+
+
+
 
 
 
 
 
 // =====================================
-// CONNECT ADAPTIVE ENGINE
+// ENGINE INSTANCES
+// =====================================
+
+
+let adaptiveEngine = null;
+
+
+let adaptiveBrain = null;
+
+
+
+
+
+
+
+
+// =====================================
+// CONNECT INTELLIGENCE ENGINES
 // =====================================
 
 
 function connectAdaptiveEngine(identityEngine){
+
 
 
     adaptiveEngine =
@@ -50,13 +76,16 @@ function connectAdaptiveEngine(identityEngine){
     );
 
 
+
+
+
+    adaptiveBrain =
+
+    new AdaptiveBrainEngine();
+
+
+
 }
-
-
-
-
-
-
 
 // =====================================
 // MAIN RESPONSE GENERATOR
@@ -90,11 +119,19 @@ function generateResponse(
 
 
 
+    let creatorContext = null;
+
+
+    let brainDecision = null;
+
+
+
+
 
 
 
     // =====================================
-    // MEMORY CONTEXT
+    // CONTEXT MEMORY CHECK
     // =====================================
 
 
@@ -107,6 +144,8 @@ function generateResponse(
         history
 
     );
+
+
 
 
 
@@ -128,13 +167,10 @@ function generateResponse(
 
 
 
+
     // =====================================
-    // ADAPTIVE CONTEXT
+    // ADAPTIVE CREATOR CONTEXT
     // =====================================
-
-
-    let creatorContext = null;
-
 
 
     if(
@@ -144,6 +180,7 @@ function generateResponse(
         brainContext.userId
 
     ){
+
 
 
         creatorContext =
@@ -157,6 +194,7 @@ function generateResponse(
         );
 
 
+
     }
 
 
@@ -165,18 +203,47 @@ function generateResponse(
 
 
 
+
     // =====================================
-    // RESPONSE TYPES
+    // ADAPTIVE BRAIN DECISION
     // =====================================
 
 
-    switch(intent){
+    if(
+
+        adaptiveBrain &&
+
+        brainContext.profile
+
+    ){
 
 
-        case "greeting":
+        brainDecision =
+
+        adaptiveBrain.decide(
+
+            brainContext.profile,
+
+            message
+
+        );
 
 
-            response =
+    }
+
+// =====================================
+// RESPONSE INTELLIGENCE
+// =====================================
+
+
+switch(intent){
+
+
+
+    case "greeting":
+
+
+        response =
 
 `Hello 👋
 
@@ -191,195 +258,181 @@ I can help you create:
 
 What are we creating today?`;
 
-            break;
+        break;
 
 
 
 
 
 
-        case "script_generation":
 
 
-            response =
+    case "script_generation":
+
+
+        response =
 
 `🎬 Video Script
 
 
 🔥 Hook:
 
-Nobody sees the struggle behind the success.
+Everyone sees the final result.
+
+Nobody sees the journey behind it.
 
 
 🎭 Story:
 
-Show the journey, challenges, failures and lessons that created the transformation.
+Show the struggle, the lessons, the failures and the transformation.
+
+Make the audience feel the process.
 
 
 🚀 Ending:
 
-The story is still being written.
+The journey continues.
 
-Keep building. Keep improving.`;
+Keep creating. Keep improving.`;
 
-            break;
-
-
+        break;
 
 
 
 
-        case "caption_generation":
 
 
-            response =
+
+
+    case "caption_generation":
+
+
+        response =
 
 `🔥 Caption:
 
-They see the result.
+They see the achievement.
 
-They don't see the battles behind it.
+They don't see the sacrifice.
 
-Every failure created strength.
-Every setback created growth.
+Every challenge created growth.
+Every setback created strength.
 
 The journey is the story. 🚀`;
 
-            break;
+        break;
 
 
 
 
 
 
-        case "idea_generation":
 
 
-            response =
+    case "idea_generation":
+
+
+        response =
 
 `🔥 Viral Content Ideas:
 
 
-1. The struggle nobody saw
+1. The story nobody knows
 
-2. My biggest lesson
+2. My biggest challenge
 
-3. Behind the scenes
+3. Behind the scenes reality
 
-4. Transformation story
+4. Before and after transformation
 
-5. The journey nobody knows
-
-
-Choose one and I'll build it.`;
-
-            break;
+5. Lessons from failure
 
 
+Choose one and I'll build the full content.`;
+
+        break;
 
 
 
 
-        case "marketing":
 
 
-            response =
+
+
+    case "marketing":
+
+
+        response =
 
 `📢 Marketing Framework:
 
 
 Problem:
 
-Identify the audience pain.
+Show the audience their problem.
 
 
 Solution:
 
-Show how your product helps.
+Explain your value.
 
 
 Action:
 
-Give people the next step.`;
+Give them the next step.`;
 
-            break;
-
-
+        break;
 
 
 
 
-        case "creator_strategy":
 
 
-            response =
+
+
+    case "creator_strategy":
+
+
+        response =
 
 `🚀 Creator Strategy:
 
 
-1. Build a unique identity.
+1. Build your identity.
 
 2. Create consistently.
 
 3. Understand your audience.
 
-4. Improve through feedback.
+4. Learn from feedback.
 
 5. Turn content into a brand.`;
 
-            break;
+        break;
 
 
 
 
 
 
-        default:
 
 
-            response =
+    default:
+
+
+        response =
 
 `I understand.
 
-I can help you create:
+I can help transform your idea into:
 
 🎬 Scripts
 ✍️ Captions
 🔥 Viral Ideas
 📢 Marketing Content
 
-Tell me what you want to build.`;
+Tell me what you want to create.`;
 
-
-
-    }
-
-
-
-
-
-
-
-    // =====================================
-    // INTERNAL ADAPTIVE BOOST
-    // =====================================
-
-
-    if(creatorContext){
-
-
-        response +=
-
-`\n\n✨ Personalized for your creator style.`;
-
-    }
-
-
-
-
-
-
-    return response;
 
 
 }
@@ -390,10 +443,77 @@ Tell me what you want to build.`;
 
 
 
+
+// =====================================
+// ADAPTIVE BRAIN INFLUENCE
+// =====================================
+
+
+if(brainDecision){
+
+
+    response +=
+
+
+`
+
+✨ Creator Adaptation:
+
+Style:
+${brainDecision.creatorStyle}
+
+Tone:
+${brainDecision.tone}
+
+`;
+
+}
+
+
+
+
+
+
+
+if(creatorContext){
+
+
+    response +=
+
+
+`
+
+🧠 Adaptive Creator Context Applied`;
+
+}
+
+// =====================================
+// RETURN RESPONSE
+// =====================================
+
+
+return response;
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// MODULE EXPORT
+// =====================================
+
+
 module.exports = {
 
 
     generateResponse,
+
 
     connectAdaptiveEngine
 
