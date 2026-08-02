@@ -1,13 +1,13 @@
 // =====================================
-// ChatTBM V6.7.3
+// ChatTBM V6.7.4
 // Response Intelligence Engine
 //
 // Upgrade:
 // - Adaptive Response Engine
 // - Adaptive Brain Engine
+// - Memory Intelligence
 // - Creator Personalization
 // - Context Intelligence
-// - Memory Ready Architecture
 // =====================================
 
 
@@ -33,6 +33,16 @@ require("./adaptiveResponseEngine");
 const AdaptiveBrainEngine =
 
 require("./adaptiveBrainEngine");
+
+
+
+
+
+const {
+
+    getImportantMemories
+
+} = require("./creatorMemoryEngine");
 
 
 
@@ -66,7 +76,6 @@ let adaptiveBrain = null;
 function connectAdaptiveEngine(identityEngine){
 
 
-
     adaptiveEngine =
 
     new AdaptiveResponseEngine(
@@ -74,7 +83,6 @@ function connectAdaptiveEngine(identityEngine){
         identityEngine
 
     );
-
 
 
 
@@ -125,13 +133,17 @@ function generateResponse(
     let brainDecision = null;
 
 
+    let importantMemories = [];
+
+
+
 
 
 
 
 
     // =====================================
-    // CONTEXT MEMORY CHECK
+    // CONTEXT MEMORY
     // =====================================
 
 
@@ -157,7 +169,42 @@ function generateResponse(
 
     ){
 
+
         return context.response;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================================
+    // MEMORY INTELLIGENCE RETRIEVAL
+    // =====================================
+
+
+    if(
+
+        brainContext.userId
+
+    ){
+
+
+
+        importantMemories =
+
+        getImportantMemories(
+
+            brainContext.userId
+
+        );
+
+
 
     }
 
@@ -218,6 +265,7 @@ function generateResponse(
     ){
 
 
+
         brainDecision =
 
         adaptiveBrain.decide(
@@ -227,6 +275,7 @@ function generateResponse(
             message
 
         );
+
 
 
     }
@@ -277,23 +326,19 @@ What are we creating today?`;
 
 🔥 Hook:
 
-Everyone sees the final result.
-
-Nobody sees the journey behind it.
+Nobody sees the preparation behind the success.
 
 
 🎭 Story:
 
-Show the struggle, the lessons, the failures and the transformation.
-
-Make the audience feel the process.
+Turn your experience, challenges and lessons into a story people can connect with.
 
 
 🚀 Ending:
 
-The journey continues.
+Your journey is still being created.
 
-Keep creating. Keep improving.`;
+Keep building.`;
 
         break;
 
@@ -311,14 +356,14 @@ Keep creating. Keep improving.`;
 
 `🔥 Caption:
 
-They see the achievement.
+They see the final moment.
 
-They don't see the sacrifice.
+They don't see the discipline behind it.
 
-Every challenge created growth.
-Every setback created strength.
+Every challenge shaped the creator.
+Every lesson built the journey.
 
-The journey is the story. 🚀`;
+The story continues. 🚀`;
 
         break;
 
@@ -337,18 +382,18 @@ The journey is the story. 🚀`;
 `🔥 Viral Content Ideas:
 
 
-1. The story nobody knows
+1. The moment everything changed
 
-2. My biggest challenge
+2. The struggle behind the result
 
-3. Behind the scenes reality
+3. My creator journey
 
-4. Before and after transformation
+4. What nobody knows about me
 
-5. Lessons from failure
+5. Lessons from my experience
 
 
-Choose one and I'll build the full content.`;
+Choose one and I'll develop it.`;
 
         break;
 
@@ -369,17 +414,17 @@ Choose one and I'll build the full content.`;
 
 Problem:
 
-Show the audience their problem.
+Show the audience the challenge.
 
 
 Solution:
 
-Explain your value.
+Explain the value.
 
 
 Action:
 
-Give them the next step.`;
+Guide them to the next step.`;
 
         break;
 
@@ -398,15 +443,15 @@ Give them the next step.`;
 `🚀 Creator Strategy:
 
 
-1. Build your identity.
+1. Build a recognizable identity.
 
-2. Create consistently.
+2. Create content consistently.
 
-3. Understand your audience.
+3. Understand audience behavior.
 
-4. Learn from feedback.
+4. Learn from results.
 
-5. Turn content into a brand.`;
+5. Improve your brand.`;
 
         break;
 
@@ -444,6 +489,48 @@ Tell me what you want to create.`;
 
 
 
+
+// =====================================
+// MEMORY INTELLIGENCE INFLUENCE
+// =====================================
+
+
+if(
+
+    importantMemories.length > 0
+
+){
+
+
+    const memory =
+
+    importantMemories[0];
+
+
+
+    response +=
+
+
+`
+
+🧠 Creator Memory Applied:
+
+${memory.content}
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+
 // =====================================
 // ADAPTIVE BRAIN INFLUENCE
 // =====================================
@@ -457,15 +544,17 @@ if(brainDecision){
 
 `
 
-✨ Creator Adaptation:
+✨ Creator Style:
 
-Style:
 ${brainDecision.creatorStyle}
 
 Tone:
+
 ${brainDecision.tone}
 
 `;
+
+
 
 }
 
@@ -473,6 +562,12 @@ ${brainDecision.tone}
 
 
 
+
+
+
+// =====================================
+// ADAPTIVE RESPONSE STATUS
+// =====================================
 
 
 if(creatorContext){
@@ -483,7 +578,9 @@ if(creatorContext){
 
 `
 
-🧠 Adaptive Creator Context Applied`;
+⚡ Adaptive Creator Personalization Active`;
+
+
 
 }
 
@@ -496,6 +593,7 @@ return response;
 
 
 }
+
 
 
 
