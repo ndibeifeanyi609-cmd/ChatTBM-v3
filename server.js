@@ -1,10 +1,11 @@
 // =====================================
-// ChatTBM V6.7.2
+// ChatTBM V6.7.3
 // Creator Intelligence Backend
 //
 // Systems:
 // - Response Intelligence
 // - Adaptive Response Engine
+// - Adaptive Brain Engine
 // - Intent Detection
 // - Creator Identity
 // - Brand Voice
@@ -37,8 +38,10 @@ app.use(express.json());
 
 
 
+
+
 // =====================================
-// CORE RESPONSE INTELLIGENCE
+// RESPONSE INTELLIGENCE
 // =====================================
 
 
@@ -55,6 +58,14 @@ const {
 
 
 
+
+
+
+// =====================================
+// INTENT ENGINE
+// =====================================
+
+
 const {
 
     detectIntent
@@ -69,7 +80,7 @@ const {
 
 
 // =====================================
-// CREATOR IDENTITY SYSTEM
+// CREATOR IDENTITY
 // =====================================
 
 
@@ -79,26 +90,25 @@ const {
 
     getCreatorIdentity
 
-
 } = require("./services/creatorIdentityEngine");
 
 
 
 
 
-// CONNECT ADAPTIVE ENGINE
+
+
+
+// =====================================
+// CONNECT ADAPTIVE SYSTEMS
+// =====================================
+
 
 connectAdaptiveEngine({
 
     getCreatorIdentity
 
 });
-
-
-
-
-
-
 
 // =====================================
 // CREATOR LEARNING SYSTEM
@@ -143,8 +153,10 @@ const {
 
 
 
+
+
 // =====================================
-// CREATOR STRATEGY
+// CREATOR STRATEGY ENGINE
 // =====================================
 
 
@@ -164,8 +176,10 @@ const {
 
 
 
+
+
 // =====================================
-// USER PROFILE
+// USER PROFILE ENGINE
 // =====================================
 
 
@@ -175,9 +189,16 @@ const {
 
 } = require("./services/userProfileEngine");
 
- 
+
+
+
+
+
+
+
+
 // =====================================
-// FEEDBACK + PERFORMANCE LEARNING
+// FEEDBACK LEARNING SYSTEM
 // =====================================
 
 
@@ -191,11 +212,17 @@ const {
 
 
 
+
+
+
 const {
 
     analyzeUserFeedback
 
 } = require("./services/profileLearningBridge");
+
+
+
 
 
 
@@ -211,8 +238,10 @@ const {
 
 
 
+
+
 // =====================================
-// VIRAL MEMORY
+// VIRAL MEMORY SYSTEM
 // =====================================
 
 
@@ -224,14 +253,8 @@ const {
 
 } = require("./services/viralMemoryBridge");
 
-
-
-
-
-
-
 // =====================================
-// PREDICTIVE INTELLIGENCE
+// PREDICTIVE INTELLIGENCE SYSTEM
 // =====================================
 
 
@@ -243,11 +266,17 @@ const {
 
 
 
+
+
+
 const {
 
     scoreHook
 
 } = require("./services/hookScoringEngine");
+
+
+
 
 
 
@@ -259,11 +288,17 @@ const {
 
 
 
+
+
+
 const {
 
     predictAudience
 
 } = require("./services/audiencePredictionEngine");
+
+
+
 
 
 
@@ -295,10 +330,11 @@ app.get("/",(req,res)=>{
         app:"ChatTBM AI Backend",
 
 
-        version:"V6.7.2",
+        version:"V6.7.3",
 
 
-        status:"Creator Intelligence Online 🚀"
+        status:"Adaptive Creator Intelligence Online 🚀"
+
 
 
     });
@@ -315,7 +351,7 @@ app.get("/",(req,res)=>{
 
 
 // =====================================
-// CHAT ENGINE V6.7.2
+// CHAT ENGINE V6.7.3
 // =====================================
 
 
@@ -340,6 +376,7 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
         if(!message){
 
 
@@ -352,10 +389,12 @@ app.post("/api/chat",(req,res)=>{
                 message:"No message received"
 
 
+
             });
 
 
         }
+
 
 
 
@@ -379,6 +418,8 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
+
         learnCreatorIdentity(
 
             userId,
@@ -386,6 +427,8 @@ app.post("/api/chat",(req,res)=>{
             message
 
         );
+
+
 
 
 
@@ -401,6 +444,8 @@ app.post("/api/chat",(req,res)=>{
 
 
 
+
+
         learnCreatorMemory(
 
             userId,
@@ -408,6 +453,7 @@ app.post("/api/chat",(req,res)=>{
             message
 
         );
+
 
 
 
@@ -436,7 +482,7 @@ app.post("/api/chat",(req,res)=>{
 
 
         // ===============================
-        // CREATOR STRATEGY
+        // STRATEGY INTELLIGENCE
         // ===============================
 
 
@@ -499,13 +545,14 @@ app.post("/api/chat",(req,res)=>{
 
                 profile:
 
-                getProfile(userId)
+                getCreatorIdentity(userId)
 
 
             }
 
 
         );
+
 
 
 
@@ -530,7 +577,6 @@ app.post("/api/chat",(req,res)=>{
 
 
         });
-
 
 
 
@@ -588,6 +634,8 @@ app.post("/api/creator-memory",(req,res)=>{
 
 
 
+
+
         if(!content){
 
 
@@ -633,6 +681,7 @@ app.post("/api/creator-memory",(req,res)=>{
 
 
 
+
             voice:
 
             learnBrandVoice(
@@ -647,6 +696,7 @@ app.post("/api/creator-memory",(req,res)=>{
 
 
 
+
             memory:
 
             learnCreatorMemory(
@@ -656,6 +706,7 @@ app.post("/api/creator-memory",(req,res)=>{
                 content
 
             )
+
 
 
         });
@@ -759,6 +810,7 @@ app.get("/api/creator-brain/:userId",(req,res)=>{
         });
 
 
+
     }
 
 
@@ -802,102 +854,6 @@ app.get("/api/profile/:userId",(req,res)=>{
     try{
 
 
-        const profile =
-
-        getProfile(
-
-            req.params.userId
-
-        );
-
-
-
-
-
-        res.json({
-
-
-            success:true,
-
-
-            profile
-
-
-
-        });
-
-
-    }
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-
-            error:error.message
-
-
-
-        });
-
-
-    }
-
-
-});
-
-// =====================================
-// CONTENT ANALYSIS ENGINE
-// =====================================
-
-
-app.post("/api/analyze",(req,res)=>{
-
-
-    try{
-
-
-        const {
-
-
-            content
-
-
-        } = req.body;
-
-
-
-
-
-        if(!content){
-
-
-            return res.json({
-
-
-                success:false,
-
-
-                message:"No content received"
-
-
-
-            });
-
-
-        }
-
-
-
-
-
-
-
         res.json({
 
 
@@ -905,59 +861,11 @@ app.post("/api/analyze",(req,res)=>{
 
 
 
-            prediction:
+            profile:
 
-            predictContent(
+            getProfile(
 
-                content
-
-            ),
-
-
-
-
-
-            hook:
-
-            scoreHook(
-
-                content
-
-            ),
-
-
-
-
-
-            contentScore:
-
-            scoreContent(
-
-                content
-
-            ),
-
-
-
-
-
-            audience:
-
-            predictAudience(
-
-                content
-
-            ),
-
-
-
-
-
-            growth:
-
-            generateGrowthReport(
-
-                content
+                req.params.userId
 
             )
 
@@ -998,6 +906,124 @@ app.post("/api/analyze",(req,res)=>{
 
 
 
+
+// =====================================
+// CONTENT ANALYSIS ENGINE
+// =====================================
+
+
+app.post("/api/analyze",(req,res)=>{
+
+
+    try{
+
+
+        const {
+
+
+            content
+
+
+        } = req.body;
+
+
+
+
+
+
+
+        if(!content){
+
+
+            return res.json({
+
+
+                success:false,
+
+
+                message:"No content received"
+
+
+
+            });
+
+
+        }
+
+
+
+
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+
+            prediction:
+
+            predictContent(content),
+
+
+
+
+            hook:
+
+            scoreHook(content),
+
+
+
+
+            contentScore:
+
+            scoreContent(content),
+
+
+
+
+            audience:
+
+            predictAudience(content),
+
+
+
+
+            growth:
+
+            generateGrowthReport(content)
+
+
+
+        });
+
+
+
+    }
+
+
+    catch(error){
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            error:error.message
+
+
+
+        });
+
+
+    }
+
+
+});
 
 // =====================================
 // FEEDBACK LEARNING
@@ -1131,7 +1157,6 @@ app.post("/api/feedback",(req,res)=>{
 
 
 
-
     }
 
 
@@ -1185,7 +1210,6 @@ app.get("/api/strategy/:userId",(req,res)=>{
 
 
 
-
         res.json({
 
 
@@ -1195,35 +1219,21 @@ app.get("/api/strategy/:userId",(req,res)=>{
 
             strategy:
 
-            generateCreatorStrategy(
-
-                userId
-
-            ),
-
+            generateCreatorStrategy(userId),
 
 
 
 
             ideas:
 
-            generateContentIdeas(
-
-                userId
-
-            ),
-
+            generateContentIdeas(userId),
 
 
 
 
             script:
 
-            generateScriptOutline(
-
-                userId
-
-            )
+            generateScriptOutline(userId)
 
 
 
@@ -1254,6 +1264,14 @@ app.get("/api/strategy/:userId",(req,res)=>{
 
 
 });
+
+
+
+
+
+
+
+
 
 // =====================================
 // VIRAL MEMORY
@@ -1332,9 +1350,7 @@ app.get("/api/feedback",(req,res)=>{
 
         res.json(
 
-
             analyzeFeedback()
-
 
         );
 
@@ -1392,7 +1408,7 @@ app.listen(PORT,()=>{
     console.log(
 
 
-        `🚀 ChatTBM V6.7.2 running on port ${PORT}`
+        `🚀 ChatTBM V6.7.3 running on port ${PORT}`
 
 
     );
