@@ -1,14 +1,10 @@
 // =====================================
-// ChatTBM V6.8.6
+// ChatTBM V6.9.1
 // Chat Routes
-//
-// Connects:
-// Route → Controller → Intelligence
 // =====================================
 
 
 const express = require("express");
-
 
 const router = express.Router();
 
@@ -26,17 +22,36 @@ const {
 
 
 
+const {
+
+    validateChatRequest,
+
+    validateUserRequest
+
+} = require("../middleware/requestValidator");
 
 
 
 
-// POST /api/chat-v2
+
+
+
+
+
+// =====================================
+// CHAT ENDPOINT
+// =====================================
+
 
 router.post(
 
-    "/",
+"/",
 
-    chatHandler
+validateUserRequest,
+
+validateChatRequest,
+
+chatHandler
 
 );
 
