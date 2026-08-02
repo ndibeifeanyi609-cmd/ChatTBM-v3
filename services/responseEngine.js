@@ -1,13 +1,13 @@
 // =====================================
-// ChatTBM V6.7.4
+// ChatTBM V6.7.5
 // Response Intelligence Engine
 //
 // Upgrade:
 // - Adaptive Response Engine
 // - Adaptive Brain Engine
 // - Memory Intelligence
-// - Creator Personalization
-// - Context Intelligence
+// - Memory Retrieval
+// - Context Fusion
 // =====================================
 
 
@@ -38,11 +38,9 @@ require("./adaptiveBrainEngine");
 
 
 
-const {
+const MemoryRetrievalEngine =
 
-    getImportantMemories
-
-} = require("./creatorMemoryEngine");
+require("./memoryRetrievalEngine");
 
 
 
@@ -60,6 +58,9 @@ let adaptiveEngine = null;
 
 
 let adaptiveBrain = null;
+
+
+let memoryRetriever = null;
 
 
 
@@ -87,9 +88,18 @@ function connectAdaptiveEngine(identityEngine){
 
 
 
+
     adaptiveBrain =
 
     new AdaptiveBrainEngine();
+
+
+
+
+
+    memoryRetriever =
+
+    new MemoryRetrievalEngine();
 
 
 
@@ -133,7 +143,7 @@ function generateResponse(
     let brainDecision = null;
 
 
-    let importantMemories = [];
+    let memoryContext = null;
 
 
 
@@ -143,7 +153,7 @@ function generateResponse(
 
 
     // =====================================
-    // CONTEXT MEMORY
+    // CONVERSATION CONTEXT
     // =====================================
 
 
@@ -184,11 +194,13 @@ function generateResponse(
 
 
     // =====================================
-    // MEMORY INTELLIGENCE RETRIEVAL
+    // MEMORY RETRIEVAL + CONTEXT FUSION
     // =====================================
 
 
     if(
+
+        memoryRetriever &&
 
         brainContext.userId
 
@@ -196,11 +208,13 @@ function generateResponse(
 
 
 
-        importantMemories =
+        memoryContext =
 
-        getImportantMemories(
+        memoryRetriever.buildContext(
 
-            brainContext.userId
+            brainContext.userId,
+
+            message
 
         );
 
@@ -215,8 +229,9 @@ function generateResponse(
 
 
 
+
     // =====================================
-    // ADAPTIVE CREATOR CONTEXT
+    // ADAPTIVE CREATOR PERSONALIZATION
     // =====================================
 
 
@@ -243,6 +258,7 @@ function generateResponse(
 
 
     }
+
 
 
 
@@ -326,17 +342,17 @@ What are we creating today?`;
 
 🔥 Hook:
 
-Nobody sees the preparation behind the success.
+Nobody sees the work behind the transformation.
 
 
 🎭 Story:
 
-Turn your experience, challenges and lessons into a story people can connect with.
+Use your real experiences, challenges and lessons to create a story people connect with.
 
 
 🚀 Ending:
 
-Your journey is still being created.
+Your journey is your brand.
 
 Keep building.`;
 
@@ -356,14 +372,14 @@ Keep building.`;
 
 `🔥 Caption:
 
-They see the final moment.
+They see the moment.
 
-They don't see the discipline behind it.
+They don't see the years behind it.
 
-Every challenge shaped the creator.
-Every lesson built the journey.
+Every challenge created the mindset.
+Every lesson created the creator.
 
-The story continues. 🚀`;
+The journey continues. 🚀`;
 
         break;
 
@@ -382,18 +398,18 @@ The story continues. 🚀`;
 `🔥 Viral Content Ideas:
 
 
-1. The moment everything changed
+1. The story behind my success
 
-2. The struggle behind the result
+2. The struggle nobody saw
 
-3. My creator journey
+3. What changed my mindset
 
-4. What nobody knows about me
+4. Behind the scenes reality
 
-5. Lessons from my experience
+5. My creator evolution
 
 
-Choose one and I'll develop it.`;
+Choose one and I'll build it.`;
 
         break;
 
@@ -414,17 +430,17 @@ Choose one and I'll develop it.`;
 
 Problem:
 
-Show the audience the challenge.
+Identify what your audience needs.
 
 
 Solution:
 
-Explain the value.
+Show your value.
 
 
 Action:
 
-Guide them to the next step.`;
+Guide them toward the next step.`;
 
         break;
 
@@ -443,13 +459,13 @@ Guide them to the next step.`;
 `🚀 Creator Strategy:
 
 
-1. Build a recognizable identity.
+1. Strengthen your identity.
 
-2. Create content consistently.
+2. Build consistent content.
 
-3. Understand audience behavior.
+3. Understand your audience.
 
-4. Learn from results.
+4. Analyze performance.
 
 5. Improve your brand.`;
 
@@ -491,20 +507,17 @@ Tell me what you want to create.`;
 
 
 // =====================================
-// MEMORY INTELLIGENCE INFLUENCE
+// MEMORY CONTEXT FUSION OUTPUT
 // =====================================
 
 
 if(
 
-    importantMemories.length > 0
+    memoryContext &&
+
+    memoryContext.count > 0
 
 ){
-
-
-    const memory =
-
-    importantMemories[0];
 
 
 
@@ -513,9 +526,9 @@ if(
 
 `
 
-🧠 Creator Memory Applied:
+🧠 Relevant Creator Memory:
 
-${memory.content}
+${memoryContext.memoryContext.join(", ")}
 
 `;
 
@@ -530,9 +543,8 @@ ${memory.content}
 
 
 
-
 // =====================================
-// ADAPTIVE BRAIN INFLUENCE
+// ADAPTIVE BRAIN OUTPUT
 // =====================================
 
 
@@ -544,7 +556,7 @@ if(brainDecision){
 
 `
 
-✨ Creator Style:
+✨ Creator Style Adaptation:
 
 ${brainDecision.creatorStyle}
 
@@ -566,7 +578,7 @@ ${brainDecision.tone}
 
 
 // =====================================
-// ADAPTIVE RESPONSE STATUS
+// PERSONALIZATION STATUS
 // =====================================
 
 
@@ -578,7 +590,7 @@ if(creatorContext){
 
 `
 
-⚡ Adaptive Creator Personalization Active`;
+⚡ Creator Personalization Active`;
 
 
 
