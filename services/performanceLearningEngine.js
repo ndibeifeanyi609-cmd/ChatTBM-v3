@@ -1,12 +1,17 @@
 // =====================================
-// ChatTBM V6.4
+// ChatTBM V7.0
 // Performance Learning Engine
 //
+// Connected:
+// - Content Performance Memory
+// - Growth Intelligence
+// - Creator Strategy
+// - Feedback Learning
+//
 // Purpose:
-// - Analyze creator feedback
+// - Analyze content results
 // - Detect winning patterns
-// - Learn why content works
-// - Build creator strategy memory
+// - Learn why content performs
 // =====================================
 
 
@@ -15,11 +20,11 @@ const {
 
     saveContentPerformance,
 
-    saveViralPattern,
+    saveWinningPattern,
 
-    getBestPerformingContent,
+    getSuccessfulContent,
 
-    getViralPatterns
+    getWinningPatterns
 
 } = require("./contentPerformanceEngine");
 
@@ -46,7 +51,7 @@ function analyzePerformanceFeedback(
 
     const text =
 
-    String(feedback)
+    String(feedback || "")
 
     .toLowerCase();
 
@@ -59,18 +64,13 @@ function analyzePerformanceFeedback(
 
         category:"general",
 
-
         result:"unknown",
-
 
         successReason:"",
 
-
         hook:"",
 
-
         audienceReaction:"",
-
 
         strategy:""
 
@@ -84,329 +84,307 @@ function analyzePerformanceFeedback(
 
 
 
-    // ===============================
-    // CONTENT TYPE
-    // ===============================
 
 
-    if(
+// =====================================
+// CONTENT CATEGORY DETECTION
+// =====================================
 
-        text.includes("video") ||
 
-        text.includes("reel") ||
+if(
 
-        text.includes("short")
+    text.includes("video") ||
 
-    ){
+    text.includes("reel") ||
 
+    text.includes("short")
 
-        learning.category =
+){
 
-        "short video";
+    learning.category = "short video";
 
+}
 
-    }
 
 
+if(
 
+    text.includes("action") ||
 
+    text.includes("fight") ||
 
-    if(
+    text.includes("battle")
 
-        text.includes("fight") ||
+){
 
-        text.includes("action")
+    learning.category = "action content";
 
-    ){
+}
 
 
-        learning.category =
 
-        "action content";
+if(
 
+    text.includes("funny") ||
 
-    }
+    text.includes("comedy") ||
 
+    text.includes("laugh")
 
+){
 
+    learning.category = "comedy content";
 
+}
 
-    if(
 
-        text.includes("comedy") ||
 
-        text.includes("funny")
 
-    ){
 
 
-        learning.category =
 
-        "comedy content";
 
 
-    }
+// =====================================
+// PERFORMANCE DETECTION
+// =====================================
 
 
+if(
 
+    text.includes("viral") ||
 
+    text.includes("blew up") ||
 
+    text.includes("many views")
 
+){
 
+    learning.result = "viral";
 
 
-    // ===============================
-    // PERFORMANCE RESULT
-    // ===============================
+}
 
 
-    if(
+else if(
 
-        text.includes("viral") ||
+    text.includes("worked") ||
 
-        text.includes("many views") ||
+    text.includes("success") ||
 
-        text.includes("blew up")
+    text.includes("good")
 
-    ){
+){
 
+    learning.result = "high";
 
-        learning.result =
 
-        "viral";
+}
 
 
-    }
+else if(
 
+    text.includes("failed") ||
 
+    text.includes("low views")
 
+){
 
-    else if(
+    learning.result = "low";
 
-        text.includes("good") ||
 
-        text.includes("worked") ||
+}
 
-        text.includes("success")
 
-    ){
 
 
-        learning.result =
 
-        "high";
 
 
-    }
 
 
+// =====================================
+// WHY CONTENT WORKED
+// =====================================
 
 
+if(
 
+    text.includes("hook")
 
+){
 
-    else if(
+    learning.successReason =
 
-        text.includes("failed") ||
+    "Strong opening hook";
 
-        text.includes("low views")
 
-    ){
+    learning.hook =
 
+    "High impact opening";
 
-        learning.result =
 
-        "low";
+}
 
 
-    }
 
+if(
 
+    text.includes("funny")
 
+){
 
+    learning.successReason =
 
+    "Comedy entertainment";
 
 
+}
 
-    // ===============================
-    // SUCCESS REASON
-    // ===============================
 
 
-    if(
+if(
 
-        text.includes("hook")
+    text.includes("emotional")
 
-    ){
+){
 
+    learning.successReason =
 
-        learning.successReason =
+    "Emotional connection";
 
-        "Strong opening hook";
 
+}
 
-        learning.hook =
 
-        "High impact opening";
 
-    }
+if(
 
+    text.includes("surprise")
 
+){
 
+    learning.successReason =
 
+    "Unexpected moment";
 
 
-    if(
+    learning.strategy =
 
-        text.includes("funny")
+    "Use surprise elements";
 
-    ){
 
+}
 
-        learning.successReason =
 
-        "Comedy and entertainment";
 
 
-    }
 
 
 
 
 
-    if(
+// =====================================
+// AUDIENCE RESPONSE
+// =====================================
 
-        text.includes("emotional")
 
-    ){
+if(
 
+    text.includes("comment") ||
 
-        learning.successReason =
+    text.includes("share") ||
 
-        "Emotional connection";
+    text.includes("engagement")
 
+){
 
-    }
+    learning.audienceReaction =
 
+    "Strong audience interaction";
 
 
+}
 
 
 
-    if(
 
-        text.includes("surprise")
 
-    ){
 
 
-        learning.successReason =
 
-        "Unexpected moment";
 
+// =====================================
+// SAVE PERFORMANCE MEMORY
+// =====================================
 
-        learning.strategy =
 
-        "Use surprise elements";
+const saved =
 
+saveContentPerformance(
 
-    }
+    userId,
 
+    learning
 
+);
 
 
 
 
 
-    // ===============================
-    // AUDIENCE REACTION
-    // ===============================
 
 
-    if(
 
-        text.includes("comments") ||
 
-        text.includes("shares") ||
+// =====================================
+// SAVE WINNING PATTERN
+// =====================================
 
-        text.includes("engagement")
 
-    ){
+if(
 
+    learning.result === "viral" ||
 
-        learning.audienceReaction =
+    learning.result === "high"
 
-        "Strong audience interaction";
+){
 
 
-    }
-
-
-
-
-
-
-
-
-    // ===============================
-    // SAVE LEARNING
-    // ===============================
-
-
-    const saved =
-
-    saveContentPerformance(
+    saveWinningPattern(
 
         userId,
 
-        learning
+        {
+
+
+            category:
+
+            learning.category,
+
+
+            reason:
+
+            learning.successReason,
+
+
+            hook:
+
+            learning.hook,
+
+
+            strategy:
+
+            learning.strategy
+
+
+
+        }
 
     );
 
 
-
-
-
-
-    // Save viral pattern separately
-
-    if(
-
-        learning.result === "viral"
-
-    ){
-
-
-        saveViralPattern(
-
-            userId,
-
-            {
-
-
-                category:
-
-                learning.category,
-
-
-                reason:
-
-                learning.successReason,
-
-
-                hook:
-
-                learning.hook
-
-
-
-            }
-
-
-        );
-
-
-    }
+}
 
 
 
@@ -414,7 +392,8 @@ function analyzePerformanceFeedback(
 
 
 
-    return saved;
+
+return saved;
 
 
 }
@@ -432,7 +411,7 @@ function analyzePerformanceFeedback(
 // =====================================
 
 
-function getWinningPatterns(
+function getCreatorWinningPatterns(
 
     userId
 
@@ -444,7 +423,7 @@ function getWinningPatterns(
 
         successfulContent:
 
-        getBestPerformingContent(
+        getSuccessfulContent(
 
             userId
 
@@ -452,9 +431,9 @@ function getWinningPatterns(
 
 
 
-        viralPatterns:
+        winningPatterns:
 
-        getViralPatterns(
+        getWinningPatterns(
 
             userId
 
@@ -465,6 +444,7 @@ function getWinningPatterns(
 
 
 }
+
 
 
 
@@ -484,7 +464,7 @@ module.exports = {
     analyzePerformanceFeedback,
 
 
-    getWinningPatterns
+    getCreatorWinningPatterns
 
 
 };
