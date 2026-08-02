@@ -1,5 +1,5 @@
 // =====================================
-// ChatTBM V6.7.8
+// ChatTBM V6.8.0
 // Response Intelligence Engine
 //
 // Systems:
@@ -26,14 +26,11 @@ const {
 
 
 
-// =====================================
-// INTELLIGENCE ENGINES
-// =====================================
-
-
 const AdaptiveResponseEngine =
 
 require("./adaptiveResponseEngine");
+
+
 
 
 
@@ -47,6 +44,8 @@ require("./adaptiveBrainEngine");
 
 
 
+
+
 const MemoryRetrievalEngine =
 
 require("./memoryRetrievalEngine");
@@ -55,9 +54,13 @@ require("./memoryRetrievalEngine");
 
 
 
+
+
 const RelationshipIntelligenceEngine =
 
 require("./relationshipIntelligenceEngine");
+
+
 
 
 
@@ -103,12 +106,11 @@ let intelligenceFusion = null;
 
 
 // =====================================
-// CONNECT INTELLIGENCE SYSTEMS
+// CONNECT INTELLIGENCE ENGINES
 // =====================================
 
 
 function connectAdaptiveEngine(identityEngine){
-
 
 
     adaptiveEngine =
@@ -199,7 +201,8 @@ function generateResponse(
     let audienceContext = null;
 
 
-    let fusedContext = null;
+    let creatorBrainContext = null;
+
 
 
 
@@ -209,7 +212,7 @@ function generateResponse(
 
 
     // =====================================
-    // CONTEXT MEMORY CHECK
+    // CONTEXT MEMORY
     // =====================================
 
 
@@ -285,7 +288,7 @@ function generateResponse(
 
 
     // =====================================
-    // RELATIONSHIP INTELLIGENCE
+    // AUDIENCE RELATIONSHIP
     // =====================================
 
 
@@ -318,7 +321,7 @@ function generateResponse(
 
 
     // =====================================
-    // CREATOR PERSONALIZATION
+    // ADAPTIVE PERSONALIZATION
     // =====================================
 
 
@@ -379,6 +382,71 @@ function generateResponse(
 
     }
 
+// =====================================
+// INTELLIGENCE FUSION
+// =====================================
+
+
+if(
+
+    intelligenceFusion &&
+
+    brainContext.userId
+
+){
+
+
+    creatorBrainContext =
+
+    intelligenceFusion.fuse(
+
+        brainContext.userId,
+
+        {
+
+
+            identity:
+
+            brainContext.profile || {},
+
+
+
+            memory:
+
+            memoryContext || {},
+
+
+
+            audience:
+
+            audienceContext || {},
+
+
+
+            personalization:
+
+            creatorContext || {},
+
+
+
+            decision:
+
+            brainDecision || {},
+
+
+
+            strategy:
+
+            brainContext.strategy || {}
+
+
+
+        }
+
+    );
+
+
+}
 
 
 
@@ -387,65 +455,6 @@ function generateResponse(
 
 
 
-    // =====================================
-    // INTELLIGENCE FUSION
-    // =====================================
-
-
-    if(
-
-        intelligenceFusion &&
-
-        brainContext.userId
-
-    ){
-
-
-        fusedContext =
-
-        intelligenceFusion.fuse(
-
-            brainContext.userId,
-
-            {
-
-
-                identity:
-
-                brainContext.profile || {},
-
-
-
-                memory:
-
-                memoryContext || {},
-
-
-
-                audience:
-
-                audienceContext || {},
-
-
-
-                personalization:
-
-                creatorContext || {},
-
-
-
-                decision:
-
-                brainDecision || {}
-
-
-
-            }
-
-        );
-
-
-    }
 
 // =====================================
 // RESPONSE INTELLIGENCE
@@ -569,11 +578,9 @@ Choose one and I'll develop it.`;
 
         break;
 
-
-
-
-
-
+// =====================================
+// CONTINUE RESPONSE INTELLIGENCE
+// =====================================
 
 
 
@@ -657,6 +664,14 @@ Tell me what you want to create.`;
 
 }
 
+
+
+
+
+
+
+
+
 // =====================================
 // MEMORY INTELLIGENCE OUTPUT
 // =====================================
@@ -704,7 +719,6 @@ if(
     audienceContext
 
 ){
-
 
 
     if(
@@ -760,16 +774,7 @@ ${audienceContext.audienceNeeds.join(", ")}
     }
 
 
-
 }
-
-
-
-
-
-
-
-
 
 // =====================================
 // ADAPTIVE BRAIN OUTPUT
@@ -812,13 +817,13 @@ ${brainDecision.tone}
 
 
 // =====================================
-// INTELLIGENCE FUSION OUTPUT
+// CREATOR BRAIN FUSION STATUS
 // =====================================
 
 
 if(
 
-    fusedContext
+    creatorBrainContext
 
 ){
 
@@ -828,17 +833,17 @@ if(
 
 `
 
-🧠 Creator Intelligence Active
+🧠 Creator Brain Active:
 
-ChatTBM is adapting this response using:
+✓ Identity
 
-✓ Creator Profile
+✓ Memory
 
-✓ Memory Intelligence
-
-✓ Audience Understanding
+✓ Audience
 
 ✓ Personalization
+
+✓ Adaptive Decision
 
 `;
 
@@ -888,7 +893,7 @@ if(
 
 
 // =====================================
-// RETURN FINAL RESPONSE
+// RETURN RESPONSE
 // =====================================
 
 
@@ -896,6 +901,14 @@ return response;
 
 
 }
+
+
+
+
+
+
+
+
 
 // =====================================
 // MODULE EXPORT
