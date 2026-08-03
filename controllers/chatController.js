@@ -1,426 +1,111 @@
 // =====================================
-// ChatTBM V6.8.7
+// ChatTBM V7.0
 // Chat Controller
 //
-// Systems:
-// - Creator Brain
-// - Response Intelligence
-// - Memory Learning
-// - Brand Intelligence
+// Responsibility:
+// - Receive requests
+// - Validate input
+// - Call Assistant Engine
+// - Return response
 // =====================================
 
-
-
 const {
 
-    detectIntent
+    generateReply
 
-} = require("../services/intentEngine");
-
-
-
-
-
-const {
-
-    generateResponse
-
-} = require("../services/responseEngine");
-
-
-
-
-
-const CreatorBrainOrchestrator =
-
-require("../services/creatorBrainOrchestrator");
-
-
-
-
-
-const {
-
-    analyzeCreatorInput
-
-} = require("../services/creatorLearningEngine");
-
-
-
-
-
-const {
-
-    learnCreatorIdentity
-
-} = require("../services/creatorIdentityEngine");
-
-
-
-
-
-const {
-
-    learnBrandVoice
-
-} = require("../services/brandVoiceEngine");
-
-
-
-
-
-const {
-
-    learnCreatorMemory
-
-} = require("../services/creatorMemoryEngine");
-
-
-
-
-
-const {
-
-    generateCreatorStrategy
-
-} = require("../services/creatorStrategyEngine");
-
-
-
-
-
-const RelationshipIntelligenceEngine =
-
-require("../services/relationshipIntelligenceEngine");
-
-
-
-
-
-const relationshipEngine =
-
-new RelationshipIntelligenceEngine();
-
-
-
-
-
-const creatorBrain =
-
-new CreatorBrainOrchestrator();
-
-
-
-
-
-
-
-
+} = require("../services/assistantEngine");
 
 // =====================================
 // CHAT HANDLER
 // =====================================
 
+async function chatHandler(req, res) {
 
-function chatHandler(req,res){
-
-
-    try{
-
+    try {
 
         const {
 
+            message,
 
-            userId="guest",
-
-
-            message
-
+            userId = "guest"
 
         } = req.body;
 
+        // ===============================
+        // VALIDATION
+        // ===============================
 
+        if (
+            !message ||
+            typeof message !== "string" ||
+            message.trim() === ""
+        ) {
 
+            return res.status(400).json({
 
+                success: false,
 
-
-
-
-        if(!message){
-
-
-            return res.json({
-
-
-                success:false,
-
-
-                message:"No message received"
-
+                message: "Message is required."
 
             });
 
-
         }
 
+        // ===============================
+        // AI RESPONSE
+        // ===============================
 
-
-
-
-
-
-
-        analyzeCreatorInput(
+        const reply = await generateReply({
 
             userId,
 
             message
-
-        );
-
-
-
-
-
-
-
-
-        learnCreatorIdentity(
-
-            userId,
-
-            message
-
-        );
-
-
-
-
-
-
-
-
-        learnBrandVoice(
-
-            userId,
-
-            message
-
-        );
-
-
-
-
-
-
-
-
-        learnCreatorMemory(
-
-            userId,
-
-            message
-
-        );
-
-
-
-
-
-
-
-
-        relationshipEngine.analyzeContent(
-
-            userId,
-
-            message
-
-        );
-
-
-
-
-
-
-
-
-        const brain =
-
-        creatorBrain.analyze(
-
-            userId,
-
-            message
-
-        );
-
-
-
-
-
-
-
-
-        const intent =
-
-        detectIntent(
-
-            message
-
-        );
-
-
-
-
-
-
-
-
-        const strategy =
-
-        generateCreatorStrategy(
-
-            userId
-
-        );
-
-
-
-
-
-
-
-
-        const response =
-
-        generateResponse(
-
-            intent,
-
-            message,
-
-            brain.profile.memory || {},
-
-            [],
-
-            {},
-
-            [],
-
-            {},
-
-            [],
-
-            {
-
-
-                userId,
-
-
-                profile:
-
-                brain.profile,
-
-
-
-                strategy,
-
-
-
-                brainContext:
-
-                brain.brainContext
-
-
-
-            }
-
-        );
-
-
-
-
-
-
-
-
-        res.json({
-
-
-            success:true,
-
-
-            version:"V6.8.7",
-
-
-            intent,
-
-
-            response,
-
-
-            strategy,
-
-
-            creatorBrain:{
-
-
-                active:true,
-
-
-                context:
-
-                brain.brainContext
-
-
-            }
-
 
         });
 
+        // ===============================
+        // RESPONSE
+        // ===============================
 
+        return res.json({
+
+            success: true,
+
+            version: "7.0.0",
+
+            response: reply
+
+        });
 
     }
 
-
-    catch(error){
-
+    catch (error) {
 
         console.error(error);
 
+        return res.status(500).json({
 
+            success: false,
 
-        res.status(500).json({
+            message: "Unable to process request.",
 
-
-            success:false,
-
-
-            error:error.message
-
+            error:
+            process.env.NODE_ENV === "development"
+                ? error.message
+                : undefined
 
         });
 
-
     }
-
-
 
 }
 
-
-
-
-
-
-
-
+// =====================================
+// EXPORTS
+// =====================================
 
 module.exports = {
 
-
     chatHandler
-
 
 };
