@@ -16,15 +16,11 @@ ChatTBM - AI Content Assistant
 <link rel="stylesheet" href="style.css">
 
 
-<!-- Favicon -->
-
 <link 
 rel="icon"
 type="image/png"
 href="IMG_4450.png">
 
-
-<!-- PWA -->
 
 <link 
 rel="manifest"
@@ -122,7 +118,7 @@ Welcome to ChatTBM
 <p>
 Your AI assistant for captions,
 scripts, viral ideas, adverts
-and content creation.
+and creator growth.
 </p>
 
 
@@ -151,8 +147,18 @@ class="chat-box">
 
 <p>
 Hello 👋 I am ChatTBM.
-I can help you create captions,
-scripts, ideas and marketing content.
+
+I can help you create:
+<br><br>
+
+✍️ Captions
+<br>
+🎬 Scripts
+<br>
+🔥 Viral Ideas
+<br>
+📢 Marketing Content
+
 </p>
 
 
@@ -287,52 +293,40 @@ ChatTBM AI Content Assistant
 
 
 
-<!-- =================================
-     ChatTBM V6.0.2 AI ENGINE SYSTEM
-================================= -->
-
-
-
-<!-- Conversation Memory -->
-
-<script src="services/conversationManager.js"></script>
-
-
-
-<!-- User Memory -->
-
-<script src="services/userProfileMemory.js"></script>
-
-
-<script src="services/creatorMemory.js"></script>
-
-
-
-<!-- Personal AI Identity -->
-
-<script src="services/personalizationEngine.js"></script>
-
-
-
-<!-- Intelligence Layer -->
-
-<script src="services/contextEngine.js"></script>
-
-
-<script src="services/editorBrain.js"></script>
-
-
-<script src="services/creatorBrain.js"></script>
-
-
-<script src="services/offlineBrain.js"></script>
-
-
-
-
-<!-- Main Application -->
+<!-- Frontend Only -->
 
 <script src="script.js"></script>
+
+
+
+<script>
+
+
+if("serviceWorker" in navigator){
+
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+
+navigator.serviceWorker.register(
+"service-worker.js"
+);
+
+
+}
+
+
+);
+
+
+}
+
+
+</script>
 
 
 
