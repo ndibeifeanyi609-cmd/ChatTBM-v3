@@ -1,14 +1,16 @@
 // =====================================
-// ChatTBM V6.8.8
+// ChatTBM V7.0
 // Creator Intelligence Backend
 //
 // Architecture:
+// - Express Server
+// - Frontend Hosting
 // - Route Layer
 // - Controller Layer
 // - Service Intelligence Layer
+// - Creator Brain Orchestrator
 //
 // Systems:
-// - Creator Brain
 // - Response Intelligence
 // - Memory Intelligence
 // - Adaptive Intelligence
@@ -17,10 +19,10 @@
 // =====================================
 
 
-
 require("dotenv").config();
 
 
+const path = require("path");
 
 const express = require("express");
 
@@ -28,14 +30,7 @@ const cors = require("cors");
 
 
 
-
-
 const app = express();
-
-
-
-
-
 
 
 
@@ -51,9 +46,39 @@ app.use(cors());
 app.use(express.json());
 
 
+app.use(express.urlencoded({
+
+    extended:true
+
+}));
 
 
 
+
+// =====================================
+// FRONTEND STATIC FILES
+// =====================================
+//
+// Serves:
+// index.html
+// style.css
+// script.js
+// manifest.json
+// service-worker.js
+// images
+//
+// =====================================
+
+
+app.use(
+
+    express.static(
+
+        path.join(__dirname,"..")
+
+    )
+
+);
 
 
 
@@ -88,93 +113,8 @@ require("./routes/feedbackRoutes");
 
 
 
-
-
-
-
-
 // =====================================
-// ROUTE CONNECTIONS
-// =====================================
-
-
-app.use(
-
-"/api/chat",
-
-chatRoutes
-
-);
-
-
-
-app.use(
-
-"/api/creator",
-
-creatorRoutes
-
-);
-
-
-
-app.use(
-
-"/api/growth",
-
-growthRoutes
-
-);
-
-
-
-app.use(
-
-"/api/feedback",
-
-feedbackRoutes
-
-);
-
-// =====================================
-// HEALTH CHECK
-// =====================================
-
-
-app.get("/",(req,res)=>{
-
-
-    res.json({
-
-
-        app:"ChatTBM AI Backend",
-
-
-        version:"V6.8.8",
-
-
-        status:"Creator Intelligence Online 🚀"
-
-
-
-    });
-
-
-});
-
-
-
-
-
-
-
-
-
-// =====================================
-// CREATOR BRAIN STATUS
-// =====================================
-//
-// Kept here for system monitoring
+// SERVICES
 // =====================================
 
 
@@ -182,104 +122,6 @@ const CreatorBrainOrchestrator =
 
 require("./services/creatorBrainOrchestrator");
 
-
-
-
-
-const creatorBrain =
-
-new CreatorBrainOrchestrator();
-
-
-
-
-
-
-
-
-
-app.get(
-
-"/api/creator-brain/:userId",
-
-(req,res)=>{
-
-
-    try{
-
-
-        const userId =
-
-        req.params.userId;
-
-
-
-
-
-
-
-
-        res.json({
-
-
-            success:true,
-
-
-            version:"V6.8.8",
-
-
-
-            brain:
-
-            creatorBrain.getBrainStatus(
-
-                userId
-
-            ),
-
-
-
-            profile:
-
-            creatorBrain.buildCreatorProfile(
-
-                userId
-
-            )
-
-
-
-        });
-
-
-
-    }
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-
-            error:error.message
-
-
-        });
-
-
-    }
-
-
-
-});
-
-// =====================================
-// CREATOR STRATEGY STATUS
-// =====================================
 
 
 const {
@@ -295,30 +137,72 @@ const {
 
 
 
+// =====================================
+// INITIALIZE CREATOR BRAIN
+// =====================================
+
+
+const creatorBrain =
+
+new CreatorBrainOrchestrator();
+
+ 
+// =====================================
+// API ROUTES
+// =====================================
+
+
+app.use(
+
+    "/api/chat",
+
+    chatRoutes
+
+);
 
 
 
+app.use(
+
+    "/api/creator",
+
+    creatorRoutes
+
+);
+
+
+
+app.use(
+
+    "/api/growth",
+
+    growthRoutes
+
+);
+
+
+
+app.use(
+
+    "/api/feedback",
+
+    feedbackRoutes
+
+);
+
+
+
+
+// =====================================
+// HEALTH CHECK
+// =====================================
 
 
 app.get(
 
-"/api/strategy/:userId",
+    "/api/health",
 
-(req,res)=>{
-
-
-    try{
-
-
-        const userId =
-
-        req.params.userId;
-
-
-
-
-
-
+    (req,res)=>{
 
 
         res.json({
@@ -327,57 +211,16 @@ app.get(
             success:true,
 
 
-            version:"V6.8.8",
+            app:"ChatTBM AI Backend",
 
 
-
-            strategy:
-
-            generateCreatorStrategy(
-
-                userId
-
-            ),
+            version:"V7.0",
 
 
-
-            ideas:
-
-            generateContentIdeas(
-
-                userId
-
-            ),
+            status:"Creator Intelligence Online 🚀",
 
 
-
-            script:
-
-            generateScriptOutline(
-
-                userId
-
-            )
-
-
-
-        });
-
-
-
-    }
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-
-            error:error.message
+            timestamp:new Date()
 
 
         });
@@ -385,100 +228,346 @@ app.get(
 
     }
 
-
-
-});
-
-
-
-
-
+);
 
 
 
 
 // =====================================
-// SYSTEM INFO
+// HOME PAGE
 // =====================================
 
 
 app.get(
 
-"/api/system",
+    "/",
 
-(req,res)=>{
-
-
-    res.json({
+    (req,res)=>{
 
 
-        name:"ChatTBM",
+        res.sendFile(
+
+            path.join(
+
+                __dirname,
+
+                "..",
+
+                "index.html"
+
+            )
+
+        );
 
 
-        version:"V6.8.8",
+    }
+
+);
 
 
-        architecture:"Creator Intelligence Stack",
 
-
-
-        systems:[
-
-
-            "Creator Brain",
-
-
-            "Response Engine",
-
-
-            "Memory Intelligence",
-
-
-            "Adaptive Intelligence",
-
-
-            "Growth Intelligence",
-
-
-            "Feedback Learning"
-
-
-        ]
-
-
-    });
-
-
-});
 
 // =====================================
-// ERROR HANDLING
+// CREATOR BRAIN STATUS
+// =====================================
+
+
+app.get(
+
+    "/api/creator-brain/:userId",
+
+    (req,res)=>{
+
+
+        try{
+
+
+            const userId =
+
+            req.params.userId;
+
+
+
+            res.json({
+
+
+                success:true,
+
+
+                version:"V7.0",
+
+
+
+                brain:
+
+                creatorBrain.getBrainStatus(
+
+                    userId
+
+                ),
+
+
+
+                profile:
+
+                creatorBrain.buildCreatorProfile(
+
+                    userId
+
+                )
+
+
+            });
+
+
+
+        }
+
+        catch(error){
+
+
+            res.status(500).json({
+
+
+                success:false,
+
+
+                error:error.message
+
+
+            });
+
+
+        }
+
+
+    }
+
+);
+
+// =====================================
+// CREATOR STRATEGY
+// =====================================
+
+
+app.get(
+
+    "/api/strategy/:userId",
+
+    (req,res)=>{
+
+
+        try{
+
+
+            const userId =
+
+            req.params.userId;
+
+
+
+            res.json({
+
+
+                success:true,
+
+
+                version:"V7.0",
+
+
+
+                strategy:
+
+                generateCreatorStrategy(
+
+                    userId
+
+                ),
+
+
+
+                ideas:
+
+                generateContentIdeas(
+
+                    userId
+
+                ),
+
+
+
+                script:
+
+                generateScriptOutline(
+
+                    userId
+
+                )
+
+
+            });
+
+
+
+        }
+
+        catch(error){
+
+
+            res.status(500).json({
+
+
+                success:false,
+
+
+                error:error.message
+
+
+            });
+
+
+        }
+
+
+    }
+
+);
+
+
+
+
+// =====================================
+// SYSTEM INFORMATION
+// =====================================
+
+
+app.get(
+
+    "/api/system",
+
+    (req,res)=>{
+
+
+        res.json({
+
+
+            success:true,
+
+
+            name:"ChatTBM",
+
+
+            version:"V7.0",
+
+
+            architecture:
+
+            "Creator Intelligence Platform",
+
+
+
+            systems:[
+
+
+                "Creator Brain",
+
+
+                "Response Intelligence",
+
+
+                "Memory Intelligence",
+
+
+                "Adaptive Intelligence",
+
+
+                "Growth Intelligence",
+
+
+                "Feedback Learning"
+
+
+            ]
+
+
+        });
+
+
+    }
+
+);
+
+
+
+
+// =====================================
+// FRONTEND FALLBACK
+// =====================================
+
+
+app.get(
+
+    "*",
+
+    (req,res,next)=>{
+
+
+        if(
+
+            req.path.startsWith("/api/")
+
+        ){
+
+            return next();
+
+        }
+
+
+
+        res.sendFile(
+
+            path.join(
+
+                __dirname,
+
+                "..",
+
+                "index.html"
+
+            )
+
+        );
+
+
+    }
+
+);
+
+// =====================================
+// 404 HANDLER
 // =====================================
 
 
 app.use(
 
-(req,res)=>{
+    (req,res)=>{
 
 
-    res.status(404).json({
+        res.status(404).json({
 
 
-        success:false,
+            success:false,
 
 
-        message:"Route not found"
+            message:"Route not found"
 
 
-    });
+        });
 
 
-});
+    }
 
-
-
-
-
+);
 
 
 
@@ -490,39 +579,37 @@ app.use(
 
 app.use(
 
-(error,req,res,next)=>{
+    (error,req,res,next)=>{
 
 
-    console.error(
-
-        error
-
-    );
+        console.error(error);
 
 
 
+        res.status(500).json({
 
 
-    res.status(500).json({
+            success:false,
 
 
-        success:false,
+            message:"Internal server error",
 
 
-        message:"Internal server error",
+            error:error.message
 
 
-        error:error.message
+        });
 
 
-    });
+    }
+
+);
 
 
 
-});
 
 // =====================================
-// SERVER START
+// SERVER STARTUP
 // =====================================
 
 
@@ -532,22 +619,68 @@ process.env.PORT || 3000;
 
 
 
+const HOST =
 
+process.env.HOST || "0.0.0.0";
 
 
 
 
 
 app.listen(
-PORT,
-"0.0.0.0",
-()=>{
 
-    console.log(
+    PORT,
 
-        `🚀 ChatTBM V6.8.8 running on port ${PORT}`
+    HOST,
 
-    );
+    ()=>{
 
 
-});
+        console.log("====================================");
+
+        console.log("🚀 ChatTBM V7.0 Started Successfully");
+
+        console.log("====================================");
+
+        console.log(
+
+            `🌐 Server: http://${HOST}:${PORT}`
+
+        );
+
+        console.log(
+
+            `🏠 Frontend: http://${HOST}:${PORT}/`
+
+        );
+
+        console.log(
+
+            `❤️ Health: http://${HOST}:${PORT}/api/health`
+
+        );
+
+        console.log(
+
+            `💬 Chat API: http://${HOST}:${PORT}/api/chat`
+
+        );
+
+        console.log("🧠 Creator Brain: ACTIVE");
+
+        console.log("⚡ Response Intelligence: ACTIVE");
+
+        console.log("📚 Memory Intelligence: ACTIVE");
+
+        console.log("🎯 Strategy Engine: ACTIVE");
+
+        console.log("📈 Growth Intelligence: ACTIVE");
+
+        console.log("❤️ Feedback Learning: ACTIVE");
+
+        console.log("====================================");
+
+
+    }
+
+);
