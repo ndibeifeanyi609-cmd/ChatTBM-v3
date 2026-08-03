@@ -1,16 +1,11 @@
 // =====================================
-// ChatTBM V6.9.1
+// ChatTBM V7.0
 // Chat Routes
 // =====================================
-
 
 const express = require("express");
 
 const router = express.Router();
-
-
-
-
 
 const {
 
@@ -18,49 +13,20 @@ const {
 
 } = require("../controllers/chatController");
 
-
-
-
-
-const {
-
-    validateChatRequest,
-
-    validateUserRequest
-
-} = require("../middleware/requestValidator");
-
-
-
-
-
-
-
-
-
 // =====================================
-// CHAT ENDPOINT
+// CHAT
 // =====================================
-
 
 router.post(
 
-"/",
+    "/",
 
-validateUserRequest,
-
-validateChatRequest,
-
-chatHandler
+    chatHandler
 
 );
 
-
-
-
-
-
-
-
+// =====================================
+// EXPORT
+// =====================================
 
 module.exports = router;
