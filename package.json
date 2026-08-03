@@ -1,12 +1,12 @@
 {
   "name": "chattbm-backend",
   "version": "7.0.0",
-  "description": "ChatTBM AI Backend",
-
+  "description": "ChatTBM AI Content Assistant Backend",
   "main": "server.js",
 
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
 
   "dependencies": {
