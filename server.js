@@ -1,26 +1,22 @@
 // =====================================
 // ChatTBM V7.0
-// Creator Intelligence Backend
+// AI Assistant Platform
 //
-// Architecture:
+// Foundation Server
+//
+// Architecture
 // - Express Server
-// - Frontend Hosting
-// - Route Layer
-// - Controller Layer
-// - Service Intelligence Layer
-// - Creator Brain Orchestrator
+// - API Routes
+// - AI Engine
+// - Assistant Engine
 //
-// Systems:
-// - Response Intelligence
-// - Memory Intelligence
-// - Adaptive Intelligence
-// - Growth Intelligence
-// - Feedback Learning
+// Future Ready
+// - Gemini
+// - Grok
+// - Multi Provider
 // =====================================
 
-
 require("dotenv").config();
-
 
 const path = require("path");
 
@@ -28,659 +24,205 @@ const express = require("express");
 
 const cors = require("cors");
 
-
-
 const app = express();
 
-
-
+const PORT =
+process.env.PORT || 3000;
 
 // =====================================
 // MIDDLEWARE
 // =====================================
 
-
 app.use(cors());
-
 
 app.use(express.json());
 
-
-app.use(express.urlencoded({
-
-    extended:true
-
-}));
-
-
-
-
-// =====================================
-// FRONTEND STATIC FILES
-// =====================================
-//
-// Serves:
-// index.html
-// style.css
-// script.js
-// manifest.json
-// service-worker.js
-// images
-//
-// =====================================
-
-
 app.use(
-
-    express.static(
-
-        path.join(__dirname,"..")
-
-    )
-
+    express.urlencoded({
+        extended: true
+    })
 );
 
-
-
-
 // =====================================
-// ROUTES
+// STATIC FILES
 // =====================================
 
+app.use(
+    express.static(__dirname)
+);
 
-const chatRoutes =
-
-require("./routes/chatRoutes");
-
-
-
-const creatorRoutes =
-
-require("./routes/creatorRoutes");
-
-
-
-const growthRoutes =
-
-require("./routes/growthRoutes");
-
-
-
-const feedbackRoutes =
-
-require("./routes/feedbackRoutes");
-
-
-
-
-// =====================================
-// SERVICES
-// =====================================
-
-
-const CreatorBrainOrchestrator =
-
-require("./services/creatorBrainOrchestrator");
-
-
-
-const {
-
-    generateCreatorStrategy,
-
-    generateContentIdeas,
-
-    generateScriptOutline
-
-} = require("./services/creatorStrategyEngine");
-
-
-
-
-// =====================================
-// INITIALIZE CREATOR BRAIN
-// =====================================
-
-
-const creatorBrain =
-
-new CreatorBrainOrchestrator();
-
- 
 // =====================================
 // API ROUTES
 // =====================================
 
+const chatRoutes =
+require("./routes/chatRoutes");
+
+// =====================================
+// REGISTER ROUTES
+// =====================================
 
 app.use(
-
     "/api/chat",
-
     chatRoutes
-
 );
-
-
-
-app.use(
-
-    "/api/creator",
-
-    creatorRoutes
-
-);
-
-
-
-app.use(
-
-    "/api/growth",
-
-    growthRoutes
-
-);
-
-
-
-app.use(
-
-    "/api/feedback",
-
-    feedbackRoutes
-
-);
-
-
-
 
 // =====================================
 // HEALTH CHECK
 // =====================================
 
-
 app.get(
-
     "/api/health",
-
-    (req,res)=>{
-
+    (req, res) => {
 
         res.json({
 
+            success: true,
 
-            success:true,
+            name: "ChatTBM",
 
+            version: "7.0.0",
 
-            app:"ChatTBM AI Backend",
+            status: "Online",
 
+            ai: "Connected",
 
-            version:"V7.0",
-
-
-            status:"Creator Intelligence Online 🚀",
-
-
-            timestamp:new Date()
-
+            timestamp: new Date()
 
         });
 
-
     }
-
 );
-
-
-
 
 // =====================================
 // HOME PAGE
 // =====================================
 
-
 app.get(
-
     "/",
-
-    (req,res)=>{
-
+    (req, res) => {
 
         res.sendFile(
 
             path.join(
-
                 __dirname,
-
-                "..",
-
                 "index.html"
-
             )
 
         );
 
-
     }
-
-);
-
-
-
-
-// =====================================
-// CREATOR BRAIN STATUS
-// =====================================
-
-
-app.get(
-
-    "/api/creator-brain/:userId",
-
-    (req,res)=>{
-
-
-        try{
-
-
-            const userId =
-
-            req.params.userId;
-
-
-
-            res.json({
-
-
-                success:true,
-
-
-                version:"V7.0",
-
-
-
-                brain:
-
-                creatorBrain.getBrainStatus(
-
-                    userId
-
-                ),
-
-
-
-                profile:
-
-                creatorBrain.buildCreatorProfile(
-
-                    userId
-
-                )
-
-
-            });
-
-
-
-        }
-
-        catch(error){
-
-
-            res.status(500).json({
-
-
-                success:false,
-
-
-                error:error.message
-
-
-            });
-
-
-        }
-
-
-    }
-
 );
 
 // =====================================
-// CREATOR STRATEGY
+// API INFORMATION
 // =====================================
-
 
 app.get(
-
-    "/api/strategy/:userId",
-
-    (req,res)=>{
-
-
-        try{
-
-
-            const userId =
-
-            req.params.userId;
-
-
-
-            res.json({
-
-
-                success:true,
-
-
-                version:"V7.0",
-
-
-
-                strategy:
-
-                generateCreatorStrategy(
-
-                    userId
-
-                ),
-
-
-
-                ideas:
-
-                generateContentIdeas(
-
-                    userId
-
-                ),
-
-
-
-                script:
-
-                generateScriptOutline(
-
-                    userId
-
-                )
-
-
-            });
-
-
-
-        }
-
-        catch(error){
-
-
-            res.status(500).json({
-
-
-                success:false,
-
-
-                error:error.message
-
-
-            });
-
-
-        }
-
-
-    }
-
-);
-
-
-
-
-// =====================================
-// SYSTEM INFORMATION
-// =====================================
-
-
-app.get(
-
-    "/api/system",
-
-    (req,res)=>{
-
+    "/api",
+    (req, res) => {
 
         res.json({
 
+            success: true,
 
-            success:true,
+            application: "ChatTBM",
 
+            version: "7.0.0",
 
-            name:"ChatTBM",
+            endpoints: [
 
+                "/api/chat",
 
-            version:"V7.0",
-
-
-            architecture:
-
-            "Creator Intelligence Platform",
-
-
-
-            systems:[
-
-
-                "Creator Brain",
-
-
-                "Response Intelligence",
-
-
-                "Memory Intelligence",
-
-
-                "Adaptive Intelligence",
-
-
-                "Growth Intelligence",
-
-
-                "Feedback Learning"
-
+                "/api/health"
 
             ]
 
-
         });
 
-
     }
-
 );
-
-
-
 
 // =====================================
 // FRONTEND FALLBACK
 // =====================================
 
-
 app.get(
-
     "*",
+    (req, res, next) => {
 
-    (req,res,next)=>{
-
-
-        if(
-
-            req.path.startsWith("/api/")
-
-        ){
-
+        if (req.path.startsWith("/api/")) {
             return next();
-
         }
 
-
-
         res.sendFile(
-
             path.join(
-
                 __dirname,
-
-                "..",
-
                 "index.html"
-
             )
-
         );
 
-
     }
-
 );
 
 // =====================================
 // 404 HANDLER
 // =====================================
 
-
 app.use(
-
-    (req,res)=>{
-
+    (req, res) => {
 
         res.status(404).json({
 
+            success: false,
 
-            success:false,
-
-
-            message:"Route not found"
-
+            message: "Route not found."
 
         });
 
-
     }
-
 );
-
-
-
 
 // =====================================
 // GLOBAL ERROR HANDLER
 // =====================================
 
-
 app.use(
+    (err, req, res, next) => {
 
-    (error,req,res,next)=>{
-
-
-        console.error(error);
-
-
+        console.error(err);
 
         res.status(500).json({
 
+            success: false,
 
-            success:false,
+            message: "Internal Server Error",
 
-
-            message:"Internal server error",
-
-
-            error:error.message
-
+            error:
+            process.env.NODE_ENV === "development"
+                ? err.message
+                : undefined
 
         });
 
-
     }
-
 );
 
-
-
-
 // =====================================
-// SERVER STARTUP
+// START SERVER
 // =====================================
-
-
-const PORT =
-
-process.env.PORT || 3000;
-
-
-
-const HOST =
-
-process.env.HOST || "0.0.0.0";
-
-
-
-
 
 app.listen(
-
     PORT,
-
-    HOST,
-
-    ()=>{
-
+    () => {
 
         console.log("====================================");
-
-        console.log("🚀 ChatTBM V7.0 Started Successfully");
-
+        console.log("🚀 ChatTBM V7.0");
         console.log("====================================");
-
-        console.log(
-
-            `🌐 Server: http://${HOST}:${PORT}`
-
-        );
-
-        console.log(
-
-            `🏠 Frontend: http://${HOST}:${PORT}/`
-
-        );
-
-        console.log(
-
-            `❤️ Health: http://${HOST}:${PORT}/api/health`
-
-        );
-
-        console.log(
-
-            `💬 Chat API: http://${HOST}:${PORT}/api/chat`
-
-        );
-
-        console.log("🧠 Creator Brain: ACTIVE");
-
-        console.log("⚡ Response Intelligence: ACTIVE");
-
-        console.log("📚 Memory Intelligence: ACTIVE");
-
-        console.log("🎯 Strategy Engine: ACTIVE");
-
-        console.log("📈 Growth Intelligence: ACTIVE");
-
-        console.log("❤️ Feedback Learning: ACTIVE");
-
+        console.log(`Server running on port ${PORT}`);
+        console.log(`Health: http://localhost:${PORT}/api/health`);
+        console.log("AI Assistant Platform Ready");
         console.log("====================================");
-
 
     }
-
 );
