@@ -1,11 +1,11 @@
 // =====================================
-// ChatTBM V7.4
+// ChatTBM V8.5
 // Learning Skill
 //
-// Purpose:
-// - Explain concepts
-// - Help with studying
-// - Answer educational questions
+// Upgrade:
+// - Router V8.5 compatible
+// - Context support
+// - Educational responses
 // =====================================
 
 
@@ -16,7 +16,8 @@ const LearningSkill = {
     name: "Learning Assistant",
 
 
-    version: "7.4",
+    version: "8.5",
+
 
 
 
@@ -39,17 +40,37 @@ const LearningSkill = {
 
 
 
-    respond(message){
+
+    respond(context){
+
+
+
+        const message =
+
+        typeof context === "string"
+
+        ? context
+
+        : context.message;
+
+
+
+
+
 
 
         const text =
+
         message.toLowerCase();
 
 
 
 
 
+
+
         // Photosynthesis
+
 
         if(
 
@@ -64,10 +85,11 @@ const LearningSkill = {
 Photosynthesis is the process plants use to make their own food using sunlight.
 
 
-It happens mainly in the leaves inside structures called chloroplasts.
+It happens mainly in leaves inside structures called chloroplasts.
 
 
 Plants use:
+
 
 ☀️ Sunlight
 
@@ -77,6 +99,7 @@ Plants use:
 
 
 to produce:
+
 
 🍬 Glucose (food energy)
 
@@ -88,7 +111,7 @@ The process has two main stages:
 
 1. Light-dependent reactions
 
-- Sunlight is captured by chlorophyll.
+- Chlorophyll captures sunlight.
 - Water is split.
 - Oxygen is released.
 
@@ -110,6 +133,7 @@ Plants use sunlight to convert water and carbon dioxide into food and oxygen.`;
 
 
 
+
         // General learning response
 
 
@@ -118,10 +142,15 @@ Plants use sunlight to convert water and carbon dioxide into food and oxygen.`;
 
 I can help explain:
 
+
 • Science
+
 • Mathematics
+
 • Technology
+
 • History
+
 • General concepts
 
 
@@ -156,5 +185,7 @@ window.ChatTBMLearningSkill = LearningSkill;
 
 
 console.log(
-"✅ ChatTBM Learning Skill Loaded"
+
+"✅ ChatTBM V8.5 Learning Skill Loaded"
+
 );
