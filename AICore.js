@@ -1,12 +1,12 @@
 // =====================================
-// ChatTBM V7.4
+// ChatTBM V8.1
 // AI Core
 //
-// Purpose:
-// - Process user messages
-// - Connect memory
-// - Connect skill router
-// - Manage AI reasoning flow
+// Upgrade:
+// - Memory Context
+// - Skill Routing
+// - Response Processing
+// - Conversation Learning
 // =====================================
 
 
@@ -14,7 +14,7 @@
 const ChatTBM_Core = {
 
 
-    version: "7.4",
+    version: "8.1",
 
 
     status: "ready"
@@ -49,13 +49,23 @@ async function processMessage(message){
 
 
 
+
+
+    const userId = "guest";
+
+
+
     let memoryContext = "";
 
 
 
 
 
-    // Memory connection
+
+
+    // =================================
+    // LOAD MEMORY
+    // =================================
 
 
     if(
@@ -71,7 +81,16 @@ async function processMessage(message){
 
         window.ChatTBMMemory.buildMemoryContext(
 
-            "guest"
+            userId
+
+        );
+
+
+        console.log(
+
+            "🧠 Memory Context:",
+
+            memoryContext
 
         );
 
@@ -90,7 +109,11 @@ async function processMessage(message){
 
 
 
-    // Skill Router connection
+
+
+    // =================================
+    // SKILL ROUTING
+    // =================================
 
 
     if(
@@ -115,7 +138,7 @@ async function processMessage(message){
 
         console.log(
 
-            "🎯 Skill Response:",
+            "🎯 Routed Response:",
 
             response
 
@@ -124,12 +147,59 @@ async function processMessage(message){
 
     }
 
-    else{
+
+
+
+
+
+
+    // =================================
+    // FALLBACK
+    // =================================
+
+
+    if(!response){
+
+
+        response =
+
+        "🤖 ChatTBM is processing your request.";
+
+
+    }
+
+
+
+
+
+
+
+    // =================================
+    // SAVE MEMORY
+    // =================================
+
+
+    if(
+
+        window.ChatTBMMemory &&
+
+        window.ChatTBMMemory.addMemoryNote
+
+    ){
+
+
+        window.ChatTBMMemory.addMemoryNote(
+
+            userId,
+
+            message
+
+        );
 
 
         console.log(
 
-            "⚠️ Skill Router not available"
+            "💾 Memory Saved"
 
         );
 
@@ -227,6 +297,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V7.4 AI Core Loaded"
+"🧠 ChatTBM V8.1 AI Core Loaded"
 
 );
