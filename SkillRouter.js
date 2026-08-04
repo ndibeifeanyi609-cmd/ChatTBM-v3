@@ -1,11 +1,11 @@
 // =====================================
-// ChatTBM V8.3
-// Context Aware Skill Router
+// ChatTBM V8.4
+// Compatible Skill Router
 //
 // Upgrade:
-// - Receives memory context
-// - Sends context to skills
-// - Better conversation understanding
+// - Memory context support
+// - Old skill compatibility
+// - New context skills support
 // =====================================
 
 
@@ -13,7 +13,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "8.3",
+    version: "8.4",
 
 
     skills: []
@@ -69,43 +69,9 @@ function registerSkill(skill){
 function detectIntent(message){
 
 
-
     const text =
 
     message.toLowerCase();
-
-
-
-
-
-
-
-    // Problem solving first
-
-
-    if(
-
-        text.includes("plan") ||
-
-        text.includes("strategy") ||
-
-        text.includes("goal") ||
-
-        text.includes("solve") ||
-
-        text.includes("problem") ||
-
-        text.includes("fix") ||
-
-        text.includes("how do i")
-
-    ){
-
-        return "problem";
-
-    }
-
-
 
 
 
@@ -141,7 +107,9 @@ function detectIntent(message){
 
         text.includes("learn") ||
 
-        text.includes("study")
+        text.includes("study") ||
+
+        text.includes("photosynthesis")
 
     ){
 
@@ -161,7 +129,9 @@ function detectIntent(message){
 
         text.includes("email") ||
 
-        text.includes("caption")
+        text.includes("caption") ||
+
+        text.includes("story")
 
     ){
 
@@ -197,11 +167,39 @@ function detectIntent(message){
 
     if(
 
+        text.includes("plan") ||
+
+        text.includes("strategy") ||
+
+        text.includes("goal") ||
+
+        text.includes("problem") ||
+
+        text.includes("solve") ||
+
+        text.includes("how do i")
+
+    ){
+
+        return "problem";
+
+    }
+
+
+
+
+
+
+
+    if(
+
         text.includes("business") ||
 
         text.includes("marketing") ||
 
-        text.includes("sales")
+        text.includes("sales") ||
+
+        text.includes("brand")
 
     ){
 
@@ -249,20 +247,6 @@ function routeMessage(
 
 
 
-    console.log(
-
-        "🎯 Intent:",
-
-        intent
-
-    );
-
-
-
-
-
-
-
     const context = {
 
 
@@ -276,6 +260,18 @@ function routeMessage(
 
 
     };
+
+
+
+
+
+    console.log(
+
+        "🎯 Intent:",
+
+        intent
+
+    );
 
 
 
@@ -299,11 +295,69 @@ function routeMessage(
 
 
 
-            return skill.respond(
+            try{
 
-                context
 
-            );
+
+                // New context skills
+
+
+                if(
+
+                    skill.respond.length === 1
+
+                ){
+
+
+
+                    return skill.respond(
+
+                        context
+
+                    );
+
+
+                }
+
+
+
+
+
+
+
+                // Old message skills
+
+
+                return skill.respond(
+
+                    message
+
+                );
+
+
+
+
+
+            }
+
+            catch(error){
+
+
+
+                console.error(
+
+                    "Skill Error:",
+
+                    error
+
+                );
+
+
+
+                return null;
+
+
+            }
 
 
         }
@@ -365,7 +419,7 @@ function getSkillStatus(){
 
 
 // =====================================
-// GLOBAL ACCESS
+// GLOBAL
 // =====================================
 
 
@@ -399,9 +453,11 @@ if(window.ChatTBMGeneralSkill)
 registerSkill(window.ChatTBMGeneralSkill);
 
 
+
 if(window.ChatTBMLearningSkill)
 
 registerSkill(window.ChatTBMLearningSkill);
+
 
 
 if(window.ChatTBMCodingSkill)
@@ -409,9 +465,11 @@ if(window.ChatTBMCodingSkill)
 registerSkill(window.ChatTBMCodingSkill);
 
 
+
 if(window.ChatTBMWritingSkill)
 
 registerSkill(window.ChatTBMWritingSkill);
+
 
 
 if(window.ChatTBMBusinessSkill)
@@ -419,9 +477,11 @@ if(window.ChatTBMBusinessSkill)
 registerSkill(window.ChatTBMBusinessSkill);
 
 
+
 if(window.ChatTBMResearchSkill)
 
 registerSkill(window.ChatTBMResearchSkill);
+
 
 
 if(window.ChatTBMProblemSkill)
@@ -436,6 +496,6 @@ registerSkill(window.ChatTBMProblemSkill);
 
 console.log(
 
-"🧠 ChatTBM V8.3 Context Router Loaded"
+"🧠 ChatTBM V8.4 Compatible Router Loaded"
 
 );
