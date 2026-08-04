@@ -1,12 +1,11 @@
 // =====================================
-// ChatTBM V7.5
+// ChatTBM V8.5
 // Coding Skill
 //
-// Purpose:
-// - Programming help
-// - Explain code
-// - Debug assistance
-// - Development guidance
+// Upgrade:
+// - Router V8.5 compatible
+// - Context support
+// - Programming assistance
 // =====================================
 
 
@@ -17,7 +16,7 @@ const CodingSkill = {
     name: "Coding Assistant",
 
 
-    version: "7.5",
+    version: "8.5",
 
 
 
@@ -41,7 +40,22 @@ const CodingSkill = {
 
 
 
-    respond(message){
+    respond(context){
+
+
+
+        const message =
+
+        typeof context === "string"
+
+        ? context
+
+        : context.message;
+
+
+
+
+
 
 
         const text =
@@ -75,11 +89,17 @@ JavaScript helps you create interactive websites and applications.
 I can help you with:
 
 • Variables
+
 • Functions
+
 • Arrays
+
 • Objects
+
 • DOM manipulation
+
 • Debugging
+
 • Building projects
 
 
@@ -111,8 +131,11 @@ Tell me what JavaScript problem you are working on.`;
 I can help you build websites using:
 
 • HTML structure
+
 • CSS styling
+
 • Responsive design
+
 • Frontend improvements
 
 
@@ -142,9 +165,13 @@ Tell me what you want to create.`;
 I can help you learn Python:
 
 • Variables
+
 • Functions
+
 • Automation
+
 • Data handling
+
 • Programming concepts
 
 
@@ -167,8 +194,11 @@ Tell me your Python question.`;
 I can help you with:
 
 • Programming questions
+
 • Debugging
+
 • Explaining code
+
 • Building software
 
 
@@ -201,6 +231,6 @@ window.ChatTBMCodingSkill = CodingSkill;
 
 console.log(
 
-"✅ ChatTBM Coding Skill Loaded"
+"✅ ChatTBM V8.5 Coding Skill Loaded"
 
 );
