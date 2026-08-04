@@ -1,12 +1,12 @@
 // =====================================
-// ChatTBM V8.2
+// ChatTBM V8.3
 // AI Core
 //
 // Upgrade:
-// - Memory extraction
-// - Memory context loading
-// - Skill routing
-// - Better reasoning flow
+// - Memory learning
+// - Memory context
+// - Context-aware skill routing
+// - Better AI pipeline
 // =====================================
 
 
@@ -14,7 +14,7 @@
 const ChatTBM_Core = {
 
 
-    version: "8.2",
+    version: "8.3",
 
 
     status: "ready"
@@ -36,7 +36,6 @@ const ChatTBM_Core = {
 async function processMessage(message){
 
 
-
     console.log(
 
         "🧠 AI Core Processing:",
@@ -44,8 +43,6 @@ async function processMessage(message){
         message
 
     );
-
-
 
 
 
@@ -60,7 +57,7 @@ async function processMessage(message){
 
 
     // =================================
-    // MEMORY LEARNING
+    // LEARN FROM MESSAGE
     // =================================
 
 
@@ -73,7 +70,6 @@ async function processMessage(message){
     ){
 
 
-
         window.ChatTBMMemory.analyzeMemory(
 
             message
@@ -81,10 +77,9 @@ async function processMessage(message){
         );
 
 
-
         console.log(
 
-            "💾 Memory Analysis Complete"
+            "💾 Memory Updated"
 
         );
 
@@ -106,7 +101,7 @@ async function processMessage(message){
 
 
     // =================================
-    // MEMORY CONTEXT
+    // LOAD MEMORY CONTEXT
     // =================================
 
 
@@ -152,7 +147,7 @@ async function processMessage(message){
 
 
     // =================================
-    // SKILL ROUTER
+    // CONTEXT AWARE ROUTING
     // =================================
 
 
@@ -170,7 +165,9 @@ async function processMessage(message){
 
         window.ChatTBMRouter.routeMessage(
 
-            message
+            message,
+
+            memoryContext
 
         );
 
@@ -193,13 +190,18 @@ async function processMessage(message){
 
 
 
+    // =================================
+    // FALLBACK
+    // =================================
+
+
     if(!response){
 
 
 
         response =
 
-        "🤖 ChatTBM is processing your request.";
+        "🤖 ChatTBM is ready to help.";
 
 
     }
@@ -220,6 +222,9 @@ async function processMessage(message){
 
 
         response,
+
+
+        userId,
 
 
         timestamp:
@@ -295,6 +300,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V8.2 AI Core Loaded"
+"🧠 ChatTBM V8.3 Context AI Core Loaded"
 
 );
