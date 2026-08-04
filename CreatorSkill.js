@@ -1,11 +1,11 @@
 // =====================================
-// ChatTBM V9.8
-// Creator Profile Learning Display Skill
+// ChatTBM V9.9
+// Creator Profile Object Bridge Skill
 //
 // Upgrade:
+// - Direct creatorProfile support
 // - Memory personalization
 // - Creator intelligence context
-// - Creator profile display
 // - Fitness brand awareness
 // - Goal-based responses
 // - Strategy preparation
@@ -20,7 +20,7 @@ const CreatorSkill = {
     name: "Creator Assistant",
 
 
-    version: "9.8",
+    version: "9.9",
 
 
 
@@ -100,66 +100,39 @@ const CreatorSkill = {
 
 
 
-        try{
+        // =================================
+        // CREATOR PROFILE DISPLAY
+        // =================================
 
 
-            if(
+        if(
 
-                window.ChatTBMCreatorProfile &&
+            profile.identity ||
 
-                window.ChatTBMCreatorProfile.getCreatorSummary
+            profile.niche ||
 
-            ){
+            profile.platform ||
 
+            profile.goal
 
-                profileInfo =
-
-                window.ChatTBMCreatorProfile.getCreatorSummary();
-
-
-
-            }
-
-
-        }
-
-
-        catch(error){
-
-
-            console.error(
-
-                "Creator Profile Error:",
-
-                error
-
-            );
-
-
-        }
+        ){
 
 
 
+            profileInfo = `
+
+🎯 Your Creator Profile:
 
 
+${profile.identity ? "- Identity: " + profile.identity + "\n" : ""}
 
+${profile.niche ? "- Niche: " + profile.niche + "\n" : ""}
 
-        let memoryInfo = "";
+${profile.platform ? "- Platform: " + profile.platform + "\n" : ""}
 
+${profile.goal ? "- Goal: " + profile.goal + "\n" : ""}
 
-
-
-
-
-
-        if(memory){
-
-
-            memoryInfo = `
-
-🧠 Memory Understanding:
-
-${memory}
+${profile.strategy ? "- Strategy: " + profile.strategy + "\n" : ""}
 
 `;
 
@@ -245,33 +218,6 @@ ${memory}
 
 
 
-        let displayProfile = "";
-
-
-
-
-
-
-
-        if(profileInfo){
-
-
-            displayProfile = `
-
-🎯 Your Creator Profile:
-
-${profileInfo}
-
-`;
-
-        }
-
-
-
-
-
-
-
         // =================================
         // CREATOR CONTENT REQUEST
         // =================================
@@ -294,7 +240,7 @@ ${profileInfo}
 
 
 
-${displayProfile}
+${profileInfo}
 
 
 ${strategyInfo}
@@ -377,7 +323,7 @@ and I will build your strategy.`;
 
 
 
-${displayProfile}
+${profileInfo}
 
 
 ${strategyInfo}
@@ -419,10 +365,7 @@ Tell me who you want to reach.`;
 
 
 
-${displayProfile}
-
-
-${memoryInfo}
+${profileInfo}
 
 
 ${strategyInfo}
@@ -474,6 +417,6 @@ window.ChatTBMCreatorSkill = CreatorSkill;
 
 console.log(
 
-"🎬 ChatTBM V9.8 Creator Profile Learning Display Skill Loaded"
+"🎬 ChatTBM V9.9 Creator Profile Object Bridge Skill Loaded"
 
 );
