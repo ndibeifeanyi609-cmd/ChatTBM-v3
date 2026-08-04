@@ -1,11 +1,12 @@
 // =====================================
-// ChatTBM V8.5
+// ChatTBM V8.6
 // Clean Skill Router
 //
 // Upgrade:
 // - Existing skills only
 // - Memory context support
-// - Compatible responses
+// - No missing skills
+// - Better fallback handling
 // =====================================
 
 
@@ -13,7 +14,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "8.5",
+    version: "8.6",
 
 
     skills: []
@@ -27,9 +28,7 @@ const ChatTBM_SkillRouter = {
 
 
 
-// =====================================
 // REGISTER SKILL
-// =====================================
 
 
 function registerSkill(skill){
@@ -61,9 +60,7 @@ function registerSkill(skill){
 
 
 
-// =====================================
 // DETECT INTENT
-// =====================================
 
 
 function detectIntent(message){
@@ -154,26 +151,6 @@ function detectIntent(message){
 
     if(
 
-        text.includes("compare") ||
-
-        text.includes("research") ||
-
-        text.includes("difference")
-
-    ){
-
-        return "research";
-
-    }
-
-
-
-
-
-
-
-    if(
-
         text.includes("business") ||
 
         text.includes("marketing") ||
@@ -211,9 +188,7 @@ function detectIntent(message){
 
 
 
-// =====================================
 // ROUTE MESSAGE
-// =====================================
 
 
 function routeMessage(
@@ -285,7 +260,6 @@ function routeMessage(
             try{
 
 
-
                 return skill.respond(
 
                     context
@@ -297,9 +271,7 @@ function routeMessage(
             }
 
 
-
             catch(error){
-
 
 
                 console.error(
@@ -309,7 +281,6 @@ function routeMessage(
                     error
 
                 );
-
 
 
                 return null;
@@ -340,9 +311,7 @@ function routeMessage(
 
 
 
-// =====================================
 // STATUS
-// =====================================
 
 
 function getSkillStatus(){
@@ -376,9 +345,7 @@ function getSkillStatus(){
 
 
 
-// =====================================
-// GLOBAL ACCESS
-// =====================================
+// GLOBAL
 
 
 window.ChatTBMRouter = {
@@ -401,9 +368,7 @@ window.ChatTBMRouter = {
 
 
 
-// =====================================
 // AUTO REGISTER EXISTING SKILLS
-// =====================================
 
 
 if(window.ChatTBMGeneralSkill)
@@ -430,12 +395,6 @@ registerSkill(window.ChatTBMWritingSkill);
 
 
 
-if(window.ChatTBMResearchSkill)
-
-registerSkill(window.ChatTBMResearchSkill);
-
-
-
 if(window.ChatTBMBusinessSkill)
 
 registerSkill(window.ChatTBMBusinessSkill);
@@ -448,6 +407,6 @@ registerSkill(window.ChatTBMBusinessSkill);
 
 console.log(
 
-"🧠 ChatTBM V8.5 Clean Skill Router Loaded"
+"🧠 ChatTBM V8.6 Clean Skill Router Loaded"
 
 );
