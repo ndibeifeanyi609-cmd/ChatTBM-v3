@@ -1,12 +1,13 @@
 // =====================================
-// ChatTBM V9.2
-// Memory Powered Creator Skill
+// ChatTBM V9.5
+// Creator Intelligence Powered Skill
 //
 // Upgrade:
 // - Memory personalization
-// - Brand-aware content ideas
-// - Creator strategy support
-// - Audience growth preparation
+// - Creator intelligence context
+// - Fitness brand awareness
+// - Goal-based responses
+// - Strategy preparation
 // =====================================
 
 
@@ -17,7 +18,8 @@ const CreatorSkill = {
     name: "Creator Assistant",
 
 
-    version: "9.2",
+    version: "9.5",
+
 
 
 
@@ -42,6 +44,8 @@ const CreatorSkill = {
 
 
 
+
+
     respond(context){
 
 
@@ -58,9 +62,19 @@ const CreatorSkill = {
 
 
 
+
+
         const memory =
 
         context.memoryContext || "";
+
+
+
+
+
+        const creator =
+
+        context.creatorContext || {};
 
 
 
@@ -76,11 +90,8 @@ const CreatorSkill = {
 
 
 
-        if(
+        if(memory){
 
-            memory
-
-        ){
 
 
             brandInfo = `
@@ -92,6 +103,81 @@ ${memory}
 `;
 
         }
+
+
+
+
+
+
+
+
+        let strategyInfo = "";
+
+
+
+
+
+
+
+        if(creator.fitness){
+
+
+            strategyInfo +=
+
+            "\n💪 Fitness niche detected";
+
+
+        }
+
+
+
+
+
+
+
+        if(creator.content){
+
+
+            strategyInfo +=
+
+            "\n🎬 Content creation goal detected";
+
+
+        }
+
+
+
+
+
+
+
+        if(creator.audience){
+
+
+            strategyInfo +=
+
+            "\n🎯 Audience growth focus detected";
+
+
+        }
+
+
+
+
+
+
+
+        if(creator.goal){
+
+
+            strategyInfo +=
+
+            `\n📈 Goal: ${creator.goal}`;
+
+
+        }
+
+
 
 
 
@@ -121,40 +207,56 @@ ${memory}
 ${brandInfo}
 
 
-I can help you create:
+${strategyInfo}
+
+
+
+Based on your creator goals, I can help create:
+
 
 • Instagram Reel ideas
+
 • Video concepts
+
 • Content calendars
+
 • Viral hooks
+
 • Audience growth strategies
 
 
-For your fitness brand, content ideas include:
+
+For your fitness brand:
 
 
-💪 Workout transformation videos
+💪 Transformation journeys
 
 🔥 Before and after stories
 
-🥗 Nutrition tips
+🏋️ Workout tutorials
 
-🎯 Motivation clips
+🥗 Nutrition education
 
-🏋️ Exercise tutorials
+🎯 Motivation content
 
 📈 Fitness challenges
+
 
 
 Tell me:
 
 • Your target audience
+
 • Your fitness niche
+
 • Your content goal
 
-and I will build a strategy.`;
+
+and I will build a complete strategy.`;
 
         }
+
+
 
 
 
@@ -174,10 +276,15 @@ and I will build a strategy.`;
         ){
 
 
+
             return `🎯 Creator Audience Assistant
 
 
 ${brandInfo}
+
+
+${strategyInfo}
+
 
 
 I can help you understand:
@@ -185,11 +292,11 @@ I can help you understand:
 
 • Target audience
 
-• Followers
-
 • Customer interests
 
-• Community growth
+• Follower growth
+
+• Community building
 
 • Content direction
 
@@ -204,10 +311,16 @@ Tell me who you want to reach.`;
 
 
 
+
+
         return `🎬 Creator Assistant
 
 
 ${brandInfo}
+
+
+${strategyInfo}
+
 
 
 I can help with:
@@ -241,6 +354,8 @@ Your request:
 
 
 
+
+
 // =====================================
 // GLOBAL ACCESS
 // =====================================
@@ -252,6 +367,6 @@ window.ChatTBMCreatorSkill = CreatorSkill;
 
 console.log(
 
-"🎬 ChatTBM V9.2 Memory Powered Creator Skill Loaded"
+"🎬 ChatTBM V9.5 Creator Intelligence Powered Skill Loaded"
 
 );
