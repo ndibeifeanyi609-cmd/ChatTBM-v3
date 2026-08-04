@@ -1,5 +1,5 @@
 // =====================================
-// ChatTBM V7.6
+// ChatTBM V7.7
 // Skill Router
 //
 // Purpose:
@@ -13,7 +13,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "7.6",
+    version: "7.7",
 
 
     skills: []
@@ -167,7 +167,13 @@ function detectIntent(message){
 
         text.includes("marketing") ||
 
-        text.includes("sales")
+        text.includes("sales") ||
+
+        text.includes("sell") ||
+
+        text.includes("brand") ||
+
+        text.includes("branding")
 
     ){
 
@@ -379,12 +385,22 @@ if(window.ChatTBMWritingSkill){
 
 
 
+if(window.ChatTBMBusinessSkill){
+
+    registerSkill(
+        window.ChatTBMBusinessSkill
+    );
+
+}
+
+
+
 
 
 
 
 console.log(
 
-"✅ ChatTBM V7.6 Skill Router Loaded"
+"✅ ChatTBM V7.7 Skill Router Loaded"
 
 );
