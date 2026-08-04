@@ -1,13 +1,12 @@
 // =====================================
-// ChatTBM V8.9
-// Personalized AI Core
+// ChatTBM V9.0
+// AI Core
 //
 // Upgrade:
-// - Memory aware responses
-// - Context personalization
-// - Skill pipeline improvement
-// - Better response metadata
-// - Future AI engine ready
+// - Memory context
+// - Creator intelligence
+// - Context-aware routing
+// - Personalized pipeline
 // =====================================
 
 
@@ -15,62 +14,13 @@
 const ChatTBM_Core = {
 
 
-    version: "8.9",
+    version: "9.0",
 
 
     status: "ready"
 
 
 };
-
-
-
-
-
-
-
-// =====================================
-// BUILD PERSONAL CONTEXT
-// =====================================
-
-
-function personalizeResponse(
-
-    response,
-
-    memoryContext
-
-){
-
-
-    if(
-
-        !memoryContext
-
-    ){
-
-        return response;
-
-    }
-
-
-
-    return {
-
-
-        text: response,
-
-
-        memoryUsed: true,
-
-
-        context: memoryContext
-
-
-    };
-
-
-}
 
 
 
@@ -89,7 +39,7 @@ async function processMessage(message){
 
     console.log(
 
-        "🧠 ChatTBM V8.9 Processing:",
+        "🧠 ChatTBM V9.0 Processing:",
 
         message
 
@@ -106,6 +56,9 @@ async function processMessage(message){
     let memoryContext = "";
 
 
+    let creatorContext = null;
+
+
     let response = null;
 
 
@@ -118,7 +71,7 @@ async function processMessage(message){
 
 
     // =================================
-    // MEMORY
+    // MEMORY SYSTEM
     // =================================
 
 
@@ -190,7 +143,68 @@ async function processMessage(message){
 
 
     // =================================
-    // ROUTING
+    // CREATOR INTELLIGENCE
+    // =================================
+
+
+    try{
+
+
+        if(
+
+            window.ChatTBMCreatorIntelligence &&
+
+            window.ChatTBMCreatorIntelligence.analyzeCreatorContext
+
+        ){
+
+
+            creatorContext =
+
+            window.ChatTBMCreatorIntelligence.analyzeCreatorContext(
+
+                message
+
+            );
+
+
+            console.log(
+
+                "🎯 Creator Context:",
+
+                creatorContext
+
+            );
+
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Creator Intelligence Error:",
+
+            error
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    // =================================
+    // SKILL ROUTER
     // =================================
 
 
@@ -204,6 +218,7 @@ async function processMessage(message){
             window.ChatTBMRouter.routeMessage
 
         ){
+
 
 
             intent =
@@ -271,18 +286,12 @@ You asked:
 "${message}"`;
 
 
-
     }
 
 
 
 
 
-
-
-    // =================================
-    // FINAL RESPONSE PACKAGE
-    // =================================
 
 
     return {
@@ -300,9 +309,7 @@ You asked:
         memoryContext,
 
 
-        personalized:
-
-        memoryContext.length > 0,
+        creatorContext,
 
 
         userId,
@@ -367,6 +374,7 @@ window.ChatTBMCore = {
 
     processMessage,
 
+
     getCoreStatus
 
 
@@ -380,6 +388,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V8.9 Personalized AI Core Loaded"
+"🧠 ChatTBM V9.0 Creator Intelligence Core Loaded"
 
 );
