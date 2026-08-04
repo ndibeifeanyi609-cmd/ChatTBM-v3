@@ -1,23 +1,27 @@
 // =====================================
-// ChatTBM V7.3
+// ChatTBM V7.4
 // Skill Router
 //
 // Purpose:
 // - Detect user intent
-// - Select correct AI skill
-// - Connect skills together
+// - Route messages to skills
+// - Manage AI abilities
 // =====================================
 
 
 
 const ChatTBM_SkillRouter = {
 
-    version: "7.3",
+
+    version: "7.4",
 
 
     skills: []
 
+
 };
+
+
 
 
 
@@ -59,6 +63,8 @@ function detectIntent(message){
 
 
 
+
+
     if(
 
         text.includes("code") ||
@@ -67,7 +73,9 @@ function detectIntent(message){
 
         text.includes("python") ||
 
-        text.includes("html")
+        text.includes("html") ||
+
+        text.includes("css")
 
     ){
 
@@ -78,19 +86,27 @@ function detectIntent(message){
 
 
 
+
+
     if(
 
         text.includes("learn") ||
 
         text.includes("study") ||
 
-        text.includes("explain")
+        text.includes("explain") ||
+
+        text.includes("science") ||
+
+        text.includes("math")
 
     ){
 
         return "learning";
 
     }
+
+
 
 
 
@@ -112,6 +128,8 @@ function detectIntent(message){
 
 
 
+
+
     if(
 
         text.includes("write") ||
@@ -128,10 +146,13 @@ function detectIntent(message){
 
 
 
+
+
     return "general";
 
 
 }
+
 
 
 
@@ -215,7 +236,7 @@ function routeMessage(message){
 
 
 // =====================================
-// GET ROUTER STATUS
+// STATUS
 // =====================================
 
 
@@ -279,8 +300,9 @@ window.ChatTBMRouter = {
 
 
 // =====================================
-// AUTO REGISTER GENERAL SKILL
+// AUTO REGISTER SKILLS
 // =====================================
+
 
 
 if(
@@ -303,9 +325,30 @@ if(
 
 
 
+if(
+
+    window.ChatTBMLearningSkill
+
+){
+
+
+    registerSkill(
+
+        window.ChatTBMLearningSkill
+
+    );
+
+
+}
+
+
+
+
+
+
+
 console.log(
 
-"✅ ChatTBM V7.3 Skill Router Loaded"
+"✅ ChatTBM V7.4 Skill Router Loaded"
 
 );
-
