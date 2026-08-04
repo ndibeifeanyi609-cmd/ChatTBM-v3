@@ -1,12 +1,12 @@
 // =====================================
-// ChatTBM V8.1
+// ChatTBM V8.2
 // AI Core
 //
 // Upgrade:
-// - Memory Context
-// - Skill Routing
-// - Response Processing
-// - Conversation Learning
+// - Memory extraction
+// - Memory context loading
+// - Skill routing
+// - Better reasoning flow
 // =====================================
 
 
@@ -14,7 +14,7 @@
 const ChatTBM_Core = {
 
 
-    version: "8.1",
+    version: "8.2",
 
 
     status: "ready"
@@ -55,6 +55,48 @@ async function processMessage(message){
 
 
 
+
+
+
+
+    // =================================
+    // MEMORY LEARNING
+    // =================================
+
+
+    if(
+
+        window.ChatTBMMemory &&
+
+        window.ChatTBMMemory.analyzeMemory
+
+    ){
+
+
+
+        window.ChatTBMMemory.analyzeMemory(
+
+            message
+
+        );
+
+
+
+        console.log(
+
+            "💾 Memory Analysis Complete"
+
+        );
+
+
+    }
+
+
+
+
+
+
+
     let memoryContext = "";
 
 
@@ -64,7 +106,7 @@ async function processMessage(message){
 
 
     // =================================
-    // LOAD MEMORY
+    // MEMORY CONTEXT
     // =================================
 
 
@@ -77,13 +119,11 @@ async function processMessage(message){
     ){
 
 
+
         memoryContext =
 
-        window.ChatTBMMemory.buildMemoryContext(
+        window.ChatTBMMemory.buildMemoryContext();
 
-            userId
-
-        );
 
 
         console.log(
@@ -112,7 +152,7 @@ async function processMessage(message){
 
 
     // =================================
-    // SKILL ROUTING
+    // SKILL ROUTER
     // =================================
 
 
@@ -138,7 +178,7 @@ async function processMessage(message){
 
         console.log(
 
-            "🎯 Routed Response:",
+            "🎯 Skill Response:",
 
             response
 
@@ -153,55 +193,13 @@ async function processMessage(message){
 
 
 
-    // =================================
-    // FALLBACK
-    // =================================
-
-
     if(!response){
+
 
 
         response =
 
         "🤖 ChatTBM is processing your request.";
-
-
-    }
-
-
-
-
-
-
-
-    // =================================
-    // SAVE MEMORY
-    // =================================
-
-
-    if(
-
-        window.ChatTBMMemory &&
-
-        window.ChatTBMMemory.addMemoryNote
-
-    ){
-
-
-        window.ChatTBMMemory.addMemoryNote(
-
-            userId,
-
-            message
-
-        );
-
-
-        console.log(
-
-            "💾 Memory Saved"
-
-        );
 
 
     }
@@ -297,6 +295,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V8.1 AI Core Loaded"
+"🧠 ChatTBM V8.2 AI Core Loaded"
 
 );
