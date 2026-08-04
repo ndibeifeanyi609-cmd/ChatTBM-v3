@@ -1,11 +1,11 @@
 // =====================================
-// ChatTBM V8.0
-// Smart Skill Router
+// ChatTBM V8.3
+// Context Aware Skill Router
 //
 // Upgrade:
-// - Better intent priority
-// - Context-aware routing
-// - Improved AI assistant behavior
+// - Receives memory context
+// - Sends context to skills
+// - Better conversation understanding
 // =====================================
 
 
@@ -13,7 +13,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "8.0",
+    version: "8.3",
 
 
     skills: []
@@ -69,15 +69,18 @@ function registerSkill(skill){
 function detectIntent(message){
 
 
-    const text = message.toLowerCase();
+
+    const text =
+
+    message.toLowerCase();
 
 
 
 
 
-    // ================================
-    // PROBLEM SOLVING FIRST
-    // ================================
+
+
+    // Problem solving first
 
 
     if(
@@ -92,13 +95,7 @@ function detectIntent(message){
 
         text.includes("problem") ||
 
-        text.includes("issue") ||
-
         text.includes("fix") ||
-
-        text.includes("decision") ||
-
-        text.includes("choose") ||
 
         text.includes("how do i")
 
@@ -114,16 +111,9 @@ function detectIntent(message){
 
 
 
-    // ================================
-    // CODING
-    // ================================
-
-
     if(
 
         text.includes("code") ||
-
-        text.includes("coding") ||
 
         text.includes("javascript") ||
 
@@ -131,9 +121,7 @@ function detectIntent(message){
 
         text.includes("html") ||
 
-        text.includes("css") ||
-
-        text.includes("program")
+        text.includes("css")
 
     ){
 
@@ -147,24 +135,13 @@ function detectIntent(message){
 
 
 
-    // ================================
-    // LEARNING
-    // ================================
-
-
     if(
 
         text.includes("explain") ||
 
         text.includes("learn") ||
 
-        text.includes("study") ||
-
-        text.includes("science") ||
-
-        text.includes("math") ||
-
-        text.includes("school")
+        text.includes("study")
 
     ){
 
@@ -178,24 +155,13 @@ function detectIntent(message){
 
 
 
-    // ================================
-    // WRITING
-    // ================================
-
-
     if(
 
         text.includes("write") ||
 
         text.includes("email") ||
 
-        text.includes("rewrite") ||
-
-        text.includes("story") ||
-
-        text.includes("caption") ||
-
-        text.includes("post")
+        text.includes("caption")
 
     ){
 
@@ -209,24 +175,13 @@ function detectIntent(message){
 
 
 
-    // ================================
-    // RESEARCH
-    // ================================
-
-
     if(
 
         text.includes("compare") ||
 
-        text.includes("difference") ||
-
         text.includes("research") ||
 
-        text.includes("summary") ||
-
-        text.includes("summarize") ||
-
-        text.includes("information")
+        text.includes("difference")
 
     ){
 
@@ -240,22 +195,13 @@ function detectIntent(message){
 
 
 
-    // ================================
-    // BUSINESS
-    // ================================
-
-
     if(
 
         text.includes("business") ||
 
         text.includes("marketing") ||
 
-        text.includes("sales") ||
-
-        text.includes("sell") ||
-
-        text.includes("brand")
+        text.includes("sales")
 
     ){
 
@@ -285,10 +231,22 @@ function detectIntent(message){
 // =====================================
 
 
-function routeMessage(message){
+function routeMessage(
+
+    message,
+
+    memoryContext = ""
+
+){
 
 
-    const intent = detectIntent(message);
+
+    const intent =
+
+    detectIntent(message);
+
+
+
 
 
     console.log(
@@ -303,11 +261,34 @@ function routeMessage(message){
 
 
 
+
+
+    const context = {
+
+
+        message,
+
+
+        memoryContext,
+
+
+        intent
+
+
+    };
+
+
+
+
+
+
+
     for(
 
         let skill of ChatTBM_SkillRouter.skills
 
     ){
+
 
 
         if(
@@ -317,13 +298,20 @@ function routeMessage(message){
         ){
 
 
-            return skill.respond(message);
+
+            return skill.respond(
+
+                context
+
+            );
 
 
         }
 
 
     }
+
+
 
 
 
@@ -406,11 +394,9 @@ window.ChatTBMRouter = {
 // =====================================
 
 
-
 if(window.ChatTBMGeneralSkill)
 
 registerSkill(window.ChatTBMGeneralSkill);
-
 
 
 if(window.ChatTBMLearningSkill)
@@ -418,11 +404,9 @@ if(window.ChatTBMLearningSkill)
 registerSkill(window.ChatTBMLearningSkill);
 
 
-
 if(window.ChatTBMCodingSkill)
 
 registerSkill(window.ChatTBMCodingSkill);
-
 
 
 if(window.ChatTBMWritingSkill)
@@ -430,17 +414,14 @@ if(window.ChatTBMWritingSkill)
 registerSkill(window.ChatTBMWritingSkill);
 
 
-
 if(window.ChatTBMBusinessSkill)
 
 registerSkill(window.ChatTBMBusinessSkill);
 
 
-
 if(window.ChatTBMResearchSkill)
 
 registerSkill(window.ChatTBMResearchSkill);
-
 
 
 if(window.ChatTBMProblemSkill)
@@ -455,6 +436,6 @@ registerSkill(window.ChatTBMProblemSkill);
 
 console.log(
 
-"✅ ChatTBM V8.0 Smart Router Loaded"
+"🧠 ChatTBM V8.3 Context Router Loaded"
 
 );
