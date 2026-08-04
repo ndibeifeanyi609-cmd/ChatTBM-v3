@@ -1,12 +1,12 @@
 // =====================================
-// ChatTBM V7.3
+// ChatTBM V7.4
 // AI Core
 //
 // Purpose:
 // - Process user messages
 // - Connect memory
 // - Connect skill router
-// - Prepare advanced reasoning
+// - Manage AI reasoning flow
 // =====================================
 
 
@@ -14,7 +14,7 @@
 const ChatTBM_Core = {
 
 
-    version: "7.3",
+    version: "7.4",
 
 
     status: "ready"
@@ -37,13 +37,25 @@ async function processMessage(message){
 
 
 
+    console.log(
+
+        "🧠 AI Core Processing:",
+
+        message
+
+    );
+
+
+
+
+
     let memoryContext = "";
 
 
 
 
 
-    // Get memory context
+    // Memory connection
 
 
     if(
@@ -57,7 +69,11 @@ async function processMessage(message){
 
         memoryContext =
 
-        window.ChatTBMMemory.buildMemoryContext();
+        window.ChatTBMMemory.buildMemoryContext(
+
+            "guest"
+
+        );
 
 
     }
@@ -68,11 +84,13 @@ async function processMessage(message){
 
 
 
-    // Route to skill
-
-
     let response = null;
 
+
+
+
+
+    // Skill Router connection
 
 
     if(
@@ -90,6 +108,28 @@ async function processMessage(message){
         window.ChatTBMRouter.routeMessage(
 
             message
+
+        );
+
+
+
+        console.log(
+
+            "🎯 Skill Response:",
+
+            response
+
+        );
+
+
+    }
+
+    else{
+
+
+        console.log(
+
+            "⚠️ Skill Router not available"
 
         );
 
@@ -187,6 +227,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V7.3 AI Core Loaded"
+"🧠 ChatTBM V7.4 AI Core Loaded"
 
 );
