@@ -1,11 +1,15 @@
 // =====================================
-// ChatTBM V8.5
-// Business Skill
+// ChatTBM V10.0
+// Business Intelligence Skill
 //
 // Upgrade:
-// - Router V8.5 compatible
-// - Context support
-// - Business assistance
+// - Memory-aware business assistant
+// - Brand profile support
+// - Marketing intelligence
+// - Sales strategy support
+// - Business goal detection
+// - Personalized responses
+// - Context compatible
 // =====================================
 
 
@@ -16,7 +20,8 @@ const BusinessSkill = {
     name: "Business Assistant",
 
 
-    version: "8.5",
+    version: "10.0",
+
 
 
 
@@ -41,6 +46,8 @@ const BusinessSkill = {
 
 
 
+
+
     respond(context){
 
 
@@ -57,6 +64,18 @@ const BusinessSkill = {
 
 
 
+        const memory =
+
+        typeof context === "object"
+
+        ? context.memoryContext || ""
+
+        : "";
+
+
+
+
+
         const text =
 
         message.toLowerCase();
@@ -65,6 +84,40 @@ const BusinessSkill = {
 
 
 
+
+
+        let memoryInfo = "";
+
+
+
+
+
+
+
+        if(memory){
+
+
+            memoryInfo = `
+
+🧠 Business Memory:
+
+${memory}
+
+`;
+
+        }
+
+
+
+
+
+
+
+
+
+        // =================================
+        // MARKETING
+        // =================================
 
 
         if(
@@ -77,16 +130,39 @@ const BusinessSkill = {
             return `💼 Marketing Assistant
 
 
-I can help you with:
+
+${memoryInfo}
+
+
+
+I can help you create:
+
 
 • Marketing strategies
+
 • Customer targeting
+
 • Brand awareness
-• Social media marketing
-• Campaign ideas
+
+• Social media campaigns
+
+• Content marketing ideas
+
+• Growth plans
 
 
-Tell me your product, service, or business goal.`;
+
+Tell me:
+
+
+• Your product or service
+
+• Your target customers
+
+• Your business goal
+
+
+and I will build a strategy.`;
 
         }
 
@@ -94,6 +170,13 @@ Tell me your product, service, or business goal.`;
 
 
 
+
+
+
+
+        // =================================
+        // SALES
+        // =================================
 
 
         if(
@@ -108,16 +191,27 @@ Tell me your product, service, or business goal.`;
             return `📈 Sales Assistant
 
 
+
+${memoryInfo}
+
+
+
 I can help you create:
 
+
 • Sales messages
+
 • Offers
-• Customer communication
-• Sales strategies
-• Conversion ideas
+
+• Customer acquisition plans
+
+• Conversion strategies
+
+• Sales funnels
 
 
-Tell me what you are selling.`;
+
+Tell me what you are selling and who your customers are.`;
 
         }
 
@@ -125,6 +219,13 @@ Tell me what you are selling.`;
 
 
 
+
+
+
+
+        // =================================
+        // BRANDING
+        // =================================
 
 
         if(
@@ -139,16 +240,27 @@ Tell me what you are selling.`;
             return `🎯 Branding Assistant
 
 
+
+${memoryInfo}
+
+
+
 I can help with:
 
-• Brand names
+
 • Brand identity
-• Positioning
-• Audience understanding
-• Brand ideas
+
+• Brand positioning
+
+• Audience research
+
+• Brand voice
+
+• Marketing direction
 
 
-Tell me about your brand.`;
+
+Tell me about your brand vision.`;
 
         }
 
@@ -158,20 +270,42 @@ Tell me about your brand.`;
 
 
 
+
+
+        // =================================
+        // GENERAL BUSINESS
+        // =================================
+
+
         return `💼 Business Assistant
+
+
+
+${memoryInfo}
+
 
 
 I can help you with:
 
+
 • Business ideas
+
 • Marketing
+
 • Sales
+
 • Branding
+
 • Product descriptions
+
 • Business planning
+
+• Growth strategies
+
 
 
 Your request:
+
 
 "${message}"`;
 
@@ -181,6 +315,8 @@ Your request:
 
 
 };
+
+
 
 
 
@@ -199,6 +335,6 @@ window.ChatTBMBusinessSkill = BusinessSkill;
 
 console.log(
 
-"✅ ChatTBM V8.5 Business Skill Loaded"
+"💼 ChatTBM V10.0 Business Intelligence Skill Loaded"
 
 );
