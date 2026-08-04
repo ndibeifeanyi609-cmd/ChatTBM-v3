@@ -1,11 +1,11 @@
 // =====================================
-// ChatTBM V7.9
-// Skill Router
+// ChatTBM V8.0
+// Smart Skill Router
 //
-// Purpose:
-// - Detect user intent
-// - Register AI skills
-// - Route messages
+// Upgrade:
+// - Better intent priority
+// - Context-aware routing
+// - Improved AI assistant behavior
 // =====================================
 
 
@@ -13,7 +13,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "7.9",
+    version: "8.0",
 
 
     skills: []
@@ -38,11 +38,7 @@ function registerSkill(skill){
     if(skill){
 
 
-        ChatTBM_SkillRouter.skills.push(
-
-            skill
-
-        );
+        ChatTBM_SkillRouter.skills.push(skill);
 
 
         console.log(
@@ -73,12 +69,54 @@ function registerSkill(skill){
 function detectIntent(message){
 
 
-    const text =
-
-    message.toLowerCase();
+    const text = message.toLowerCase();
 
 
 
+
+
+    // ================================
+    // PROBLEM SOLVING FIRST
+    // ================================
+
+
+    if(
+
+        text.includes("plan") ||
+
+        text.includes("strategy") ||
+
+        text.includes("goal") ||
+
+        text.includes("solve") ||
+
+        text.includes("problem") ||
+
+        text.includes("issue") ||
+
+        text.includes("fix") ||
+
+        text.includes("decision") ||
+
+        text.includes("choose") ||
+
+        text.includes("how do i")
+
+    ){
+
+        return "problem";
+
+    }
+
+
+
+
+
+
+
+    // ================================
+    // CODING
+    // ================================
 
 
     if(
@@ -109,13 +147,18 @@ function detectIntent(message){
 
 
 
+    // ================================
+    // LEARNING
+    // ================================
+
+
     if(
+
+        text.includes("explain") ||
 
         text.includes("learn") ||
 
         text.includes("study") ||
-
-        text.includes("explain") ||
 
         text.includes("science") ||
 
@@ -133,6 +176,11 @@ function detectIntent(message){
 
 
 
+
+
+    // ================================
+    // WRITING
+    // ================================
 
 
     if(
@@ -161,37 +209,18 @@ function detectIntent(message){
 
 
 
-    if(
-
-        text.includes("business") ||
-
-        text.includes("marketing") ||
-
-        text.includes("sales") ||
-
-        text.includes("sell") ||
-
-        text.includes("brand")
-
-    ){
-
-        return "business";
-
-    }
-
-
-
-
-
+    // ================================
+    // RESEARCH
+    // ================================
 
 
     if(
-
-        text.includes("research") ||
 
         text.includes("compare") ||
 
         text.includes("difference") ||
+
+        text.includes("research") ||
 
         text.includes("summary") ||
 
@@ -211,27 +240,26 @@ function detectIntent(message){
 
 
 
+    // ================================
+    // BUSINESS
+    // ================================
+
+
     if(
 
-        text.includes("problem") ||
+        text.includes("business") ||
 
-        text.includes("issue") ||
+        text.includes("marketing") ||
 
-        text.includes("fix") ||
+        text.includes("sales") ||
 
-        text.includes("plan") ||
+        text.includes("sell") ||
 
-        text.includes("strategy") ||
-
-        text.includes("goal") ||
-
-        text.includes("decision") ||
-
-        text.includes("choose")
+        text.includes("brand")
 
     ){
 
-        return "problem";
+        return "business";
 
     }
 
@@ -260,13 +288,7 @@ function detectIntent(message){
 function routeMessage(message){
 
 
-
-    const intent =
-
-    detectIntent(message);
-
-
-
+    const intent = detectIntent(message);
 
 
     console.log(
@@ -281,16 +303,11 @@ function routeMessage(message){
 
 
 
-
-
     for(
 
-        let skill of
-
-        ChatTBM_SkillRouter.skills
+        let skill of ChatTBM_SkillRouter.skills
 
     ){
-
 
 
         if(
@@ -300,19 +317,13 @@ function routeMessage(message){
         ){
 
 
-
-            return skill.respond(
-
-                message
-
-            );
+            return skill.respond(message);
 
 
         }
 
 
     }
-
 
 
 
@@ -375,12 +386,9 @@ window.ChatTBMRouter = {
 
     registerSkill,
 
-
     detectIntent,
 
-
     routeMessage,
-
 
     getSkillStatus
 
@@ -394,78 +402,50 @@ window.ChatTBMRouter = {
 
 
 // =====================================
-// AUTO REGISTER SKILLS
+// AUTO REGISTER
 // =====================================
 
 
 
-if(window.ChatTBMGeneralSkill){
+if(window.ChatTBMGeneralSkill)
 
-    registerSkill(
-        window.ChatTBMGeneralSkill
-    );
-
-}
+registerSkill(window.ChatTBMGeneralSkill);
 
 
 
-if(window.ChatTBMLearningSkill){
+if(window.ChatTBMLearningSkill)
 
-    registerSkill(
-        window.ChatTBMLearningSkill
-    );
-
-}
+registerSkill(window.ChatTBMLearningSkill);
 
 
 
-if(window.ChatTBMCodingSkill){
+if(window.ChatTBMCodingSkill)
 
-    registerSkill(
-        window.ChatTBMCodingSkill
-    );
-
-}
+registerSkill(window.ChatTBMCodingSkill);
 
 
 
-if(window.ChatTBMWritingSkill){
+if(window.ChatTBMWritingSkill)
 
-    registerSkill(
-        window.ChatTBMWritingSkill
-    );
-
-}
+registerSkill(window.ChatTBMWritingSkill);
 
 
 
-if(window.ChatTBMBusinessSkill){
+if(window.ChatTBMBusinessSkill)
 
-    registerSkill(
-        window.ChatTBMBusinessSkill
-    );
-
-}
+registerSkill(window.ChatTBMBusinessSkill);
 
 
 
-if(window.ChatTBMResearchSkill){
+if(window.ChatTBMResearchSkill)
 
-    registerSkill(
-        window.ChatTBMResearchSkill
-    );
-
-}
+registerSkill(window.ChatTBMResearchSkill);
 
 
 
-if(window.ChatTBMProblemSkill){
+if(window.ChatTBMProblemSkill)
 
-    registerSkill(
-        window.ChatTBMProblemSkill
-    );
-
-}
+registerSkill(window.ChatTBMProblemSkill);
 
 
 
@@ -475,6 +455,6 @@ if(window.ChatTBMProblemSkill){
 
 console.log(
 
-"✅ ChatTBM V7.9 Skill Router Loaded"
+"✅ ChatTBM V8.0 Smart Router Loaded"
 
 );
