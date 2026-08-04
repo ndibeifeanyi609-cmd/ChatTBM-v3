@@ -16,15 +16,11 @@ ChatTBM - AI Assistant
 <link rel="stylesheet" href="style.css">
 
 
-<!-- ChatTBM Favicon -->
-
 <link
 rel="icon"
 type="image/png"
 href="IMG_4450.png">
 
-
-<!-- PWA -->
 
 <link
 rel="manifest"
@@ -34,12 +30,10 @@ href="manifest.json">
 </head>
 
 
-
 <body>
 
 
 <div class="app-container">
-
 
 
 <header class="app-header">
@@ -52,7 +46,6 @@ href="manifest.json">
 src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
 alt="ChatTBM"
 class="hero-logo">
-
 
 
 <div class="brand-text">
@@ -80,8 +73,6 @@ Your Personal AI Assistant
 
 
 
-
-
 <section class="welcome-screen">
 
 
@@ -91,25 +82,19 @@ alt="ChatTBM Logo"
 class="logo">
 
 
-
 <h2>
 Welcome to ChatTBM
 </h2>
 
 
-
 <p>
 Your AI assistant for learning,
-creating, coding, research,
-problem solving and everyday tasks.
+creating, coding, business,
+research and problem solving.
 </p>
 
 
 </section>
-
-
-
-
 
 
 
@@ -121,7 +106,6 @@ problem solving and everyday tasks.
 <div
 id="chat-box"
 class="chat-box">
-
 
 
 <div class="message bot-message">
@@ -152,7 +136,10 @@ I can help you with:
 💼 Business
 
 <br>
-🔍 Research
+🎯 Creator ideas
+
+<br>
+💡 Problem solving
 
 </p>
 
@@ -161,10 +148,6 @@ I can help you with:
 
 
 </div>
-
-
-
-
 
 
 
@@ -182,23 +165,13 @@ class="upload-btn">
 </button>
 
 
-
-
-
 <input
-
 type="text"
-
 id="user-input"
-
 placeholder="Ask ChatTBM anything...">
 
 
-
-
-
 <button
-
 id="voice-btn">
 
 🎤
@@ -206,11 +179,7 @@ id="voice-btn">
 </button>
 
 
-
-
-
 <button
-
 id="send-btn">
 
 Send
@@ -221,12 +190,7 @@ Send
 </div>
 
 
-
 </main>
-
-
-
-
 
 
 
@@ -243,11 +207,6 @@ ChatTBM AI Assistant
 </footer>
 
 
-
-
-
-
-
 </div>
 
 
@@ -256,18 +215,13 @@ ChatTBM AI Assistant
 
 
 
-
-
-<!-- Memory -->
+<!-- Core Systems -->
 
 
 <script src="MemoryEngine.js"></script>
 
 
-
-
-
-<!-- Existing Skills -->
+<!-- Skills -->
 
 
 <script src="GeneralAssistantSkill.js"></script>
@@ -278,22 +232,21 @@ ChatTBM AI Assistant
 
 <script src="WritingSkill.js"></script>
 
-<script src="ResearchSkill.js"></script>
-
 <script src="BusinessSkill.js"></script>
 
 
 
-
-
-
-
-<!-- Router loads after skills -->
+<!-- Router -->
 
 
 <script src="SkillRouter.js"></script>
 
 
+
+<!-- Creator Intelligence -->
+
+
+<script src="creatorIntelligence.js"></script>
 
 
 
@@ -304,16 +257,10 @@ ChatTBM AI Assistant
 
 
 
-
-
 <!-- Voice -->
 
 
 <script src="VoiceEngine.js"></script>
-
-
-
-
 
 
 
@@ -324,8 +271,6 @@ ChatTBM AI Assistant
 
 
 
-
-
 <!-- Frontend Bridge -->
 
 
@@ -333,13 +278,6 @@ ChatTBM AI Assistant
 
 
 
-
-
-
-
-
-
-<!-- Service Worker -->
 
 
 <script>
@@ -372,7 +310,6 @@ navigator.serviceWorker.register(
 
 
 </script>
-
 
 
 </body>
