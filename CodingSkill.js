@@ -1,11 +1,15 @@
 // =====================================
-// ChatTBM V8.5
-// Coding Skill
+// ChatTBM V10.0
+// Coding Intelligence Skill
 //
 // Upgrade:
-// - Router V8.5 compatible
-// - Context support
-// - Programming assistance
+// - Memory-aware coding assistant
+// - Project context support
+// - Programming language detection
+// - Debugging assistance
+// - Beginner/intermediate support
+// - Personalized coding responses
+// - Context compatible
 // =====================================
 
 
@@ -16,7 +20,9 @@ const CodingSkill = {
     name: "Coding Assistant",
 
 
-    version: "8.5",
+    version: "10.0",
+
+
 
 
 
@@ -40,6 +46,8 @@ const CodingSkill = {
 
 
 
+
+
     respond(context){
 
 
@@ -56,6 +64,16 @@ const CodingSkill = {
 
 
 
+        const memory =
+
+        typeof context === "object"
+
+        ? context.memoryContext || ""
+
+        : "";
+
+
+
 
 
         const text =
@@ -68,25 +86,64 @@ const CodingSkill = {
 
 
 
-        // JavaScript
+        let memoryInfo = "";
+
+
+
+
+
+
+
+        if(memory){
+
+
+            memoryInfo = `
+
+🧠 Coding Memory:
+
+${memory}
+
+`;
+
+        }
+
+
+
+
+
+
+
+
+
+        // =================================
+        // JAVASCRIPT
+        // =================================
 
 
         if(
 
             text.includes("javascript") ||
 
-            text.includes("js")
+            text.includes(" js") ||
+
+            text.includes("node")
 
         ){
 
 
-            return `💻 Coding Assistant
+            return `💻 JavaScript Coding Assistant
 
 
-JavaScript helps you create interactive websites and applications.
+
+${memoryInfo}
 
 
-I can help you with:
+
+JavaScript helps build interactive websites, applications, and backend systems.
+
+
+I can help with:
+
 
 • Variables
 
@@ -98,12 +155,15 @@ I can help you with:
 
 • DOM manipulation
 
+• APIs
+
 • Debugging
 
-• Building projects
+• Project architecture
 
 
-Tell me what JavaScript problem you are working on.`;
+
+Tell me your JavaScript problem and I will guide you step by step.`;
 
         }
 
@@ -113,14 +173,20 @@ Tell me what JavaScript problem you are working on.`;
 
 
 
-        // HTML/CSS
+
+
+        // =================================
+        // HTML / CSS
+        // =================================
 
 
         if(
 
             text.includes("html") ||
 
-            text.includes("css")
+            text.includes("css") ||
+
+            text.includes("website")
 
         ){
 
@@ -128,18 +194,27 @@ Tell me what JavaScript problem you are working on.`;
             return `🌐 Web Development Assistant
 
 
+
+${memoryInfo}
+
+
+
 I can help you build websites using:
+
 
 • HTML structure
 
 • CSS styling
 
-• Responsive design
+• Responsive layouts
 
-• Frontend improvements
+• UI improvements
+
+• Frontend organization
 
 
-Tell me what you want to create.`;
+
+Tell me what you want to create or improve.`;
 
         }
 
@@ -149,7 +224,11 @@ Tell me what you want to create.`;
 
 
 
-        // Python
+
+
+        // =================================
+        // PYTHON
+        // =================================
 
 
         if(
@@ -159,12 +238,18 @@ Tell me what you want to create.`;
         ){
 
 
-            return `🐍 Python Assistant
+            return `🐍 Python Coding Assistant
 
 
-I can help you learn Python:
 
-• Variables
+${memoryInfo}
+
+
+
+I can help you with:
+
+
+• Python basics
 
 • Functions
 
@@ -173,6 +258,9 @@ I can help you learn Python:
 • Data handling
 
 • Programming concepts
+
+• Debugging
+
 
 
 Tell me your Python question.`;
@@ -185,34 +273,101 @@ Tell me your Python question.`;
 
 
 
-        // General coding
+
+
+        // =================================
+        // DEBUGGING
+        // =================================
+
+
+        if(
+
+            text.includes("error") ||
+
+            text.includes("bug") ||
+
+            text.includes("fix")
+
+        ){
+
+
+            return `🛠️ Debugging Assistant
+
+
+
+${memoryInfo}
+
+
+
+I can help you:
+
+
+• Find coding errors
+
+• Explain error messages
+
+• Improve code structure
+
+• Fix problems step by step
+
+
+
+Send the code and the error message.`;
+
+        }
+
+
+
+
+
+
+
+
+
+        // =================================
+        // GENERAL CODING
+        // =================================
 
 
         return `💻 Coding Assistant
 
 
+
+${memoryInfo}
+
+
+
 I can help you with:
+
 
 • Programming questions
 
 • Debugging
 
-• Explaining code
+• Code explanation
 
-• Building software
+• Software projects
+
+• Learning programming
+
 
 
 Your question:
 
-"${message}"`;
+
+"${message}"
+
+
+I will guide you step by step.`;
 
 
 
     }
 
 
-
 };
+
+
 
 
 
@@ -231,6 +386,6 @@ window.ChatTBMCodingSkill = CodingSkill;
 
 console.log(
 
-"✅ ChatTBM V8.5 Coding Skill Loaded"
+"💻 ChatTBM V10.0 Coding Intelligence Skill Loaded"
 
 );
