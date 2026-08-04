@@ -1,12 +1,12 @@
 // =====================================
-// ChatTBM V8.6
-// Clean Skill Router
+// ChatTBM V9.1
+// Creator Ready Skill Router
 //
 // Upgrade:
-// - Existing skills only
+// - Creator intent support
 // - Memory context support
-// - No missing skills
-// - Better fallback handling
+// - Existing skill compatibility
+// - Better routing priority
 // =====================================
 
 
@@ -14,7 +14,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "8.6",
+    version: "9.1",
 
 
     skills: []
@@ -28,7 +28,9 @@ const ChatTBM_SkillRouter = {
 
 
 
+// =====================================
 // REGISTER SKILL
+// =====================================
 
 
 function registerSkill(skill){
@@ -60,7 +62,9 @@ function registerSkill(skill){
 
 
 
+// =====================================
 // DETECT INTENT
+// =====================================
 
 
 function detectIntent(message){
@@ -75,6 +79,9 @@ function detectIntent(message){
 
 
 
+
+
+    // Coding
 
 
     if(
@@ -99,6 +106,9 @@ function detectIntent(message){
 
 
 
+
+
+    // Learning
 
 
     if(
@@ -127,6 +137,42 @@ function detectIntent(message){
 
 
 
+    // Creator Intelligence
+
+
+    if(
+
+        text.includes("instagram") ||
+
+        text.includes("reels") ||
+
+        text.includes("content ideas") ||
+
+        text.includes("creator") ||
+
+        text.includes("followers") ||
+
+        text.includes("audience") ||
+
+        text.includes("video ideas") ||
+
+        text.includes("social media")
+
+    ){
+
+        return "creator";
+
+    }
+
+
+
+
+
+
+
+    // Writing
+
+
     if(
 
         text.includes("write") ||
@@ -147,6 +193,9 @@ function detectIntent(message){
 
 
 
+
+
+    // Business
 
 
     if(
@@ -188,7 +237,9 @@ function detectIntent(message){
 
 
 
+// =====================================
 // ROUTE MESSAGE
+// =====================================
 
 
 function routeMessage(
@@ -311,7 +362,9 @@ function routeMessage(
 
 
 
+// =====================================
 // STATUS
+// =====================================
 
 
 function getSkillStatus(){
@@ -345,7 +398,9 @@ function getSkillStatus(){
 
 
 
+// =====================================
 // GLOBAL
+// =====================================
 
 
 window.ChatTBMRouter = {
@@ -368,7 +423,9 @@ window.ChatTBMRouter = {
 
 
 
-// AUTO REGISTER EXISTING SKILLS
+// =====================================
+// AUTO REGISTER
+// =====================================
 
 
 if(window.ChatTBMGeneralSkill)
@@ -401,12 +458,18 @@ registerSkill(window.ChatTBMBusinessSkill);
 
 
 
+if(window.ChatTBMCreatorSkill)
+
+registerSkill(window.ChatTBMCreatorSkill);
+
+
+
 
 
 
 
 console.log(
 
-"🧠 ChatTBM V8.6 Clean Skill Router Loaded"
+"🧠 ChatTBM V9.1 Creator Ready Router Loaded"
 
 );
