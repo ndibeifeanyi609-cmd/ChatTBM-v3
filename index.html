@@ -116,7 +116,6 @@ problem solving and everyday tasks.
 <main class="chat-container">
 
 
-
 <div
 id="chat-box"
 class="chat-box">
@@ -139,10 +138,10 @@ I can help you with:
 🧠 General questions
 
 <br>
-📚 Learning
+💻 Coding
 
 <br>
-💻 Coding
+📚 Learning
 
 <br>
 ✍️ Writing
@@ -151,10 +150,13 @@ I can help you with:
 💼 Business
 
 <br>
+🎯 Branding
+
+<br>
 🔍 Research
 
 <br>
-🧩 Problem solving
+💡 Problem solving
 
 </p>
 
@@ -258,9 +260,29 @@ ChatTBM AI Assistant
 
 
 
-<!-- ChatTBM AI Systems -->
+<!-- ChatTBM Core Systems -->
+
 
 <script src="MemoryEngine.js"></script>
+
+
+<script src="SkillRouter.js"></script>
+
+
+<script src="AICore.js"></script>
+
+
+<!-- Voice -->
+
+
+<script src="VoiceEngine.js"></script>
+
+
+
+
+
+<!-- Skills -->
+
 
 <script src="GeneralAssistantSkill.js"></script>
 
@@ -270,19 +292,26 @@ ChatTBM AI Assistant
 
 <script src="WritingSkill.js"></script>
 
+<script src="ResearchSkill.js"></script>
+
 <script src="BusinessSkill.js"></script>
 
-<script src="ResearchSkill.js"></script>
+<script src="BrandingSkill.js"></script>
 
 <script src="ProblemSolvingSkill.js"></script>
 
-<script src="SkillRouter.js"></script>
 
-<script src="AICore.js"></script>
 
-<script src="VoiceEngine.js"></script>
+
+
+<!-- AI Gateway -->
+
 
 <script src="ai.js"></script>
+
+
+<!-- Frontend Bridge -->
+
 
 <script src="script.js"></script>
 
@@ -292,7 +321,10 @@ ChatTBM AI Assistant
 
 
 
+
+
 <!-- Service Worker -->
+
 
 <script>
 
@@ -308,7 +340,9 @@ window.addEventListener(
 
 
 navigator.serviceWorker.register(
+
 "service-worker.js"
+
 );
 
 
