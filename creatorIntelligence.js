@@ -1,13 +1,15 @@
 // =====================================
-// ChatTBM V9.3
-// Creator Strategy Intelligence Engine
+// ChatTBM V9.4
+// Creator Intelligence Engine
 //
 // Upgrade:
-// - Creator context analysis
-// - Brand niche detection
-// - Goal understanding
+// - Memory-aware creator analysis
+// - Brand detection
+// - Fitness detection
+// - Audience detection
+// - Goal detection
 // - Strategy preparation
-// - Memory compatible
+// - Fully compatible with V9.x
 // =====================================
 
 
@@ -18,13 +20,10 @@ const CreatorIntelligence = {
     name: "Creator Intelligence",
 
 
-    version: "9.3"
-
+    version: "9.4"
 
 
 };
-
-
 
 
 
@@ -35,7 +34,13 @@ const CreatorIntelligence = {
 // =====================================
 
 
-function analyzeCreatorContext(message, memoryContext = ""){
+function analyzeCreatorContext(
+
+    message,
+
+    memoryContext = ""
+
+){
 
 
 
@@ -45,31 +50,45 @@ function analyzeCreatorContext(message, memoryContext = ""){
 
 
 
+    const memory =
+
+    memoryContext.toLowerCase();
+
+
+
 
 
     const context = {
 
 
-        creator: false,
+        creator:false,
 
 
-        business: false,
+        business:false,
 
 
-        fitness: false,
+        fitness:false,
 
 
-        content: false,
+        content:false,
 
 
-        audience: false,
+        audience:false,
 
 
-        strategy: false,
+        strategy:false,
 
 
-        goal: ""
+        goal:"",
 
+
+        niche:"",
+
+
+        platform:"",
+
+
+        remembered:false
 
 
     };
@@ -78,9 +97,25 @@ function analyzeCreatorContext(message, memoryContext = ""){
 
 
 
+    // ================================
+    // MEMORY DETECTION
+    // ================================
 
 
-    // Business
+    if(memory.length > 0){
+
+        context.remembered = true;
+
+    }
+
+
+
+
+
+
+    // ================================
+    // BUSINESS
+    // ================================
 
 
     if(
@@ -91,13 +126,15 @@ function analyzeCreatorContext(message, memoryContext = ""){
 
         text.includes("marketing") ||
 
-        text.includes("sales")
+        text.includes("sales") ||
+
+        memory.includes("business") ||
+
+        memory.includes("brand")
 
     ){
 
-
         context.business = true;
-
 
     }
 
@@ -106,8 +143,9 @@ function analyzeCreatorContext(message, memoryContext = ""){
 
 
 
-
-    // Fitness niche
+    // ================================
+    // FITNESS NICHE
+    // ================================
 
 
     if(
@@ -120,13 +158,15 @@ function analyzeCreatorContext(message, memoryContext = ""){
 
         text.includes("exercise") ||
 
-        text.includes("health")
+        text.includes("health") ||
+
+        memory.includes("fitness")
 
     ){
 
-
         context.fitness = true;
 
+        context.niche = "fitness";
 
     }
 
@@ -135,8 +175,9 @@ function analyzeCreatorContext(message, memoryContext = ""){
 
 
 
-
-    // Creator content
+    // ================================
+    // CREATOR CONTENT
+    // ================================
 
 
     if(
@@ -155,12 +196,10 @@ function analyzeCreatorContext(message, memoryContext = ""){
 
     ){
 
-
         context.creator = true;
 
         context.content = true;
 
-
     }
 
 
@@ -168,224 +207,25 @@ function analyzeCreatorContext(message, memoryContext = ""){
 
 
 
-
-    // Audience
-
-
-    if(
-
-        text.includes("audience") ||
-
-        text.includes("customer") ||
-
-        text.includes("followers") ||
-
-        text.includes("clients")
-
-    ){
+    // ================================
+    // PLATFORM
+    // ================================
 
 
-        context.audience = true;
+    if(text.includes("instagram")){
 
+        context.platform = "Instagram";
 
     }
 
+    else if(text.includes("youtube")){
 
-
-
-
-
-
-    // Strategy
-
-
-    if(
-
-        text.includes("plan") ||
-
-        text.includes("strategy") ||
-
-        text.includes("growth") ||
-
-        text.includes("marketing")
-
-    ){
-
-
-        context.strategy = true;
-
+        context.platform = "YouTube";
 
     }
 
+    else if(text.includes("facebook")){
 
-
-
-
-
-
-    // Goal detection
-
-
-    if(
-
-        text.includes("ideas")
-
-    ){
-
-
-        context.goal = "content ideas";
-
+        context.platform = "Facebook";
 
     }
-
-
-    else if(
-
-        text.includes("grow")
-
-    ){
-
-
-        context.goal = "growth";
-
-
-    }
-
-
-    else if(
-
-        text.includes("sell") ||
-
-        text.includes("sales")
-
-    ){
-
-
-        context.goal = "sales";
-
-
-    }
-
-
-
-
-
-
-
-    return context;
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// CREATE STRATEGY SUMMARY
-// =====================================
-
-
-function buildCreatorStrategy(context){
-
-
-
-    let strategy = [];
-
-
-
-
-
-    if(context.fitness){
-
-
-        strategy.push(
-
-            "Fitness niche detected"
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-    if(context.content){
-
-
-        strategy.push(
-
-            "Content creation focus detected"
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-    if(context.audience){
-
-
-        strategy.push(
-
-            "Audience growth focus detected"
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-    return strategy;
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// GLOBAL ACCESS
-// =====================================
-
-
-window.ChatTBMCreatorIntelligence = {
-
-
-    analyzeCreatorContext(message, memoryContext)
-
-    buildCreatorStrategy
-
-
-};
-
-
-
-
-
-
-
-console.log(
-
-"🎯 ChatTBM V9.3 Creator Strategy Intelligence Loaded"
-
-);
