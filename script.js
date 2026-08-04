@@ -1,22 +1,31 @@
 // =====================================
-// ChatTBM V6.8.5
-// Frontend Bridge
+// ChatTBM V7.2
+// Frontend AI Assistant Bridge
 //
 // Connected:
 // - Chat Interface
-// - Node Backend API
-// - Conversation Memory
-// - Response Display
+// - AI Gateway
+// - AI Core
+// - Voice Engine
+// - Memory System
 // =====================================
 
 
-const chatBox = document.getElementById("chat-box");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
+
+const chatBox =
+document.getElementById("chat-box");
 
 
+const userInput =
+document.getElementById("user-input");
 
-const API_URL = "/api/chat";
+
+const sendBtn =
+document.getElementById("send-btn");
+
+
+const voiceBtn =
+document.getElementById("voice-btn");
 
 
 
@@ -29,7 +38,10 @@ const API_URL = "/api/chat";
 
 function addMessage(message, type){
 
-    const div = document.createElement("div");
+
+    const div =
+    document.createElement("div");
+
 
     div.className =
     type === "user"
@@ -37,20 +49,31 @@ function addMessage(message, type){
     : "message bot-message";
 
 
-    const p = document.createElement("p");
 
-    p.textContent = message;
+    const p =
+    document.createElement("p");
+
+
+
+    p.textContent =
+    message;
+
 
 
     div.appendChild(p);
 
+
     chatBox.appendChild(div);
+
 
 
     chatBox.scrollTop =
     chatBox.scrollHeight;
 
+
 }
+
+
 
 
 
@@ -63,27 +86,44 @@ function addMessage(message, type){
 
 function showLoading(){
 
-    const div = document.createElement("div");
 
-    div.id = "loading-message";
+    const div =
+    document.createElement("div");
 
-    div.className = "message bot-message";
+
+
+    div.id =
+    "loading-message";
+
+
+
+    div.className =
+    "message bot-message";
+
 
 
     div.innerHTML =
     "<p>ChatTBM is thinking...</p>";
 
 
+
     chatBox.appendChild(div);
+
+
 
     chatBox.scrollTop =
     chatBox.scrollHeight;
+
 
 }
 
 
 
+
+
+
 function removeLoading(){
+
 
     const loading =
     document.getElementById(
@@ -97,14 +137,17 @@ function removeLoading(){
 
     }
 
+
 }
 
 
 
 
 
+
+
 // =====================================
-// SEND MESSAGE TO BACKEND
+// SEND MESSAGE
 // =====================================
 
 
@@ -124,10 +167,15 @@ async function sendMessage(){
 
 
 
+
     addMessage(
+
         message,
+
         "user"
+
     );
+
 
 
     userInput.value = "";
@@ -138,50 +186,29 @@ async function sendMessage(){
 
 
 
+
+
     try{
 
 
-        const response =
-        await fetch(
-            API_URL,
-            {
-
-                method:"POST",
-
-                headers:{
-                    "Content-Type":"application/json"
-                },
-
-                body:JSON.stringify({
-
-                    userId:"guest",
-
-                    message
-
-                })
-
-            }
-        );
+        let response;
 
 
 
-        const data =
-        await response.json();
+        if(
+
+            window.ChatTBM_AI &&
+
+            window.ChatTBM_AI.askChatTBM
+
+        ){
 
 
+            response =
 
-        removeLoading();
+            await window.ChatTBM_AI.askChatTBM(
 
-
-
-        if(data.success){
-
-
-            addMessage(
-
-                data.response,
-
-                "bot"
+                message
 
             );
 
@@ -191,11 +218,48 @@ async function sendMessage(){
         else{
 
 
-            addMessage(
+            response =
 
-                "Sorry, I could not process that request.",
+            "ChatTBM AI system is loading...";
 
-                "bot"
+        }
+
+
+
+
+
+        removeLoading();
+
+
+
+        addMessage(
+
+            response,
+
+            "bot"
+
+        );
+
+
+
+
+
+        // Save conversation memory later
+
+        if(
+
+            window.ChatTBMMemory &&
+
+            window.ChatTBMMemory.saveMemory
+
+        ){
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "conversation",
+
+                message
 
             );
 
@@ -206,7 +270,10 @@ async function sendMessage(){
 
     }
 
+
+
     catch(error){
+
 
 
         removeLoading();
@@ -214,14 +281,16 @@ async function sendMessage(){
 
 
         console.error(
+
             error
+
         );
 
 
 
         addMessage(
 
-            "ChatTBM connection error. Check your backend server.",
+            "ChatTBM had a problem processing that request.",
 
             "bot"
 
@@ -231,7 +300,58 @@ async function sendMessage(){
     }
 
 
+
 }
+
+
+
+
+
+
+
+
+
+// =====================================
+// VOICE INPUT
+// =====================================
+
+
+if(voiceBtn){
+
+
+    voiceBtn.addEventListener(
+
+        "click",
+
+        function(){
+
+
+            if(
+
+                window.ChatTBMVoice &&
+
+                window.ChatTBMVoice.startVoiceInput
+
+            ){
+
+
+                window.ChatTBMVoice.startVoiceInput();
+
+
+            }
+
+
+        }
+
+
+    );
+
+
+}
+
+
+
+
 
 
 
@@ -242,42 +362,59 @@ async function sendMessage(){
 // =====================================
 
 
-sendBtn.addEventListener(
-
-"click",
-
-sendMessage
-
-);
+if(sendBtn){
 
 
+    sendBtn.addEventListener(
 
+        "click",
 
+        sendMessage
 
-userInput.addEventListener(
-
-"keypress",
-
-function(event){
-
-
-    if(event.key === "Enter"){
-
-
-        sendMessage();
-
-
-    }
+    );
 
 
 }
 
-);
+
+
+
+
+if(userInput){
+
+
+    userInput.addEventListener(
+
+        "keypress",
+
+        function(event){
+
+
+            if(event.key === "Enter"){
+
+
+                sendMessage();
+
+
+            }
+
+
+        }
+
+
+    );
+
+
+}
+
+
 
 
 
 
 
 console.log(
-"🚀 ChatTBM V6.8.5 Frontend Bridge Loaded"
+
+"🚀 ChatTBM V7.2 Frontend AI Bridge Loaded"
+
 );
