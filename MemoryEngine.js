@@ -1,11 +1,13 @@
 // =====================================
-// ChatTBM V8.3
-// Stable Smart Memory Engine
+// ChatTBM V8.8
+// Smart Memory Intelligence Engine
 //
 // Upgrade:
-// - Safe memory extraction
-// - Error protection
+// - Memory ranking
 // - Better context handling
+// - User preference learning
+// - Safe storage
+// - Future backend ready
 // =====================================
 
 
@@ -39,13 +41,11 @@ function loadMemory(){
         );
 
 
-
         if(!data){
 
             return [];
 
         }
-
 
 
         return JSON.parse(data);
@@ -94,7 +94,6 @@ function saveMemory(
     importance="normal"
 
 ){
-
 
 
     try{
@@ -148,7 +147,6 @@ function saveMemory(
             importance,
 
 
-
             created:
 
             new Date().toISOString()
@@ -179,7 +177,6 @@ function saveMemory(
     }
 
 
-
     catch(error){
 
 
@@ -207,7 +204,7 @@ function saveMemory(
 
 
 // =====================================
-// GET MEMORY
+// GET ALL MEMORY
 // =====================================
 
 
@@ -231,7 +228,6 @@ function getMemories(){
 
 
 function searchMemory(query){
-
 
 
     const memories =
@@ -270,6 +266,49 @@ function searchMemory(query){
 
 
 // =====================================
+// MEMORY IMPORTANCE SCORE
+// =====================================
+
+
+function memoryScore(memory){
+
+
+    if(
+
+        memory.importance === "high"
+
+    ){
+
+        return 3;
+
+    }
+
+
+
+    if(
+
+        memory.importance === "medium"
+
+    ){
+
+        return 2;
+
+    }
+
+
+
+    return 1;
+
+
+}
+
+
+
+
+
+
+
+// =====================================
 // MEMORY LEARNING
 // =====================================
 
@@ -289,11 +328,18 @@ function analyzeMemory(message){
 
 
 
+
+
         if(
 
-            text.includes("my business is")
+            text.includes(
+
+                "my business is"
+
+            )
 
         ){
+
 
 
             const parts =
@@ -357,12 +403,14 @@ function analyzeMemory(message){
 
 
 
+
+
+
+
     }
 
 
-
     catch(error){
-
 
 
         console.error(
@@ -372,7 +420,6 @@ function analyzeMemory(message){
             error
 
         );
-
 
 
     }
@@ -387,7 +434,7 @@ function analyzeMemory(message){
 
 
 // =====================================
-// BUILD CONTEXT
+// BUILD AI CONTEXT
 // =====================================
 
 
@@ -409,11 +456,33 @@ function buildMemoryContext(){
 
     ){
 
-
         return "";
 
-
     }
+
+
+
+
+
+
+
+    const important =
+
+    memories
+
+    .sort(
+
+        (a,b)=>
+
+        memoryScore(b)
+
+        -
+
+        memoryScore(a)
+
+    )
+
+    .slice(0,10);
 
 
 
@@ -431,11 +500,7 @@ function buildMemoryContext(){
 
 
 
-    memories
-
-    .slice(-10)
-
-    .forEach(memory=>{
+    important.forEach(memory=>{
 
 
         context +=
@@ -517,6 +582,6 @@ window.ChatTBMMemory = {
 
 console.log(
 
-"🧠 ChatTBM V8.3 Stable Memory Engine Loaded"
+"🧠 ChatTBM V8.8 Smart Memory Engine Loaded"
 
 );
