@@ -371,7 +371,7 @@ function buildCreatorStrategy(context){
 window.ChatTBMCreatorIntelligence = {
 
 
-    analyzeCreatorContext,
+    analyzeCreatorContext(message, memoryContext)
 
     buildCreatorStrategy
 
