@@ -1,12 +1,12 @@
 // =====================================
-// ChatTBM V8.7
-// AI Core
+// ChatTBM V8.9
+// Personalized AI Core
 //
 // Upgrade:
-// - Memory context
-// - Context-aware routing
-// - Skill pipeline
-// - Better response handling
+// - Memory aware responses
+// - Context personalization
+// - Skill pipeline improvement
+// - Better response metadata
 // - Future AI engine ready
 // =====================================
 
@@ -15,13 +15,62 @@
 const ChatTBM_Core = {
 
 
-    version: "8.7",
+    version: "8.9",
 
 
     status: "ready"
 
 
 };
+
+
+
+
+
+
+
+// =====================================
+// BUILD PERSONAL CONTEXT
+// =====================================
+
+
+function personalizeResponse(
+
+    response,
+
+    memoryContext
+
+){
+
+
+    if(
+
+        !memoryContext
+
+    ){
+
+        return response;
+
+    }
+
+
+
+    return {
+
+
+        text: response,
+
+
+        memoryUsed: true,
+
+
+        context: memoryContext
+
+
+    };
+
+
+}
 
 
 
@@ -37,9 +86,10 @@ const ChatTBM_Core = {
 async function processMessage(message){
 
 
+
     console.log(
 
-        "🧠 ChatTBM Processing:",
+        "🧠 ChatTBM V8.9 Processing:",
 
         message
 
@@ -53,14 +103,10 @@ async function processMessage(message){
 
 
 
-
-
     let memoryContext = "";
 
 
-
     let response = null;
-
 
 
     let intent = "unknown";
@@ -72,11 +118,35 @@ async function processMessage(message){
 
 
     // =================================
-    // MEMORY CONTEXT
+    // MEMORY
     // =================================
 
 
     try{
+
+
+        if(
+
+            window.ChatTBMMemory &&
+
+            window.ChatTBMMemory.analyzeMemory
+
+        ){
+
+
+            window.ChatTBMMemory.analyzeMemory(
+
+                message
+
+            );
+
+
+        }
+
+
+
+
+
 
 
         if(
@@ -91,7 +161,6 @@ async function processMessage(message){
             memoryContext =
 
             window.ChatTBMMemory.buildMemoryContext();
-
 
 
         }
@@ -121,7 +190,7 @@ async function processMessage(message){
 
 
     // =================================
-    // SKILL ROUTING
+    // ROUTING
     // =================================
 
 
@@ -137,6 +206,15 @@ async function processMessage(message){
         ){
 
 
+            intent =
+
+            window.ChatTBMRouter.detectIntent(
+
+                message
+
+            );
+
+
 
             response =
 
@@ -147,17 +225,6 @@ async function processMessage(message){
                 memoryContext
 
             );
-
-
-
-            intent =
-
-            window.ChatTBMRouter.detectIntent(
-
-                message
-
-            );
-
 
 
         }
@@ -213,6 +280,11 @@ You asked:
 
 
 
+    // =================================
+    // FINAL RESPONSE PACKAGE
+    // =================================
+
+
     return {
 
 
@@ -222,10 +294,15 @@ You asked:
         intent,
 
 
+        response,
+
+
         memoryContext,
 
 
-        response,
+        personalized:
+
+        memoryContext.length > 0,
 
 
         userId,
@@ -290,7 +367,6 @@ window.ChatTBMCore = {
 
     processMessage,
 
-
     getCoreStatus
 
 
@@ -304,6 +380,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V8.7 AI Core Loaded"
+"🧠 ChatTBM V8.9 Personalized AI Core Loaded"
 
 );
