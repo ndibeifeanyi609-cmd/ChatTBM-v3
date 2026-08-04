@@ -1,129 +1,310 @@
 // =====================================
-// ChatTBM V7.1
+// ChatTBM V7.3
 // Skill Router
 //
 // Purpose:
-// - Receive AI Core decisions
-// - Route requests to skills
-// - Manage future AI abilities
+// - Detect user intent
+// - Select correct AI skill
+// - Connect skills together
 // =====================================
 
 
-// =====================================
-// SKILL REGISTRY
-// =====================================
 
-const SkillRouter = {
+const ChatTBM_SkillRouter = {
 
-    version: "7.1",
+    version: "7.3",
 
-    skills: {
 
-        general: "General Assistant",
-
-        coding: "Coding Assistant",
-
-        creator: "Creator Assistant",
-
-        writing: "Writing Assistant",
-
-        business: "Business Assistant",
-
-        education: "Learning Assistant"
-
-    }
+    skills: []
 
 };
 
 
+
+
+
 // =====================================
-// ROUTE REQUEST
+// REGISTER SKILL
 // =====================================
 
-function routeSkill(intent) {
+
+function registerSkill(skill){
 
 
-    switch(intent) {
+    ChatTBM_SkillRouter.skills.push(
+
+        skill
+
+    );
 
 
-        case "coding":
-
-            return SkillRouter.skills.coding;
+}
 
 
-        case "creator":
-
-            return SkillRouter.skills.creator;
 
 
-        case "business":
-
-            return SkillRouter.skills.business;
 
 
-        case "education":
 
-            return SkillRouter.skills.education;
-
-
-        case "writing":
-
-            return SkillRouter.skills.writing;
+// =====================================
+// DETECT INTENT
+// =====================================
 
 
-        default:
+function detectIntent(message){
 
-            return SkillRouter.skills.general;
+
+    const text =
+    message.toLowerCase();
+
+
+
+    if(
+
+        text.includes("code") ||
+
+        text.includes("javascript") ||
+
+        text.includes("python") ||
+
+        text.includes("html")
+
+    ){
+
+        return "coding";
 
     }
 
+
+
+
+    if(
+
+        text.includes("learn") ||
+
+        text.includes("study") ||
+
+        text.includes("explain")
+
+    ){
+
+        return "learning";
+
+    }
+
+
+
+
+    if(
+
+        text.includes("business") ||
+
+        text.includes("marketing") ||
+
+        text.includes("sell")
+
+    ){
+
+        return "business";
+
+    }
+
+
+
+
+    if(
+
+        text.includes("write") ||
+
+        text.includes("caption") ||
+
+        text.includes("story")
+
+    ){
+
+        return "writing";
+
+    }
+
+
+
+    return "general";
+
+
 }
 
 
+
+
+
+
+
 // =====================================
-// ADD FUTURE SKILL
+// ROUTE MESSAGE
 // =====================================
 
-function registerSkill(name, description) {
+
+function routeMessage(message){
 
 
-    SkillRouter.skills[name] = description;
+
+    const intent =
+
+    detectIntent(message);
+
+
+
 
 
     console.log(
-        "New skill added:",
-        name
+
+        "🎯 Intent:",
+
+        intent
+
     );
 
+
+
+
+
+    for(
+
+        let skill of
+
+        ChatTBM_SkillRouter.skills
+
+    ){
+
+
+
+        if(
+
+            skill.canHandle(intent)
+
+        ){
+
+
+
+            return skill.respond(
+
+                message
+
+            );
+
+
+        }
+
+
+    }
+
+
+
+
+
+
+    return null;
+
+
 }
 
 
+
+
+
+
+
 // =====================================
-// GET AVAILABLE SKILLS
+// GET ROUTER STATUS
 // =====================================
 
-function getSkills() {
 
-    return SkillRouter.skills;
+function getSkillStatus(){
+
+
+    return {
+
+
+        version:
+
+        ChatTBM_SkillRouter.version,
+
+
+        skills:
+
+        ChatTBM_SkillRouter.skills.map(
+
+            skill => skill.name
+
+        )
+
+
+    };
+
 
 }
+
+
+
+
+
 
 
 // =====================================
 // GLOBAL ACCESS
 // =====================================
 
-window.ChatTBMSkillRouter = {
 
-    routeSkill,
+window.ChatTBMRouter = {
+
 
     registerSkill,
 
-    getSkills
+
+    detectIntent,
+
+
+    routeMessage,
+
+
+    getSkillStatus
+
 
 };
 
 
+
+
+
+
+
+// =====================================
+// AUTO REGISTER GENERAL SKILL
+// =====================================
+
+
+if(
+
+    window.ChatTBMGeneralSkill
+
+){
+
+
+    registerSkill(
+
+        window.ChatTBMGeneralSkill
+
+    );
+
+
+}
+
+
+
+
+
 console.log(
-    "✅ ChatTBM Skill Router Loaded"
+
+"✅ ChatTBM V7.3 Skill Router Loaded"
+
 );
