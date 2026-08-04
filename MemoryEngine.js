@@ -1,18 +1,16 @@
 // =====================================
-// ChatTBM V8.2
-// Smart Memory Engine
+// ChatTBM V8.3
+// Stable Smart Memory Engine
 //
 // Upgrade:
-// - Better memory storage
-// - Duplicate protection
-// - Importance ranking
-// - AI context preparation
+// - Safe memory extraction
+// - Error protection
+// - Better context handling
 // =====================================
 
 
 
 const CHATTBM_MEMORY_KEY =
-
 "ChatTBM_Memory";
 
 
@@ -29,27 +27,49 @@ const CHATTBM_MEMORY_KEY =
 function loadMemory(){
 
 
-    const data =
-
-    localStorage.getItem(
-
-        CHATTBM_MEMORY_KEY
-
-    );
+    try{
 
 
+        const data =
 
-    if(!data){
+        localStorage.getItem(
+
+            CHATTBM_MEMORY_KEY
+
+        );
+
+
+
+        if(!data){
+
+            return [];
+
+        }
+
+
+
+        return JSON.parse(data);
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Memory Load Error:",
+
+            error
+
+        );
 
 
         return [];
 
 
     }
-
-
-
-    return JSON.parse(data);
 
 
 }
@@ -71,89 +91,111 @@ function saveMemory(
 
     value,
 
-    importance = "normal"
+    importance="normal"
 
 ){
 
 
-    const memories =
 
-    loadMemory();
-
+    try{
 
 
+        const memories =
 
-
-    const exists =
-
-    memories.some(
-
-        memory =>
-
-        memory.type === type &&
-
-        memory.value === value
-
-    );
+        loadMemory();
 
 
 
 
 
-    if(exists){
+        const exists =
+
+        memories.some(
+
+            memory =>
+
+            memory.type === type &&
+
+            memory.value === value
+
+        );
 
 
-        return false;
+
+
+
+        if(exists){
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        memories.push({
+
+
+            type,
+
+
+            value,
+
+
+            importance,
+
+
+
+            created:
+
+            new Date().toISOString()
+
+
+
+        });
+
+
+
+
+
+
+
+        localStorage.setItem(
+
+            CHATTBM_MEMORY_KEY,
+
+            JSON.stringify(memories)
+
+        );
+
+
+
+        return true;
 
 
     }
 
 
 
+    catch(error){
 
 
+        console.error(
+
+            "Memory Save Error:",
+
+            error
+
+        );
 
 
-    memories.push({
+        return false;
 
 
-        type,
-
-
-        value,
-
-
-        importance,
-
-
-
-        created:
-
-        new Date().toISOString()
-
-
-
-    });
-
-
-
-
-
-
-
-    localStorage.setItem(
-
-        CHATTBM_MEMORY_KEY,
-
-        JSON.stringify(memories)
-
-    );
-
-
-
-
-
-    return true;
+    }
 
 
 }
@@ -165,7 +207,7 @@ function saveMemory(
 
 
 // =====================================
-// GET ALL MEMORY
+// GET MEMORY
 // =====================================
 
 
@@ -189,6 +231,7 @@ function getMemories(){
 
 
 function searchMemory(query){
+
 
 
     const memories =
@@ -227,11 +270,129 @@ function searchMemory(query){
 
 
 // =====================================
-// BUILD AI CONTEXT
+// MEMORY LEARNING
+// =====================================
+
+
+function analyzeMemory(message){
+
+
+
+    try{
+
+
+        const text =
+
+        message.toLowerCase();
+
+
+
+
+
+        if(
+
+            text.includes("my business is")
+
+        ){
+
+
+            const parts =
+
+            message.split(
+
+                /my business is/i
+
+            );
+
+
+
+
+
+            if(parts[1]){
+
+
+                saveMemory(
+
+                    "business",
+
+                    parts[1].trim(),
+
+                    "high"
+
+                );
+
+
+            }
+
+
+        }
+
+
+
+
+
+
+
+        if(
+
+            text.startsWith("i am") ||
+
+            text.startsWith("i'm")
+
+        ){
+
+
+            saveMemory(
+
+                "user",
+
+                message,
+
+                "medium"
+
+            );
+
+
+        }
+
+
+
+    }
+
+
+
+    catch(error){
+
+
+
+        console.error(
+
+            "Memory Analysis Error:",
+
+            error
+
+        );
+
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// BUILD CONTEXT
 // =====================================
 
 
 function buildMemoryContext(){
+
 
 
     const memories =
@@ -279,7 +440,6 @@ function buildMemoryContext(){
 
         context +=
 
-
         `- ${memory.type}: ${memory.value}\n`;
 
 
@@ -293,99 +453,6 @@ function buildMemoryContext(){
 
 
     return context;
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// AUTO MEMORY EXTRACTION
-// =====================================
-
-
-function analyzeMemory(message){
-
-
-
-    const text =
-
-    message.toLowerCase();
-
-
-
-
-
-
-
-    if(
-
-        text.includes("my business is")
-
-    ){
-
-
-        const value =
-
-        message
-
-        .split(
-
-            "is"
-
-        )[1]
-
-        .trim();
-
-
-
-
-
-        saveMemory(
-
-            "business",
-
-            value,
-
-            "high"
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-    if(
-
-        text.includes("i am") ||
-
-        text.includes("i'm")
-
-    ){
-
-
-        saveMemory(
-
-            "user",
-
-            message,
-
-            "medium"
-
-        );
-
-
-    }
-
 
 
 }
@@ -429,18 +496,13 @@ window.ChatTBMMemory = {
 
     saveMemory,
 
-
     getMemories,
-
 
     searchMemory,
 
-
-    buildMemoryContext,
-
-
     analyzeMemory,
 
+    buildMemoryContext,
 
     clearMemory
 
@@ -455,6 +517,6 @@ window.ChatTBMMemory = {
 
 console.log(
 
-"🧠 ChatTBM V8.2 Smart Memory Engine Loaded"
+"🧠 ChatTBM V8.3 Stable Memory Engine Loaded"
 
 );
