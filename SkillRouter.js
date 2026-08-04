@@ -1,10 +1,11 @@
 // =====================================
-// ChatTBM V9.4
-// Creator Intelligence Skill Router
+// ChatTBM V9.7
+// Creator Profile Intelligence Skill Router
 //
 // Upgrade:
 // - Memory context support
 // - Creator intelligence bridge
+// - Creator profile bridge
 // - Existing skills compatibility
 // - Context-aware routing
 // - Safe fallback handling
@@ -15,7 +16,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "9.4",
+    version: "9.7",
 
 
     skills: []
@@ -241,7 +242,9 @@ function routeMessage(
 
     memoryContext = "",
 
-    creatorContext = null
+    creatorContext = null,
+
+    creatorProfile = null
 
 ){
 
@@ -269,6 +272,9 @@ function routeMessage(
         creatorContext,
 
 
+        creatorProfile,
+
+
         intent
 
 
@@ -292,11 +298,27 @@ function routeMessage(
 
 
 
+
+
     console.log(
 
         "🎬 Creator Context:",
 
         creatorContext
+
+    );
+
+
+
+
+
+
+
+    console.log(
+
+        "🎯 Creator Profile:",
+
+        creatorProfile
 
     );
 
@@ -326,7 +348,7 @@ function routeMessage(
 
 
 
-                // Context-based skills
+                // New context-based skills
 
 
                 if(
@@ -352,7 +374,7 @@ function routeMessage(
 
 
 
-                // Older skills
+                // Older skills compatibility
 
 
                 return skill.respond(
@@ -529,6 +551,6 @@ registerSkill(window.ChatTBMCreatorSkill);
 
 console.log(
 
-"🧠 ChatTBM V9.4 Creator Intelligence Router Loaded"
+"🧠 ChatTBM V9.7 Creator Profile Intelligence Router Loaded"
 
 );
