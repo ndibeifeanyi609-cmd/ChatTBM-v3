@@ -1,14 +1,15 @@
 // =====================================
-// ChatTBM V9.6
-// Creator Profile Intelligence Skill
+// ChatTBM V9.8
+// Creator Profile Learning Display Skill
 //
 // Upgrade:
 // - Memory personalization
 // - Creator intelligence context
-// - Creator profile awareness
+// - Creator profile display
 // - Fitness brand awareness
 // - Goal-based responses
 // - Strategy preparation
+// - Creator onboarding improvement
 // =====================================
 
 
@@ -19,7 +20,7 @@ const CreatorSkill = {
     name: "Creator Assistant",
 
 
-    version: "9.6",
+    version: "9.8",
 
 
 
@@ -81,29 +82,9 @@ const CreatorSkill = {
 
 
 
+        const profile =
 
-
-        let brandInfo = "";
-
-
-
-
-
-
-
-        if(memory){
-
-
-
-            brandInfo = `
-
-🧠 Memory Context:
-
-${memory}
-
-`;
-
-        }
+        context.creatorProfile || {};
 
 
 
@@ -133,13 +114,7 @@ ${memory}
 
                 profileInfo =
 
-                `
-
-🎯 Creator Profile:
-
-${window.ChatTBMCreatorProfile.getCreatorSummary()}
-
-`;
+                window.ChatTBMCreatorProfile.getCreatorSummary();
 
 
 
@@ -163,6 +138,32 @@ ${window.ChatTBMCreatorProfile.getCreatorSummary()}
 
         }
 
+
+
+
+
+
+
+        let memoryInfo = "";
+
+
+
+
+
+
+
+        if(memory){
+
+
+            memoryInfo = `
+
+🧠 Memory Understanding:
+
+${memory}
+
+`;
+
+        }
 
 
 
@@ -199,7 +200,7 @@ ${window.ChatTBMCreatorProfile.getCreatorSummary()}
 
             strategyInfo +=
 
-            "\n🎬 Content creation goal detected";
+            "\n🎬 Content creation detected";
 
 
         }
@@ -215,7 +216,7 @@ ${window.ChatTBMCreatorProfile.getCreatorSummary()}
 
             strategyInfo +=
 
-            "\n🎯 Audience growth focus detected";
+            "\n🎯 Audience growth detected";
 
 
         }
@@ -244,7 +245,36 @@ ${window.ChatTBMCreatorProfile.getCreatorSummary()}
 
 
 
-        // Instagram / Reels
+        let displayProfile = "";
+
+
+
+
+
+
+
+        if(profileInfo){
+
+
+            displayProfile = `
+
+🎯 Your Creator Profile:
+
+${profileInfo}
+
+`;
+
+        }
+
+
+
+
+
+
+
+        // =================================
+        // CREATOR CONTENT REQUEST
+        // =================================
 
 
         if(
@@ -263,37 +293,40 @@ ${window.ChatTBMCreatorProfile.getCreatorSummary()}
             return `🎬 Creator Assistant
 
 
-${profileInfo}
 
-
-${brandInfo}
+${displayProfile}
 
 
 ${strategyInfo}
 
 
 
-Based on your creator profile, I can help create:
+I understand your creator direction.
+
+
+I can help you create:
 
 
 • Instagram Reel ideas
+
+• Viral hooks
 
 • Video concepts
 
 • Content calendars
 
-• Viral hooks
-
 • Audience growth strategies
+
+• Monetization plans
 
 
 
 For your fitness brand:
 
 
-💪 Transformation journeys
+💪 Transformation stories
 
-🔥 Before and after stories
+🔥 Before and after content
 
 🏋️ Workout tutorials
 
@@ -311,10 +344,10 @@ Tell me:
 
 • Your fitness niche
 
-• Your content goal
+• Your growth goal
 
 
-and I will build a complete strategy.`;
+and I will build your strategy.`;
 
         }
 
@@ -326,7 +359,9 @@ and I will build a complete strategy.`;
 
 
 
-        // Audience
+        // =================================
+        // AUDIENCE REQUEST
+        // =================================
 
 
         if(
@@ -338,32 +373,29 @@ and I will build a complete strategy.`;
         ){
 
 
-
             return `🎯 Creator Audience Assistant
 
 
-${profileInfo}
 
-
-${brandInfo}
+${displayProfile}
 
 
 ${strategyInfo}
 
 
 
-I can help you understand:
+Based on your creator profile, I can help with:
 
 
-• Target audience
+• Finding your ideal audience
 
-• Customer interests
+• Increasing followers
 
-• Follower growth
+• Building community
 
-• Community building
+• Improving engagement
 
-• Content direction
+• Creating better content direction
 
 
 Tell me who you want to reach.`;
@@ -378,13 +410,19 @@ Tell me who you want to reach.`;
 
 
 
+        // =================================
+        // GENERAL CREATOR REQUEST
+        // =================================
+
+
         return `🎬 Creator Assistant
 
 
-${profileInfo}
+
+${displayProfile}
 
 
-${brandInfo}
+${memoryInfo}
 
 
 ${strategyInfo}
@@ -394,15 +432,16 @@ ${strategyInfo}
 I can help with:
 
 
-• Content ideas
+• Creator strategy
 
-• Social media strategy
+• Content planning
 
-• Creator planning
+• Brand growth
 
-• Audience growth
+• Audience building
 
-• Brand content
+• Fitness content systems
+
 
 
 Your request:
@@ -435,6 +474,6 @@ window.ChatTBMCreatorSkill = CreatorSkill;
 
 console.log(
 
-"🎬 ChatTBM V9.6 Creator Profile Intelligence Skill Loaded"
+"🎬 ChatTBM V9.8 Creator Profile Learning Display Skill Loaded"
 
 );
