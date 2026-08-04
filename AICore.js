@@ -1,11 +1,12 @@
 // =====================================
-// ChatTBM V9.1
+// ChatTBM V9.7
 // AI Core
 //
 // Upgrade:
 // - Memory context
 // - Creator intelligence
 // - Creator memory learning
+// - Creator profile loading
 // - Context-aware routing
 // - Personalized pipeline
 // - Skill compatibility
@@ -16,7 +17,7 @@
 const ChatTBM_Core = {
 
 
-    version: "9.1",
+    version: "9.7",
 
 
     status: "ready"
@@ -41,7 +42,7 @@ async function processMessage(message){
 
     console.log(
 
-        "🧠 ChatTBM V9.1 Processing:",
+        "🧠 ChatTBM V9.7 Processing:",
 
         message
 
@@ -59,6 +60,9 @@ async function processMessage(message){
 
 
     let creatorContext = null;
+
+
+    let creatorProfile = null;
 
 
     let response = null;
@@ -210,8 +214,6 @@ async function processMessage(message){
 
     // =================================
     // CREATOR MEMORY LEARNING
-    //
-    // V9.6 CONNECTION
     // =================================
 
 
@@ -268,6 +270,66 @@ async function processMessage(message){
 
 
     // =================================
+    // CREATOR PROFILE ENGINE
+    //
+    // V9.7 CONNECTION
+    // =================================
+
+
+    try{
+
+
+        if(
+
+            window.ChatTBMCreatorProfile &&
+
+            window.ChatTBMCreatorProfile.buildCreatorProfile
+
+        ){
+
+
+            creatorProfile =
+
+            window.ChatTBMCreatorProfile.buildCreatorProfile();
+
+
+
+            console.log(
+
+                "🎯 Creator Profile:",
+
+                creatorProfile
+
+            );
+
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Creator Profile Error:",
+
+            error
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    // =================================
     // SKILL ROUTER
     // =================================
 
@@ -305,7 +367,9 @@ async function processMessage(message){
 
                 memoryContext,
 
-                creatorContext
+                creatorContext,
+
+                creatorProfile
 
             );
 
@@ -378,6 +442,9 @@ You asked:
 
 
         creatorContext,
+
+
+        creatorProfile,
 
 
         userId,
@@ -456,6 +523,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V9.1 AI Core Creator Memory Bridge Loaded"
+"🧠 ChatTBM V9.7 AI Core Creator Profile Bridge Loaded"
 
 );
