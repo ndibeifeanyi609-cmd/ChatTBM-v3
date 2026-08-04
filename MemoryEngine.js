@@ -1,11 +1,13 @@
 // =====================================
-// ChatTBM V8.8
+// ChatTBM V9.6
 // Smart Memory Intelligence Engine
 //
 // Upgrade:
 // - Memory ranking
 // - Better context handling
 // - User preference learning
+// - Creator intelligence learning
+// - Creator profile memory
 // - Safe storage
 // - Future backend ready
 // =====================================
@@ -309,7 +311,7 @@ function memoryScore(memory){
 
 
 // =====================================
-// MEMORY LEARNING
+// BASIC MEMORY LEARNING
 // =====================================
 
 
@@ -416,6 +418,238 @@ function analyzeMemory(message){
         console.error(
 
             "Memory Analysis Error:",
+
+            error
+
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// CREATOR INTELLIGENCE MEMORY LEARNING
+//
+// V9.6 Upgrade:
+// - Learns creator identity
+// - Learns niche
+// - Learns platform
+// - Learns goals
+// - Learns strategy
+// =====================================
+
+
+function learnCreatorContext(
+
+    creatorContext
+
+){
+
+
+    try{
+
+
+        if(!creatorContext){
+
+            return;
+
+        }
+
+
+
+
+
+
+        if(
+
+            creatorContext.creator
+
+        ){
+
+
+            saveMemory(
+
+                "creator_identity",
+
+                "content creator",
+
+                "high"
+
+            );
+
+
+        }
+
+
+
+
+
+
+        if(
+
+            creatorContext.niche
+
+        ){
+
+
+            saveMemory(
+
+                "creator_niche",
+
+                creatorContext.niche,
+
+                "high"
+
+            );
+
+
+        }
+
+
+
+
+
+
+        if(
+
+            creatorContext.fitness
+
+        ){
+
+
+            saveMemory(
+
+                "creator_interest",
+
+                "fitness",
+
+                "high"
+
+            );
+
+
+        }
+
+
+
+
+
+
+        if(
+
+            creatorContext.business
+
+        ){
+
+
+            saveMemory(
+
+                "creator_business",
+
+                "brand and business growth",
+
+                "high"
+
+            );
+
+
+        }
+
+
+
+
+
+
+        if(
+
+            creatorContext.platform
+
+        ){
+
+
+            saveMemory(
+
+                "creator_platform",
+
+                creatorContext.platform,
+
+                "medium"
+
+            );
+
+
+        }
+
+
+
+
+
+
+        if(
+
+            creatorContext.goal
+
+        ){
+
+
+            saveMemory(
+
+                "creator_goal",
+
+                creatorContext.goal,
+
+                "high"
+
+            );
+
+
+        }
+
+
+
+
+
+
+        if(
+
+            creatorContext.strategy
+
+        ){
+
+
+            saveMemory(
+
+                "creator_strategy",
+
+                creatorContext.strategy,
+
+                "medium"
+
+            );
+
+
+        }
+
+
+
+    }
+
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Creator Learning Error:",
 
             error
 
@@ -567,6 +801,8 @@ window.ChatTBMMemory = {
 
     analyzeMemory,
 
+    learnCreatorContext,
+
     buildMemoryContext,
 
     clearMemory
@@ -582,6 +818,6 @@ window.ChatTBMMemory = {
 
 console.log(
 
-"🧠 ChatTBM V8.8 Smart Memory Engine Loaded"
+"🧠 ChatTBM V9.6 Creator Memory Intelligence Loaded"
 
 );
