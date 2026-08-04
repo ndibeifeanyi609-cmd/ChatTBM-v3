@@ -9,20 +9,22 @@
 
 
 <title>
-ChatTBM - AI Content Assistant
+ChatTBM - AI Assistant
 </title>
 
 
 <link rel="stylesheet" href="style.css">
 
 
-<link 
+<!-- ChatTBM Favicon -->
+<link
 rel="icon"
 type="image/png"
 href="IMG_4450.png">
 
 
-<link 
+<!-- PWA -->
+<link
 rel="manifest"
 href="manifest.json">
 
@@ -60,7 +62,7 @@ ChatTBM
 
 
 <p>
-Your AI Content Assistant
+Your Personal AI Assistant
 </p>
 
 
@@ -70,28 +72,7 @@ Your AI Content Assistant
 </div>
 
 
-
-
-
-<div class="auth-buttons">
-
-
-<button id="login-btn">
-Log In
-</button>
-
-
-<button id="signup-btn">
-Sign Up
-</button>
-
-
-</div>
-
-
 </header>
-
-
 
 
 
@@ -116,9 +97,9 @@ Welcome to ChatTBM
 
 
 <p>
-Your AI assistant for captions,
-scripts, viral ideas, adverts
-and creator growth.
+Your AI assistant for learning,
+creating, coding, research,
+problem solving and everyday tasks.
 </p>
 
 
@@ -136,7 +117,7 @@ and creator growth.
 
 
 
-<div 
+<div
 id="chat-box"
 class="chat-box">
 
@@ -146,18 +127,34 @@ class="chat-box">
 
 
 <p>
+
 Hello 👋 I am ChatTBM.
 
-I can help you create:
 <br><br>
 
-✍️ Captions
+I can help you with:
+
+<br><br>
+
+🧠 General questions
+
 <br>
-🎬 Scripts
+💻 Coding
+
 <br>
-🔥 Viral Ideas
+📚 Learning
+
 <br>
-📢 Marketing Content
+✍️ Writing
+
+<br>
+💼 Business
+
+<br>
+🔍 Research
+
+<br>
+💡 Ideas and problem solving
 
 </p>
 
@@ -175,58 +172,10 @@ I can help you create:
 
 
 
-<div class="creator-tools">
-
-
-<button class="tool-btn" data-tool="caption">
-✍️ Caption
-</button>
-
-
-
-<button class="tool-btn" data-tool="script">
-🎬 Script
-</button>
-
-
-
-<button class="tool-btn" data-tool="hashtags">
-#️⃣ Hashtags
-</button>
-
-
-
-<button class="tool-btn" data-tool="ideas">
-💡 Viral Ideas
-</button>
-
-
-
-<button class="tool-btn" data-tool="advert">
-📢 Advert
-</button>
-
-
-
-<button class="tool-btn" data-tool="calendar">
-📅 Calendar
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-
-
 <div class="input-area">
 
 
-<button 
+<button
 id="upload-btn"
 class="upload-btn">
 
@@ -250,7 +199,19 @@ placeholder="Ask ChatTBM anything...">
 
 
 
-<button id="send-btn">
+<button
+id="voice-btn">
+
+🎤
+
+</button>
+
+
+
+
+
+<button
+id="send-btn">
 
 Send
 
@@ -275,11 +236,15 @@ Send
 
 
 <p>
-ChatTBM AI Content Assistant
+ChatTBM AI Assistant
 </p>
 
 
 </footer>
+
+
+
+
 
 
 
@@ -293,11 +258,25 @@ ChatTBM AI Content Assistant
 
 
 
-<!-- Frontend Only -->
+<!-- ChatTBM Core Systems -->
+
+<script src="MemoryEngine.js"></script>
+
+<script src="SkillRouter.js"></script>
+
+<script src="AICore.js"></script>
+
+<script src="ai.js"></script>
 
 <script src="script.js"></script>
 
 
+
+
+
+
+
+<!-- Service Worker -->
 
 <script>
 
