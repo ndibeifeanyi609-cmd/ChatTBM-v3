@@ -1,12 +1,13 @@
 // =====================================
-// ChatTBM V9.7
-// AI Core
+// ChatTBM V9.8
+// AI Core Creator Profile Bridge
 //
 // Upgrade:
 // - Memory context
 // - Creator intelligence
 // - Creator memory learning
-// - Creator profile loading
+// - Creator profile extraction
+// - Creator profile passing
 // - Context-aware routing
 // - Personalized pipeline
 // - Skill compatibility
@@ -17,7 +18,7 @@
 const ChatTBM_Core = {
 
 
-    version: "9.7",
+    version: "9.8",
 
 
     status: "ready"
@@ -42,7 +43,7 @@ async function processMessage(message){
 
     console.log(
 
-        "🧠 ChatTBM V9.7 Processing:",
+        "🧠 ChatTBM V9.8 Processing:",
 
         message
 
@@ -69,6 +70,63 @@ async function processMessage(message){
 
 
     let intent = "unknown";
+
+
+
+
+
+
+
+    // =================================
+    // CREATOR PROFILE LEARNING
+    // =================================
+
+
+    try{
+
+
+        if(
+
+            window.ChatTBMCreatorProfile &&
+
+            window.ChatTBMCreatorProfile.extractCreatorInformation
+
+        ){
+
+
+            window.ChatTBMCreatorProfile.extractCreatorInformation(
+
+                message
+
+            );
+
+
+            console.log(
+
+                "🎯 Creator information extracted"
+
+            );
+
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Creator Extraction Error:",
+
+            error
+
+        );
+
+
+    }
 
 
 
@@ -149,6 +207,64 @@ async function processMessage(message){
 
 
     // =================================
+    // BUILD CREATOR PROFILE
+    // =================================
+
+
+    try{
+
+
+        if(
+
+            window.ChatTBMCreatorProfile &&
+
+            window.ChatTBMCreatorProfile.buildCreatorProfile
+
+        ){
+
+
+            creatorProfile =
+
+            window.ChatTBMCreatorProfile.buildCreatorProfile();
+
+
+
+            console.log(
+
+                "🎯 Creator Profile:",
+
+                creatorProfile
+
+            );
+
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Creator Profile Error:",
+
+            error
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    // =================================
     // CREATOR INTELLIGENCE
     // =================================
 
@@ -179,7 +295,7 @@ async function processMessage(message){
 
             console.log(
 
-                "🎯 Creator Context:",
+                "🎬 Creator Context:",
 
                 creatorContext
 
@@ -255,66 +371,6 @@ async function processMessage(message){
         console.error(
 
             "Creator Memory Learning Error:",
-
-            error
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-    // =================================
-    // CREATOR PROFILE ENGINE
-    //
-    // V9.7 CONNECTION
-    // =================================
-
-
-    try{
-
-
-        if(
-
-            window.ChatTBMCreatorProfile &&
-
-            window.ChatTBMCreatorProfile.buildCreatorProfile
-
-        ){
-
-
-            creatorProfile =
-
-            window.ChatTBMCreatorProfile.buildCreatorProfile();
-
-
-
-            console.log(
-
-                "🎯 Creator Profile:",
-
-                creatorProfile
-
-            );
-
-
-        }
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(
-
-            "Creator Profile Error:",
 
             error
 
@@ -523,6 +579,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V9.7 AI Core Creator Profile Bridge Loaded"
+"🧠 ChatTBM V9.8 AI Core Creator Profile Bridge Loaded"
 
 );
