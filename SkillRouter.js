@@ -1,5 +1,5 @@
 // =====================================
-// ChatTBM V7.5
+// ChatTBM V7.6
 // Skill Router
 //
 // Purpose:
@@ -13,7 +13,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "7.5",
+    version: "7.6",
 
 
     skills: []
@@ -137,15 +137,21 @@ function detectIntent(message){
 
     if(
 
-        text.includes("business") ||
+        text.includes("write") ||
 
-        text.includes("marketing") ||
+        text.includes("email") ||
 
-        text.includes("sales")
+        text.includes("rewrite") ||
+
+        text.includes("story") ||
+
+        text.includes("caption") ||
+
+        text.includes("post")
 
     ){
 
-        return "business";
+        return "writing";
 
     }
 
@@ -157,15 +163,15 @@ function detectIntent(message){
 
     if(
 
-        text.includes("write") ||
+        text.includes("business") ||
 
-        text.includes("story") ||
+        text.includes("marketing") ||
 
-        text.includes("caption")
+        text.includes("sales")
 
     ){
 
-        return "writing";
+        return "business";
 
     }
 
@@ -232,6 +238,7 @@ function routeMessage(message){
             skill.canHandle(intent)
 
         ){
+
 
 
             return skill.respond(
@@ -334,13 +341,9 @@ window.ChatTBMRouter = {
 
 if(window.ChatTBMGeneralSkill){
 
-
     registerSkill(
-
         window.ChatTBMGeneralSkill
-
     );
-
 
 }
 
@@ -348,13 +351,9 @@ if(window.ChatTBMGeneralSkill){
 
 if(window.ChatTBMLearningSkill){
 
-
     registerSkill(
-
         window.ChatTBMLearningSkill
-
     );
-
 
 }
 
@@ -362,13 +361,19 @@ if(window.ChatTBMLearningSkill){
 
 if(window.ChatTBMCodingSkill){
 
-
     registerSkill(
-
         window.ChatTBMCodingSkill
-
     );
 
+}
+
+
+
+if(window.ChatTBMWritingSkill){
+
+    registerSkill(
+        window.ChatTBMWritingSkill
+    );
 
 }
 
@@ -380,6 +385,6 @@ if(window.ChatTBMCodingSkill){
 
 console.log(
 
-"✅ ChatTBM V7.5 Skill Router Loaded"
+"✅ ChatTBM V7.6 Skill Router Loaded"
 
 );
