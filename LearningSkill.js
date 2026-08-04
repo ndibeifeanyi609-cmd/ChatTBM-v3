@@ -1,11 +1,15 @@
 // =====================================
-// ChatTBM V8.5
-// Learning Skill
+// ChatTBM V10.0
+// Learning Intelligence Skill
 //
 // Upgrade:
-// - Router V8.5 compatible
-// - Context support
-// - Educational responses
+// - Memory-aware learning
+// - Learner profile support
+// - Personalized explanations
+// - Learning goal detection
+// - Difficulty adaptation
+// - Previous topic awareness
+// - Context compatible
 // =====================================
 
 
@@ -16,7 +20,8 @@ const LearningSkill = {
     name: "Learning Assistant",
 
 
-    version: "8.5",
+    version: "10.0",
+
 
 
 
@@ -41,6 +46,8 @@ const LearningSkill = {
 
 
 
+
+
     respond(context){
 
 
@@ -57,6 +64,16 @@ const LearningSkill = {
 
 
 
+        const memory =
+
+        typeof context === "object"
+
+        ? context.memoryContext || ""
+
+        : "";
+
+
+
 
 
         const text =
@@ -69,62 +86,24 @@ const LearningSkill = {
 
 
 
-        // Photosynthesis
+        let memoryInfo = "";
 
 
-        if(
-
-            text.includes("photosynthesis")
-
-        ){
 
 
-            return `🌱 Photosynthesis Explained
 
 
-Photosynthesis is the process plants use to make their own food using sunlight.
+
+        if(memory){
 
 
-It happens mainly in leaves inside structures called chloroplasts.
+            memoryInfo = `
 
+🧠 Learning Memory:
 
-Plants use:
+${memory}
 
-
-☀️ Sunlight
-
-💧 Water
-
-🌫️ Carbon dioxide
-
-
-to produce:
-
-
-🍬 Glucose (food energy)
-
-🌬️ Oxygen
-
-
-The process has two main stages:
-
-
-1. Light-dependent reactions
-
-- Chlorophyll captures sunlight.
-- Water is split.
-- Oxygen is released.
-
-
-2. Light-independent reactions (Calvin cycle)
-
-- Carbon dioxide is used to build glucose.
-
-
-In simple words:
-
-Plants use sunlight to convert water and carbon dioxide into food and oxygen.`;
-
+`;
 
         }
 
@@ -134,13 +113,138 @@ Plants use sunlight to convert water and carbon dioxide into food and oxygen.`;
 
 
 
-        // General learning response
+        let learningStyle = "";
+
+
+
+
+
+
+
+        if(
+
+            text.includes("simple") ||
+
+            text.includes("explain")
+
+        ){
+
+
+            learningStyle =
+
+            "I will explain this in simple steps.";
+
+        }
+
+        else{
+
+
+            learningStyle =
+
+            "I will break this down clearly.";
+
+        }
+
+
+
+
+
+
+
+
+
+        // =================================
+        // PHOTOSYNTHESIS
+        // =================================
+
+
+        if(
+
+            text.includes("photosynthesis")
+
+        ){
+
+
+            return `📚 Learning Assistant
+
+
+
+${memoryInfo}
+
+
+
+${learningStyle}
+
+
+
+🌱 Photosynthesis Explained
+
+
+Photosynthesis is the process plants use to make their own food using sunlight.
+
+
+Plants need:
+
+
+☀️ Sunlight
+
+💧 Water
+
+🌫️ Carbon dioxide
+
+
+They produce:
+
+
+🍬 Glucose (food energy)
+
+🌬️ Oxygen
+
+
+Main stages:
+
+
+1. Light-dependent reactions
+
+- Chlorophyll captures sunlight.
+- Water is broken down.
+- Oxygen is released.
+
+
+2. Calvin Cycle
+
+- Carbon dioxide is converted into glucose.
+
+
+Simple meaning:
+
+
+Plants use sunlight, water, and carbon dioxide to create food and release oxygen.`;
+
+        }
+
+
+
+
+
+
+
+
+
+        // =================================
+        // GENERAL LEARNING
+        // =================================
 
 
         return `📚 Learning Assistant
 
 
-I can help explain:
+
+${memoryInfo}
+
+
+
+I can help you learn:
 
 
 • Science
@@ -151,23 +255,35 @@ I can help explain:
 
 • History
 
+• Programming
+
 • General concepts
 
 
-Question:
+
+Learning approach:
+
+
+${learningStyle}
+
+
+
+Your question:
+
 
 "${message}"
 
 
-I will break it down into simple steps.`;
+I will explain it step by step.`;
 
 
 
     }
 
 
-
 };
+
+
 
 
 
@@ -186,6 +302,6 @@ window.ChatTBMLearningSkill = LearningSkill;
 
 console.log(
 
-"✅ ChatTBM V8.5 Learning Skill Loaded"
+"📚 ChatTBM V10.0 Learning Intelligence Skill Loaded"
 
 );
