@@ -1,16 +1,23 @@
 // =====================================
-// ChatTBM V7.1
-// Frontend Memory Engine
+// ChatTBM V8.2
+// Smart Memory Engine
 //
-// Purpose:
-// - Store user memories locally
-// - Provide AI context
-// - Prepare future backend sync
+// Upgrade:
+// - Better memory storage
+// - Duplicate protection
+// - Importance ranking
+// - AI context preparation
 // =====================================
 
 
+
 const CHATTBM_MEMORY_KEY =
+
 "ChatTBM_Memory";
+
+
+
+
 
 
 
@@ -18,24 +25,36 @@ const CHATTBM_MEMORY_KEY =
 // LOAD MEMORY
 // =====================================
 
+
 function loadMemory(){
 
+
     const data =
+
     localStorage.getItem(
+
         CHATTBM_MEMORY_KEY
+
     );
+
 
 
     if(!data){
 
+
         return [];
+
 
     }
 
 
+
     return JSON.parse(data);
 
+
 }
+
+
 
 
 
@@ -45,25 +64,80 @@ function loadMemory(){
 // SAVE MEMORY
 // =====================================
 
+
 function saveMemory(
+
     type,
-    value
+
+    value,
+
+    importance = "normal"
+
 ){
 
+
     const memories =
+
     loadMemory();
+
+
+
+
+
+    const exists =
+
+    memories.some(
+
+        memory =>
+
+        memory.type === type &&
+
+        memory.value === value
+
+    );
+
+
+
+
+
+    if(exists){
+
+
+        return false;
+
+
+    }
+
+
+
+
+
 
 
     memories.push({
 
+
         type,
+
 
         value,
 
+
+        importance,
+
+
+
         created:
+
         new Date().toISOString()
 
+
+
     });
+
+
+
+
 
 
 
@@ -76,9 +150,15 @@ function saveMemory(
     );
 
 
+
+
+
     return true;
 
+
 }
+
+
 
 
 
@@ -88,11 +168,16 @@ function saveMemory(
 // GET ALL MEMORY
 // =====================================
 
+
 function getMemories(){
+
 
     return loadMemory();
 
+
 }
+
+
 
 
 
@@ -102,27 +187,40 @@ function getMemories(){
 // SEARCH MEMORY
 // =====================================
 
+
 function searchMemory(query){
 
 
     const memories =
+
     loadMemory();
+
+
+
 
 
     return memories.filter(
 
         memory =>
 
+
         memory.value
+
         .toLowerCase()
+
         .includes(
+
             query.toLowerCase()
+
         )
+
 
     );
 
 
 }
+
+
 
 
 
@@ -132,46 +230,167 @@ function searchMemory(query){
 // BUILD AI CONTEXT
 // =====================================
 
+
 function buildMemoryContext(){
 
 
     const memories =
+
     loadMemory();
 
 
 
+
+
     if(
+
         memories.length === 0
+
     ){
 
+
         return "";
+
 
     }
 
 
 
+
+
+
+
     let context =
+
     "Known user information:\n";
 
 
 
+
+
+
+
     memories
-    .slice(-5)
+
+    .slice(-10)
+
     .forEach(memory=>{
 
 
         context +=
 
+
         `- ${memory.type}: ${memory.value}\n`;
+
 
 
     });
 
 
 
+
+
+
+
     return context;
 
+
 }
+
+
+
+
+
+
+
+// =====================================
+// AUTO MEMORY EXTRACTION
+// =====================================
+
+
+function analyzeMemory(message){
+
+
+
+    const text =
+
+    message.toLowerCase();
+
+
+
+
+
+
+
+    if(
+
+        text.includes("my business is")
+
+    ){
+
+
+        const value =
+
+        message
+
+        .split(
+
+            "is"
+
+        )[1]
+
+        .trim();
+
+
+
+
+
+        saveMemory(
+
+            "business",
+
+            value,
+
+            "high"
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    if(
+
+        text.includes("i am") ||
+
+        text.includes("i'm")
+
+    ){
+
+
+        saveMemory(
+
+            "user",
+
+            message,
+
+            "medium"
+
+        );
+
+
+    }
+
+
+
+}
+
+
 
 
 
@@ -181,7 +400,9 @@ function buildMemoryContext(){
 // CLEAR MEMORY
 // =====================================
 
+
 function clearMemory(){
+
 
     localStorage.removeItem(
 
@@ -189,7 +410,10 @@ function clearMemory(){
 
     );
 
+
 }
+
+
 
 
 
@@ -199,23 +423,38 @@ function clearMemory(){
 // GLOBAL ACCESS
 // =====================================
 
+
 window.ChatTBMMemory = {
 
 
     saveMemory,
 
+
     getMemories,
+
 
     searchMemory,
 
+
     buildMemoryContext,
 
+
+    analyzeMemory,
+
+
     clearMemory
+
 
 };
 
 
 
+
+
+
+
 console.log(
-"✅ ChatTBM Frontend Memory Engine Loaded"
+
+"🧠 ChatTBM V8.2 Smart Memory Engine Loaded"
+
 );
