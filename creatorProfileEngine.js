@@ -1,9 +1,11 @@
 // =====================================
-// ChatTBM V9.7
-// Creator Profile Intelligence Engine
+// ChatTBM V9.9
+// Creator Profile Auto Learning Engine
 //
 // Upgrade:
 // - Builds creator identity
+// - Extracts creator information
+// - Converts conversations into profile data
 // - Combines creator memories
 // - Creates creator profile
 // - Uses MemoryEngine data
@@ -18,10 +20,263 @@ const CreatorProfileEngine = {
     name: "Creator Profile Intelligence",
 
 
-    version: "9.7"
+    version: "9.9"
 
 
 };
+
+
+
+
+
+
+
+// =====================================
+// EXTRACT CREATOR INFORMATION
+// =====================================
+
+
+function extractCreatorInformation(message){
+
+
+    try{
+
+
+        if(
+
+            !window.ChatTBMMemory ||
+
+            !window.ChatTBMMemory.saveMemory
+
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const text =
+
+        message.toLowerCase();
+
+
+
+
+
+
+
+        // Creator identity
+
+
+        if(
+
+            text.includes("i create") ||
+
+            text.includes("i am a creator") ||
+
+            text.includes("content creator")
+
+        ){
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "creator_identity",
+
+                "content creator",
+
+                "high"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        // Fitness niche
+
+
+        if(
+
+            text.includes("fitness") ||
+
+            text.includes("workout") ||
+
+            text.includes("gym")
+
+        ){
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "creator_niche",
+
+                "fitness",
+
+                "high"
+
+            );
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "creator_interest",
+
+                "fitness",
+
+                "high"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        // Platform
+
+
+        if(
+
+            text.includes("instagram")
+
+        ){
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "creator_platform",
+
+                "Instagram",
+
+                "medium"
+
+            );
+
+
+        }
+
+
+        else if(
+
+            text.includes("youtube")
+
+        ){
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "creator_platform",
+
+                "YouTube",
+
+                "medium"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        // Growth goal
+
+
+        if(
+
+            text.includes("grow") ||
+
+            text.includes("followers") ||
+
+            text.includes("reach")
+
+        ){
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "creator_goal",
+
+                "growth",
+
+                "high"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        // Monetization goal
+
+
+        if(
+
+            text.includes("sell") ||
+
+            text.includes("customers") ||
+
+            text.includes("money")
+
+        ){
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "creator_goal",
+
+                "monetization",
+
+                "high"
+
+            );
+
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Creator Extraction Error:",
+
+            error
+
+        );
+
+
+    }
+
+
+}
 
 
 
@@ -113,9 +368,7 @@ function buildCreatorProfile(){
                 case "creator_identity":
 
 
-                    profile.identity =
-
-                    memory.value;
+                    profile.identity = memory.value;
 
 
                     break;
@@ -127,9 +380,7 @@ function buildCreatorProfile(){
                 case "creator_niche":
 
 
-                    profile.niche =
-
-                    memory.value;
+                    profile.niche = memory.value;
 
 
                     break;
@@ -141,9 +392,7 @@ function buildCreatorProfile(){
                 case "creator_platform":
 
 
-                    profile.platform =
-
-                    memory.value;
+                    profile.platform = memory.value;
 
 
                     break;
@@ -155,9 +404,7 @@ function buildCreatorProfile(){
                 case "creator_goal":
 
 
-                    profile.goal =
-
-                    memory.value;
+                    profile.goal = memory.value;
 
 
                     break;
@@ -169,11 +416,7 @@ function buildCreatorProfile(){
                 case "creator_interest":
 
 
-                    profile.interests.push(
-
-                        memory.value
-
-                    );
+                    profile.interests.push(memory.value);
 
 
                     break;
@@ -185,9 +428,7 @@ function buildCreatorProfile(){
                 case "creator_strategy":
 
 
-                    profile.strategy =
-
-                    memory.value;
+                    profile.strategy = memory.value;
 
 
                     break;
@@ -278,8 +519,7 @@ function getCreatorSummary(){
 
 
 
-    if(profile.identity){
-
+    if(profile.identity)
 
         summary +=
 
@@ -290,16 +530,12 @@ function getCreatorSummary(){
         "\n";
 
 
-    }
 
 
 
 
 
-
-
-    if(profile.niche){
-
+    if(profile.niche)
 
         summary +=
 
@@ -310,16 +546,12 @@ function getCreatorSummary(){
         "\n";
 
 
-    }
 
 
 
 
 
-
-
-    if(profile.platform){
-
+    if(profile.platform)
 
         summary +=
 
@@ -330,16 +562,12 @@ function getCreatorSummary(){
         "\n";
 
 
-    }
 
 
 
 
 
-
-
-    if(profile.goal){
-
+    if(profile.goal)
 
         summary +=
 
@@ -350,16 +578,12 @@ function getCreatorSummary(){
         "\n";
 
 
-    }
 
 
 
 
 
-
-
-    if(profile.interests.length){
-
+    if(profile.interests.length)
 
         summary +=
 
@@ -368,29 +592,6 @@ function getCreatorSummary(){
         profile.interests.join(", ") +
 
         "\n";
-
-
-    }
-
-
-
-
-
-
-
-    if(profile.strategy){
-
-
-        summary +=
-
-        "- Strategy: " +
-
-        profile.strategy +
-
-        "\n";
-
-
-    }
 
 
 
@@ -417,8 +618,9 @@ function getCreatorSummary(){
 window.ChatTBMCreatorProfile = {
 
 
-    buildCreatorProfile,
+    extractCreatorInformation,
 
+    buildCreatorProfile,
 
     getCreatorSummary
 
@@ -433,6 +635,6 @@ window.ChatTBMCreatorProfile = {
 
 console.log(
 
-"🎯 ChatTBM V9.7 Creator Profile Intelligence Loaded"
+"🎯 ChatTBM V9.9 Creator Profile Auto Learning Engine Loaded"
 
 );
