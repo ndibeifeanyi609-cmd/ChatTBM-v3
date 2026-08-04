@@ -1,13 +1,11 @@
 // =====================================
-// ChatTBM V7.6
+// ChatTBM V8.5
 // Writing Skill
 //
-// Purpose:
+// Upgrade:
+// - Router V8.5 compatible
+// - Context support
 // - Writing assistance
-// - Text improvement
-// - Emails
-// - Posts
-// - Creative writing
 // =====================================
 
 
@@ -18,7 +16,7 @@ const WritingSkill = {
     name: "Writing Assistant",
 
 
-    version: "7.6",
+    version: "8.5",
 
 
 
@@ -43,7 +41,20 @@ const WritingSkill = {
 
 
 
-    respond(message){
+    respond(context){
+
+
+
+        const message =
+
+        typeof context === "string"
+
+        ? context
+
+        : context.message;
+
+
+
 
 
         const text =
@@ -189,6 +200,6 @@ window.ChatTBMWritingSkill = WritingSkill;
 
 console.log(
 
-"✅ ChatTBM Writing Skill Loaded"
+"✅ ChatTBM V8.5 Writing Skill Loaded"
 
 );
