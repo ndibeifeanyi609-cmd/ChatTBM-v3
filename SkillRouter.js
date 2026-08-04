@@ -1,12 +1,13 @@
 // =====================================
-// ChatTBM V9.1
-// Creator Ready Skill Router
+// ChatTBM V9.4
+// Creator Intelligence Skill Router
 //
 // Upgrade:
-// - Creator intent support
 // - Memory context support
-// - Existing skill compatibility
-// - Better routing priority
+// - Creator intelligence bridge
+// - Existing skills compatibility
+// - Context-aware routing
+// - Safe fallback handling
 // =====================================
 
 
@@ -14,10 +15,11 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "9.1",
+    version: "9.4",
 
 
     skills: []
+
 
 
 };
@@ -40,6 +42,7 @@ function registerSkill(skill){
 
 
         ChatTBM_SkillRouter.skills.push(skill);
+
 
 
         console.log(
@@ -70,7 +73,6 @@ function registerSkill(skill){
 function detectIntent(message){
 
 
-
     const text =
 
     message.toLowerCase();
@@ -79,9 +81,6 @@ function detectIntent(message){
 
 
 
-
-
-    // Coding
 
 
     if(
@@ -98,7 +97,9 @@ function detectIntent(message){
 
     ){
 
+
         return "coding";
+
 
     }
 
@@ -106,9 +107,6 @@ function detectIntent(message){
 
 
 
-
-
-    // Learning
 
 
     if(
@@ -127,40 +125,9 @@ function detectIntent(message){
 
     ){
 
+
         return "learning";
 
-    }
-
-
-
-
-
-
-
-    // Creator Intelligence
-
-
-    if(
-
-        text.includes("instagram") ||
-
-        text.includes("reels") ||
-
-        text.includes("content ideas") ||
-
-        text.includes("creator") ||
-
-        text.includes("followers") ||
-
-        text.includes("audience") ||
-
-        text.includes("video ideas") ||
-
-        text.includes("social media")
-
-    ){
-
-        return "creator";
 
     }
 
@@ -168,9 +135,6 @@ function detectIntent(message){
 
 
 
-
-
-    // Writing
 
 
     if(
@@ -185,7 +149,9 @@ function detectIntent(message){
 
     ){
 
+
         return "writing";
+
 
     }
 
@@ -195,7 +161,30 @@ function detectIntent(message){
 
 
 
-    // Business
+    if(
+
+        text.includes("instagram") ||
+
+        text.includes("reels") ||
+
+        text.includes("content") ||
+
+        text.includes("creator") ||
+
+        text.includes("video ideas")
+
+    ){
+
+
+        return "creator";
+
+
+    }
+
+
+
+
+
 
 
     if(
@@ -216,7 +205,9 @@ function detectIntent(message){
 
     ){
 
+
         return "business";
+
 
     }
 
@@ -237,6 +228,8 @@ function detectIntent(message){
 
 
 
+
+
 // =====================================
 // ROUTE MESSAGE
 // =====================================
@@ -246,7 +239,9 @@ function routeMessage(
 
     message,
 
-    memoryContext = ""
+    memoryContext = "",
+
+    creatorContext = null
 
 ){
 
@@ -255,6 +250,8 @@ function routeMessage(
     const intent =
 
     detectIntent(message);
+
+
 
 
 
@@ -269,10 +266,15 @@ function routeMessage(
         memoryContext,
 
 
+        creatorContext,
+
+
         intent
 
 
     };
+
+
 
 
 
@@ -283,6 +285,18 @@ function routeMessage(
         "🎯 Intent:",
 
         intent
+
+    );
+
+
+
+
+
+    console.log(
+
+        "🎬 Creator Context:",
+
+        creatorContext
 
     );
 
@@ -311,9 +325,39 @@ function routeMessage(
             try{
 
 
+
+                // Context-based skills
+
+
+                if(
+
+                    skill.respond.length === 1
+
+                ){
+
+
+
+                    return skill.respond(
+
+                        context
+
+                    );
+
+
+                }
+
+
+
+
+
+
+
+                // Older skills
+
+
                 return skill.respond(
 
-                    context
+                    message
 
                 );
 
@@ -322,7 +366,9 @@ function routeMessage(
             }
 
 
+
             catch(error){
+
 
 
                 console.error(
@@ -332,6 +378,7 @@ function routeMessage(
                     error
 
                 );
+
 
 
                 return null;
@@ -362,6 +409,8 @@ function routeMessage(
 
 
 
+
+
 // =====================================
 // STATUS
 // =====================================
@@ -376,6 +425,7 @@ function getSkillStatus(){
         version:
 
         ChatTBM_SkillRouter.version,
+
 
 
         skills:
@@ -398,8 +448,10 @@ function getSkillStatus(){
 
 
 
+
+
 // =====================================
-// GLOBAL
+// GLOBAL ACCESS
 // =====================================
 
 
@@ -408,9 +460,12 @@ window.ChatTBMRouter = {
 
     registerSkill,
 
+
     detectIntent,
 
+
     routeMessage,
+
 
     getSkillStatus
 
@@ -423,8 +478,10 @@ window.ChatTBMRouter = {
 
 
 
+
+
 // =====================================
-// AUTO REGISTER
+// AUTO REGISTER EXISTING SKILLS
 // =====================================
 
 
@@ -468,8 +525,10 @@ registerSkill(window.ChatTBMCreatorSkill);
 
 
 
+
+
 console.log(
 
-"🧠 ChatTBM V9.1 Creator Ready Router Loaded"
+"🧠 ChatTBM V9.4 Creator Intelligence Router Loaded"
 
 );
