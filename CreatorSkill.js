@@ -1,12 +1,12 @@
 // =====================================
-// ChatTBM V9.1
-// Creator Skill
+// ChatTBM V9.2
+// Memory Powered Creator Skill
 //
-// Purpose:
-// - Content ideas
-// - Social media strategy
-// - Creator planning
-// - Audience growth support
+// Upgrade:
+// - Memory personalization
+// - Brand-aware content ideas
+// - Creator strategy support
+// - Audience growth preparation
 // =====================================
 
 
@@ -17,7 +17,7 @@ const CreatorSkill = {
     name: "Creator Assistant",
 
 
-    version: "9.1",
+    version: "9.2",
 
 
 
@@ -58,6 +58,43 @@ const CreatorSkill = {
 
 
 
+        const memory =
+
+        context.memoryContext || "";
+
+
+
+
+
+
+
+        let brandInfo = "";
+
+
+
+
+
+
+
+        if(
+
+            memory
+
+        ){
+
+
+            brandInfo = `
+
+🧠 I remember your previous information:
+
+${memory}
+
+`;
+
+        }
+
+
+
 
 
 
@@ -81,6 +118,9 @@ const CreatorSkill = {
             return `🎬 Creator Assistant
 
 
+${brandInfo}
+
+
 I can help you create:
 
 • Instagram Reel ideas
@@ -90,20 +130,29 @@ I can help you create:
 • Audience growth strategies
 
 
-For your fitness brand, I can help plan:
-
-💪 Workout content
-
-🔥 Transformation stories
-
-🥗 Fitness tips
-
-🎯 Motivation videos
-
-📈 Growth strategies
+For your fitness brand, content ideas include:
 
 
-Tell me your target audience and content goal.`;
+💪 Workout transformation videos
+
+🔥 Before and after stories
+
+🥗 Nutrition tips
+
+🎯 Motivation clips
+
+🏋️ Exercise tutorials
+
+📈 Fitness challenges
+
+
+Tell me:
+
+• Your target audience
+• Your fitness niche
+• Your content goal
+
+and I will build a strategy.`;
 
         }
 
@@ -128,13 +177,21 @@ Tell me your target audience and content goal.`;
             return `🎯 Creator Audience Assistant
 
 
+${brandInfo}
+
+
 I can help you understand:
 
+
 • Target audience
+
 • Followers
+
 • Customer interests
-• Content direction
+
 • Community growth
+
+• Content direction
 
 
 Tell me who you want to reach.`;
@@ -150,12 +207,20 @@ Tell me who you want to reach.`;
         return `🎬 Creator Assistant
 
 
+${brandInfo}
+
+
 I can help with:
 
+
 • Content ideas
+
 • Social media strategy
+
 • Creator planning
+
 • Audience growth
+
 • Brand content
 
 
@@ -187,6 +252,6 @@ window.ChatTBMCreatorSkill = CreatorSkill;
 
 console.log(
 
-"🎬 ChatTBM V9.1 Creator Skill Loaded"
+"🎬 ChatTBM V9.2 Memory Powered Creator Skill Loaded"
 
 );
