@@ -1,12 +1,13 @@
 // =====================================
-// ChatTBM V8.3
+// ChatTBM V8.7
 // AI Core
 //
 // Upgrade:
-// - Memory learning
 // - Memory context
-// - Context-aware skill routing
-// - Better AI pipeline
+// - Context-aware routing
+// - Skill pipeline
+// - Better response handling
+// - Future AI engine ready
 // =====================================
 
 
@@ -14,7 +15,7 @@
 const ChatTBM_Core = {
 
 
-    version: "8.3",
+    version: "8.7",
 
 
     status: "ready"
@@ -38,7 +39,7 @@ async function processMessage(message){
 
     console.log(
 
-        "🧠 AI Core Processing:",
+        "🧠 ChatTBM Processing:",
 
         message
 
@@ -54,87 +55,7 @@ async function processMessage(message){
 
 
 
-
-
-    // =================================
-    // LEARN FROM MESSAGE
-    // =================================
-
-
-    if(
-
-        window.ChatTBMMemory &&
-
-        window.ChatTBMMemory.analyzeMemory
-
-    ){
-
-
-        window.ChatTBMMemory.analyzeMemory(
-
-            message
-
-        );
-
-
-        console.log(
-
-            "💾 Memory Updated"
-
-        );
-
-
-    }
-
-
-
-
-
-
-
     let memoryContext = "";
-
-
-
-
-
-
-
-    // =================================
-    // LOAD MEMORY CONTEXT
-    // =================================
-
-
-    if(
-
-        window.ChatTBMMemory &&
-
-        window.ChatTBMMemory.buildMemoryContext
-
-    ){
-
-
-
-        memoryContext =
-
-        window.ChatTBMMemory.buildMemoryContext();
-
-
-
-        console.log(
-
-            "🧠 Memory Context:",
-
-            memoryContext
-
-        );
-
-
-    }
-
-
-
-
 
 
 
@@ -142,42 +63,117 @@ async function processMessage(message){
 
 
 
+    let intent = "unknown";
+
+
+
 
 
 
 
     // =================================
-    // CONTEXT AWARE ROUTING
+    // MEMORY CONTEXT
     // =================================
 
 
-    if(
-
-        window.ChatTBMRouter &&
-
-        window.ChatTBMRouter.routeMessage
-
-    ){
+    try{
 
 
+        if(
 
-        response =
+            window.ChatTBMMemory &&
 
-        window.ChatTBMRouter.routeMessage(
+            window.ChatTBMMemory.buildMemoryContext
 
-            message,
+        ){
 
-            memoryContext
+
+            memoryContext =
+
+            window.ChatTBMMemory.buildMemoryContext();
+
+
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Memory Error:",
+
+            error
 
         );
 
 
+    }
 
-        console.log(
 
-            "🎯 Skill Response:",
 
-            response
+
+
+
+
+    // =================================
+    // SKILL ROUTING
+    // =================================
+
+
+    try{
+
+
+        if(
+
+            window.ChatTBMRouter &&
+
+            window.ChatTBMRouter.routeMessage
+
+        ){
+
+
+
+            response =
+
+            window.ChatTBMRouter.routeMessage(
+
+                message,
+
+                memoryContext
+
+            );
+
+
+
+            intent =
+
+            window.ChatTBMRouter.detectIntent(
+
+                message
+
+            );
+
+
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Router Error:",
+
+            error
 
         );
 
@@ -198,10 +194,15 @@ async function processMessage(message){
     if(!response){
 
 
-
         response =
 
-        "🤖 ChatTBM is ready to help.";
+        `🤖 ChatTBM is ready to help.
+
+
+You asked:
+
+"${message}"`;
+
 
 
     }
@@ -216,6 +217,9 @@ async function processMessage(message){
 
 
         message,
+
+
+        intent,
 
 
         memoryContext,
@@ -300,6 +304,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V8.3 Context AI Core Loaded"
+"🧠 ChatTBM V8.7 AI Core Loaded"
 
 );
