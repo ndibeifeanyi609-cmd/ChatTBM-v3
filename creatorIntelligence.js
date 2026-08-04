@@ -1,12 +1,13 @@
 // =====================================
-// ChatTBM V9.0
-// Creator Intelligence Engine
+// ChatTBM V9.3
+// Creator Strategy Intelligence Engine
 //
-// Purpose:
-// - Understand creator/business context
-// - Detect creator needs
-// - Prepare personalization
-// - Support future strategy engine
+// Upgrade:
+// - Creator context analysis
+// - Brand niche detection
+// - Goal understanding
+// - Strategy preparation
+// - Memory compatible
 // =====================================
 
 
@@ -17,7 +18,7 @@ const CreatorIntelligence = {
     name: "Creator Intelligence",
 
 
-    version: "9.0",
+    version: "9.3"
 
 
 
@@ -30,11 +31,11 @@ const CreatorIntelligence = {
 
 
 // =====================================
-// ANALYZE MESSAGE
+// ANALYZE CREATOR CONTEXT
 // =====================================
 
 
-function analyzeCreatorContext(message){
+function analyzeCreatorContext(message, memoryContext = ""){
 
 
 
@@ -46,7 +47,7 @@ function analyzeCreatorContext(message){
 
 
 
-    let context = {
+    const context = {
 
 
         creator: false,
@@ -55,13 +56,20 @@ function analyzeCreatorContext(message){
         business: false,
 
 
+        fitness: false,
+
+
         content: false,
 
 
         audience: false,
 
 
-        strategy: false
+        strategy: false,
+
+
+        goal: ""
+
 
 
     };
@@ -72,7 +80,7 @@ function analyzeCreatorContext(message){
 
 
 
-    // Business detection
+    // Business
 
 
     if(
@@ -99,7 +107,36 @@ function analyzeCreatorContext(message){
 
 
 
-    // Creator detection
+    // Fitness niche
+
+
+    if(
+
+        text.includes("fitness") ||
+
+        text.includes("workout") ||
+
+        text.includes("gym") ||
+
+        text.includes("exercise") ||
+
+        text.includes("health")
+
+    ){
+
+
+        context.fitness = true;
+
+
+    }
+
+
+
+
+
+
+
+    // Creator content
 
 
     if(
@@ -108,19 +145,18 @@ function analyzeCreatorContext(message){
 
         text.includes("video") ||
 
-        text.includes("creator") ||
-
         text.includes("instagram") ||
 
         text.includes("youtube") ||
 
-        text.includes("reels")
+        text.includes("reels") ||
+
+        text.includes("post")
 
     ){
 
 
         context.creator = true;
-
 
         context.content = true;
 
@@ -133,7 +169,7 @@ function analyzeCreatorContext(message){
 
 
 
-    // Audience detection
+    // Audience
 
 
     if(
@@ -142,7 +178,9 @@ function analyzeCreatorContext(message){
 
         text.includes("customer") ||
 
-        text.includes("followers")
+        text.includes("followers") ||
+
+        text.includes("clients")
 
     ){
 
@@ -158,7 +196,7 @@ function analyzeCreatorContext(message){
 
 
 
-    // Strategy detection
+    // Strategy
 
 
     if(
@@ -167,12 +205,63 @@ function analyzeCreatorContext(message){
 
         text.includes("strategy") ||
 
-        text.includes("growth")
+        text.includes("growth") ||
+
+        text.includes("marketing")
 
     ){
 
 
         context.strategy = true;
+
+
+    }
+
+
+
+
+
+
+
+    // Goal detection
+
+
+    if(
+
+        text.includes("ideas")
+
+    ){
+
+
+        context.goal = "content ideas";
+
+
+    }
+
+
+    else if(
+
+        text.includes("grow")
+
+    ){
+
+
+        context.goal = "growth";
+
+
+    }
+
+
+    else if(
+
+        text.includes("sell") ||
+
+        text.includes("sales")
+
+    ){
+
+
+        context.goal = "sales";
 
 
     }
@@ -195,6 +284,86 @@ function analyzeCreatorContext(message){
 
 
 // =====================================
+// CREATE STRATEGY SUMMARY
+// =====================================
+
+
+function buildCreatorStrategy(context){
+
+
+
+    let strategy = [];
+
+
+
+
+
+    if(context.fitness){
+
+
+        strategy.push(
+
+            "Fitness niche detected"
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    if(context.content){
+
+
+        strategy.push(
+
+            "Content creation focus detected"
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    if(context.audience){
+
+
+        strategy.push(
+
+            "Audience growth focus detected"
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    return strategy;
+
+
+}
+
+
+
+
+
+
+
+// =====================================
 // GLOBAL ACCESS
 // =====================================
 
@@ -202,7 +371,10 @@ function analyzeCreatorContext(message){
 window.ChatTBMCreatorIntelligence = {
 
 
-    analyzeCreatorContext
+    analyzeCreatorContext,
+
+    buildCreatorStrategy
+
 
 };
 
@@ -214,6 +386,6 @@ window.ChatTBMCreatorIntelligence = {
 
 console.log(
 
-"🎯 ChatTBM V9.0 Creator Intelligence Loaded"
+"🎯 ChatTBM V9.3 Creator Strategy Intelligence Loaded"
 
 );
