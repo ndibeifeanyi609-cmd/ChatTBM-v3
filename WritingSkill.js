@@ -1,23 +1,25 @@
 // =====================================
-// ChatTBM V8.5
-// Writing Skill
+// ChatTBM V10.0
+// Writing Intelligence Skill
 //
 // Upgrade:
-// - Router V8.5 compatible
-// - Context support
-// - Writing assistance
+// - Memory awareness
+// - Creator profile support
+// - Social media intelligence
+// - Caption generation
+// - Script writing
+// - Brand voice support
+// - Professional writing
 // =====================================
-
 
 
 const WritingSkill = {
 
 
-    name: "Writing Assistant",
+    name: "Writing Intelligence Assistant",
 
 
-    version: "8.5",
-
+    version: "10.0",
 
 
 
@@ -65,6 +67,220 @@ const WritingSkill = {
 
 
 
+        const memory =
+
+        context.memoryContext || "";
+
+
+
+
+
+        const creator =
+
+        context.creatorContext || {};
+
+
+
+
+
+
+
+
+        let creatorInfo = "";
+
+
+
+
+
+
+
+        if(creator.fitness){
+
+
+            creatorInfo +=
+
+            "\n💪 Fitness creator style detected";
+
+
+        }
+
+
+
+
+
+
+
+        if(creator.platform){
+
+
+            creatorInfo +=
+
+            `\n📱 Platform: ${creator.platform}`;
+
+
+        }
+
+
+
+
+
+
+
+        if(creator.goal){
+
+
+            creatorInfo +=
+
+            `\n🎯 Goal: ${creator.goal}`;
+
+
+        }
+
+
+
+
+
+
+
+        // =================================
+        // CAPTION WRITING
+        // =================================
+
+
+        if(
+
+            text.includes("caption") ||
+
+            text.includes("instagram") ||
+
+            text.includes("post")
+
+        ){
+
+
+            return `📱 Social Media Writing Assistant
+
+
+
+${creatorInfo}
+
+
+
+I can create:
+
+
+• Instagram captions
+
+• Viral hooks
+
+• Reel descriptions
+
+• Call-to-action lines
+
+• Hashtags
+
+• Engagement posts
+
+
+
+For fitness creators:
+
+
+💪 Transformation captions
+
+🔥 Motivation hooks
+
+🏋️ Workout descriptions
+
+🎯 Audience engagement posts
+
+
+
+Tell me:
+
+• Video topic
+
+• Your style
+
+• Your target audience`;
+
+        }
+
+
+
+
+
+
+
+
+
+        // =================================
+        // SCRIPT WRITING
+        // =================================
+
+
+        if(
+
+            text.includes("script") ||
+
+            text.includes("story")
+
+        ){
+
+
+            return `🎬 Script Writing Assistant
+
+
+
+${creatorInfo}
+
+
+
+I can help create:
+
+
+• Short video scripts
+
+• Reel scripts
+
+• Storytelling structures
+
+• Video hooks
+
+• Content outlines
+
+
+
+A strong script structure:
+
+
+1. Hook
+
+2. Problem
+
+3. Value
+
+4. Action step
+
+5. Call to action
+
+
+
+Tell me your video idea.`;
+
+        }
+
+
+
+
+
+
+
+
+
+        // =================================
+        // EMAIL
+        // =================================
 
 
         if(
@@ -74,53 +290,32 @@ const WritingSkill = {
         ){
 
 
-            return `✍️ Writing Assistant
+            return `✉️ Professional Writing Assistant
 
-
-I can help you create professional emails.
-
-
-I can assist with:
-
-• Business emails
-• Requests
-• Apologies
-• Follow-ups
-• Invitations
-
-
-Tell me who the email is for and the purpose.`;
-
-        }
-
-
-
-
-
-
-
-        if(
-
-            text.includes("caption") ||
-
-            text.includes("post")
-
-        ){
-
-
-            return `📱 Social Writing Assistant
 
 
 I can help create:
 
-• Social media captions
-• Posts
-• Hooks
-• Short descriptions
-• Creative ideas
+
+• Business emails
+
+• Client messages
+
+• Follow-ups
+
+• Proposals
+
+• Invitations
 
 
-Tell me your topic and style.`;
+
+Tell me:
+
+• Who is receiving it
+
+• The purpose
+
+• The tone you want`;
 
         }
 
@@ -128,6 +323,13 @@ Tell me your topic and style.`;
 
 
 
+
+
+
+
+        // =================================
+        // REWRITE
+        // =================================
 
 
         if(
@@ -141,15 +343,22 @@ Tell me your topic and style.`;
         ){
 
 
-            return `📝 Editing Assistant
+            return `📝 Editing Intelligence Assistant
 
 
-Send me your text and I can help:
+
+Send your text and I can:
+
 
 • Rewrite it
+
 • Improve clarity
+
 • Fix grammar
-• Make it more professional`;
+
+• Make it professional
+
+• Adapt the style`;
 
         }
 
@@ -159,20 +368,42 @@ Send me your text and I can help:
 
 
 
-        return `✍️ Writing Assistant
 
 
-I can help you with:
+        // =================================
+        // GENERAL
+        // =================================
 
-• Writing
-• Editing
+
+        return `✍️ Writing Intelligence Assistant
+
+
+
+${creatorInfo}
+
+
+
+I can help with:
+
+
+• Content writing
+
+• Captions
+
+• Scripts
+
 • Emails
+
 • Stories
-• Posts
+
 • Professional messages
+
+• Creative ideas
+
 
 
 Your request:
+
 
 "${message}"`;
 
@@ -182,6 +413,8 @@ Your request:
 
 
 };
+
+
 
 
 
@@ -200,6 +433,6 @@ window.ChatTBMWritingSkill = WritingSkill;
 
 console.log(
 
-"✅ ChatTBM V8.5 Writing Skill Loaded"
+"✍️ ChatTBM V10.0 Writing Intelligence Skill Loaded"
 
 );
