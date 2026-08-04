@@ -1,5 +1,5 @@
- // =====================================
-// ChatTBM V7.8
+// =====================================
+// ChatTBM V7.9
 // Skill Router
 //
 // Purpose:
@@ -13,7 +13,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "7.8",
+    version: "7.9",
 
 
     skills: []
@@ -202,6 +202,36 @@ function detectIntent(message){
     ){
 
         return "research";
+
+    }
+
+
+
+
+
+
+
+    if(
+
+        text.includes("problem") ||
+
+        text.includes("issue") ||
+
+        text.includes("fix") ||
+
+        text.includes("plan") ||
+
+        text.includes("strategy") ||
+
+        text.includes("goal") ||
+
+        text.includes("decision") ||
+
+        text.includes("choose")
+
+    ){
+
+        return "problem";
 
     }
 
@@ -429,12 +459,22 @@ if(window.ChatTBMResearchSkill){
 
 
 
+if(window.ChatTBMProblemSkill){
+
+    registerSkill(
+        window.ChatTBMProblemSkill
+    );
+
+}
+
+
+
 
 
 
 
 console.log(
 
-"✅ ChatTBM V7.8 Skill Router Loaded"
+"✅ ChatTBM V7.9 Skill Router Loaded"
 
 );
