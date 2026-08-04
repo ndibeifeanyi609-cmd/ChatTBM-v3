@@ -1,12 +1,14 @@
 // =====================================
-// ChatTBM V9.0
+// ChatTBM V9.1
 // AI Core
 //
 // Upgrade:
 // - Memory context
 // - Creator intelligence
+// - Creator memory learning
 // - Context-aware routing
 // - Personalized pipeline
+// - Skill compatibility
 // =====================================
 
 
@@ -14,7 +16,7 @@
 const ChatTBM_Core = {
 
 
-    version: "9.0",
+    version: "9.1",
 
 
     status: "ready"
@@ -39,7 +41,7 @@ async function processMessage(message){
 
     console.log(
 
-        "🧠 ChatTBM V9.0 Processing:",
+        "🧠 ChatTBM V9.1 Processing:",
 
         message
 
@@ -163,9 +165,12 @@ async function processMessage(message){
 
             window.ChatTBMCreatorIntelligence.analyzeCreatorContext(
 
-                message
+                message,
+
+                memoryContext
 
             );
+
 
 
             console.log(
@@ -189,6 +194,65 @@ async function processMessage(message){
         console.error(
 
             "Creator Intelligence Error:",
+
+            error
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    // =================================
+    // CREATOR MEMORY LEARNING
+    //
+    // V9.6 CONNECTION
+    // =================================
+
+
+    try{
+
+
+        if(
+
+            window.ChatTBMMemory &&
+
+            window.ChatTBMMemory.learnCreatorContext
+
+        ){
+
+
+            window.ChatTBMMemory.learnCreatorContext(
+
+                creatorContext
+
+            );
+
+
+            console.log(
+
+                "🧠 Creator Memory Updated"
+
+            );
+
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Creator Memory Learning Error:",
 
             error
 
@@ -231,13 +295,17 @@ async function processMessage(message){
 
 
 
+
+
             response =
 
             window.ChatTBMRouter.routeMessage(
 
                 message,
 
-                memoryContext
+                memoryContext,
+
+                creatorContext
 
             );
 
@@ -388,6 +456,6 @@ window.ChatTBMCore = {
 
 console.log(
 
-"🧠 ChatTBM V9.0 Creator Intelligence Core Loaded"
+"🧠 ChatTBM V9.1 AI Core Creator Memory Bridge Loaded"
 
 );
