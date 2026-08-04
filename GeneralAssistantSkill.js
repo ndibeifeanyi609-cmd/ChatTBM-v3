@@ -1,23 +1,29 @@
 // =====================================
-// ChatTBM V7.3
+// ChatTBM V8.5
 // General Assistant Skill
 //
-// Purpose:
-// - Handle general questions
-// - Provide basic assistant responses
-// - Act as fallback skill
+// Upgrade:
+// - Router V8.5 compatible
+// - Context support
+// - Fallback assistant
 // =====================================
 
 
 
 const GeneralAssistantSkill = {
 
+
     name: "General Assistant",
 
-    version: "7.3",
+
+    version: "8.5",
+
+
+
 
 
     canHandle(intent){
+
 
         return (
 
@@ -25,21 +31,43 @@ const GeneralAssistantSkill = {
 
         );
 
+
     },
 
 
 
 
 
-    respond(message){
+
+
+    respond(context){
+
+
+
+        const message =
+
+        typeof context === "string"
+
+        ? context
+
+        : context.message;
+
+
+
 
 
         const text =
+
         message.toLowerCase();
 
 
 
+
+
+
+
         // Greetings
+
 
         if(
 
@@ -51,11 +79,27 @@ const GeneralAssistantSkill = {
 
         ){
 
+
             return `👋 Hello!
+
 
 I'm ChatTBM, your personal AI assistant.
 
-I can help you with questions, learning, writing, coding, ideas, and problem solving.
+
+I can help you with:
+
+• Questions
+
+• Learning
+
+• Writing
+
+• Coding
+
+• Business ideas
+
+• Research
+
 
 How can I help you today?`;
 
@@ -65,7 +109,10 @@ How can I help you today?`;
 
 
 
+
+
         // Thanks
+
 
         if(
 
@@ -73,7 +120,9 @@ How can I help you today?`;
 
         ){
 
+
             return `You're welcome! 😊
+
 
 I'm here whenever you need help.`;
 
@@ -83,7 +132,10 @@ I'm here whenever you need help.`;
 
 
 
+
+
         // Default
+
 
         return `🤖 ChatTBM General Assistant
 
@@ -95,7 +147,8 @@ You asked:
 
 I'm ready to help you solve problems, learn new things, create ideas, and explore different topics.
 
-As my skills expand, I'll become capable of handling more advanced tasks.`;
+
+My skills will continue expanding as ChatTBM develops.`;
 
 
 
@@ -120,5 +173,7 @@ window.ChatTBMGeneralSkill = GeneralAssistantSkill;
 
 
 console.log(
-"✅ ChatTBM General Assistant Skill Loaded"
+
+"✅ ChatTBM V8.5 General Assistant Skill Loaded"
+
 );
