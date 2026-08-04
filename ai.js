@@ -1,367 +1,393 @@
 // =====================================
-// ChatTBM V7
+// ChatTBM V7.2
 // AI Gateway
 //
-// Supports:
-// - Demo AI
-// - Gemini (Future)
-// - Grok (Future)
-// - Additional Providers
+// Purpose:
+// - Connect frontend to AI Core
+// - Manage AI providers
+// - Prepare future models
 // =====================================
 
 
-// =====================================
-// AI CONFIGURATION
-// =====================================
 
 const ChatTBM_AI = {
 
+
     provider: "demo",
+
 
     connected: false,
 
-    model: "ChatTBM AI V7",
+
+    model: "ChatTBM AI V7.2",
+
 
     apiEndpoint: "",
 
+
     apiKey: ""
+
 
 };
 
 
+
+
+
 // =====================================
-// CHANGE PROVIDER
+// PROVIDER SETTINGS
 // =====================================
 
-function setAIProvider(provider) {
+
+function setAIProvider(provider){
+
 
     ChatTBM_AI.provider = provider;
 
+
 }
 
 
+
+
+
 // =====================================
-// CONNECT
+// CONNECT AI
 // =====================================
 
-async function connectAI() {
 
-    switch (ChatTBM_AI.provider) {
+async function connectAI(){
+
+
+    switch(ChatTBM_AI.provider){
+
 
         case "demo":
 
+
             ChatTBM_AI.connected = true;
+
 
             return true;
 
+
+
         case "gemini":
 
-            // Future Gemini connection
 
             ChatTBM_AI.connected = false;
 
+
             return false;
+
+
 
         case "grok":
 
-            // Future Grok connection
 
             ChatTBM_AI.connected = false;
 
+
             return false;
+
+
 
         default:
 
+
             ChatTBM_AI.connected = false;
+
 
             return false;
 
+
     }
+
 
 }
 
 
+
+
+
 // =====================================
-// MAIN AI
+// MAIN CHAT FUNCTION
 // =====================================
 
-async function askChatTBM(message) {
 
-    // Process message through AI Core first
-    let aiContext = null;
+async function askChatTBM(message){
 
-    if (
+
+
+    let context = null;
+
+
+
+    if(
+
         window.ChatTBMCore &&
+
         window.ChatTBMCore.processMessage
-    ) {
 
-        aiContext =
-            await window.ChatTBMCore.processMessage(message);
+    ){
 
-        console.log("🧠 AI Core:", aiContext);
+
+        context =
+
+        await window.ChatTBMCore.processMessage(
+
+            message
+
+        );
+
+
+        console.log(
+
+            "🧠 AI Core Context:",
+
+            context
+
+        );
+
 
     }
 
-    // Demo provider
-    if (ChatTBM_AI.provider === "demo") {
 
-        return demoAIResponse(message, aiContext);
+
+
+
+    if(
+
+        ChatTBM_AI.provider === "demo"
+
+    ){
+
+
+        return demoResponse(
+
+            message,
+
+            context
+
+        );
+
 
     }
 
-    return "AI provider is not connected yet.";
+
+
+    return "AI provider not connected.";
 
 }
 
+
+
+
+
+
+
 // =====================================
-// DEMO AI ENGINE
+// DEMO RESPONSE
 // =====================================
 
-function demoAIResponse(message, aiContext = null) {
 
-    const text =
-    message.toLowerCase();
+function demoResponse(
 
-    // =================================
-    // GREETINGS
-    // =================================
+message,
 
-    if (
+context
 
-        text === "hi" ||
-        text === "hello" ||
-        text === "hey"
+){
 
-    ) {
 
-        return `👋 Hello!
 
-Welcome to ChatTBM V7.
+    let skill =
 
-I'm your AI assistant.
+    context?.skill || "General Assistant";
 
-I can help with:
 
-• General questions
-• Writing
-• Programming
-• Business
-• Learning
-• Content creation
 
-How can I help you today?`;
 
-    }
 
-    // =================================
-    // CONTENT CREATION
-    // =================================
+    return `🤖 ChatTBM ${ChatTBM_AI.model}
 
-    if (
 
-        text.includes("caption") ||
-        text.includes("script") ||
-        text.includes("hashtag") ||
-        text.includes("content")
+Skill: ${skill}
 
-    ) {
 
-        return `🎬 Creator Studio
+I received your message:
 
-I can help you create:
+"${message}"
 
-✍️ Viral captions
 
-🎥 Video scripts
+This is the ChatTBM AI foundation.
 
-🔥 Hooks
+More advanced AI abilities will connect here.`;
 
-📱 Social media posts
 
-#️⃣ Hashtags
-
-Tell me your topic or niche and I'll generate ideas.`;
-
-    }
-
-    // =================================
-    // PROGRAMMING
-    // =================================
-
-    if (
-
-        text.includes("code") ||
-        text.includes("javascript") ||
-        text.includes("python") ||
-        text.includes("html") ||
-        text.includes("css")
-
-    ) {
-
-        return `💻 Coding Assistant
-
-I can help explain code, debug problems, and write examples.
-
-When an AI provider is connected, I'll be able to generate complete coding solutions.`;
-
-    }
-
-    // =================================
-    // BUSINESS
-    // =================================
-
-    if (
-
-        text.includes("business") ||
-        text.includes("marketing") ||
-        text.includes("sales")
-
-    ) {
-
-        return `💼 Business Assistant
-
-I can help with:
-
-• Marketing ideas
-• Business plans
-• Product descriptions
-• Sales copy
-• Branding
-
-Tell me what you're working on.`;
-
-    }
-
-    // =================================
-    // STUDY
-    // =================================
-
-    if (
-
-        text.includes("study") ||
-        text.includes("learn") ||
-        text.includes("school") ||
-        text.includes("exam")
-
-    ) {
-
-        return `📚 Learning Assistant
-
-I can explain concepts, help with revision, and answer questions across many subjects.`;
-
-    }
-
-    // =================================
-    // DEFAULT
-    // =================================
-
-    return `🤖 ChatTBM V7
-
-I'm currently running in Demo Mode.
-
-Once an AI provider is connected, I'll be able to answer a much wider range of questions and assist with many different tasks.
-
-You asked:
-
-"${message}"`;
 
 }
 
+
+
+
+
+
+
+
 // =====================================
-// PROVIDER STATUS
+// STATUS
 // =====================================
 
-function getAIStatus() {
+
+function getAIStatus(){
+
 
     return {
 
-        provider: ChatTBM_AI.provider,
 
-        connected: ChatTBM_AI.connected,
+        provider:
 
-        model: ChatTBM_AI.model
+        ChatTBM_AI.provider,
+
+
+        connected:
+
+        ChatTBM_AI.connected,
+
+
+        model:
+
+        ChatTBM_AI.model
+
 
     };
 
+
 }
 
 
+
+
+
+
+
 // =====================================
-// FUTURE FEATURES
+// FUTURE AI FEATURES
 // =====================================
 
-async function generateImage(prompt) {
+
+async function generateImage(prompt){
+
 
     return {
 
-        success: false,
+
+        success:false,
+
 
         message:
-        "Image generation is not available yet."
+        "Image generation coming soon."
+
 
     };
+
 
 }
 
 
-async function generateVideo(prompt) {
+
+
+
+
+async function generateVideo(prompt){
+
 
     return {
 
-        success: false,
+
+        success:false,
+
 
         message:
-        "Video generation is not available yet."
+        "Video generation coming soon."
+
 
     };
+
 
 }
 
 
+
+
+
+
+
 // =====================================
-// RESET AI
+// RESET
 // =====================================
 
-function resetAI() {
+
+function resetAI(){
+
 
     ChatTBM_AI.provider = "demo";
 
+
     ChatTBM_AI.connected = false;
 
-    ChatTBM_AI.model = "ChatTBM AI V7";
+
+    ChatTBM_AI.model =
+    "ChatTBM AI V7.2";
+
 
 }
+
+
+
+
+
+
 
 
 // =====================================
 // GLOBAL ACCESS
 // =====================================
 
+
 window.ChatTBM_AI = {
+
 
     askChatTBM,
 
+
     connectAI,
+
 
     setAIProvider,
 
+
     getAIStatus,
+
 
     generateImage,
 
+
     generateVideo
+
 
 };
 
 
-// =====================================
-// STARTUP
-// =====================================
+
+
+
 
 connectAI();
 
+
+
 console.log(
-
-    "✅ ChatTBM V7 AI Gateway Loaded"
-
+"✅ ChatTBM V7.2 AI Gateway Loaded"
 );
