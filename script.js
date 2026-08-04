@@ -1,13 +1,14 @@
 // =====================================
-// ChatTBM V7.2
+// ChatTBM V8.0
 // Frontend AI Assistant Bridge
 //
-// Connected:
+// Upgrade:
 // - Chat Interface
 // - AI Gateway
 // - AI Core
 // - Voice Engine
 // - Memory System
+// - Copy Response Button
 // =====================================
 
 
@@ -26,6 +27,8 @@ document.getElementById("send-btn");
 
 const voiceBtn =
 document.getElementById("voice-btn");
+
+
 
 
 
@@ -50,6 +53,8 @@ function addMessage(message, type){
 
 
 
+
+
     const p =
     document.createElement("p");
 
@@ -63,6 +68,78 @@ function addMessage(message, type){
     div.appendChild(p);
 
 
+
+
+
+
+
+    // COPY BUTTON FOR BOT MESSAGES
+
+
+    if(type === "bot"){
+
+
+        const copyBtn =
+        document.createElement("button");
+
+
+        copyBtn.textContent =
+        "📋 Copy";
+
+
+
+        copyBtn.className =
+        "copy-btn";
+
+
+
+        copyBtn.onclick = function(){
+
+
+
+            navigator.clipboard.writeText(
+
+                message
+
+            );
+
+
+
+            copyBtn.textContent =
+
+            "✅ Copied";
+
+
+
+            setTimeout(()=>{
+
+
+                copyBtn.textContent =
+
+                "📋 Copy";
+
+
+            },2000);
+
+
+
+        };
+
+
+
+
+
+        div.appendChild(copyBtn);
+
+
+    }
+
+
+
+
+
+
+
     chatBox.appendChild(div);
 
 
@@ -72,6 +149,8 @@ function addMessage(message, type){
 
 
 }
+
+
 
 
 
@@ -122,23 +201,31 @@ function showLoading(){
 
 
 
+
 function removeLoading(){
 
 
     const loading =
     document.getElementById(
+
         "loading-message"
+
     );
+
 
 
     if(loading){
 
+
         loading.remove();
+
 
     }
 
 
 }
+
+
 
 
 
@@ -168,6 +255,7 @@ async function sendMessage(){
 
 
 
+
     addMessage(
 
         message,
@@ -188,10 +276,14 @@ async function sendMessage(){
 
 
 
+
+
     try{
 
 
         let response;
+
+
 
 
 
@@ -202,6 +294,7 @@ async function sendMessage(){
             window.ChatTBM_AI.askChatTBM
 
         ){
+
 
 
             response =
@@ -215,6 +308,8 @@ async function sendMessage(){
 
         }
 
+
+
         else{
 
 
@@ -222,7 +317,10 @@ async function sendMessage(){
 
             "ChatTBM AI system is loading...";
 
+
         }
+
+
 
 
 
@@ -244,7 +342,8 @@ async function sendMessage(){
 
 
 
-        // Save conversation memory later
+
+
 
         if(
 
@@ -380,6 +479,8 @@ if(sendBtn){
 
 
 
+
+
 if(userInput){
 
 
@@ -415,6 +516,6 @@ if(userInput){
 
 console.log(
 
-"🚀 ChatTBM V7.2 Frontend AI Bridge Loaded"
+"🚀 ChatTBM V8.0 Frontend Bridge + Copy System Loaded"
 
 );
