@@ -117,7 +117,7 @@ async function askChatTBM(message) {
 // DEMO AI ENGINE
 // =====================================
 
-function demoAIResponse(message) {
+function demoAIResponse(message, aiContext = null) {
 
     const text =
     message.toLowerCase();
