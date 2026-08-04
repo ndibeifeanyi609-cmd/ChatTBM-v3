@@ -1,12 +1,11 @@
 // =====================================
-// ChatTBM V7.7
+// ChatTBM V8.5
 // Business Skill
 //
-// Purpose:
-// - Business ideas
-// - Marketing help
-// - Sales support
-// - Branding assistance
+// Upgrade:
+// - Router V8.5 compatible
+// - Context support
+// - Business assistance
 // =====================================
 
 
@@ -17,7 +16,7 @@ const BusinessSkill = {
     name: "Business Assistant",
 
 
-    version: "7.7",
+    version: "8.5",
 
 
 
@@ -42,7 +41,20 @@ const BusinessSkill = {
 
 
 
-    respond(message){
+    respond(context){
+
+
+
+        const message =
+
+        typeof context === "string"
+
+        ? context
+
+        : context.message;
+
+
+
 
 
         const text =
@@ -187,6 +199,6 @@ window.ChatTBMBusinessSkill = BusinessSkill;
 
 console.log(
 
-"✅ ChatTBM Business Skill Loaded"
+"✅ ChatTBM V8.5 Business Skill Loaded"
 
 );
