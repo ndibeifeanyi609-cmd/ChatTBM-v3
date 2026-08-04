@@ -229,3 +229,209 @@ function analyzeCreatorContext(
         context.platform = "Facebook";
 
     }
+
+    // ================================
+    // AUDIENCE DETECTION
+    // ================================
+
+
+    if(
+
+        text.includes("audience") ||
+
+        text.includes("followers") ||
+
+        text.includes("community") ||
+
+        text.includes("customers") ||
+
+        text.includes("clients")
+
+    ){
+
+        context.audience = true;
+
+    }
+
+
+
+
+
+    // ================================
+    // GOAL DETECTION
+    // ================================
+
+
+    if(
+
+        text.includes("grow") ||
+
+        text.includes("increase followers") ||
+
+        text.includes("viral") ||
+
+        text.includes("reach")
+
+    ){
+
+        context.goal = "growth";
+
+    }
+
+
+    else if(
+
+        text.includes("sell") ||
+
+        text.includes("sales") ||
+
+        text.includes("money") ||
+
+        text.includes("customers")
+
+    ){
+
+        context.goal = "monetization";
+
+    }
+
+
+    else if(
+
+        text.includes("learn") ||
+
+        text.includes("improve") ||
+
+        text.includes("better")
+
+    ){
+
+        context.goal = "improvement";
+
+    }
+
+
+
+
+
+    // ================================
+    // STRATEGY PREPARATION
+    // ================================
+
+
+    if(context.creator && context.fitness){
+
+        context.strategy =
+        "Fitness content strategy: reels, transformation stories, educational posts, audience engagement";
+
+    }
+
+
+    else if(context.business){
+
+        context.strategy =
+        "Brand growth strategy: positioning, marketing, customer acquisition";
+
+    }
+
+
+    else if(context.creator){
+
+        context.strategy =
+        "Creator growth strategy: consistent content, audience building, platform optimization";
+
+    }
+
+
+
+
+
+    // ================================
+    // NICHE FALLBACK
+    // ================================
+
+
+    if(context.niche === ""){
+
+
+        if(text.includes("tech")){
+
+            context.niche = "technology";
+
+        }
+
+        else if(text.includes("fashion")){
+
+            context.niche = "fashion";
+
+        }
+
+        else if(text.includes("food")){
+
+            context.niche = "food";
+
+        }
+
+        else if(text.includes("gaming")){
+
+            context.niche = "gaming";
+
+        }
+
+    }
+
+
+
+
+
+    // ================================
+    // CONFIDENCE SCORE
+    // ================================
+
+
+    let score = 0;
+
+
+    if(context.creator) score += 20;
+
+    if(context.business) score += 20;
+
+    if(context.fitness) score += 20;
+
+    if(context.audience) score += 15;
+
+    if(context.strategy) score += 25;
+
+
+
+    context.confidence = score;
+
+
+
+
+
+    return context;
+
+
+}
+
+
+
+
+
+// =====================================
+// EXPORT
+// =====================================
+
+
+if(typeof module !== "undefined"){
+
+    module.exports = {
+
+        CreatorIntelligence,
+
+        analyzeCreatorContext
+
+    };
+
+}
