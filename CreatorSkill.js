@@ -1,10 +1,11 @@
 // =====================================
-// ChatTBM V9.5
-// Creator Intelligence Powered Skill
+// ChatTBM V9.6
+// Creator Profile Intelligence Skill
 //
 // Upgrade:
 // - Memory personalization
 // - Creator intelligence context
+// - Creator profile awareness
 // - Fitness brand awareness
 // - Goal-based responses
 // - Strategy preparation
@@ -18,7 +19,7 @@ const CreatorSkill = {
     name: "Creator Assistant",
 
 
-    version: "9.5",
+    version: "9.6",
 
 
 
@@ -96,11 +97,69 @@ const CreatorSkill = {
 
             brandInfo = `
 
-🧠 I remember your previous information:
+🧠 Memory Context:
 
 ${memory}
 
 `;
+
+        }
+
+
+
+
+
+
+
+        let profileInfo = "";
+
+
+
+
+
+
+
+        try{
+
+
+            if(
+
+                window.ChatTBMCreatorProfile &&
+
+                window.ChatTBMCreatorProfile.getCreatorSummary
+
+            ){
+
+
+                profileInfo =
+
+                `
+
+🎯 Creator Profile:
+
+${window.ChatTBMCreatorProfile.getCreatorSummary()}
+
+`;
+
+
+
+            }
+
+
+        }
+
+
+        catch(error){
+
+
+            console.error(
+
+                "Creator Profile Error:",
+
+                error
+
+            );
+
 
         }
 
@@ -204,6 +263,9 @@ ${memory}
             return `🎬 Creator Assistant
 
 
+${profileInfo}
+
+
 ${brandInfo}
 
 
@@ -211,7 +273,7 @@ ${strategyInfo}
 
 
 
-Based on your creator goals, I can help create:
+Based on your creator profile, I can help create:
 
 
 • Instagram Reel ideas
@@ -280,6 +342,9 @@ and I will build a complete strategy.`;
             return `🎯 Creator Audience Assistant
 
 
+${profileInfo}
+
+
 ${brandInfo}
 
 
@@ -314,6 +379,9 @@ Tell me who you want to reach.`;
 
 
         return `🎬 Creator Assistant
+
+
+${profileInfo}
 
 
 ${brandInfo}
@@ -367,6 +435,6 @@ window.ChatTBMCreatorSkill = CreatorSkill;
 
 console.log(
 
-"🎬 ChatTBM V9.5 Creator Intelligence Powered Skill Loaded"
+"🎬 ChatTBM V9.6 Creator Profile Intelligence Skill Loaded"
 
 );
