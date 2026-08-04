@@ -87,13 +87,25 @@ async function connectAI() {
 
 async function askChatTBM(message) {
 
+    // Process message through AI Core first
+    let aiContext = null;
+
     if (
-
-        ChatTBM_AI.provider === "demo"
-
+        window.ChatTBMCore &&
+        window.ChatTBMCore.processMessage
     ) {
 
-        return demoAIResponse(message);
+        aiContext =
+            await window.ChatTBMCore.processMessage(message);
+
+        console.log("🧠 AI Core:", aiContext);
+
+    }
+
+    // Demo provider
+    if (ChatTBM_AI.provider === "demo") {
+
+        return demoAIResponse(message, aiContext);
 
     }
 
