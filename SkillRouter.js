@@ -1,11 +1,11 @@
 // =====================================
-// ChatTBM V8.4
-// Compatible Skill Router
+// ChatTBM V8.5
+// Clean Skill Router
 //
 // Upgrade:
+// - Existing skills only
 // - Memory context support
-// - Old skill compatibility
-// - New context skills support
+// - Compatible responses
 // =====================================
 
 
@@ -13,7 +13,7 @@
 const ChatTBM_SkillRouter = {
 
 
-    version: "8.4",
+    version: "8.5",
 
 
     skills: []
@@ -69,9 +69,12 @@ function registerSkill(skill){
 function detectIntent(message){
 
 
+
     const text =
 
     message.toLowerCase();
+
+
 
 
 
@@ -108,6 +111,10 @@ function detectIntent(message){
         text.includes("learn") ||
 
         text.includes("study") ||
+
+        text.includes("school") ||
+
+        text.includes("exam") ||
 
         text.includes("photosynthesis")
 
@@ -167,39 +174,19 @@ function detectIntent(message){
 
     if(
 
-        text.includes("plan") ||
-
-        text.includes("strategy") ||
-
-        text.includes("goal") ||
-
-        text.includes("problem") ||
-
-        text.includes("solve") ||
-
-        text.includes("how do i")
-
-    ){
-
-        return "problem";
-
-    }
-
-
-
-
-
-
-
-    if(
-
         text.includes("business") ||
 
         text.includes("marketing") ||
 
         text.includes("sales") ||
 
-        text.includes("brand")
+        text.includes("brand") ||
+
+        text.includes("plan") ||
+
+        text.includes("strategy") ||
+
+        text.includes("goal")
 
     ){
 
@@ -299,46 +286,17 @@ function routeMessage(
 
 
 
-                // New context skills
-
-
-                if(
-
-                    skill.respond.length === 1
-
-                ){
-
-
-
-                    return skill.respond(
-
-                        context
-
-                    );
-
-
-                }
-
-
-
-
-
-
-
-                // Old message skills
-
-
                 return skill.respond(
 
-                    message
+                    context
 
                 );
 
 
 
-
-
             }
+
+
 
             catch(error){
 
@@ -346,7 +304,7 @@ function routeMessage(
 
                 console.error(
 
-                    "Skill Error:",
+                    "❌ Skill Error:",
 
                     error
 
@@ -419,7 +377,7 @@ function getSkillStatus(){
 
 
 // =====================================
-// GLOBAL
+// GLOBAL ACCESS
 // =====================================
 
 
@@ -444,7 +402,7 @@ window.ChatTBMRouter = {
 
 
 // =====================================
-// AUTO REGISTER
+// AUTO REGISTER EXISTING SKILLS
 // =====================================
 
 
@@ -472,21 +430,15 @@ registerSkill(window.ChatTBMWritingSkill);
 
 
 
-if(window.ChatTBMBusinessSkill)
-
-registerSkill(window.ChatTBMBusinessSkill);
-
-
-
 if(window.ChatTBMResearchSkill)
 
 registerSkill(window.ChatTBMResearchSkill);
 
 
 
-if(window.ChatTBMProblemSkill)
+if(window.ChatTBMBusinessSkill)
 
-registerSkill(window.ChatTBMProblemSkill);
+registerSkill(window.ChatTBMBusinessSkill);
 
 
 
@@ -496,6 +448,6 @@ registerSkill(window.ChatTBMProblemSkill);
 
 console.log(
 
-"🧠 ChatTBM V8.4 Compatible Router Loaded"
+"🧠 ChatTBM V8.5 Clean Skill Router Loaded"
 
 );
