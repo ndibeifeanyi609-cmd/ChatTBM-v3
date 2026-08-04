@@ -1,11 +1,12 @@
 // =====================================
-// ChatTBM V7.2
+// ChatTBM V7.4
 // AI Gateway
 //
-// Purpose:
-// - Connect frontend to AI Core
-// - Manage AI providers
-// - Prepare future models
+// Connected:
+// - Frontend
+// - AI Core
+// - Skill Router
+// - AI Providers (Future)
 // =====================================
 
 
@@ -19,7 +20,7 @@ const ChatTBM_AI = {
     connected: false,
 
 
-    model: "ChatTBM AI V7.2",
+    model: "ChatTBM AI V7.4",
 
 
     apiEndpoint: "",
@@ -34,8 +35,10 @@ const ChatTBM_AI = {
 
 
 
+
+
 // =====================================
-// PROVIDER SETTINGS
+// CHANGE PROVIDER
 // =====================================
 
 
@@ -51,6 +54,8 @@ function setAIProvider(provider){
 
 
 
+
+
 // =====================================
 // CONNECT AI
 // =====================================
@@ -59,52 +64,32 @@ function setAIProvider(provider){
 async function connectAI(){
 
 
-    switch(ChatTBM_AI.provider){
+    if(
+
+        ChatTBM_AI.provider === "demo"
+
+    ){
 
 
-        case "demo":
+        ChatTBM_AI.connected = true;
 
 
-            ChatTBM_AI.connected = true;
-
-
-            return true;
-
-
-
-        case "gemini":
-
-
-            ChatTBM_AI.connected = false;
-
-
-            return false;
-
-
-
-        case "grok":
-
-
-            ChatTBM_AI.connected = false;
-
-
-            return false;
-
-
-
-        default:
-
-
-            ChatTBM_AI.connected = false;
-
-
-            return false;
+        return true;
 
 
     }
 
 
+
+    ChatTBM_AI.connected = false;
+
+
+    return false;
+
+
 }
+
+
 
 
 
@@ -119,8 +104,7 @@ async function askChatTBM(message){
 
 
 
-    let context = null;
-
+    // Send message to AI Core
 
 
     if(
@@ -132,7 +116,8 @@ async function askChatTBM(message){
     ){
 
 
-        context =
+
+        const result =
 
         await window.ChatTBMCore.processMessage(
 
@@ -141,13 +126,36 @@ async function askChatTBM(message){
         );
 
 
+
+
+
         console.log(
 
-            "🧠 AI Core Context:",
+            "🧠 Core Result:",
 
-            context
+            result
 
         );
+
+
+
+
+
+        // Return skill response if available
+
+
+        if(
+
+            result.response
+
+        ){
+
+
+            return result.response;
+
+
+        }
+
 
 
     }
@@ -156,27 +164,9 @@ async function askChatTBM(message){
 
 
 
-    if(
 
-        ChatTBM_AI.provider === "demo"
+    return defaultResponse(message);
 
-    ){
-
-
-        return demoResponse(
-
-            message,
-
-            context
-
-        );
-
-
-    }
-
-
-
-    return "AI provider not connected.";
 
 }
 
@@ -187,47 +177,24 @@ async function askChatTBM(message){
 
 
 // =====================================
-// DEMO RESPONSE
+// FALLBACK RESPONSE
 // =====================================
 
 
-function demoResponse(
-
-message,
-
-context
-
-){
-
-
-
-    let skill =
-
-    context?.skill || "General Assistant";
-
-
-
+function defaultResponse(message){
 
 
     return `🤖 ChatTBM ${ChatTBM_AI.model}
 
 
-Skill: ${skill}
-
-
-I received your message:
+I received:
 
 "${message}"
 
 
-This is the ChatTBM AI foundation.
-
-More advanced AI abilities will connect here.`;
-
-
+I am ready to help you.`;
 
 }
-
 
 
 
@@ -273,7 +240,7 @@ function getAIStatus(){
 
 
 // =====================================
-// FUTURE AI FEATURES
+// FUTURE FEATURES
 // =====================================
 
 
@@ -286,14 +253,14 @@ async function generateImage(prompt){
         success:false,
 
 
-        message:
-        "Image generation coming soon."
+        message:"Image generation coming soon."
 
 
     };
 
 
 }
+
 
 
 
@@ -309,8 +276,7 @@ async function generateVideo(prompt){
         success:false,
 
 
-        message:
-        "Video generation coming soon."
+        message:"Video generation coming soon."
 
 
     };
@@ -338,12 +304,7 @@ function resetAI(){
     ChatTBM_AI.connected = false;
 
 
-    ChatTBM_AI.model =
-    "ChatTBM AI V7.2";
-
-
 }
-
 
 
 
@@ -384,10 +345,13 @@ window.ChatTBM_AI = {
 
 
 
+
 connectAI();
 
 
 
 console.log(
-"✅ ChatTBM V7.2 AI Gateway Loaded"
+
+"✅ ChatTBM V7.4 AI Gateway Loaded"
+
 );
