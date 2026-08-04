@@ -1,187 +1,192 @@
 // =====================================
-// ChatTBM V7.1
-// AI Core Engine
+// ChatTBM V7.3
+// AI Core
 //
 // Purpose:
-// - Understand user requests
-// - Detect intent
-// - Route requests
-// - Prepare context
-// - Return unified response
+// - Process user messages
+// - Connect memory
+// - Connect skill router
+// - Prepare advanced reasoning
 // =====================================
 
 
-// =====================================
-// AI CORE
-// =====================================
 
-const AICore = {
+const ChatTBM_Core = {
 
-    version: "7.1",
 
-    initialized: false,
+    version: "7.3",
 
-    modules: {
 
-        memory: false,
+    status: "ready"
 
-        intent: false,
-
-        router: false,
-
-        provider: false
-
-    }
 
 };
 
 
-// =====================================
-// INITIALIZE
-// =====================================
 
-function initializeAICore() {
 
-    AICore.initialized = true;
 
-    AICore.modules.memory = true;
-    AICore.modules.intent = true;
-    AICore.modules.router = true;
-    AICore.modules.provider = true;
-
-    console.log("🧠 AI Core Initialized");
-
-}
 
 
 // =====================================
-// MAIN ENTRY
+// PROCESS MESSAGE
 // =====================================
 
-async function processMessage(message) {
 
-    const intent = detectIntent(message);
+async function processMessage(message){
 
-    const route = routeIntent(intent);
+
+
+    let memoryContext = "";
+
+
+
+
+
+    // Get memory context
+
+
+    if(
+
+        window.ChatTBMMemory &&
+
+        window.ChatTBMMemory.buildMemoryContext
+
+    ){
+
+
+        memoryContext =
+
+        window.ChatTBMMemory.buildMemoryContext();
+
+
+    }
+
+
+
+
+
+
+
+    // Route to skill
+
+
+    let response = null;
+
+
+
+    if(
+
+        window.ChatTBMRouter &&
+
+        window.ChatTBMRouter.routeMessage
+
+    ){
+
+
+
+        response =
+
+        window.ChatTBMRouter.routeMessage(
+
+            message
+
+        );
+
+
+    }
+
+
+
+
+
+
 
     return {
 
-        success: true,
 
-        intent,
+        message,
 
-        route,
 
-        originalMessage: message
+        memoryContext,
+
+
+        response,
+
+
+        timestamp:
+
+        new Date().toISOString()
+
+
 
     };
 
-}
-
-
-// =====================================
-// INTENT DETECTION
-// =====================================
-
-function detectIntent(message) {
-
-    const text = message.toLowerCase();
-
-    if (
-        text.includes("code") ||
-        text.includes("javascript") ||
-        text.includes("python") ||
-        text.includes("html")
-    ) {
-        return "coding";
-    }
-
-    if (
-        text.includes("caption") ||
-        text.includes("script") ||
-        text.includes("content")
-    ) {
-        return "creator";
-    }
-
-    if (
-        text.includes("business") ||
-        text.includes("marketing")
-    ) {
-        return "business";
-    }
-
-    if (
-        text.includes("study") ||
-        text.includes("learn") ||
-        text.includes("exam")
-    ) {
-        return "education";
-    }
-
-    return "general";
 
 }
 
 
-// =====================================
-// ROUTER
-// =====================================
 
-function routeIntent(intent) {
 
-    switch (intent) {
 
-        case "coding":
-            return "Coding Assistant";
-
-        case "creator":
-            return "Creator Studio";
-
-        case "business":
-            return "Business Assistant";
-
-        case "education":
-            return "Learning Assistant";
-
-        default:
-            return "General AI";
-
-    }
-
-}
 
 
 // =====================================
 // STATUS
 // =====================================
 
-function getAICoreStatus() {
 
-    return AICore;
+function getCoreStatus(){
+
+
+    return {
+
+
+        version:
+
+        ChatTBM_Core.version,
+
+
+        status:
+
+        ChatTBM_Core.status
+
+
+    };
+
 
 }
 
 
+
+
+
+
+
 // =====================================
-// EXPORT
+// GLOBAL ACCESS
 // =====================================
+
 
 window.ChatTBMCore = {
 
-    initializeAICore,
 
     processMessage,
 
-    getAICoreStatus
+
+    getCoreStatus
+
 
 };
 
 
-// =====================================
-// STARTUP
-// =====================================
 
-initializeAICore();
 
-console.log("✅ ChatTBM AI Core Ready");
+
+
+
+console.log(
+
+"🧠 ChatTBM V7.3 AI Core Loaded"
+
+);
