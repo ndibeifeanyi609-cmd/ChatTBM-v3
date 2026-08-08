@@ -1,11 +1,12 @@
 // =====================================
-// ChatTBM REG-086.34
+// ChatTBM REG-086.41.4
 // Forecast Object
 //
 // Purpose:
 // - Canonical forecasting object
 // - Standardize forecast records
 // - Provide safe defaults
+// - Preserve prediction explanations
 // - Prepare lifecycle integration
 // - Prepare evaluation integration
 // - Prepare memory integration
@@ -67,8 +68,12 @@ function createForecastObject(data = {}) {
                     data.prediction?.score
                 ),
             confidence:
-                data.prediction?.confidence ||
-                null
+                data.prediction?.confidence ??
+                null,
+            reasons:
+                normalizePredictionReasons(
+                    data.prediction?.reasons
+                )
         },
         // ===============================
         // SIGNALS
@@ -152,9 +157,25 @@ function normalizeScore(score) {
     return score;
 }
 // =====================================
+// NORMALIZE PREDICTION REASONS
+// =====================================
+function normalizePredictionReasons(
+    reasons
+) {
+    if (!Array.isArray(reasons)) {
+        return [];
+    }
+    return reasons.filter(
+        reason =>
+            typeof reason === "string"
+    );
+}
+// =====================================
 // VALIDATE FORECAST OBJECT
 // =====================================
-function validateForecastObject(forecast) {
+function validateForecastObject(
+    forecast
+) {
     if (!forecast) {
         return {
             valid: false,
@@ -169,7 +190,11 @@ function validateForecastObject(forecast) {
             "Forecast ID is required."
         );
     }
-    if (!isValidForecastType(forecast.type)) {
+    if (
+        !isValidForecastType(
+            forecast.type
+        )
+    ) {
         errors.push(
             "Invalid forecast type."
         );
