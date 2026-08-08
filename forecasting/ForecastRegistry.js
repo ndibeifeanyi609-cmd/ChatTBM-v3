@@ -55,9 +55,12 @@ class ForecastRegistry {
             new ForecastRegistryPersistence();
     }
     // =====================================
-    // CREATE RESULT
+    // CREATE SUCCESS RESULT
     // =====================================
-    success(forecast, extra = {}) {
+    success(
+        forecast,
+        extra = {}
+    ) {
         return {
             success: true,
             forecast,
@@ -65,7 +68,7 @@ class ForecastRegistry {
         };
     }
     // =====================================
-    // CREATE ERROR RESULT
+    // CREATE FAILURE RESULT
     // =====================================
     failure(
         code,
@@ -163,7 +166,8 @@ class ForecastRegistry {
             return this.failure(
                 ForecastRegistryErrors
                     .PERSISTENCE_ERROR,
-                error.message || "Forecast persistence failed."
+                error.message ||
+                "Forecast persistence failed."
             );
         }
     }
@@ -254,6 +258,9 @@ class ForecastRegistry {
                 existing
             );
         }
+        // =================================
+        // PROTECT OWNERSHIP
+        // =================================
         if (
             updates.userId !== undefined &&
             updates.userId !== existing.userId
@@ -262,6 +269,23 @@ class ForecastRegistry {
                 ForecastRegistryErrors
                     .FORECAST_UPDATE_INVALID,
                 "Forecast userId cannot be changed.",
+                existing
+            );
+        }
+        // =================================
+        // PROTECT LIFECYCLE
+        //
+        // Status changes MUST go through
+        // transition().
+        // =================================
+        if (
+            updates.status !== undefined &&
+            updates.status !== existing.status
+        ) {
+            return this.failure(
+                ForecastRegistryErrors
+                    .FORECAST_LIFECYCLE_INVALID,
+                "Forecast lifecycle status cannot be changed through update(). Use transition().",
                 existing
             );
         }
@@ -275,6 +299,8 @@ class ForecastRegistry {
                 existing.id,
             userId:
                 existing.userId,
+            status:
+                existing.status,
             updatedAt:
                 new Date().toISOString()
         };
