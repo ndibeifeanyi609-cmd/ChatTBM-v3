@@ -1,514 +1,173 @@
 // =====================================
 // ChatTBM REG-086.38.8
-// Forecast Registry
+// Forecast Registry Persistence Adapter
 //
 // Purpose:
-// - Register canonical forecast objects
-// - Protect forecast identity
-// - Coordinate validation
-// - Coordinate lifecycle transitions
-// - Provide controlled forecast lookup
-// - Isolate forecasting from intelligence/memory systems
+// - Provide isolated forecast storage
+// - Keep storage mechanics outside Registry
+// - Protect stored forecast references
+// - Prepare future database adapters
 // =====================================
-const {
-    isValidForecastType
-} = require("./ForecastTypes");
-const {
-    validateForecast
-} = require("./ForecastValidator");
-const {
-    transitionForecast
-} = require("./ForecastLifecycle");
-const ForecastRegistryPersistence =
-    require("./ForecastRegistryPersistence");
 // =====================================
-// REGISTRY ERROR CODES
+// CLONE FORECAST
 // =====================================
-const ForecastRegistryErrors =
-    Object.freeze({
-        FORECAST_REQUIRED:
-            "FORECAST_REQUIRED",
-        FORECAST_INVALID:
-            "FORECAST_INVALID",
-        FORECAST_NOT_FOUND:
-            "FORECAST_NOT_FOUND",
-        FORECAST_ALREADY_REGISTERED:
-            "FORECAST_ALREADY_REGISTERED",
-        FORECAST_ID_CONFLICT:
-            "FORECAST_ID_CONFLICT",
-        FORECAST_TYPE_INVALID:
-            "FORECAST_TYPE_INVALID",
-        FORECAST_LIFECYCLE_INVALID:
-            "FORECAST_LIFECYCLE_INVALID",
-        FORECAST_UPDATE_INVALID:
-            "FORECAST_UPDATE_INVALID",
-        PERSISTENCE_ERROR:
-            "PERSISTENCE_ERROR"
-    });
+function cloneForecast(forecast) {
+    if (forecast === null || forecast === undefined) {
+        return forecast;
+    }
+    return JSON.parse(
+        JSON.stringify(forecast)
+    );
+}
 // =====================================
-// REGISTRY
+// FORECAST REGISTRY PERSISTENCE
 // =====================================
-class ForecastRegistry {
-    constructor(options = {}) {
-        this.persistence =
-            options.persistence ||
-            new ForecastRegistryPersistence();
+class ForecastRegistryPersistence {
+    constructor() {
+        this.storage = new Map();
     }
     // =====================================
-    // CREATE RESULT
+    // SAVE
     // =====================================
-    success(forecast, extra = {}) {
-        return {
-            success: true,
-            forecast,
-            ...extra
-        };
-    }
-    // =====================================
-    // CREATE ERROR RESULT
-    // =====================================
-    failure(
-        code,
-        error,
-        forecast = null
-    ) {
-        return {
-            success: false,
-            code,
-            error,
-            forecast
-        };
-    }
-    // =====================================
-    // REGISTER FORECAST
-    // =====================================
-    register(forecast) {
-        if (!forecast) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_REQUIRED,
-                "Forecast object is required."
+    save(forecast) {
+        if (!forecast || !forecast.id) {
+            throw new Error(
+                "Forecast with valid ID is required."
             );
         }
-        // =================================
-        // VALIDATE CANONICAL OBJECT
-        // =================================
-        const validation =
-            validateForecast(
-                forecast
-            );
-        if (!validation.valid) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_INVALID,
-                "Invalid forecast object.",
-                forecast
+        if (this.storage.has(forecast.id)) {
+            throw new Error(
+                `Forecast already exists: ${forecast.id}`
             );
         }
-        // =================================
-        // CHECK EXISTING ID
-        // =================================
-        const existing =
-            this.persistence.getById(
-                forecast.id
-            );
-        if (existing) {
-            // =============================
-            // IDEMPOTENT REGISTRATION
-            // =============================
-            if (
-                this.areEquivalent(
-                    existing,
-                    forecast
-                )
-            ) {
-                return this.success(
-                    existing,
-                    {
-                        registered: false,
-                        idempotent: true,
-                        code:
-                            ForecastRegistryErrors
-                                .FORECAST_ALREADY_REGISTERED
-                    }
-                );
-            }
-            // =============================
-            // IDENTITY CONFLICT
-            // =============================
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_ID_CONFLICT,
-                `Forecast ID conflict: ${forecast.id}`,
-                existing
-            );
-        }
-        // =================================
-        // PERSIST
-        // =================================
-        try {
-            const stored =
-                this.persistence.save(
-                    forecast
-                );
-            return this.success(
-                stored,
-                {
-                    registered: true,
-                    idempotent: false
-                }
-            );
-        }
-        catch (error) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .PERSISTENCE_ERROR,
-                error.message || "Forecast persistence failed."
-            );
-        }
+        this.storage.set(
+            forecast.id,
+            cloneForecast(forecast)
+        );
+        return cloneForecast(forecast);
     }
     // =====================================
     // GET BY ID
     // =====================================
     getById(id) {
-        return this.persistence.getById(
-            id
-        );
+        if (!id) {
+            return null;
+        }
+        const forecast =
+            this.storage.get(id);
+        if (!forecast) {
+            return null;
+        }
+        return cloneForecast(forecast);
     }
     // =====================================
     // EXISTS
     // =====================================
     exists(id) {
-        return this.persistence.exists(
-            id
-        );
+        return this.storage.has(id);
     }
     // =====================================
     // GET BY USER
     // =====================================
     getByUser(userId) {
-        return this.persistence.getByUser(
-            userId
-        );
+        if (!userId) {
+            return [];
+        }
+        const results = [];
+        for (
+            const forecast of this.storage.values()
+        ) {
+            if (
+                forecast.userId === userId
+            ) {
+                results.push(
+                    cloneForecast(forecast)
+                );
+            }
+        }
+        return results;
     }
     // =====================================
     // GET BY TYPE
     // =====================================
     getByType(type) {
-        if (
-            !isValidForecastType(
-                type
-            )
-        ) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_TYPE_INVALID,
-                `Invalid forecast type: ${type}`
-            );
+        if (!type) {
+            return [];
         }
-        return this.persistence.getByType(
-            type
-        );
+        const results = [];
+        for (
+            const forecast of this.storage.values()
+        ) {
+            if (
+                forecast.type === type
+            ) {
+                results.push(
+                    cloneForecast(forecast)
+                );
+            }
+        }
+        return results;
     }
     // =====================================
     // GET ALL
     // =====================================
     getAll() {
-        return this.persistence.getAll();
+        return Array.from(
+            this.storage.values()
+        ).map(
+            forecast =>
+                cloneForecast(forecast)
+        );
     }
     // =====================================
     // COUNT
     // =====================================
     count() {
-        return this.persistence.count();
+        return this.storage.size;
     }
     // =====================================
-    // UPDATE FORECAST
+    // UPDATE
     // =====================================
-    update(
-        id,
-        updates = {}
-    ) {
-        const existing =
-            this.persistence.getById(
-                id
+    update(id, forecast) {
+        if (!id) {
+            throw new Error(
+                "Forecast ID is required."
             );
-        if (!existing) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_NOT_FOUND,
+        }
+        if (!this.storage.has(id)) {
+            throw new Error(
                 `Forecast not found: ${id}`
             );
         }
-        // =================================
-        // PROTECT CANONICAL IDENTITY
-        // =================================
         if (
-            updates.id !== undefined &&
-            updates.id !== existing.id
+            !forecast ||
+            forecast.id !== id
         ) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_UPDATE_INVALID,
-                "Forecast ID cannot be changed.",
-                existing
+            throw new Error(
+                "Forecast identity does not match update ID."
             );
         }
-        if (
-            updates.userId !== undefined &&
-            updates.userId !== existing.userId
-        ) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_UPDATE_INVALID,
-                "Forecast userId cannot be changed.",
-                existing
-            );
-        }
-        // =================================
-        // BUILD UPDATED OBJECT
-        // =================================
-        const updated = {
-            ...existing,
-            ...updates,
-            id:
-                existing.id,
-            userId:
-                existing.userId,
-            updatedAt:
-                new Date().toISOString()
-        };
-        // =================================
-        // VALIDATE RESULT
-        // =================================
-        const validation =
-            validateForecast(
-                updated
-            );
-        if (!validation.valid) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_UPDATE_INVALID,
-                "Updated forecast is invalid.",
-                existing
-            );
-        }
-        // =================================
-        // PERSIST
-        // =================================
-        try {
-            const stored =
-                this.persistence.update(
-                    id,
-                    updated
-                );
-            return this.success(
-                stored
-            );
-        }
-        catch (error) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .PERSISTENCE_ERROR,
-                error.message ||
-                "Forecast update failed.",
-                existing
-            );
-        }
-    }
-    // =====================================
-    // TRANSITION FORECAST
-    // =====================================
-    transition(
-        id,
-        nextState
-    ) {
-        const existing =
-            this.persistence.getById(
-                id
-            );
-        if (!existing) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_NOT_FOUND,
-                `Forecast not found: ${id}`
-            );
-        }
-        // =================================
-        // USE CANONICAL LIFECYCLE ENGINE
-        // =================================
-        const result =
-            transitionForecast(
-                existing,
-                nextState
-            );
-        if (!result.success) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_LIFECYCLE_INVALID,
-                result.error,
-                existing
-            );
-        }
-        // =================================
-        // VALIDATE RESULT
-        // =================================
-        const validation =
-            validateForecast(
-                result.forecast
-            );
-        if (!validation.valid) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_LIFECYCLE_INVALID,
-                "Lifecycle transition produced an invalid forecast.",
-                existing
-            );
-        }
-        // =================================
-        // PERSIST
-        // =================================
-        try {
-            const stored =
-                this.persistence.update(
-                    id,
-                    result.forecast
-                );
-            return this.success(
-                stored,
-                {
-                    previousState:
-                        result.previousState,
-                    currentState:
-                        result.currentState
-                }
-            );
-        }
-        catch (error) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .PERSISTENCE_ERROR,
-                error.message ||
-                "Forecast lifecycle persistence failed.",
-                existing
-            );
-        }
+        this.storage.set(
+            id,
+            cloneForecast(forecast)
+        );
+        return cloneForecast(forecast);
     }
     // =====================================
     // DELETE
     // =====================================
     delete(id) {
-        if (
-            !this.persistence.exists(
-                id
-            )
-        ) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .FORECAST_NOT_FOUND,
-                `Forecast not found: ${id}`
-            );
-        }
-        try {
-            this.persistence.delete(
-                id
-            );
-            return {
-                success: true,
-                deleted: true,
-                id
-            };
-        }
-        catch (error) {
-            return this.failure(
-                ForecastRegistryErrors
-                    .PERSISTENCE_ERROR,
-                error.message ||
-                "Forecast deletion failed."
-            );
-        }
+        return this.storage.delete(id);
     }
     // =====================================
-    // CLEAR REGISTRY
+    // CLEAR
     // =====================================
     clear() {
-        this.persistence.clear();
-        return {
-            success: true,
-            cleared: true
-        };
-    }
-    // =====================================
-    // FORECAST EQUIVALENCE
-    // =====================================
-    areEquivalent(
-        first,
-        second
-    ) {
-        if (
-            !first ||
-            !second
-        ) {
-            return false;
-        }
-        // =================================
-        // CANONICAL IDENTITY
-        // =================================
-        if (
-            first.id !==
-            second.id
-        ) {
-            return false;
-        }
-        if (
-            first.userId !==
-            second.userId
-        ) {
-            return false;
-        }
-        // =================================
-        // COMPARE STABLE CONTENT
-        //
-        // Timestamps are intentionally
-        // excluded from equivalence.
-        // =================================
-        const normalize =
-            forecast => ({
-                id:
-                    forecast.id,
-                version:
-                    forecast.version,
-                type:
-                    forecast.type,
-                userId:
-                    forecast.userId,
-                input:
-                    forecast.input,
-                prediction:
-                    forecast.prediction,
-                signals:
-                    forecast.signals,
-                status:
-                    forecast.status,
-                evaluation:
-                    forecast.evaluation,
-                learning:
-                    forecast.learning,
-                provenance:
-                    forecast.provenance
-            });
-        return JSON.stringify(
-            normalize(first)
-        ) ===
-        JSON.stringify(
-            normalize(second)
-        );
+        this.storage.clear();
     }
 }
 // =====================================
-// EXPORTS
+// EXPORT
 // =====================================
-module.exports = {
-    ForecastRegistry,
-    ForecastRegistryErrors
-};
+module.exports =
+    ForecastRegistryPersistence;
