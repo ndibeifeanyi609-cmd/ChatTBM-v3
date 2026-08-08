@@ -1,5 +1,5 @@
 // =====================================
-// ChatTBM REG-086.36
+// ChatTBM REG-086.41.5
 // Forecast Validator
 //
 // Purpose:
@@ -8,6 +8,7 @@
 // - Detect malformed forecast data
 // - Validate required fields
 // - Validate prediction values
+// - Validate prediction explanations
 // - Validate lifecycle state
 // - Prepare safe registry persistence
 // =====================================
@@ -119,6 +120,9 @@ function validatePrediction(
     if (!prediction) {
         return errors;
     }
+    // ===============================
+    // SCORE
+    // ===============================
     if (
         prediction.score !== null &&
         prediction.score !== undefined
@@ -139,6 +143,37 @@ function validatePrediction(
                 "Prediction score must be between 0 and 100."
             );
         }
+    }
+    // ===============================
+    // REASONS
+    // ===============================
+    if (
+        prediction.reasons !== undefined &&
+        !Array.isArray(
+            prediction.reasons
+        )
+    ) {
+        errors.push(
+            "Prediction reasons must be an array."
+        );
+    }
+    if (
+        Array.isArray(
+            prediction.reasons
+        )
+    ) {
+        prediction.reasons.forEach(
+            (reason, index) => {
+                if (
+                    typeof reason !==
+                    "string"
+                ) {
+                    errors.push(
+                        `Prediction reason at index ${index} must be a string.`
+                    );
+                }
+            }
+        );
     }
     return errors;
 }
