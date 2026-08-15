@@ -1,12 +1,20 @@
 // =====================================
-// ChatTBM V6.7
+// ChatTBM V7.0
 // Creator Strategy Engine
 //
 // Connected:
 // - Creator Identity
 // - Brand Voice
 // - Creator Memory
+// - Growth Intelligence
+// - Performance Learning
+//
+// Purpose:
+// - Build creator strategy
+// - Generate content direction
+// - Improve future decisions
 // =====================================
+
 
 
 const {
@@ -16,11 +24,17 @@ const {
 } = require("./creatorIdentityEngine");
 
 
+
+
+
 const {
 
     getBrandVoice
 
 } = require("./brandVoiceEngine");
+
+
+
 
 
 const {
@@ -33,29 +47,88 @@ const {
 
 
 
+const {
+
+    getGrowthProfile,
+
+    buildGrowthStrategy
+
+} = require("./creatorGrowthEngine");
+
+
+
+
+
+
+
+
 
 // =====================================
-// STRATEGY GENERATOR
+// GENERATE CREATOR STRATEGY
 // =====================================
+
 
 function generateCreatorStrategy(userId){
 
 
     const identity =
 
-    getCreatorIdentity(userId);
+    getCreatorIdentity(
+
+        userId
+
+    );
+
+
 
 
 
     const voice =
 
-    getBrandVoice(userId);
+    getBrandVoice(
+
+        userId
+
+    );
+
+
 
 
 
     const memory =
 
-    getCreatorMemory(userId);
+    getCreatorMemory(
+
+        userId
+
+    );
+
+
+
+
+
+    const growth =
+
+    getGrowthProfile(
+
+        userId
+
+    );
+
+
+
+
+
+    const growthStrategy =
+
+    buildGrowthStrategy(
+
+        userId
+
+    );
+
+
+
 
 
 
@@ -87,7 +160,10 @@ function generateCreatorStrategy(userId){
             identity.audience || "General Audience"
 
 
+
         },
+
+
 
 
 
@@ -109,7 +185,12 @@ function generateCreatorStrategy(userId){
             voice.energy || "Medium"
 
 
+
         },
+
+
+
+
 
 
 
@@ -131,7 +212,47 @@ function generateCreatorStrategy(userId){
             memory.contentLessons
 
 
-        }
+
+        },
+
+
+
+
+
+
+
+        growth:{
+
+
+            signals:
+
+            growth.growthSignals,
+
+
+            successfulContent:
+
+            growth.successfulContent,
+
+
+            recommendations:
+
+            growth.recommendations
+
+
+
+        },
+
+
+
+
+
+
+
+        direction:
+
+
+        growthStrategy
+
 
 
     };
@@ -144,16 +265,26 @@ function generateCreatorStrategy(userId){
 
 
 
+
+
+
 // =====================================
 // CONTENT IDEAS
 // =====================================
+
 
 function generateContentIdeas(userId){
 
 
     const strategy =
 
-    generateCreatorStrategy(userId);
+    generateCreatorStrategy(
+
+        userId
+
+    );
+
+
 
 
 
@@ -163,19 +294,20 @@ function generateContentIdeas(userId){
 
 
 
+
+
     if(
 
-        strategy.creatorProfile.niche
-
-        ===
+        strategy.creatorProfile.niche ===
 
         "Action Content"
 
     ){
 
+
         ideas.push(
 
-            "Create a cinematic action story with a powerful ending."
+            "Create a cinematic action story showing your journey and transformation."
 
         );
 
@@ -186,24 +318,27 @@ function generateContentIdeas(userId){
 
 
 
+
+
     if(
 
-        strategy.brandVoice.tone
-
-        ===
+        strategy.brandVoice.tone ===
 
         "Motivational"
 
     ){
 
+
         ideas.push(
 
-            "Create a struggle-to-success journey."
+            "Create a struggle-to-success story that inspires your audience."
 
         );
 
 
     }
+
+
 
 
 
@@ -211,17 +346,16 @@ function generateContentIdeas(userId){
 
     if(
 
-        strategy.brandVoice.tone
-
-        ===
+        strategy.brandVoice.tone ===
 
         "Funny"
 
     ){
 
+
         ideas.push(
 
-            "Create a realistic comedy challenge."
+            "Create a realistic comedy challenge based on your personality."
 
         );
 
@@ -232,7 +366,35 @@ function generateContentIdeas(userId){
 
 
 
-    if(ideas.length===0){
+
+
+    if(
+
+        strategy.growth.successfulContent.length > 0
+
+    ){
+
+
+        ideas.push(
+
+            "Create a new version of your previous successful content pattern."
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    if(
+
+        ideas.length === 0
+
+    ){
 
 
         ideas.push(
@@ -248,6 +410,8 @@ function generateContentIdeas(userId){
 
 
 
+
+
     return ideas;
 
 
@@ -258,16 +422,26 @@ function generateContentIdeas(userId){
 
 
 
+
+
+
 // =====================================
 // SCRIPT OUTLINE
 // =====================================
+
 
 function generateScriptOutline(userId){
 
 
     const strategy =
 
-    generateCreatorStrategy(userId);
+    generateCreatorStrategy(
+
+        userId
+
+    );
+
+
 
 
 
@@ -276,17 +450,27 @@ function generateScriptOutline(userId){
 
         hook:
 
+
         `Nobody expected this ${strategy.creatorProfile.niche} story.`,
+
+
+
 
 
         body:
 
-        "Show the struggle, process and transformation.",
+
+        "Show the struggle, the process, the lesson and the transformation.",
+
+
+
 
 
         ending:
 
-        "Invite viewers to follow the journey."
+
+        "Turn viewers into followers by inviting them into your journey."
+
 
 
     };
@@ -299,12 +483,22 @@ function generateScriptOutline(userId){
 
 
 
-module.exports={
+
+
+
+// =====================================
+// EXPORT
+// =====================================
+
+
+module.exports = {
 
 
     generateCreatorStrategy,
 
+
     generateContentIdeas,
+
 
     generateScriptOutline
 

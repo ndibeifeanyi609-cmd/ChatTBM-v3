@@ -1,11 +1,12 @@
 // =====================================
-// ChatTBM V6.5
-// Content Performance Memory Engine
+// ChatTBM V7.0
+// Content Performance Intelligence Engine
 //
 // Purpose:
 // - Remember creator content history
-// - Learn what performs well
-// - Store winning formulas
+// - Learn winning patterns
+// - Store viral formulas
+// - Support growth intelligence
 // - Support strategy generation
 //
 // Future:
@@ -14,11 +15,9 @@
 
 
 
-
 // =====================================
 // CONTENT MEMORY DATABASE
 // =====================================
-
 
 const contentMemoryDatabase = {};
 
@@ -26,12 +25,9 @@ const contentMemoryDatabase = {};
 
 
 
-
-
 // =====================================
-// CREATE CREATOR SPACE
+// CREATE CREATOR PERFORMANCE SPACE
 // =====================================
-
 
 function createCreatorMemory(userId){
 
@@ -45,13 +41,16 @@ function createCreatorMemory(userId){
             userId,
 
 
-            contentHistory: [],
+            contentHistory:[],
 
 
-            winningPatterns: [],
+            winningPatterns:[],
 
 
-            strategies: [],
+            viralPatterns:[],
+
+
+            strategies:[],
 
 
             created:
@@ -85,7 +84,6 @@ function createCreatorMemory(userId){
 // =====================================
 // SAVE CONTENT PERFORMANCE
 // =====================================
-
 
 function saveContentPerformance(
 
@@ -123,11 +121,9 @@ function saveContentPerformance(
 
 
 
-
         category:
 
         data.category || "general",
-
 
 
 
@@ -137,11 +133,9 @@ function saveContentPerformance(
 
 
 
-
         result:
 
         data.result || "unknown",
-
 
 
 
@@ -151,11 +145,9 @@ function saveContentPerformance(
 
 
 
-
         formula:
 
         data.formula || "",
-
 
 
 
@@ -165,11 +157,9 @@ function saveContentPerformance(
 
 
 
-
         audienceReaction:
 
         data.audienceReaction || "",
-
 
 
 
@@ -185,6 +175,7 @@ function saveContentPerformance(
 
 
 
+
     memory.contentHistory.push(
 
         content
@@ -193,9 +184,14 @@ function saveContentPerformance(
 
 
 
+
+
     memory.updated =
 
     new Date().toISOString();
+
+
+
 
 
 
@@ -222,17 +218,15 @@ function saveContentPerformance(
 
 
 
-
 // =====================================
 // SAVE WINNING PATTERN
 // =====================================
-
 
 function saveWinningPattern(
 
     userId,
 
-    pattern
+    pattern = {}
 
 ){
 
@@ -249,7 +243,8 @@ function saveWinningPattern(
 
 
 
-    memory.winningPatterns.push({
+
+    const savedPattern = {
 
 
         ...pattern,
@@ -260,7 +255,28 @@ function saveWinningPattern(
         new Date().toISOString()
 
 
-    });
+    };
+
+
+
+
+
+
+    memory.winningPatterns.push(
+
+        savedPattern
+
+    );
+
+
+
+
+
+    memory.updated =
+
+    new Date().toISOString();
+
+
 
 
 
@@ -272,7 +288,101 @@ function saveWinningPattern(
         success:true,
 
 
-        pattern
+        pattern:savedPattern
+
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// SAVE VIRAL PATTERN
+// =====================================
+
+function saveViralPattern(
+
+    userId,
+
+    pattern = {}
+
+){
+
+
+    const memory =
+
+    createCreatorMemory(
+
+        userId
+
+    );
+
+
+
+
+
+
+    const viral = {
+
+
+        ...pattern,
+
+
+        created:
+
+        new Date().toISOString()
+
+
+    };
+
+
+
+
+
+
+    memory.viralPatterns.push(
+
+        viral
+
+    );
+
+
+
+    memory.winningPatterns.push(
+
+        viral
+
+    );
+
+
+
+
+
+    memory.updated =
+
+    new Date().toISOString();
+
+
+
+
+
+
+
+
+    return {
+
+
+        success:true,
+
+
+        viralPattern:viral
 
 
 
@@ -290,7 +400,6 @@ function saveWinningPattern(
 // =====================================
 // GET CONTENT HISTORY
 // =====================================
-
 
 function getContentHistory(
 
@@ -320,11 +429,9 @@ function getContentHistory(
 
 
 
-
 // =====================================
 // GET WINNING PATTERNS
 // =====================================
-
 
 function getWinningPatterns(
 
@@ -354,11 +461,41 @@ function getWinningPatterns(
 
 
 
+// =====================================
+// GET VIRAL PATTERNS
+// =====================================
+
+function getViralPatterns(
+
+    userId
+
+){
+
+
+    const memory =
+
+    createCreatorMemory(
+
+        userId
+
+    );
+
+
+
+    return memory.viralPatterns;
+
+
+}
+
+
+
+
+
+
 
 // =====================================
 // GET SUCCESSFUL CONTENT
 // =====================================
-
 
 function getSuccessfulContent(
 
@@ -392,11 +529,35 @@ function getSuccessfulContent(
 
 
 
+// =====================================
+// GET BEST PERFORMING CONTENT
+// =====================================
+
+function getBestPerformingContent(
+
+    userId
+
+){
+
+
+    return getSuccessfulContent(
+
+        userId
+
+    );
+
+
+}
+
+
+
+
+
+
 
 // =====================================
 // CONTENT STATISTICS
 // =====================================
-
 
 function getContentStats(
 
@@ -412,6 +573,9 @@ function getContentStats(
         userId
 
     );
+
+
+
 
 
 
@@ -449,11 +613,9 @@ function getContentStats(
 
 
 
-
 // =====================================
 // EXPORT
 // =====================================
-
 
 module.exports = {
 
@@ -467,13 +629,22 @@ module.exports = {
     saveWinningPattern,
 
 
+    saveViralPattern,
+
+
     getContentHistory,
 
 
     getWinningPatterns,
 
 
+    getViralPatterns,
+
+
     getSuccessfulContent,
+
+
+    getBestPerformingContent,
 
 
     getContentStats

@@ -1,1139 +1,196 @@
 // =====================================
-// ChatTBM V6.7.1
-// Creator Intelligence Backend
+// ChatTBM REG-086.41
+// Foundation Server
 //
-// Systems:
-// - Response Intelligence
-// - Intent Detection
-// - Creator Identity
-// - Brand Voice
-// - Creator Memory
-// - Strategy Engine
-// - Feedback Learning
-// - Predictive Intelligence
+// Architecture
+// - Express Server
+// - API Routes
+// - Chat API
+// - Forecast API
+// - AI Engine
+// - Assistant Engine
+//
+// Forecasting
+// - Forecast Object
+// - Forecast Validator
+// - Forecast Lifecycle
+// - Forecast Registry
+// - Forecast Registry Persistence
+// - Forecast Service
+// - Forecast Controller
 // =====================================
-
-
 require("dotenv").config();
-
-
+const path = require("path");
 const express = require("express");
-
 const cors = require("cors");
-
-
-
 const app = express();
-
-
-
+const PORT =
+    process.env.PORT || 3000;
+// =====================================
+// MIDDLEWARE
+// =====================================
 app.use(cors());
-
 app.use(express.json());
-
-
-
-
-
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+);
 // =====================================
-// CORE RESPONSE INTELLIGENCE
+// STATIC FILES
 // =====================================
-
-
-const {
-
-    generateResponse
-
-} = require("./services/responseEngine");
-
-
-
-
-
-const {
-
-    detectIntent
-
-} = require("./services/intentEngine");
-
-
-
-
-
-
-
-
+app.use(
+    express.static(__dirname)
+);
 // =====================================
-// CREATOR LEARNING SYSTEM
+// API ROUTES
 // =====================================
-
-
-const {
-
-    analyzeCreatorInput
-
-} = require("./services/creatorLearningEngine");
-
-
-
-const {
-
-    learnCreatorIdentity,
-
-    getCreatorIdentity
-
-} = require("./services/creatorIdentityEngine");
-
-
-
-const {
-
-    learnBrandVoice,
-
-    getBrandVoice
-
-} = require("./services/brandVoiceEngine");
-
-
-
-const {
-
-    learnCreatorMemory,
-
-    getCreatorMemory
-
-} = require("./services/creatorMemoryEngine");
-
-
-
-
-
-
-
+const chatRoutes =
+    require("./routes/chatRoutes");
+const forecastRoutes =
+    require("./routes/forecastRoutes");
 // =====================================
-// CREATOR STRATEGY
+// REGISTER CHAT ROUTES
 // =====================================
-
-
-const {
-
-    generateCreatorStrategy,
-
-    generateContentIdeas,
-
-    generateScriptOutline
-
-} = require("./services/creatorStrategyEngine");
-
-
-
-
-
-
-
+app.use(
+    "/api/chat",
+    chatRoutes
+);
 // =====================================
-// USER PROFILE
+// REGISTER FORECAST ROUTES
 // =====================================
-
-
-const {
-
-    getProfile
-
-} = require("./services/userProfileEngine");
-
-
-
-
-
-
-
-// =====================================
-// FEEDBACK + PERFORMANCE LEARNING
-// =====================================
-
-
-const {
-
-    saveFeedback,
-
-    analyzeFeedback
-
-} = require("./services/feedbackEngine");
-
-
-
-const {
-
-    analyzeUserFeedback
-
-} = require("./services/profileLearningBridge");
-
-
-
-const {
-
-    analyzePerformanceFeedback
-
-} = require("./services/performanceLearningEngine");
-
-
-
-
-
-
-
-
-// =====================================
-// VIRAL MEMORY
-// =====================================
-
-
-const {
-
-    learnViralPattern,
-
-    getCreatorViralMemory
-
-} = require("./services/viralMemoryBridge");
-
-
-
-
-
-
-
-// =====================================
-// PREDICTIVE INTELLIGENCE
-// =====================================
-
-
-const {
-
-    predictContent
-
-} = require("./services/predictionEngine");
-
-const {
-
-    forecastContent,
-    getForecast
-
-} = require("./forecasting/ForecastIntegration");
-
-
-
-const {
-
-    scoreHook
-
-} = require("./services/hookScoringEngine");
-
-
-
-const {
-
-    scoreContent
-
-} = require("./services/contentScoreEngine");
-
-
-
-const {
-
-    predictAudience
-
-} = require("./services/audiencePredictionEngine");
-
-
-
-const {
-
-    generateGrowthReport
-
-} = require("./services/growthRecommendationEngine");
-
+app.use(
+    "/api/forecast",
+    forecastRoutes
+);
 // =====================================
 // HEALTH CHECK
 // =====================================
-
-
-app.get("/",(req,res)=>{
-
-
-    res.json({
-
-        app:"ChatTBM AI Backend",
-
-        version:"V6.7.1",
-
-        status:"Creator Intelligence Online 🚀"
-
-    });
-
-
-});
-
-
-
-
-
-
-
-// =====================================
-// CHAT ENGINE V6.7.1
-// =====================================
-
-
-app.post("/api/chat",(req,res)=>{
-
-
-    try{
-
-
-        const {
-
-
-            userId="guest",
-
-            message
-
-
-        } = req.body;
-
-
-
-
-        if(!message){
-
-
-            return res.json({
-
-
-                success:false,
-
-
-                message:"No message received"
-
-
-            });
-
-
-        }
-
-
-
-
-
-        // ===============================
-        // CREATOR LEARNING
-        // ===============================
-
-
-        analyzeCreatorInput(
-
-            userId,
-
-            message
-
-        );
-
-
-
-        learnCreatorIdentity(
-
-            userId,
-
-            message
-
-        );
-
-
-
-        learnBrandVoice(
-
-            userId,
-
-            message
-
-        );
-
-
-
-        learnCreatorMemory(
-
-            userId,
-
-            message
-
-        );
-
-
-
-
-
-
-        // ===============================
-        // INTENT DETECTION
-        // ===============================
-
-
-        const intent =
-
-        detectIntent(
-
-            message
-
-        );
-
-
-
-
-
-
-        // ===============================
-        // CREATOR STRATEGY
-        // ===============================
-
-
-        const strategy =
-
-        generateCreatorStrategy(
-
-            userId
-
-        );
-
-
-
-
-
-
-
-        // ===============================
-        // RESPONSE GENERATION
-        // ===============================
-
-
-        const response =
-
-        generateResponse(
-
-            intent,
-
-            message,
-
-            {},
-
-            [],
-
-            {},
-
-            [],
-
-            {},
-
-            [],
-
-            {
-
-
-                userId,
-
-
-                strategy,
-
-
-                profile:
-
-                getProfile(userId)
-
-
-
-            }
-
-
-        );
-
-
-
-
-
-
-
+app.get(
+    "/api/health",
+    (req, res) => {
         res.json({
-
-
-            success:true,
-
-
-            intent,
-
-
-            response,
-
-
-            strategy
-
-
-
+            success: true,
+            name: "ChatTBM",
+            status: "Online",
+            ai: "Connected",
+            forecasting: "Ready",
+            timestamp:
+                new Date().toISOString()
         });
-
-
-
-
     }
-
-
-    catch(error){
-
-
-        console.error(error);
-
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-            error:error.message
-
-
-
-        });
-
-
-
-    }
-
-
-});
-
-
-
-
-
-
-
-
-
+);
 // =====================================
-// CREATOR MEMORY LEARNING
+// API INFORMATION
 // =====================================
-
-
-app.post("/api/creator-memory",(req,res)=>{
-
-
-    try{
-
-
-        const {
-
-
-            userId="guest",
-
-            content
-
-
-        } = req.body;
-
-
+app.get(
+    "/api",
+    (req, res) => {
         res.json({
-
-
-            success:true,
-
-
-
-            identity:
-
-            learnCreatorIdentity(
-
-                userId,
-
-                content
-
-            ),
-
-
-
-            voice:
-
-            learnBrandVoice(
-
-                userId,
-
-                content
-
-            ),
-
-
-
-            memory:
-
-            learnCreatorMemory(
-
-                userId,
-
-                content
-
+            success: true,
+            application: "ChatTBM",
+            endpoints: [
+                "/api/chat",
+                "/api/forecast",
+                "/api/health"
+            ]
+        });
+    }
+);
+// =====================================
+// HOME PAGE
+// =====================================
+app.get(
+    "/",
+    (req, res) => {
+        res.sendFile(
+            path.join(
+                __dirname,
+                "index.html"
             )
-
-
-        });
-
-
+        );
     }
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-            error:error.message
-
-
-        });
-
-
-    }
-
-
-});
-
-
-
-
-
-
-
-
+);
 // =====================================
-// CREATOR BRAIN
+// FRONTEND FALLBACK
 // =====================================
-
-
-app.get("/api/creator-brain/:userId",(req,res)=>{
-
-
-    const userId =
-
-    req.params.userId;
-
-
-
-
-
-    res.json({
-
-
-        success:true,
-
-
-
-        identity:
-
-        getCreatorIdentity(userId),
-
-
-
-        voice:
-
-        getBrandVoice(userId),
-
-
-
-        memory:
-
-        getCreatorMemory(userId)
-
-
-
-    });
-
-
-});
-
-
-
-
-
-
-
-
-// =====================================
-// CONTENT ANALYSIS ENGINE
-// =====================================
-
-
-app.post("/api/analyze",(req,res)=>{
-
-
-    try{
-
-
-        const {
-
-
-            content,
-
-            userId="guest"
-
-
-        } = req.body;
-
-
-        if (typeof content !== "string" || !content.trim()) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                error: "Content is required."
-
-            });
-
+app.get(
+    "*",
+    (req, res, next) => {
+        if (
+            req.path.startsWith("/api/")
+        ) {
+            return next();
         }
-
-
-
-
-
-        res.json({
-
-
-        success:true,
-
-
-
-        forecast:
-
-        forecastContent(content, userId).forecast,
-
-
-        prediction:
-
-        predictContent(content),
-
-
-
-        hook:
-
-        scoreHook(content),
-
-
-
-        contentScore:
-
-        scoreContent(content),
-
-
-
-        audience:
-
-        predictAudience(content),
-
-
-
-        growth:
-
-        generateGrowthReport(content)
-
-
-
-        });
-
-
+        res.sendFile(
+            path.join(
+                __dirname,
+                "index.html"
+            )
+        );
     }
-
-
-    catch(error){
-
-
-        console.error(error);
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-            error:error.message
-
-
-        });
-
-
-    }
-
-
-});
-
-
+);
 // =====================================
-// FORECAST RETRIEVAL
+// 404 HANDLER
 // =====================================
-
-app.get("/api/forecast/:id",(req,res)=>{
-
-    try{
-
-        const { id } = req.params;
-        const { userId } = req.query;
-
-        if (typeof userId !== "string" || !userId.trim()) {
-            return res.status(400).json({
-                success: false,
-                error: "User ID is required."
-            });
-        }
-
-        const result = getForecast(id, userId);
-
-        if (!result.success) {
-            return res.status(404).json(result);
-        }
-
-        return res.json(result);
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-        return res.status(500).json({
+app.use(
+    (req, res) => {
+        res.status(404).json({
             success: false,
-            error: error.message
+            message:
+                "Route not found."
         });
-
     }
-
-});
-
+);
 // =====================================
-// FEEDBACK LEARNING
+// GLOBAL ERROR HANDLER
 // =====================================
-
-
-app.post("/api/feedback",(req,res)=>{
-
-
-    try{
-
-
-        const {
-
-
-            userId="guest",
-
-            correction
-
-
-        } = req.body;
-
-
-
-
-
-        if(!correction){
-
-
-            return res.json({
-
-
-                success:false,
-
-
-                message:"No feedback received"
-
-
-
-            });
-
-
-        }
-
-
-
-
-
-
-        const feedback =
-
-        saveFeedback({
-
-
-            userId,
-
-
-            correction
-
-
-
-        });
-
-
-
-
-
-
-        analyzeUserFeedback(
-
-            userId,
-
-            correction
-
-        );
-
-
-
-
-
-
-        analyzePerformanceFeedback(
-
-            userId,
-
-            correction
-
-        );
-
-
-
-
-
-
-        learnViralPattern(
-
-            userId,
-
-            correction
-
-        );
-
-
-
-
-
-
-        res.json({
-
-
-            success:true,
-
-
-            feedback
-
-
-
-        });
-
-
-
-
-    }
-
-
-    catch(error){
-
-
+app.use(
+    (err, req, res, next) => {
+        console.error(err);
         res.status(500).json({
-
-
-            success:false,
-
-            error:error.message
-
-
+            success: false,
+            message:
+                "Internal Server Error",
+            error:
+                process.env.NODE_ENV === "development"
+                    ? err.message
+                    : undefined
         });
-
-
     }
-
-
-});
-
-
-
-
-
-
-
-
+);
 // =====================================
-// USER PROFILE
+// START SERVER
 // =====================================
-
-
-app.get("/api/profile/:userId",(req,res)=>{
-
-
-    res.json({
-
-
-        success:true,
-
-
-        profile:
-
-        getProfile(
-
-            req.params.userId
-
-        )
-
-
-    });
-
-
-});
-
-
-
-
-
-
-
-
-// =====================================
-// CREATOR STRATEGY
-// =====================================
-
-
-app.get("/api/strategy/:userId",(req,res)=>{
-
-
-    const userId =
-
-    req.params.userId;
-
-
-
-
-
-    res.json({
-
-
-        success:true,
-
-
-
-        strategy:
-
-        generateCreatorStrategy(userId),
-
-
-
-        ideas:
-
-        generateContentIdeas(userId),
-
-
-
-        script:
-
-        generateScriptOutline(userId)
-
-
-
-    });
-
-
-});
-
-
-
-
-
-
-
-
-// =====================================
-// VIRAL MEMORY
-// =====================================
-
-
-app.get("/api/viral-memory/:userId",(req,res)=>{
-
-
-    res.json({
-
-
-        success:true,
-
-
-        memory:
-
-        getCreatorViralMemory(
-
-            req.params.userId
-
-        )
-
-
-    });
-
-
-});
-
-
-
-
-
-
-
-
-// =====================================
-// FEEDBACK ANALYTICS
-// =====================================
-
-
-app.get("/api/feedback",(req,res)=>{
-
-
-    res.json(
-
-        analyzeFeedback()
-
-    );
-
-
-});
-
-
-
-
-
-
-
-
-// =====================================
-// SERVER START
-// =====================================
-
-
-const PORT =
-
-process.env.PORT || 3000;
-
-
-
-
-app.listen(PORT,()=>{
-
-
-    console.log(
-
-        `🚀 ChatTBM V6.7.1 running on port ${PORT}`
-
-    );
-
-
-});
+app.listen(
+    PORT,
+    () => {
+        console.log(
+            "===================================="
+        );
+        console.log(
+            "ChatTBM REG-086.41"
+        );
+        console.log(
+            "===================================="
+        );
+        console.log(
+            `Server running on port ${PORT}`
+        );
+        console.log(
+            `Health: http://localhost:${PORT}/api/health`
+        );
+        console.log(
+            "Chat API: /api/chat"
+        );
+        console.log(
+            "Forecast API: /api/forecast"
+        );
+        console.log(
+            "AI Assistant Platform Ready"
+        );
+        console.log(
+            "===================================="
+        );
+    }
+);

@@ -1,12 +1,30 @@
 // =====================================
-// ChatTBM V6.7
+// ChatTBM V6.7.4
 // Creator Memory Engine
 //
-// Purpose:
-// - Store creator knowledge
-// - Learn content preferences
-// - Recall creator patterns
+// Upgrade:
+// - Memory Intelligence Connected
+// - Intelligent Memory Ranking
+// - Creator Knowledge Storage
+// - Memory Retrieval Ready
 // =====================================
+
+
+
+const MemoryIntelligenceEngine =
+
+require("./memoryIntelligenceEngine");
+
+
+
+
+
+const memoryIntelligence =
+
+new MemoryIntelligenceEngine();
+
+
+
 
 
 const creatorMemories = {};
@@ -14,9 +32,14 @@ const creatorMemories = {};
 
 
 
+
+
+
+
 // =====================================
 // CREATE MEMORY PROFILE
 // =====================================
+
 
 function createMemoryProfile(userId){
 
@@ -27,19 +50,47 @@ function createMemoryProfile(userId){
         creatorMemories[userId] = {
 
 
+            userId,
+
+
             preferences:[],
+
 
             successfulPatterns:[],
 
+
             contentLessons:[],
+
 
             favoriteTopics:[],
 
+
             audienceInsights:[],
+
+
+            brandVoice:[],
+
+
+            contentStyle:[],
+
+
+            audience:[],
+
+
+            strategies:[],
+
+
+            viralPatterns:[],
+
+
+            intelligentMemories:[],
+
 
             createdAt:new Date(),
 
+
             lastUpdated:new Date()
+
 
 
         };
@@ -51,6 +102,7 @@ function createMemoryProfile(userId){
 
     return creatorMemories[userId];
 
+
 }
 
 
@@ -58,9 +110,98 @@ function createMemoryProfile(userId){
 
 
 
+
+
+
 // =====================================
-// SAVE MEMORY
+// UPDATE CREATOR MEMORY
 // =====================================
+
+
+function updateCreatorMemory(
+
+    userId,
+
+    data = {}
+
+){
+
+
+    const memory =
+
+    createMemoryProfile(userId);
+
+
+
+
+
+    Object.keys(data)
+
+    .forEach(key=>{
+
+
+        if(Array.isArray(memory[key])){
+
+
+            memory[key].push(
+
+                data[key]
+
+            );
+
+
+
+            memory[key] = [
+
+                ...new Set(
+
+                    memory[key]
+
+                )
+
+            ];
+
+
+        }
+
+
+        else{
+
+
+            memory[key] = data[key];
+
+
+        }
+
+
+
+    });
+
+
+
+
+
+    memory.lastUpdated = new Date();
+
+
+
+    return memory;
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SAVE CREATOR MEMORY
+// =====================================
+
 
 function saveCreatorMemory(
 
@@ -79,15 +220,22 @@ function saveCreatorMemory(
 
 
 
-    if(
 
-        Array.isArray(memory[type])
 
-        &&
+    if(!memory[type]){
 
-        information
 
-    ){
+        memory[type] = [];
+
+
+    }
+
+
+
+
+
+
+    if(information){
 
 
         memory[type].push(
@@ -98,9 +246,7 @@ function saveCreatorMemory(
 
 
 
-        memory[type] =
-
-        [
+        memory[type] = [
 
             ...new Set(
 
@@ -110,13 +256,34 @@ function saveCreatorMemory(
 
         ];
 
+
+
+        const intelligentMemory =
+
+        memoryIntelligence.remember(
+
+            userId,
+
+            information
+
+        );
+
+
+
+        memory.intelligentMemories.push(
+
+            intelligentMemory
+
+        );
+
+
     }
 
 
 
-    memory.lastUpdated =
 
-    new Date();
+
+    memory.lastUpdated = new Date();
 
 
 
@@ -130,9 +297,13 @@ function saveCreatorMemory(
 
 
 
+
+
+
 // =====================================
-// LEARN MEMORY
+// LEARN CREATOR MEMORY
 // =====================================
+
 
 function learnCreatorMemory(
 
@@ -151,6 +322,7 @@ function learnCreatorMemory(
 
 
 
+
     const memory =
 
     createMemoryProfile(userId);
@@ -159,93 +331,17 @@ function learnCreatorMemory(
 
 
 
-    if(
 
-        text.includes("cinematic")
-
-    ){
-
-        memory.preferences.push(
-
-            "Prefers cinematic style"
-
-        );
+    if(text.includes("cinematic")){
 
 
-    }
+        saveCreatorMemory(
 
+            userId,
 
+            "contentStyle",
 
-
-
-    if(
-
-        text.includes("realistic")
-
-    ){
-
-        memory.preferences.push(
-
-            "Prefers realistic content"
-
-        );
-
-
-    }
-
-
-
-
-
-    if(
-
-        text.includes("comedy")
-
-    ){
-
-        memory.favoriteTopics.push(
-
-            "Comedy"
-
-        );
-
-
-    }
-
-
-
-
-
-    if(
-
-        text.includes("action")
-
-    ){
-
-        memory.favoriteTopics.push(
-
-            "Action"
-
-        );
-
-
-    }
-
-
-
-
-
-    if(
-
-        text.includes("growth") ||
-
-        text.includes("journey")
-
-    ){
-
-        memory.contentLessons.push(
-
-            "Uses transformation storytelling"
+            "Cinematic style"
 
         );
 
@@ -257,38 +353,70 @@ function learnCreatorMemory(
 
 
 
-    Object.keys(memory)
-
-    .forEach(key=>{
+    if(text.includes("realistic")){
 
 
-        if(Array.isArray(memory[key])){
+        saveCreatorMemory(
+
+            userId,
+
+            "contentStyle",
+
+            "Realistic style"
+
+        );
 
 
-            memory[key] =
-
-            [
-
-                ...new Set(
-
-                    memory[key]
-
-                )
-
-            ];
-
-        }
-
-
-    });
+    }
 
 
 
 
 
-    memory.lastUpdated =
 
-    new Date();
+    if(text.includes("action")){
+
+
+        saveCreatorMemory(
+
+            userId,
+
+            "favoriteTopics",
+
+            "Action content"
+
+        );
+
+
+    }
+
+
+
+
+
+
+    if(text.includes("journey")){
+
+
+        saveCreatorMemory(
+
+            userId,
+
+            "contentLessons",
+
+            "Transformation storytelling"
+
+        );
+
+
+    }
+
+
+
+
+
+
+    memory.lastUpdated = new Date();
 
 
 
@@ -302,9 +430,13 @@ function learnCreatorMemory(
 
 
 
+
+
+
 // =====================================
-// GET MEMORY
+// GET CREATOR MEMORY
 // =====================================
+
 
 function getCreatorMemory(userId){
 
@@ -319,9 +451,13 @@ function getCreatorMemory(userId){
 
 
 
+
+
+
 // =====================================
 // SEARCH MEMORY
 // =====================================
+
 
 function searchMemory(
 
@@ -338,7 +474,9 @@ function searchMemory(
 
 
 
-    const results=[];
+    const results = [];
+
+
 
 
 
@@ -386,6 +524,8 @@ function searchMemory(
 
 
 
+
+
     return results;
 
 
@@ -396,10 +536,47 @@ function searchMemory(
 
 
 
+
+
+
+// =====================================
+// INTELLIGENT MEMORY
+// =====================================
+
+
+function getImportantMemories(userId){
+
+
+    return memoryIntelligence
+
+    .getImportantMemories(
+
+        userId
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// EXPORT
+// =====================================
+
+
 module.exports = {
 
 
     createMemoryProfile,
+
+    updateCreatorMemory,
 
     saveCreatorMemory,
 
@@ -407,7 +584,9 @@ module.exports = {
 
     getCreatorMemory,
 
-    searchMemory
+    searchMemory,
+
+    getImportantMemories
 
 
 };

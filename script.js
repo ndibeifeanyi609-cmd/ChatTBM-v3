@@ -1,343 +1,142 @@
-/* ===================================
-   ChatTBM V6.0.2
-
-   Main Application Engine
-
-   Upgrade:
-   - Offline Brain First
-   - Backend Backup
-   - Creator Brain Support
-   - Creator Memory Support
-   - Context Engine Support
-   - Chat History
-   - Creator Tools
-=================================== */
+// =====================================
+// ChatTBM V8.0
+// Frontend AI Assistant Bridge
+//
+// Upgrade:
+// - Chat Interface
+// - AI Gateway
+// - AI Core
+// - Voice Engine
+// - Memory System
+// - Copy Response Button
+// =====================================
 
 
-// ===============================
-// CONNECT ELEMENTS
-// ===============================
 
 const chatBox =
 document.getElementById("chat-box");
 
+
 const userInput =
 document.getElementById("user-input");
+
 
 const sendBtn =
 document.getElementById("send-btn");
 
-const toolButtons =
-document.querySelectorAll(".tool-btn");
 
+const voiceBtn =
+document.getElementById("voice-btn");
 
-let lastUserMessage = "";
 
 
 
 
-// ===============================
-// EVENTS
-// ===============================
 
 
-sendBtn.addEventListener(
-    "click",
-    sendMessage
-);
+// =====================================
+// ADD MESSAGE
+// =====================================
 
 
-userInput.addEventListener(
-    "keypress",
-    function(event){
-
-        if(event.key === "Enter"){
-
-            sendMessage();
-
-        }
-
-    }
-);
-
-
-
-
-// ===============================
-// SEND MESSAGE
-// ===============================
-
-
-async function sendMessage(){
-
-
-    const message =
-    userInput.value.trim();
-
-
-
-    if(!message) return;
-
-
-
-    lastUserMessage =
-    message;
-
-
-
-    addMessage(
-        message,
-        "user"
-    );
-
-
-
-    saveConversation(
-        "user",
-        message
-    );
-
-
-
-    userInput.value = "";
-
-
-
-    showLoading();
-
-
-
-    const response =
-    await generateAIResponse(
-        message
-    );
-
-
-
-    removeLoading();
-
-
-
-    addMessage(
-        response,
-        "bot"
-    );
-
-
-
-    saveConversation(
-        "assistant",
-        response
-    );
-
-
-    saveChat();
-
-
-}
-
-
-
-
-
-
-
-
-// ===============================
-// AI RESPONSE ENGINE
-// ===============================
-
-
-async function generateAIResponse(message){
-
-
-
-    // ===============================
-    // OFFLINE INTELLIGENCE FIRST
-    // ===============================
-
-
-    if(
-        typeof window.offlineBrain === "function"
-    ){
-
-
-        const offlineReply =
-
-        window.offlineBrain(
-            message
-        );
-
-
-
-        if(offlineReply){
-
-            return offlineReply;
-
-        }
-
-    }
-
-
-
-
-
-
-    // ===============================
-    // BACKEND FALLBACK
-    // ===============================
-
-
-    try{
-
-
-        const userId =
-
-        localStorage.getItem(
-            "ChatTBM_user"
-        )
-
-        ||
-
-        createUserId();
-
-
-
-
-        const response =
-
-        await fetch(
-
-        "https://chattbm-backend.onrender.com/api/chat",
-
-        {
-
-            method:"POST",
-
-            headers:{
-
-                "Content-Type":
-                "application/json"
-
-            },
-
-
-            body:JSON.stringify({
-
-                message,
-
-                conversationId:userId
-
-            })
-
-
-        });
-
-
-
-        const data =
-        await response.json();
-
-
-
-
-        if(data.reply){
-
-            return data.reply;
-
-        }
-
-
-    }
-
-
-    catch(error){
-
-
-        console.log(
-            "Backend unavailable",
-            error
-        );
-
-
-    }
-
-
-
-
-
-    return (
-
-        "I'm ready to help you create content 🤖"
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// MESSAGE DISPLAY
-// ===============================
-
-
-function addMessage(text, sender){
+function addMessage(message, type){
 
 
     const div =
     document.createElement("div");
 
 
-
     div.className =
-
-    sender === "user"
-
-    ?
-
-    "message user-message"
-
-    :
-
-    "message bot-message";
+    type === "user"
+    ? "message user-message"
+    : "message bot-message";
 
 
 
 
 
-    div.innerHTML = `
+    const p =
+    document.createElement("p");
 
-        <p>${text}</p>
 
-        ${
-            sender === "bot"
 
-            ?
+    p.textContent =
+    message;
 
-            `
-            <button onclick="copyResponse(this)">
-            Copy
-            </button>
 
-            <button onclick="regenerateResponse()">
-            Regenerate
-            </button>
-            `
 
-            :
+    div.appendChild(p);
 
-            ""
 
-        }
 
-    `;
+
+
+
+
+    // COPY BUTTON FOR BOT MESSAGES
+
+
+    if(type === "bot"){
+
+
+        const copyBtn =
+        document.createElement("button");
+
+
+        copyBtn.textContent =
+        "📋 Copy";
+
+
+
+        copyBtn.className =
+        "copy-btn";
+
+
+
+        copyBtn.onclick = function(){
+
+
+
+            navigator.clipboard.writeText(
+
+                message
+
+            );
+
+
+
+            copyBtn.textContent =
+
+            "✅ Copied";
+
+
+
+            setTimeout(()=>{
+
+
+                copyBtn.textContent =
+
+                "📋 Copy";
+
+
+            },2000);
+
+
+
+        };
+
+
+
+
+
+        div.appendChild(copyBtn);
+
+
+    }
+
+
+
+
 
 
 
@@ -359,84 +158,45 @@ function addMessage(text, sender){
 
 
 
-// ===============================
-// CREATOR TOOL BUTTONS
-// ===============================
-
-
-toolButtons.forEach(button=>{
-
-
-    button.addEventListener(
-
-        "click",
-
-        ()=>{
-
-
-            const tool =
-            button.dataset.tool;
-
-
-
-            userInput.value =
-            "Create " + tool;
-
-
-
-            sendMessage();
-
-
-        }
-
-    );
-
-
-});
-
-
-
-
-
-
-
-
-
-// ===============================
-// LOADING
-// ===============================
+// =====================================
+// LOADING MESSAGE
+// =====================================
 
 
 function showLoading(){
 
 
-    const loading =
+    const div =
     document.createElement("div");
 
 
 
-    loading.id =
-    "loading";
+    div.id =
+    "loading-message";
 
 
 
-    loading.className =
+    div.className =
     "message bot-message";
 
 
 
-    loading.innerHTML =
-
-    "<p>ChatTBM is thinking... 🤖</p>";
-
+    div.innerHTML =
+    "<p>ChatTBM is thinking...</p>";
 
 
-    chatBox.appendChild(
-        loading
-    );
+
+    chatBox.appendChild(div);
+
+
+
+    chatBox.scrollTop =
+    chatBox.scrollHeight;
 
 
 }
+
+
 
 
 
@@ -447,14 +207,18 @@ function removeLoading(){
 
     const loading =
     document.getElementById(
-        "loading"
+
+        "loading-message"
+
     );
 
 
 
     if(loading){
 
+
         loading.remove();
+
 
     }
 
@@ -469,65 +233,40 @@ function removeLoading(){
 
 
 
-// ===============================
-// COPY RESPONSE
-// ===============================
+// =====================================
+// SEND MESSAGE
+// =====================================
 
 
-function copyResponse(button){
+async function sendMessage(){
 
 
-    const text =
-
-    button.parentElement
-
-    .querySelector("p")
-
-    .innerText;
+    const message =
+    userInput.value.trim();
 
 
 
-    navigator.clipboard.writeText(
-        text
+    if(!message){
+
+        return;
+
+    }
+
+
+
+
+
+    addMessage(
+
+        message,
+
+        "user"
+
     );
 
 
 
-    button.innerText =
-    "Copied!";
-
-
-
-    setTimeout(()=>{
-
-
-        button.innerText =
-        "Copy";
-
-
-    },1500);
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// REGENERATE
-// ===============================
-
-
-async function regenerateResponse(){
-
-
-    if(!lastUserMessage)
-    return;
+    userInput.value = "";
 
 
 
@@ -535,64 +274,51 @@ async function regenerateResponse(){
 
 
 
-    const response =
-
-    await generateAIResponse(
-        lastUserMessage
-    );
 
 
 
-    removeLoading();
+
+    try{
 
 
-
-    addMessage(
-        response,
-        "bot"
-    );
-
-
-}
+        let response;
 
 
 
 
 
+        if(
+
+            window.ChatTBM_AI &&
+
+            window.ChatTBM_AI.askChatTBM
+
+        ){
 
 
 
+            response =
 
-// ===============================
-// USER ID
-// ===============================
+            await window.ChatTBM_AI.askChatTBM(
+
+                message
+
+            );
 
 
-function createUserId(){
-
-
-    const id =
-
-    "user-" +
-
-    Date.now();
+        }
 
 
 
-    localStorage.setItem(
-
-        "ChatTBM_user",
-
-        id
-
-    );
+        else{
 
 
+            response =
 
-    return id;
+            "ChatTBM AI system is loading...";
 
 
-}
+        }
 
 
 
@@ -600,36 +326,78 @@ function createUserId(){
 
 
 
+        removeLoading();
 
 
-// ===============================
-// CONVERSATION MEMORY
-// ===============================
 
+        addMessage(
 
-function saveConversation(
-role,
-message
-){
+            response,
 
-
-    if(
-
-        window.conversationManager &&
-
-        typeof window.conversationManager.addMessage === "function"
-
-    ){
-
-        window.conversationManager.addMessage(
-
-            role,
-
-            message
+            "bot"
 
         );
 
+
+
+
+
+
+
+
+        if(
+
+            window.ChatTBMMemory &&
+
+            window.ChatTBMMemory.saveMemory
+
+        ){
+
+
+            window.ChatTBMMemory.saveMemory(
+
+                "conversation",
+
+                message
+
+            );
+
+
+        }
+
+
+
     }
+
+
+
+    catch(error){
+
+
+
+        removeLoading();
+
+
+
+        console.error(
+
+            error
+
+        );
+
+
+
+        addMessage(
+
+            "ChatTBM had a problem processing that request.",
+
+            "bot"
+
+        );
+
+
+    }
+
 
 
 }
@@ -642,19 +410,38 @@ message
 
 
 
-// ===============================
-// CHAT HISTORY
-// ===============================
+// =====================================
+// VOICE INPUT
+// =====================================
 
 
-function saveChat(){
+if(voiceBtn){
 
 
-    localStorage.setItem(
+    voiceBtn.addEventListener(
 
-        "ChatTBM_history",
+        "click",
 
-        chatBox.innerHTML
+        function(){
+
+
+            if(
+
+                window.ChatTBMVoice &&
+
+                window.ChatTBMVoice.startVoiceInput
+
+            ){
+
+
+                window.ChatTBMVoice.startVoiceInput();
+
+
+            }
+
+
+        }
+
 
     );
 
@@ -665,88 +452,70 @@ function saveChat(){
 
 
 
-function loadChat(){
 
 
-    const saved =
 
-    localStorage.getItem(
 
-        "ChatTBM_history"
+// =====================================
+// BUTTON EVENTS
+// =====================================
+
+
+if(sendBtn){
+
+
+    sendBtn.addEventListener(
+
+        "click",
+
+        sendMessage
 
     );
 
 
+}
 
-    if(saved){
 
-        chatBox.innerHTML =
-        saved;
 
-    }
+
+
+
+
+if(userInput){
+
+
+    userInput.addEventListener(
+
+        "keypress",
+
+        function(event){
+
+
+            if(event.key === "Enter"){
+
+
+                sendMessage();
+
+
+            }
+
+
+        }
+
+
+    );
 
 
 }
 
 
 
-loadChat();
 
 
-
-
-
-
-
-
-
-// ===============================
-// SERVICE WORKER
-// ===============================
-
-
-if(
-"serviceWorker" in navigator
-){
-
-
-window.addEventListener(
-
-"load",
-
-()=>{
-
-
-navigator.serviceWorker.register(
-
-"service-worker.js"
-
-)
-
-.then(()=>{
-
-console.log(
-"ChatTBM PWA Ready 🚀"
-);
-
-
-})
-
-.catch(error=>{
 
 
 console.log(
-"Service Worker Error",
-error
-);
 
-
-});
-
-
-}
+"🚀 ChatTBM V8.0 Frontend Bridge + Copy System Loaded"
 
 );
-
-
-}

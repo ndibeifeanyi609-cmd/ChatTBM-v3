@@ -1,13 +1,18 @@
 // =====================================
-// ChatTBM V6.7.1
+// ChatTBM V7.0
 // Response Intelligence Engine
 //
-// Features:
-// - Creator Content Generation
-// - Memory Awareness
-// - Profile Adaptation
-// - Smart Responses
+// Connected:
+// - Adaptive Response Engine
+// - Adaptive Brain Engine
+// - Intelligence Fusion
+// - Memory Intelligence
+// - Relationship Intelligence
+// - Creator Brain
+// - Growth Intelligence
+// - Strategy Intelligence
 // =====================================
+
 
 
 const {
@@ -18,20 +23,101 @@ const {
 
 
 
-const {
+const AdaptiveResponseEngine =
 
-    createProfilePrompt
-
-} = require("./profileContextEngine");
+require("./adaptiveResponseEngine");
 
 
 
+const AdaptiveBrainEngine =
+
+require("./adaptiveBrainEngine");
 
 
 
-// =====================================
-// MAIN RESPONSE GENERATOR
-// =====================================
+const MemoryRetrievalEngine =
+
+require("./memoryRetrievalEngine");
+
+
+
+const RelationshipIntelligenceEngine =
+
+require("./relationshipIntelligenceEngine");
+
+
+
+const IntelligenceFusionEngine =
+
+require("./intelligenceFusionEngine");
+
+
+
+
+
+
+
+
+
+let adaptiveEngine = null;
+
+let adaptiveBrain = null;
+
+let memoryRetriever = null;
+
+let relationshipEngine = null;
+
+let intelligenceFusion = null;
+
+
+
+
+
+
+
+
+
+function connectAdaptiveEngine(identityEngine){
+
+
+    adaptiveEngine =
+
+    new AdaptiveResponseEngine(
+
+        identityEngine
+
+    );
+
+
+    adaptiveBrain =
+
+    new AdaptiveBrainEngine();
+
+
+    memoryRetriever =
+
+    new MemoryRetrievalEngine();
+
+
+    relationshipEngine =
+
+    new RelationshipIntelligenceEngine();
+
+
+    intelligenceFusion =
+
+    new IntelligenceFusionEngine();
+
+
+}
+
+
+
+
+
+
+
+
 
 function generateResponse(
 
@@ -56,48 +142,19 @@ function generateResponse(
 ){
 
 
-    const text =
-
-    String(message || "")
-
-    .toLowerCase();
+let response = "";
 
 
 
+let memoryContext = null;
 
+let audienceContext = null;
 
-    let response = "";
+let creatorContext = null;
 
+let brainDecision = null;
 
-
-
-
-
-    // =====================================
-    // PROFILE CONTEXT
-    // =====================================
-
-    let profilePrompt = "";
-
-
-
-    if(
-
-        brainContext.userId
-
-    ){
-
-
-        profilePrompt =
-
-        createProfilePrompt(
-
-            brainContext.userId
-
-        );
-
-
-    }
+let fusedContext = null;
 
 
 
@@ -105,341 +162,68 @@ function generateResponse(
 
 
 
-    // =====================================
-    // CONTEXT MEMORY
-    // =====================================
 
 
-    const context =
+// =====================================
+// CONTEXT MEMORY
+// =====================================
 
-    handleContextRequest(
 
-        message,
+const context =
 
-        history
+handleContextRequest(
+
+    message,
+
+    history
+
+);
+
+
+
+if(
+
+    context &&
+
+    context.matched
+
+){
+
+    return context.response;
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// MEMORY RETRIEVAL
+// =====================================
+
+
+if(
+
+    memoryRetriever &&
+
+    brainContext.userId
+
+){
+
+
+    memoryContext =
+
+    memoryRetriever.buildContext(
+
+        brainContext.userId,
+
+        message
 
     );
-
-
-
-    if(
-
-        context &&
-
-        context.matched
-
-    ){
-
-        return context.response;
-
-    }
-
-
-
-
-
-
-
-
-
-    // =====================================
-    // GREETING
-    // =====================================
-
-
-    if(intent === "greeting"){
-
-
-        response =
-
-`Hello 👋
-
-I'm ChatTBM, your AI Content Assistant.
-
-I can help you create:
-
-🎬 Video scripts
-✍️ Captions
-🔥 Viral ideas
-📢 Marketing content
-
-What are we creating today?`;
-
-
-
-    }
-
-
-
-
-
-
-
-    // =====================================
-    // SCRIPT GENERATION
-    // =====================================
-
-
-    else if(
-
-        intent === "script_generation"
-
-    ){
-
-
-        response =
-
-
-`🎬 Video Script
-
-
-🔥 HOOK:
-
-Nobody sees the beginning. They only see the results.
-
-
-🎭 BODY:
-
-Show the struggle, the failures, the lessons, and the process behind the growth.
-
-Let people see the moments when you had to keep going even when nobody was watching.
-
-
-🚀 ENDING:
-
-The journey is still being written.
-
-Follow the journey and watch the transformation happen.
-
-
-
-`;
-
-
-
-    }
-
-
-
-
-
-
-
-    // =====================================
-    // CAPTION GENERATION
-    // =====================================
-
-
-    else if(
-
-        intent === "caption_generation"
-
-    ){
-
-
-        response =
-
-
-`🔥 Caption:
-
-Nobody saw the days I struggled.
-
-They only see the moment I succeed.
-
-Every step, every failure, every lesson built this journey.
-
-The process is the story. 🚀`;
-
-
-
-    }
-
-
-
-
-
-
-
-
-    // =====================================
-    // IDEA GENERATION
-    // =====================================
-
-
-    else if(
-
-        intent === "idea_generation"
-
-    ){
-
-
-        response =
-
-
-`🔥 Viral Content Ideas:
-
-
-1. Nobody believed in me story
-
-2. Before vs After transformation
-
-3. Behind the scenes struggle
-
-4. Failed attempt that became success
-
-5. My journey nobody saw
-
-
-
-Choose one and I'll build the full script.`;
-
-
-
-    }
-
-
-
-
-
-
-
-
-    // =====================================
-    // MARKETING
-    // =====================================
-
-
-    else if(
-
-        intent === "marketing"
-
-    ){
-
-
-        response =
-
-
-`📢 Marketing Script:
-
-
-Problem:
-
-Show the audience a challenge they face.
-
-
-Solution:
-
-Present your product or service as the answer.
-
-
-Action:
-
-Tell them the next step to take.`;
-
-
-
-    }
-
-
-
-
-
-
-
-
-    // =====================================
-    // CREATOR STRATEGY
-    // =====================================
-
-
-    else if(
-
-        intent === "creator_strategy"
-
-    ){
-
-
-        response =
-
-
-`🚀 Creator Growth Strategy:
-
-
-1. Build a recognizable style.
-
-2. Create consistently.
-
-3. Study audience reactions.
-
-4. Improve every video.
-
-5. Turn your journey into your brand.`;
-
-
-
-    }
-
-
-
-
-
-
-
-
-    // =====================================
-    // DEFAULT
-    // =====================================
-
-
-    else {
-
-
-        response =
-
-
-`I understand.
-
-I can help you turn this into:
-
-🎬 A video script
-✍️ A caption
-🔥 Viral content idea
-📢 Marketing content
-
-Tell me what you want to create.`;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // =====================================
-    // ADD PROFILE
-    // =====================================
-
-
-    if(profilePrompt){
-
-
-        response +=
-
-        `\n\n🧠 Creator Profile:\n${profilePrompt}`;
-
-
-    }
-
-
-
-
-
-    return response;
 
 
 }
@@ -450,10 +234,497 @@ Tell me what you want to create.`;
 
 
 
+
+
+// =====================================
+// AUDIENCE INTELLIGENCE
+// =====================================
+
+
+if(
+
+    relationshipEngine &&
+
+    brainContext.userId
+
+){
+
+
+    audienceContext =
+
+    relationshipEngine.getRelationship(
+
+        brainContext.userId
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// ADAPTIVE PERSONALIZATION
+// =====================================
+
+
+if(
+
+    adaptiveEngine &&
+
+    brainContext.userId
+
+){
+
+
+    creatorContext =
+
+    adaptiveEngine.personalize(
+
+        brainContext.userId,
+
+        message
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// CREATOR DECISION
+// =====================================
+
+
+if(
+
+    adaptiveBrain &&
+
+    brainContext.profile
+
+){
+
+
+    brainDecision =
+
+    adaptiveBrain.decide(
+
+        brainContext.profile,
+
+        message
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// INTELLIGENCE FUSION
+// =====================================
+
+
+if(
+
+    intelligenceFusion &&
+
+    brainContext.userId
+
+){
+
+
+fusedContext =
+
+intelligenceFusion.fuse(
+
+brainContext.userId,
+
+{
+
+
+identity:
+
+brainContext.profile?.identity || {},
+
+
+memory:
+
+memoryContext || {},
+
+
+audience:
+
+audienceContext || {},
+
+
+personalization:
+
+creatorContext || {},
+
+
+decision:
+
+brainDecision || {},
+
+
+strategy:
+
+brainContext.strategy || {},
+
+
+growth:
+
+brainContext.growth || {}
+
+
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// CORE RESPONSE
+// =====================================
+
+
+switch(intent){
+
+
+
+case "greeting":
+
+
+response =
+
+`Hello 👋
+
+I'm ChatTBM, your AI Content Assistant.
+
+I help creators build:
+
+🎬 Scripts
+✍️ Captions
+🔥 Viral Ideas
+📢 Marketing Content
+
+Let's create something powerful today.`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "script_generation":
+
+
+response =
+
+`🎬 Creator Script
+
+
+🔥 Hook:
+
+Nobody saw this journey coming.
+
+
+🎭 Story:
+
+Show the struggle, the process and the transformation.
+
+
+🚀 Ending:
+
+Make the audience remember your story.`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "caption_generation":
+
+
+response =
+
+`🔥 Caption:
+
+They see the result.
+
+They don't see the discipline behind it.
+
+Every challenge created the person you see today. 🚀`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "idea_generation":
+
+
+response =
+
+`🔥 Content Ideas:
+
+
+1. The story nobody knows
+
+2. Behind the scenes reality
+
+3. My biggest challenge
+
+4. The transformation journey
+
+5. What I learned creating content`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "marketing":
+
+
+response =
+
+`📢 Marketing Strategy:
+
+
+Problem → Solution → Trust → Action
+
+
+Show people why your brand matters.`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+case "creator_strategy":
+
+
+response =
+
+`🚀 Creator Growth Strategy:
+
+
+1. Build recognizable content.
+
+2. Study what performs.
+
+3. Improve your hooks.
+
+4. Understand your audience.
+
+5. Create consistently.`;
+
+
+break;
+
+
+
+
+
+
+
+
+
+default:
+
+
+response =
+
+`I can help you create:
+
+🎬 Scripts
+
+✍️ Captions
+
+🔥 Viral Content Ideas
+
+📢 Marketing Strategies
+
+Tell me your idea.`;
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// INTELLIGENCE OUTPUT
+// =====================================
+
+
+if(memoryContext?.count > 0){
+
+
+response +=
+
+`
+
+🧠 Memory Applied:
+
+${memoryContext.memoryContext.join(", ")}
+
+`;
+
+}
+
+
+
+if(audienceContext){
+
+
+response +=
+
+`
+
+👥 Audience Intelligence Active
+
+`;
+
+}
+
+
+
+if(brainDecision){
+
+
+response +=
+
+`
+
+✨ Creator Style:
+
+${brainDecision.creatorStyle}
+
+
+🎙️ Tone:
+
+${brainDecision.tone}
+
+`;
+
+}
+
+
+
+if(fusedContext){
+
+
+response +=
+
+`
+
+🧠 Creator Brain V7.0 Active:
+
+✓ Identity
+
+✓ Memory
+
+✓ Voice
+
+✓ Growth
+
+✓ Strategy
+
+✓ Adaptive Intelligence
+
+`;
+
+}
+
+
+
+return response;
+
+
+}
+
+
+
+
+
+
+
+
+
 module.exports = {
 
 
-    generateResponse
+generateResponse,
+
+
+connectAdaptiveEngine
 
 
 };

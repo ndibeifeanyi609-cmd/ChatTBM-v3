@@ -1,70 +1,86 @@
 // =====================================
-// ChatTBM V4.6
+// ChatTBM V7
 // API Manager
+//
+// Purpose:
+// Manage every AI provider
 // =====================================
 
-const APIManager = {
+class APIManager {
 
-    mode: "demo", // demo | backend
+    constructor() {
 
-    backendURL: "",
+        this.provider = "gemini";
 
-    async sendMessage(message){
+        this.providers = {
 
-        // Demo mode
-        if(this.mode === "demo"){
+            gemini: null,
 
-            return demoAIResponse(message);
+            grok: null,
 
-        }
+            openai: null
 
-        // Backend mode
-        try{
+        };
 
-            const response = await fetch(
+    }
 
-                this.backendURL + "/api/chat",
+    // ==========================
+    // SET ACTIVE PROVIDER
+    // ==========================
 
-                {
+    setProvider(name) {
 
-                    method:"POST",
+        if (this.providers.hasOwnProperty(name)) {
 
-                    headers:{
-                        "Content-Type":"application/json"
-                    },
-
-                    body:JSON.stringify({
-
-                        message:message
-
-                    })
-
-                }
-
-            );
-
-            if(!response.ok){
-
-                throw new Error("Server Error");
-
-            }
-
-            const data = await response.json();
-
-            return data.reply;
-
-        }
-
-        catch(error){
-
-            console.error(error);
-
-            return "❌ Unable to contact ChatTBM AI server.";
+            this.provider = name;
 
         }
 
     }
 
-};
+    // ==========================
+    // GET ACTIVE PROVIDER
+    // ==========================
 
-console.log("✅ API Manager Loaded");
+    getProvider() {
+
+        return this.provider;
+
+    }
+
+    // ==========================
+    // SEND MESSAGE
+    // ==========================
+
+    async send(message) {
+
+        switch (this.provider) {
+
+            case "gemini":
+
+                return await window.ChatTBM_AI
+                    .sendToGemini(message);
+
+            case "grok":
+
+                return await window.ChatTBM_AI
+                    .sendToGrok(message);
+
+            case "openai":
+
+                return await window.ChatTBM_AI
+                    .sendToOpenAI(message);
+
+            default:
+
+                throw new Error(
+                    "Unknown AI Provider"
+                );
+
+        }
+
+    }
+
+}
+
+window.APIManager = new APIManager();
