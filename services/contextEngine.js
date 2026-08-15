@@ -495,4 +495,4 @@ function hasWords(text,words){
 // =====================================
 
 
-window.contextEngine = contextEngine;
+if (typeof window !== "undefined") { window.contextEngine = contextEngine; }

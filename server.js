@@ -214,6 +214,13 @@ const {
 
 } = require("./services/predictionEngine");
 
+const {
+
+    forecastContent,
+    getForecast
+
+} = require("./forecasting/ForecastIntegration");
+
 
 
 const {
@@ -533,9 +540,6 @@ app.post("/api/creator-memory",(req,res)=>{
         } = req.body;
 
 
-
-
-
         res.json({
 
 
@@ -671,23 +675,46 @@ app.get("/api/creator-brain/:userId",(req,res)=>{
 app.post("/api/analyze",(req,res)=>{
 
 
-    const {
+    try{
 
 
-        content
+        const {
 
 
-    } = req.body;
+            content,
+
+            userId="guest"
+
+
+        } = req.body;
+
+
+        if (typeof content !== "string" || !content.trim()) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                error: "Content is required."
+
+            });
+
+        }
 
 
 
 
 
-    res.json({
+        res.json({
 
 
         success:true,
 
+
+
+        forecast:
+
+        forecastContent(content, userId).forecast,
 
 
         prediction:
@@ -720,8 +747,73 @@ app.post("/api/analyze",(req,res)=>{
 
 
 
-    });
+        });
 
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+            error:error.message
+
+
+        });
+
+
+    }
+
+
+});
+
+
+// =====================================
+// FORECAST RETRIEVAL
+// =====================================
+
+app.get("/api/forecast/:id",(req,res)=>{
+
+    try{
+
+        const { id } = req.params;
+        const { userId } = req.query;
+
+        if (typeof userId !== "string" || !userId.trim()) {
+            return res.status(400).json({
+                success: false,
+                error: "User ID is required."
+            });
+        }
+
+        const result = getForecast(id, userId);
+
+        if (!result.success) {
+            return res.status(404).json(result);
+        }
+
+        return res.json(result);
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+
+    }
 
 });
 
