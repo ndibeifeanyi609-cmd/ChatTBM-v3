@@ -1,0 +1,47 @@
+const assert=require("assert");
+const {AIProviderBoundary,DevelopmentProvider}=require("../services/AIProviderBoundary");
+
+async function runTests(){
+console.log("\n=== AI PROVIDER BOUNDARY TEST ===\n");
+const boundary=new AIProviderBoundary();
+assert.strictEqual(boundary.getProvider(),null);
+console.log("✓ Boundary creation");
+const provider=new DevelopmentProvider();
+const registration=boundary.registerProvider("development",provider);
+assert.strictEqual(registration.success,true);
+assert.strictEqual(boundary.hasProvider("development"),true);
+console.log("✓ Provider registration");
+const selection=boundary.setProvider("development");
+assert.strictEqual(selection.success,true);
+assert.strictEqual(boundary.getProvider(),"development");
+console.log("✓ Provider selection");
+const result=await boundary.generateResponse({message:"Explain photosynthesis.",userId:"test-user"});
+assert.strictEqual(result.success,true);
+assert.strictEqual(result.provider,"development");
+assert.strictEqual(result.model,"ChatTBM Development Provider");
+assert.ok(result.response.includes("Explain photosynthesis."));
+assert.strictEqual(result.metadata.development,true);
+console.log("✓ Request and response contract");
+const invalid=await boundary.generateResponse({message:""});
+assert.strictEqual(invalid.success,false);
+assert.strictEqual(invalid.error.code,"INVALID_REQUEST");
+console.log("✓ Invalid request protection");
+const unknown=boundary.setProvider("unknown");
+assert.strictEqual(unknown.success,false);
+assert.strictEqual(unknown.code,"PROVIDER_NOT_FOUND");
+console.log("✓ Unknown provider protection");
+const failing=new AIProviderBoundary();
+failing.registerProvider("failing",{async generateResponse(){throw new Error("Simulated failure");}});
+failing.setProvider("failing");
+const failure=await failing.generateResponse({message:"Failure test"});
+assert.strictEqual(failure.success,false);
+assert.strictEqual(failure.error.code,"PROVIDER_ERROR");
+console.log("✓ Provider failure normalization");
+const empty=new AIProviderBoundary();
+const unavailable=await empty.generateResponse({message:"No provider test"});
+assert.strictEqual(unavailable.success,false);
+assert.strictEqual(unavailable.error.code,"PROVIDER_UNAVAILABLE");
+console.log("✓ Provider unavailable protection");
+console.log("\n=== AI PROVIDER BOUNDARY VERIFIED ===\n");
+}
+runTests().catch(error=>{console.error("\n=== AI PROVIDER BOUNDARY FAILED ===");console.error(error.message);process.exitCode=1;});

@@ -166,3 +166,71 @@ LearningTypes
 → LearningPersistence
 → LearningRegistry
 → LearningIntegration
+
+## AI Provider Foundation — Provider Boundary
+
+Status: Verified
+
+The canonical AI provider foundation has been implemented and verified across:
+
+- AIProviderBoundary
+- GeminiProvider
+- AI provider boundary tests
+- Gemini provider contract tests
+
+Verified contracts:
+
+- Provider registration
+- Provider selection
+- Active provider retrieval
+- Provider existence checking
+- Provider-independent request validation
+- Canonical provider response normalization
+- Invalid provider response rejection
+- Provider failure normalization
+- Provider unavailable protection
+- Gemini provider contract implementation
+- Gemini model identification
+- Gemini request validation
+- Missing Gemini API key protection
+- Lazy Gemini SDK loading
+- Gemini response normalization
+- Gemini provider failure normalization
+
+Verification status:
+
+- `AIProviderBoundary.js` syntax check passed
+- `GeminiProvider.js` syntax check passed
+- `aiProviderBoundary.test.js` syntax check passed
+- `GeminiProvider.test.js` syntax check passed
+- AI Provider Boundary verification passed
+- Gemini Provider verification passed
+- Live Gemini API execution was intentionally not performed because `AI_API_KEY` is not configured
+
+The AI Provider foundation establishes a provider-independent boundary so higher-level ChatTBM intelligence does not need to depend directly on a specific AI vendor.
+
+## Current Foundation Boundary
+
+The verified architecture currently follows:
+
+ForecastTypes
+→ ForecastObject
+→ ForecastLifecycle
+→ ForecastPersistence
+→ ForecastRegistry
+→ ForecastIntegration
+→ ForecastEvaluation
+→ EvaluationRecord
+→ EvaluationIntegration
+→ EvaluationPersistence
+→ EvaluationRegistry
+
+LearningTypes
+→ LearningObject
+→ LearningLifecycle
+→ LearningPersistence
+→ LearningRegistry
+→ LearningIntegration
+
+AIProviderBoundary
+→ GeminiProvider
