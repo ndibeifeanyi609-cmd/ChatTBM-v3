@@ -114,8 +114,7 @@ app.get(
 // =====================================
 // FRONTEND FALLBACK
 // =====================================
-app.get(
-    "*",
+app.use(
     (req, res, next) => {
         if (
             req.path.startsWith("/api/")
