@@ -2,25 +2,50 @@
 // ChatTBM V7.0
 // AI Engine
 //
+// Provider Application Adapter
+//
+// Responsibilities:
+// - Preserve existing AI Engine contract
+// - Delegate AI execution to AIProviderBoundary
+// - Keep provider-specific logic outside
+//
+// Provider Boundary:
+// - AIProviderBoundary
+//
 // Current Provider:
-// - Google Gemini
+// - GeminiProvider
 //
 // Future:
 // - Grok
 // - Other AI Providers
 // =====================================
 
-const { GoogleGenAI } = require("@google/genai");
+const {
+    AIProviderBoundary
+} = require("./AIProviderBoundary");
+
+const {
+    GeminiProvider
+} = require("./GeminiProvider");
 
 // =====================================
-// INITIALIZE AI
+// INITIALIZE PROVIDER BOUNDARY
 // =====================================
 
-const ai = new GoogleGenAI({
+const providerBoundary =
+    new AIProviderBoundary();
 
-    apiKey: process.env.AI_API_KEY
+const geminiProvider =
+    new GeminiProvider();
 
-});
+providerBoundary.registerProvider(
+    geminiProvider.name,
+    geminiProvider
+);
+
+providerBoundary.setProvider(
+    geminiProvider.name
+);
 
 // =====================================
 // GENERATE AI RESPONSE
@@ -36,51 +61,34 @@ async function generateAIResponse({
 
 }) {
 
-    try {
+    const result =
+        await providerBoundary.generateResponse({
 
-        const prompt =
+            systemPrompt,
 
-`${systemPrompt}
+            message,
 
-User ID:
-${userId}
-
-User:
-${message}`;
-
-        const response =
-
-        await ai.models.generateContent({
-
-            model: "gemini-2.5-flash",
-
-            contents: prompt
+            userId
 
         });
 
-        return (
+    if (!result.success) {
 
-            response.text ||
+        const error =
+            new Error(
+                result.error?.message ||
+                "AI provider failed."
+            );
 
-            "Sorry, I couldn't generate a response."
-
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-
-            "AI Engine Error:",
-
-            error
-
-        );
+        error.code =
+            result.error?.code ||
+            "AI_PROVIDER_ERROR";
 
         throw error;
 
     }
+
+    return result.response;
 
 }
 

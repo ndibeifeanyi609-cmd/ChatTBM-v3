@@ -20,6 +20,7 @@ const provider=this.providers.get(this.activeProvider);
 if(!provider) return {success:false,response:null,provider:this.activeProvider,model:null,metadata:{},error:{code:"PROVIDER_UNAVAILABLE",message:"Active AI provider is unavailable."}};
 try{
 const result=await provider.generateResponse(request);
+if(result&&result.success===false) return {success:false,response:null,provider:result.provider||this.activeProvider,model:result.model||null,metadata:result.metadata||{},error:result.error||{code:"PROVIDER_ERROR",message:"AI provider failed."}};
 if(!result||typeof result.response!=="string"||!result.response.trim()) return {success:false,response:null,provider:this.activeProvider,model:result?.model||null,metadata:result?.metadata||{},error:{code:"INVALID_PROVIDER_RESPONSE",message:"Provider returned an invalid response."}};
 return {success:true,response:result.response,provider:result.provider||this.activeProvider,model:result.model||null,metadata:result.metadata||{}};
 }catch(error){
