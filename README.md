@@ -275,3 +275,78 @@ Integration verification:
 
 The AI Engine is therefore no longer coupled directly to a specific AI vendor. Provider-specific implementation remains behind the canonical AI Provider Boundary.
 
+
+## REG-087 — Learning Boundary
+
+Status: Verified
+
+The REG-087 Learning Boundary has been implemented and verified as the controlled application boundary between legacy learning services and the canonical Learning Foundation.
+
+Boundary:
+
+Legacy Learning Services
+→ LearningBoundary
+→ LearningIntegration
+→ Canonical Learning Foundation
+
+Approved legacy sources:
+
+- learningEngine
+- creatorLearningEngine
+- performanceLearningEngine
+- profileLearningBridge
+
+Canonical learning types supported:
+
+- preference
+- behavior
+- pattern
+- performance
+- strategy
+- knowledge
+
+Verified boundary responsibilities:
+
+- Legacy learning source validation
+- Canonical learning type validation
+- Legacy learning signal translation
+- Canonical Learning schema preservation
+- User ownership preservation
+- Evidence preservation
+- Confidence delegation to canonical normalization
+- Provenance preservation
+- Evaluation reference preservation
+- Delegation to LearningIntegration
+- Canonical persistence through the existing Learning Foundation
+
+Verified boundary protections:
+
+- Unsupported learning sources rejected
+- Invalid learning types rejected
+- Invalid boundary input rejected
+- Canonical integration failures propagated
+- Semantic duplicate identity protection preserved
+- User ownership isolation preserved
+- Lifecycle normalization remains owned by LearningObject
+- Persistence remains owned by LearningPersistence
+- Registry authority remains unchanged
+
+Architecture rule:
+
+The Learning Boundary does not replace or modify legacy learning engines. It provides a controlled adapter path into the canonical Learning Foundation.
+
+Verification status:
+
+- LearningBoundary syntax verification passed
+- Source validation passed
+- Type validation passed
+- Canonical translation verification passed
+- Invalid input failure testing passed
+- Unauthorized source failure testing passed
+- Canonical integration verification passed
+- Confidence normalization verification passed
+- Semantic duplicate protection verified
+- Ownership isolation verified
+- Integration failure propagation verified
+
+The REG-087 Learning Boundary is now a verified application boundary without bypassing the canonical Learning Integration, Registry, Persistence, ownership, lifecycle, or identity protections.
