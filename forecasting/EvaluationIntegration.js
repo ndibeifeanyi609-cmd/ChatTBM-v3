@@ -1,32 +1,61 @@
 const {
-    isCanonicalEvaluationRecord
-} = require("./EvaluationRecord");
-
-const {
-    getRegisteredForecast
+    ForecastRegistry
 } = require("./ForecastRegistry");
 
-function registerEvaluation(evaluation) {
-    if (!isCanonicalEvaluationRecord(evaluation)) {
+// =====================================
+// ChatTBM REG-087
+// Evaluation / Forecast Integration Boundary
+//
+// Purpose:
+// - Validate canonical Evaluation records
+// - Resolve referenced Forecasts through the
+//   canonical Forecast Registry
+// - Enforce Evaluation/Forecast ownership
+// - Preserve Forecast Registry authority
+//
+// This boundary does NOT:
+// - create forecasts
+// - update forecasts
+// - delete forecasts
+// - persist evaluations
+// - bypass ForecastRegistry
+// - bypass EvaluationRegistry
+// =====================================
+
+function registerEvaluation(
+    evaluation,
+    registry
+) {
+    if (!evaluation) {
         return {
             success: false,
             evaluation: null,
             forecast: null,
-            error: "Invalid canonical evaluation."
+            error: "Evaluation is required."
         };
     }
 
-    const forecastResult =
-        getRegisteredForecast(
-            evaluation.forecastId,
-            evaluation.userId
+    const forecastRegistry =
+        registry instanceof ForecastRegistry
+            ? registry
+            : null;
+
+    if (!forecastRegistry) {
+        return {
+            success: false,
+            evaluation: null,
+            forecast: null,
+            error:
+                "Forecast Registry dependency is required."
+        };
+    }
+
+    const forecast =
+        forecastRegistry.getById(
+            evaluation.forecastId
         );
 
-    if (
-        !forecastResult ||
-        !forecastResult.success ||
-        !forecastResult.forecast
-    ) {
+    if (!forecast) {
         return {
             success: false,
             evaluation: null,
@@ -35,24 +64,29 @@ function registerEvaluation(evaluation) {
         };
     }
 
-    const forecast =
-        forecastResult.forecast;
-
-    if (forecast.userId !== evaluation.userId) {
+    if (
+        forecast.userId !==
+        evaluation.userId
+    ) {
         return {
             success: false,
             evaluation: null,
             forecast: null,
-            error: "Evaluation ownership does not match forecast ownership."
+            error:
+                "Evaluation ownership does not match forecast ownership."
         };
     }
 
-    if (forecast.id !== evaluation.forecastId) {
+    if (
+        forecast.id !==
+        evaluation.forecastId
+    ) {
         return {
             success: false,
             evaluation: null,
             forecast: null,
-            error: "Evaluation forecast reference mismatch."
+            error:
+                "Evaluation forecast reference mismatch."
         };
     }
 
@@ -62,6 +96,10 @@ function registerEvaluation(evaluation) {
         forecast
     };
 }
+
+// =====================================
+// EXPORTS
+// =====================================
 
 module.exports = {
     registerEvaluation

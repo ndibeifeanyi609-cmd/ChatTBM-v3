@@ -357,3 +357,70 @@ Verification status:
 - Integration failure propagation verified
 
 The REG-087 Learning Boundary is now a verified application boundary without bypassing the canonical Learning Integration, Registry, Persistence, ownership, lifecycle, or identity protections.
+
+
+### REG-087 — Learning / Evaluation Boundary
+
+Status: Verified
+
+The REG-087 Learning / Evaluation Boundary has been implemented and verified as the controlled reference boundary between canonical Learning objects and canonical Evaluation records.
+
+Architecture:
+
+Learning
+→ LearningEvaluationBoundary
+→ EvaluationRegistry
+→ EvaluationPersistence
+
+Evaluation
+→ EvaluationIntegration
+→ ForecastRegistry
+
+Verified responsibilities:
+
+- Learning evaluation reference validation
+- Evaluation reference normalization
+- Whitespace normalization
+- Duplicate reference normalization
+- Canonical Evaluation Registry resolution
+- Learning/Evaluation ownership enforcement
+- Evaluation/Forecast ownership enforcement
+- Forecast reference validation
+- Evaluation Registry authority preservation
+- Forecast Registry authority preservation
+
+Verified protections:
+
+- Invalid Learning input rejected
+- Empty evaluation references safely accepted
+- Missing Evaluation rejected
+- Unauthorized Evaluation reference rejected
+- Malformed evaluation references filtered
+- Duplicate and whitespace-padded references normalized
+- Missing Forecast rejected
+- Missing Forecast Registry dependency rejected
+- Evaluation/Forecast ownership mismatch rejected
+- Invalid Evaluation input rejected
+
+Failure-testing verification:
+
+- Forecast Registry dependency failure passed
+- Evaluation/Forecast ownership mismatch failure passed
+- Missing Forecast failure passed
+- Invalid Evaluation input failure passed
+
+Boundary test verification:
+
+- learningEvaluationBoundary.test.js syntax verification passed
+- Learning / Evaluation boundary regression passed
+- Evaluation reference normalization passed
+- Evaluation ownership protection passed
+- Missing Evaluation rejection passed
+- Malformed reference filtering passed
+- Evaluation Registry authority verification passed
+
+Architecture rule:
+
+The Learning / Evaluation Boundary does not create, update, delete, or persist Evaluations. Evaluation authority remains with EvaluationRegistry and EvaluationPersistence. Forecast authority remains with ForecastRegistry. The boundary only validates and resolves canonical references while preserving ownership and registry authority.
+
+The REG-087 Learning / Evaluation Boundary is therefore a verified controlled reference boundary between the canonical Learning Foundation, Evaluation Foundation, and Forecast Foundation.

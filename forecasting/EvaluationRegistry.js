@@ -13,7 +13,10 @@ const {
     deleteEvaluation
 } = require("./EvaluationPersistence");
 
-function registerEvaluationRecord(evaluation) {
+function registerEvaluationRecord(
+    evaluation,
+    forecastRegistry
+) {
     if (!isCanonicalEvaluationRecord(evaluation)) {
         return {
             success: false,
@@ -24,7 +27,10 @@ function registerEvaluationRecord(evaluation) {
     }
 
     const integration =
-        registerEvaluation(evaluation);
+        registerEvaluation(
+            evaluation,
+            forecastRegistry
+        );
 
     if (!integration.success) {
         return integration;
@@ -33,7 +39,10 @@ function registerEvaluationRecord(evaluation) {
     return saveEvaluation(evaluation);
 }
 
-function getRegisteredEvaluation(id, userId) {
+function getRegisteredEvaluation(
+    id,
+    userId
+) {
     const evaluation =
         getEvaluation(id);
 
