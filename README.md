@@ -327,6 +327,11 @@ Verified boundary protections:
 - Canonical integration failures propagated
 - Semantic duplicate identity protection preserved
 - User ownership isolation preserved
+- Ownership reassignment protection preserved
+- Invalid lifecycle rejection preserved
+- Invalid confidence safely normalized
+- User-scoped learning isolation preserved
+- Failure-test state cleanup verified
 - Lifecycle normalization remains owned by LearningObject
 - Persistence remains owned by LearningPersistence
 - Registry authority remains unchanged
@@ -338,6 +343,8 @@ The Learning Boundary does not replace or modify legacy learning engines. It pro
 Verification status:
 
 - LearningBoundary syntax verification passed
+- learningBoundary.test.js syntax verification passed
+- learningBoundary.failure.test.js syntax verification passed
 - Source validation passed
 - Type validation passed
 - Canonical translation verification passed
