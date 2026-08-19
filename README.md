@@ -424,3 +424,143 @@ Architecture rule:
 The Learning / Evaluation Boundary does not create, update, delete, or persist Evaluations. Evaluation authority remains with EvaluationRegistry and EvaluationPersistence. Forecast authority remains with ForecastRegistry. The boundary only validates and resolves canonical references while preserving ownership and registry authority.
 
 The REG-087 Learning / Evaluation Boundary is therefore a verified controlled reference boundary between the canonical Learning Foundation, Evaluation Foundation, and Forecast Foundation.
+
+
+### REG-087 — Learning Application Boundary
+
+Status: Verified
+
+The REG-087 Learning Application package has been implemented and verified as the controlled execution boundary between canonical Learning objects and target consumers.
+
+Architecture:
+
+Learning
+→ LearningApplicationBoundary
+→ ApplicationObject
+→ ApplicationPersistence
+→ ApplicationRegistry
+→ Target Consumer
+→ ApplicationLifecycle
+→ ApplicationPersistence
+→ ApplicationRegistry
+
+Canonical Application components:
+
+- ApplicationObject
+- ApplicationLifecycle
+- ApplicationPersistence
+- ApplicationRegistry
+- LearningApplicationBoundary
+
+Verified responsibilities:
+
+- Canonical ApplicationRecord creation
+- Deterministic application identity
+- Application persistence
+- Application registry registration
+- Persistence idempotency
+- Legitimate lifecycle updates
+- Application identity conflict protection
+- Canonical lifecycle transition handling
+- Injected target consumer invocation
+- Consumer result normalization
+- Successful application completion
+- Failed application handling
+- Consumer exception normalization
+- Final application state persistence
+- Final application registry synchronization
+- Learning object immutability
+
+Verified application lifecycle behavior:
+
+- REQUESTED → APPLIED
+- REQUESTED → FAILED
+- Invalid lifecycle transitions remain controlled by ApplicationLifecycle
+
+Verified persistence protections:
+
+- Deterministic identity generated from:
+  - userId
+  - learningId
+  - targetType
+  - targetId
+  - operation
+- Equivalent application records are idempotent
+- Legitimate lifecycle changes update the existing application identity
+- Application identity remains stable during lifecycle updates
+- Identity conflicts are detected
+- Persisted application state can be retrieved
+- Application store cleanup verified
+
+Verified registry protections:
+
+- Canonical ApplicationRecord validation
+- Required-field validation
+- Application version validation
+- Application lifecycle-state validation
+- Application identity comparison
+- Idempotent registration
+- Legitimate lifecycle updates
+- Identity conflict detection
+- Canonical application lookup
+- Registry cleanup verification
+
+Verified boundary protections:
+
+- Invalid boundary input rejected
+- Missing Learning object rejected
+- Missing target consumer rejected
+- Invalid target consumer rejected
+- Target consumer must implement apply()
+- Learning objects are passed without mutation
+- Target consumer execution remains outside the canonical Learning object
+- Target-specific logic remains owned by the injected consumer
+- No external API access is performed by the boundary
+
+Execution verification:
+
+- Successful target consumer execution produced APPLIED
+- Target rejection produced FAILED
+- Target consumer exceptions produced FAILED
+- Consumer failure information was preserved
+- Final application state was persisted
+- Final application state was registered
+- Application identity remained stable
+- Learning object immutability was preserved
+
+Failure-testing verification:
+
+- Invalid boundary objects rejected
+- Null and undefined inputs rejected
+- Array inputs rejected
+- Primitive inputs rejected
+- Missing Learning rejected
+- Missing target consumer rejected
+- Invalid target consumer rejected
+- Falsy consumer result produced FAILED
+- Consumer exception produced FAILED
+- Target rejection information preserved
+- Final failed state persisted
+- Final failed state registered
+
+Verification status:
+
+- ApplicationPersistence syntax verification passed
+- ApplicationPersistence deterministic identity verification passed
+- ApplicationPersistence lifecycle update verification passed
+- ApplicationRegistry syntax verification passed
+- ApplicationRegistry validation verification passed
+- ApplicationRegistry lifecycle update verification passed
+- LearningApplicationBoundary syntax verification passed
+- Learning Application success-path verification passed
+- Learning Application failure-path verification passed
+- Learning Application exception-path verification passed
+- Learning Application boundary-input
+   verification passed
+- Learning Application failure testing passed
+
+Architecture rule:
+
+The Learning Application Boundary does not mutate canonical Learning objects and does not implement Memory, Profile, Context, or other target-consumer internals. Target behavior is supplied through an injected consumer contract. Application identity, lifecycle, persistence, and registry authority remain inside the canonical Application package.
+
+The REG-087 Learning Application Boundary is therefore a verified controlled application boundary between the canonical Learning Foundation and target consumers without bypassing application identity, lifecycle, persistence, registry, or Learning ownership protections.
