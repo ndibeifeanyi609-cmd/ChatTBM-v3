@@ -564,3 +564,121 @@ Architecture rule:
 The Learning Application Boundary does not mutate canonical Learning objects and does not implement Memory, Profile, Context, or other target-consumer internals. Target behavior is supplied through an injected consumer contract. Application identity, lifecycle, persistence, and registry authority remain inside the canonical Application package.
 
 The REG-087 Learning Application Boundary is therefore a verified controlled application boundary between the canonical Learning Foundation and target consumers without bypassing application identity, lifecycle, persistence, registry, or Learning ownership protections.
+
+## REG-087 — Assistant Application Boundary
+
+Status: Verified
+
+The canonical Assistant application boundary has been implemented and verified as the controlled execution path between the Chat API and the canonical AI provider application adapter.
+
+Architecture:
+
+Chat API
+→ Chat Controller
+→ Assistant Engine
+→ AI Engine
+→ AIProviderBoundary
+→ GeminiProvider
+
+Canonical Assistant components:
+
+- Chat Controller
+- Assistant Engine
+- AI Engine
+- AIProviderBoundary
+- GeminiProvider
+
+Verified Assistant Engine responsibilities:
+
+- Assistant request validation
+- User identity normalization
+- Guest identity normalization
+- Message normalization
+- Controlled AI request construction
+- AI execution delegation to `aiEngine`
+- Controlled assistant failure normalization
+- Provider-specific logic remains outside the Assistant Engine
+- Provider state remains outside the Assistant Engine
+- Memory, Learning, Forecast, Evaluation, and Persistence remain outside the Assistant Engine
+
+Verified request protections:
+
+- Invalid assistant request rejected
+- Missing assistant message rejected
+- Invalid context rejected
+- Invalid memory rejected
+- Invalid intelligence rejected
+- Whitespace message normalization verified
+- Missing user identity normalized to `guest`
+
+Verified AI request contract:
+
+- Canonical system prompt generated
+- Normalized message preserved
+- Normalized user identity preserved
+- AI execution delegated through `generateAIResponse()`
+
+Verified failure behavior:
+
+- Provider-unavailable failure propagated from `GeminiProvider`
+- `AIProviderBoundary` preserved controlled provider failure
+- `aiEngine` converted provider failure into controlled AI Engine error
+- Assistant Engine returned controlled failure result
+- No false-success response was produced
+
+## Chat Controller Boundary
+
+Status: Verified
+
+The Chat Controller provides the HTTP application boundary for ChatTBM.
+
+Endpoint:
+
+- `POST /api/chat`
+
+Verified responsibilities:
+
+- Receive HTTP requests
+- Validate chat message input
+- Invoke Assistant Engine
+- Translate controlled Assistant failures into HTTP responses
+- Return canonical success responses
+- Prevent false-success responses
+
+Verified HTTP protections:
+
+- Empty message → HTTP `400`
+- Missing message → HTTP `400`
+- Non-string message → HTTP `400`
+- Whitespace-only message → HTTP `400`
+- Provider-unavailable Assistant failure → HTTP `503`
+- Unexpected controller failure → HTTP `500`
+
+Verified response behavior:
+
+- Successful Assistant execution returns HTTP success
+- Controlled Assistant failure returns `success: false`
+- Provider failure information remains available to the application boundary
+- False-success responses are prevented
+
+Verification status:
+
+- `assistantEngine.js` syntax verification passed
+- `chatController.js` syntax verification passed
+- `aiEngine.js` syntax verification passed
+- `AIProviderBoundary.js` syntax verification passed
+- `GeminiProvider.js` syntax verification passed
+- Assistant Engine regression passed
+- Chat Controller regression passed
+- Server startup verification passed
+- `/api/health` HTTP verification passed
+- `/api/chat` invalid-request verification passed
+- `/api/chat` provider-failure verification passed
+
+Live AI execution was intentionally not performed because the Gemini API configuration is not available in the current environment.
+
+Architecture rule:
+
+The Chat Controller does not execute provider logic directly. The Assistant Engine does not access provider SDKs or own provider state. AI provider execution remains behind the canonical AIProviderBoundary and GeminiProvider.
+
+The REG-087 Assistant Application Boundary is therefore a verified controlled application path from the HTTP Chat API through the Assistant Engine and AI Engine into the canonical AI Provider Boundary without bypassing provider, request-validation, or failure-normalization protections.

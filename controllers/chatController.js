@@ -1,3 +1,5 @@
+'use strict';
+
 // =====================================
 // ChatTBM V7.0
 // Chat Controller
@@ -6,13 +8,11 @@
 // - Receive requests
 // - Validate input
 // - Call Assistant Engine
-// - Return response
+// - Translate Assistant results to HTTP
 // =====================================
 
 const {
-
     generateReply
-
 } = require("../services/assistantEngine");
 
 // =====================================
@@ -24,11 +24,8 @@ async function chatHandler(req, res) {
     try {
 
         const {
-
             message,
-
             userId = "guest"
-
         } = req.body;
 
         // ===============================
@@ -52,19 +49,43 @@ async function chatHandler(req, res) {
         }
 
         // ===============================
-        // AI RESPONSE
+        // ASSISTANT EXECUTION
         // ===============================
 
         const reply = await generateReply({
 
             userId,
-
             message
 
         });
 
         // ===============================
-        // RESPONSE
+        // CONTROLLED ASSISTANT FAILURE
+        // ===============================
+
+        if (
+            !reply ||
+            reply.success === false
+        ) {
+
+            return res.status(503).json({
+
+                success: false,
+
+                version: "7.0.0",
+
+                error:
+                    reply?.error || {
+                        code: "ASSISTANT_ERROR",
+                        message: "Assistant execution failed."
+                    }
+
+            });
+
+        }
+
+        // ===============================
+        // SUCCESS RESPONSE
         // ===============================
 
         return res.json({
@@ -73,7 +94,7 @@ async function chatHandler(req, res) {
 
             version: "7.0.0",
 
-            response: reply
+            response: reply.response
 
         });
 
@@ -90,9 +111,9 @@ async function chatHandler(req, res) {
             message: "Unable to process request.",
 
             error:
-            process.env.NODE_ENV === "development"
-                ? error.message
-                : undefined
+                process.env.NODE_ENV === "development"
+                    ? error.message
+                    : undefined
 
         });
 
@@ -105,7 +126,5 @@ async function chatHandler(req, res) {
 // =====================================
 
 module.exports = {
-
     chatHandler
-
 };
