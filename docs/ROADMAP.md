@@ -133,6 +133,22 @@ Learning
 → Target Consumer
 → ApplicationLifecycle
 
+Verified protections include:
+
+- Canonical application identity
+- Persistence idempotency
+- Registry identity conflict protection
+- Terminal-state authority
+- APPLIED terminal no-re-execution
+- FAILED terminal no-re-execution
+- REJECTED terminal no-re-execution
+- CONFLICTED terminal no-re-execution
+- Invalid lifecycle transition rejection
+- Invalid application construction rejection
+- Consumer failure normalization
+- Consumer result normalization
+- Boundary registry conflict rejection
+
 ### AI Provider Foundation
 
 AIProviderBoundary

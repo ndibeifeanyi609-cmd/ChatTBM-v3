@@ -376,6 +376,23 @@ An ApplicationRecord must define:
 Application identity must remain stable throughout legitimate
 lifecycle transitions.
 
+Application identity is idempotent.
+
+If an ApplicationRecord already exists for the same canonical
+application identity and has reached a terminal lifecycle state,
+a repeated application request must return the existing
+ApplicationRecord without re-executing the target consumer.
+
+Terminal application states are authoritative for their
+application identity.
+
+A repeated request must not transition or re-execute an
+APPLIED, REJECTED, FAILED, or CONFLICTED ApplicationRecord.
+
+A request that conflicts with the canonical application identity
+must be classified as a conflict and must not execute the target
+consumer.
+
 The canonical Application package owns:
 
 - Application object creation

@@ -32,7 +32,7 @@ const {
 } = require('./ApplicationLifecycle');
 
 const {
-  createApplicationKey,
+  createApplicationKey,    getApplication,
   saveApplication
 } = require('./ApplicationPersistence');
 
@@ -107,6 +107,23 @@ function applyLearning(data) {
     createApplicationInput(data)
   );
 
+  const applicationKey = createApplicationKey(application);
+  const existingApplication = getApplication(applicationKey);
+
+  const terminalStates = [
+    APPLICATION_STATES.APPLIED,
+    APPLICATION_STATES.REJECTED,
+    APPLICATION_STATES.FAILED,
+    APPLICATION_STATES.CONFLICTED
+  ];
+
+  if (existingApplication && terminalStates.includes(existingApplication.status)) {
+    return {
+      application: { ...existingApplication },
+      applicationKey,
+      success: existingApplication.status === APPLICATION_STATES.APPLIED
+    };
+  }
   const persistenceResult = saveApplication(application);
 
   if (persistenceResult.conflict) {
@@ -125,9 +142,6 @@ function applyLearning(data) {
 
   let currentApplication = registryResult.application;
 
-  const applicationKey = createApplicationKey(
-    currentApplication
-  );
 
   let consumerResult;
 

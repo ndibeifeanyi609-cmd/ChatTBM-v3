@@ -62,7 +62,18 @@ function identitiesAreEquivalent(existing, incoming) {
 }
 
 function applicationRecordsAreEquivalent(existing, incoming) {
-  return JSON.stringify(existing) === JSON.stringify(incoming);
+  if (!existing || !incoming) {
+    return false;
+  }
+
+  const existingComparable = { ...existing };
+  const incomingComparable = { ...incoming };
+
+  delete existingComparable.id;
+  delete incomingComparable.id;
+
+  return JSON.stringify(existingComparable) ===
+    JSON.stringify(incomingComparable);
 }
 
 function saveApplication(application) {
