@@ -730,7 +730,260 @@ Contract.
 
 ---
 
-## 26. Final Canonical Contract Rule
+## 26. Memory Contract
+
+The canonical Memory package owns durable user-scoped memory retained for
+future interaction.
+
+Memory is distinct from Learning.
+
+Learning represents canonical learning derived from evidence, evaluation,
+behavior, patterns, performance, strategy, or knowledge.
+
+Memory represents canonical retained information belonging to a user or
+approved domain context.
+
+A legacy memory service does not become canonical merely because it stores,
+extracts, ranks, retrieves, or maintains memory-like information.
+
+### 26.1 Memory Object
+
+A canonical Memory object must define:
+
+- Memory identity
+- Version
+- User ownership
+- Memory type
+- Subject or semantic key
+- Memory value
+- Provenance where applicable
+- Lifecycle state
+- Creation timestamp
+- Update timestamp
+
+A Memory object must satisfy the Canonical Object Contract.
+
+Legacy memory fields must not be promoted into canonical Memory without
+architectural justification.
+
+### 26.2 Memory Identity
+
+Memory identity must be defined by the Memory domain.
+
+Equivalent semantic memory for the same ownership scope must not create
+uncontrolled duplicate canonical state.
+
+Duplicate memory identity must be classified according to the applicable
+Identity Contract as:
+
+- Idempotent
+- Conflict
+- Invalid
+
+Memory identity must remain stable through legitimate lifecycle updates.
+
+An identity conflict must not silently overwrite existing canonical Memory.
+
+### 26.3 Memory Ownership
+
+User-scoped Memory belongs to its owning user.
+
+Memory creation, retrieval, update, and deletion must preserve ownership.
+
+Possession of a Memory identifier does not establish authorization.
+
+Unauthorized access or modification must fail through the canonical Memory
+boundary or registry authority.
+
+### 26.4 Memory Types
+
+The canonical Memory package must define an explicit set of permitted
+Memory types.
+
+Legacy categories such as identity, project, preference, goal, skill,
+platform, file, task, and fact are discovery evidence only and do not
+automatically become canonical Memory types.
+
+The canonical type model must be established before implementation.
+
+### 26.5 Memory Lifecycle
+
+The Memory package must define:
+
+- Initial lifecycle state
+- Allowed lifecycle states
+- Valid transitions
+- Invalid transitions
+- Terminal states
+
+Lifecycle state must be controlled by the canonical Memory lifecycle
+authority.
+
+Higher-level components must not freely mutate Memory lifecycle state.
+
+Terminal Memory states must remain terminal unless a future Contract
+explicitly establishes a controlled transition.
+
+### 26.6 Memory Persistence
+
+Canonical Memory persistence is authoritative for durable Memory state.
+
+Persistence must preserve:
+
+- Identity
+- Ownership
+- Version
+- Lifecycle
+- Required canonical fields
+- Idempotency behavior
+- Conflict behavior
+
+Memory persistence must define save, retrieval, update, deletion, duplicate,
+conflict, and failure behavior.
+
+Higher-level services must not replace canonical Memory persistence with
+ad-hoc storage.
+
+### 26.7 Memory Registry
+
+Where a canonical Memory registry is established, it is authoritative for
+Memory registration and domain-scoped retrieval.
+
+The registry must preserve:
+
+- Ownership
+- Identity
+- Duplicate handling
+- Conflict handling
+- Legitimate updates
+- Deletion
+- Cleanup
+
+No legacy memory store may become a competing authoritative Memory registry.
+
+### 26.8 Memory Retrieval
+
+Memory retrieval and ranking are consumers of canonical Memory authority.
+
+A retrieval or ranking component must not create competing authoritative
+Memory state.
+
+Retrieval must resolve Memory through the approved canonical authority.
+
+Memory context construction must consume canonical Memory rather than
+becoming an alternative Memory store.
+
+### 26.9 Learning Integration
+
+Memory and Learning are distinct canonical domains.
+
+A Memory component may consume approved Learning references or results where
+the future integration contract permits it.
+
+Memory integration must not mutate canonical Learning objects directly.
+
+Learning integration must resolve Learning through the approved Learning
+authority and preserve Learning ownership, identity, lifecycle, persistence,
+and registry rules.
+
+Learning must not become an implicit competing Memory store.
+
+### 26.10 Legacy Memory Services
+
+The following legacy capabilities are discovery evidence only:
+
+- Creator memory storage
+- Memory extraction
+- Memory ranking
+- Memory retrieval
+- Memory intelligence
+- Creator memory profile
+
+These services must remain non-canonical unless explicitly integrated
+through an approved canonical Memory boundary.
+
+Legacy memory services must not be treated as authoritative merely because
+they already exist in the repository.
+
+### 26.11 Memory Boundary
+
+A canonical Memory Boundary, if required by the approved Design, must:
+
+- Validate incoming Memory input
+- Resolve approved references
+- Preserve Memory identity
+- Preserve user ownership
+- Delegate lifecycle authority
+- Delegate persistence authority
+- Delegate registry authority
+- Normalize controlled failures
+
+The boundary must not become an alternative Memory store.
+
+### 26.12 Memory Failure Behavior
+
+Memory failure behavior must distinguish, where applicable, between:
+
+- Invalid input
+- Missing required data
+- Missing Memory
+- Unauthorized ownership
+- Invalid reference
+- Duplicate semantic identity
+- Identity conflict
+- Invalid lifecycle transition
+- Persistence failure
+- Registry failure
+- Integration failure
+- Unexpected internal failure
+
+Memory failures must not silently corrupt canonical state.
+
+A failure must not be converted into a false successful Memory result.
+
+### 26.13 Memory Verification
+
+Before the Memory package may be described as canonical, verification must
+establish, where applicable:
+
+- Canonical Memory creation
+- Required-field validation
+- Type validation
+- Identity behavior
+- Ownership isolation
+- Lifecycle behavior
+- Persistence behavior
+- Registry behavior
+- Boundary behavior
+- Retrieval behavior
+- Learning integration behavior
+- Failure behavior
+
+Failure testing must explicitly attempt to violate critical Memory protections.
+
+The existence of legacy memory tests or successful legacy execution does not
+constitute canonical Memory verification.
+
+### 26.14 Memory External API Rule
+
+The canonical Memory package does not require an external API merely to
+establish Memory architecture.
+
+Any future external dependency must satisfy the External API Contract and
+must have an explicit architectural purpose, owning boundary, integration
+point, credential requirements, availability behavior, failure behavior,
+verification strategy, security considerations, and configuration
+requirements.
+
+### 26.15 Memory Documentation
+
+Memory documentation must describe only verified canonical behavior.
+
+Legacy memory capabilities must not be represented as canonical Memory
+capabilities until the applicable Contract, Design, Implementation,
+Verification, Failure Testing, and Documentation stages are complete.
+
+## 27. Final Canonical Contract Rule
 
 The ChatTBM Contract establishes the following mandatory rule:
 
