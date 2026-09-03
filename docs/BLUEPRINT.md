@@ -385,7 +385,7 @@ If a proposed package duplicates an existing canonical responsibility, the dupli
 
 ## 19. Current Verified State
 
-As of REG-087, the verified canonical framework includes:
+As of REG-089, the verified canonical framework includes:
 
 - Forecast Foundation
 - Evaluation Foundation
@@ -395,6 +395,7 @@ As of REG-087, the verified canonical framework includes:
 - Learning Application Boundary
 - AI Provider Boundary
 - AI Engine Provider Integration
+- Profile Foundation
 
 The repository is therefore moving from isolated feature development toward a controlled framework architecture.
 

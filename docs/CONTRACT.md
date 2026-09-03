@@ -983,7 +983,95 @@ Legacy memory capabilities must not be represented as canonical Memory
 capabilities until the applicable Contract, Design, Implementation,
 Verification, Failure Testing, and Documentation stages are complete.
 
-## 27. Final Canonical Contract Rule
+## 27. Profile Contract
+
+### 27.1 Profile Object
+- The canonical Profile package owns user-scoped Profile objects representing canonical user identity and approved Profile attributes.
+- A Profile object MUST contain identity, version, user ownership, type, subject, value, provenance, lifecycle, createdAt, and updatedAt.
+- Profile object structure MUST remain aligned with the canonical ProfileObject implementation.
+- Profile is distinct from Memory and Learning. A Profile object MUST NOT become a substitute for generic Memory or Learning records.
+
+### 27.2 Profile Identity
+- Profile identity is owned by the canonical Profile domain and MUST satisfy the generic Identity Contract.
+- Profile identity MUST be deterministic and stable across legitimate lifecycle updates.
+- Equivalent semantic operations MUST NOT create uncontrolled duplicate canonical Profile state.
+- Identity conflicts MUST NOT silently overwrite an existing canonical Profile object.
+
+### 27.3 Profile Attributes
+- Profile attributes MUST use the canonical Profile type attribute and an explicit subject defining their semantic meaning.
+- The value of an attribute MUST represent the canonical value accepted by the Profile domain.
+- Legacy fields such as niche, tone, audience, writing style, creator name, and response preference are discovery evidence only and MUST NOT automatically become canonical Profile attributes.
+
+### 27.4 Profile Ownership
+- Canonical Profile state belongs to its owning user.
+- User ownership MUST be preserved across Profile creation, persistence, retrieval, registration, update, and integration.
+- A Profile identifier MUST NOT by itself be treated as proof of authorization to access or modify another user’s state.
+
+### 27.5 Profile Provenance
+- Profile provenance MUST identify the source of a Profile value where provenance is available.
+- Provenance identifies origin but MUST NOT by itself confer canonical authority.
+- Provenance MUST be preserved when Profile state is derived through an approved integration boundary.
+
+### 27.6 Profile Lifecycle
+- Profile lifecycle states MUST use the canonical Profile lifecycle: proposed, active, superseded, rejected.
+- Lifecycle transitions MUST be controlled by the canonical Profile lifecycle authority.
+- Lifecycle changes MUST NOT silently bypass canonical Profile persistence or registry rules.
+
+### 27.7 Profile Authority and Precedence
+- The canonical Profile domain is the authority for canonical Profile state.
+- Provenance, authority, derivation, and resolution MUST remain distinct concepts.
+- Legacy, inferred, learned, feedback-derived, or runtime-generated values MUST NOT silently override an authoritative canonical Profile value.
+- Competing Profile values MUST be resolved through an explicit authority and precedence rule; accidental last-write-wins behavior MUST NOT establish canonical authority.
+
+### 27.8 Profile Persistence
+- Canonical Profile persistence MUST preserve Profile identity, ownership, type, subject, value, provenance, lifecycle, and version information.
+- Persistence MUST NOT silently overwrite conflicting canonical Profile identity or ownership state.
+
+### 27.9 Profile Registry
+- The canonical Profile registry MUST register and retrieve canonical Profile objects without creating a competing Profile store.
+- Registry operations MUST preserve Profile identity and ownership.
+
+### 27.10 Profile Retrieval
+- Canonical Profile retrieval MUST return only canonical Profile state that satisfies ownership and lifecycle rules.
+- Retrieval MUST NOT silently promote legacy, inferred, learned, or runtime-derived values into canonical Profile state.
+
+### 27.11 Learning Integration
+- Profile and Learning remain distinct canonical domains.
+- Learning MAY provide candidate Profile information only through an approved Profile integration boundary.
+- Learning MUST NOT directly mutate Profile lifecycle, persistence, registry, or ownership state.
+- Approved Learning-derived Profile values MUST retain provenance and MUST follow Profile authority and precedence rules.
+- Learning integration MUST NOT establish a competing Profile store.
+
+### 27.12 Legacy Profile/Identity Services
+- Legacy Profile, Identity, Creator Profile, Creator Identity, Brand Voice, and Creator Memory services remain non-canonical unless explicitly integrated through the approved canonical Profile boundary.
+- Legacy services MUST NOT become canonical merely because they store, derive, rank, retrieve, or mutate Profile-shaped information.
+- Existing legacy fields and mutation paths are discovery evidence and MUST NOT be treated as canonical Profile authority without explicit contract approval.
+
+### 27.13 Profile Boundary
+- All canonical Profile reads and writes MUST cross the approved Profile boundary.
+- Legacy components MUST NOT bypass the canonical Profile boundary to establish or mutate canonical Profile state.
+- Boundary integration MUST preserve identity, ownership, provenance, lifecycle, and authority rules.
+
+### 27.14 Profile Failure Behavior
+- Invalid Profile type, identity, ownership, lifecycle, or required structural data MUST fail explicitly.
+- Identity conflicts MUST NOT silently overwrite canonical Profile state.
+- Ownership conflicts MUST NOT silently reassign or expose canonical Profile state.
+- Unsupported legacy or inferred values MUST NOT be silently promoted to canonical Profile state.
+
+### 27.15 Profile Verification
+- Verification MUST cover Profile identity, ownership, attributes, provenance, lifecycle, authority and precedence, persistence, registry, retrieval, boundary behavior, Learning integration, and failure behavior.
+- Verification MUST test canonical behavior rather than assumptions about legacy implementations.
+- Canonical Profile verification MUST confirm that competing legacy stores cannot silently establish canonical authority.
+
+### 27.16 Profile External API Rule
+- An external API surface is NOT required merely to establish the canonical Profile architecture.
+- Any future external Profile API MUST expose canonical Profile behavior without creating a competing Profile authority or bypassing canonical validation and ownership rules.
+
+### 27.17 Profile Documentation
+- Documentation MUST describe verified canonical Profile behavior, ownership, authority, lifecycle, integration boundaries, and failure behavior.
+- Legacy behavior MUST be documented as legacy unless it has been explicitly incorporated through the canonical Profile contract.
+
+## 28. Final Canonical Contract Rule
 
 The ChatTBM Contract establishes the following mandatory rule:
 
