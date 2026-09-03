@@ -432,8 +432,6 @@ Future REG packages must extend the framework without bypassing established auth
 
 Potential future packages may address areas such as:
 
-- Memory
-- Profile
 - Context
 - Conversation
 - Intelligence orchestration
