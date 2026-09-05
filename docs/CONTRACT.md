@@ -657,6 +657,8 @@ The currently established REG-087 framework contracts cover:
 - Forecast Foundation
 - Evaluation Foundation
 - Learning Foundation
+- Profile Foundation
+- Profile Boundary
 - Learning Boundary
 - Learning / Evaluation Boundary
 - Learning Application Boundary
