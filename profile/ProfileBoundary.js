@@ -1,7 +1,18 @@
 'use strict';
 
 const { isValidProfileType } = require('./ProfileTypes');
-const { isValidLifecycleState } = require('./ProfileLifecycle');
+const { createProfileObject } = require('./ProfileObject');
+const {
+    saveProfile,
+    updateProfile: persistUpdatedProfile,
+} = require('./ProfilePersistence');
+const {
+    registerProfile,
+    getRegisteredProfile,
+    getRegisteredProfilesByUser,
+    deleteProfile: deleteRegisteredProfile
+} = require('./ProfileRegistry');
+const { transitionProfile, isValidLifecycleState } = require('./ProfileLifecycle');
 
 function validateCandidate(profile) {
     if (!profile || typeof profile !== 'object') {
@@ -99,8 +110,105 @@ function resolveProfileCandidate(currentProfile, candidateProfile) {
         idempotent: false
     };
 }
+function createProfile(data = {}) {
+    try {
+        const profile = createProfileObject(data);
+        const validation = validateCandidate(profile);
+        if (!validation.valid) return { success: false, profile: null, error: validation.error };
+
+        const existing = getRegisteredProfilesByUser(profile.userId)
+            .find(item => item.type === profile.type && item.subject === profile.subject);
+
+        if (existing) {
+            const resolution = resolveProfileCandidate(existing, profile);
+            if (!resolution.success) {
+                return {
+                    success: false,
+                    profile: resolution.profile || existing,
+                    error: resolution.error || "Profile candidate conflict.",
+                    conflict: true
+                };
+            }
+            if (resolution.idempotent) {
+                return {
+                    success: true,
+                    profile: resolution.profile,
+                    idempotent: true,
+                    conflict: false
+                };
+            }
+        }
+
+        const registration = registerProfile(profile);
+        if (registration.conflict) return { success: false, profile: registration.profile || null, error: registration.error || "Profile registration conflict.", conflict: true };
+
+        const persistence = saveProfile(profile);
+        if (!persistence.success) {
+            deleteRegisteredProfile(profile.id, profile.userId);
+            return { success: false, profile: null, error: persistence.error || "Profile persistence failed.", persistenceFailure: true };
+        }
+
+        return {
+            success: true,
+            profile: persistence.profile,
+            idempotent: Boolean(registration.idempotent) || Boolean(persistence.idempotent),
+            conflict: false
+        };
+    } catch (error) {
+        return { success: false, profile: null, error: error.message || "Profile creation failed." };
+    }
+}
+
+function getProfile(profileId, userId) {
+    if (!profileId) return { success: false, profile: null, error: "Profile ID is required." };
+    const profile = getRegisteredProfile(profileId);
+    if (!profile) return { success: false, profile: null, error: "Profile not found." };
+    if (!userId || profile.userId !== userId) return { success: false, profile: null, error: "Profile ownership violation." };
+    return { success: true, profile };
+}
+
+function getProfilesByUser(userId) {
+    if (!userId) return { success: false, profiles: [], error: "User ID is required." };
+    return { success: true, profiles: getRegisteredProfilesByUser(userId) };
+}
+
+function updateProfile(profile, userId) {
+    if (!profile || !profile.id) return { success: false, profile: null, error: "Profile ID is required." };
+    const existing = getRegisteredProfile(profile.id);
+    if (!existing) return { success: false, profile: null, error: "Profile not found." };
+    if (!userId || existing.userId !== userId) return { success: false, profile: null, error: "Profile ownership violation." };
+    const updated = { ...existing, ...profile, id: existing.id, userId: existing.userId };
+    const validation = validateCandidate(updated);
+    if (!validation.valid) return { success: false, profile: existing, error: validation.error };
+    const registration = registerProfile(updated);
+    if (registration.conflict) return { success: false, profile: registration.profile || existing, error: registration.error || "Profile registration conflict.", conflict: true };
+    const persistence = persistUpdatedProfile(updated);
+    if (!persistence.success) { registerProfile(existing); return { success: false, profile: null, error: persistence.error || "Profile persistence failed.", persistenceFailure: true }; }
+    return { success: true, profile: persistence.profile, idempotent: Boolean(persistence.idempotent) };
+}
+
+function transitionProfileLifecycle(profileId, nextState, userId) {
+    if (!profileId) return { success: false, profile: null, error: "Profile ID is required." };
+    if (!isValidLifecycleState(nextState)) return { success: false, profile: null, error: "Invalid lifecycle state." };
+    const existing = getRegisteredProfile(profileId);
+    if (!existing) return { success: false, profile: null, error: "Profile not found." };
+    if (!userId || existing.userId !== userId) return { success: false, profile: null, error: "Profile ownership violation." };
+    const result = transitionProfile(existing, nextState);
+    if (!result.success) return { success: false, profile: existing, error: result.error };
+    if (result.idempotent) return { success: true, profile: existing, idempotent: true };
+    const registration = registerProfile(result.profile);
+    if (registration.conflict) return { success: false, profile: existing, error: registration.error || "Profile registration conflict.", conflict: true };
+    const persistence = persistUpdatedProfile(result.profile);
+    if (!persistence.success) { registerProfile(existing); return { success: false, profile: null, error: persistence.error || "Profile persistence failed.", persistenceFailure: true }; }
+    return { success: true, profile: persistence.profile, idempotent: false };
+}
 
 module.exports = {
+    createProfile,
+    getProfile,
+    getProfilesByUser,
+    updateProfile,
+    transitionProfileLifecycle,
     validateCandidate,
     profilesAreEquivalent,
     resolveProfileCandidate

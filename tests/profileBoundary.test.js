@@ -98,6 +98,63 @@ function runTests() {
 
   console.log('✓ Profile boundary authority and ownership');
 
+  const created = B.createProfile({
+    userId: 'boundary-test-user',
+    type: 'attribute',
+    subject: 'niche',
+    value: 'fitness',
+    provenance: { sourceType: 'user', sourceId: 'msg-boundary', sourceVersion: '1.0' }
+  });
+  assert.strictEqual(created.success, true);
+  assert.ok(created.profile.id);
+
+  const duplicate = B.createProfile({
+    userId: 'boundary-test-user',
+    type: 'attribute',
+    subject: 'niche',
+    value: 'fitness',
+    provenance: { sourceType: 'user', sourceId: 'msg-boundary', sourceVersion: '1.0' }
+  });
+  assert.strictEqual(duplicate.success, true);
+  assert.strictEqual(duplicate.idempotent, true);
+
+  const conflicting = B.createProfile({
+    userId: 'boundary-test-user',
+    type: 'attribute',
+    subject: 'niche',
+    value: 'different niche',
+    provenance: { sourceType: 'user', sourceId: 'msg-conflict', sourceVersion: '1.0' }
+  });
+  assert.strictEqual(conflicting.success, false);
+  assert.strictEqual(conflicting.conflict, true);
+
+  const fetched = B.getProfile(created.profile.id, 'boundary-test-user');
+  assert.strictEqual(fetched.success, true);
+  assert.strictEqual(fetched.profile.value, 'fitness');
+
+  const listed = B.getProfilesByUser('boundary-test-user');
+  assert.strictEqual(listed.success, true);
+  assert.strictEqual(listed.profiles.length, 1);
+
+  const updated = B.updateProfile(
+    { id: created.profile.id, value: 'fitness content' },
+    'boundary-test-user'
+  );
+  assert.strictEqual(updated.success, true);
+  assert.strictEqual(updated.profile.value, 'fitness content');
+
+  const lifecycle = B.transitionProfileLifecycle(
+    created.profile.id, 'active', 'boundary-test-user'
+  );
+  assert.strictEqual(lifecycle.success, true);
+  assert.strictEqual(lifecycle.profile.lifecycle, 'active');
+
+  const foreignRead = B.getProfile(created.profile.id, 'other-user');
+  assert.strictEqual(foreignRead.success, false);
+  assert.strictEqual(foreignRead.error, 'Profile ownership violation.');
+
+  console.log('✓ Profile operational boundary');
+
   const saved = P.saveProfile(p);
   assert.strictEqual(saved.success, true);
 

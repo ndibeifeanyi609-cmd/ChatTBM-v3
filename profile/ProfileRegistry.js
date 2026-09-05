@@ -237,5 +237,54 @@ module.exports = {
     recordsAreEquivalent,
     registerProfile,
     getRegisteredProfile,
-    getRegisteredProfilesByUser
+    getRegisteredProfilesByUser,
+    deleteProfile
 };
+
+function deleteProfile(
+    profileId,
+    userId
+) {
+
+    if (!profileId) {
+        return {
+            success: false,
+            error: 'Profile ID is required.'
+        };
+    }
+
+    if (!userId) {
+        return {
+            success: false,
+            error: 'User ID is required.'
+        };
+    }
+
+    const existing =
+        registry.get(profileId);
+
+    if (!existing) {
+        return {
+            success: false,
+            profile: null,
+            error: 'Profile not found.'
+        };
+    }
+
+    if (existing.userId !== userId) {
+        return {
+            success: false,
+            profile: { ...existing },
+            error:
+                'Profile ownership violation.'
+        };
+    }
+
+    registry.delete(profileId);
+
+    return {
+        success: true,
+        profile: { ...existing }
+    };
+
+}
