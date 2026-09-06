@@ -61,6 +61,10 @@ function runTests() {
   assert.throws(() => profile({value: null}));
   assert.throws(() => profile({lifecycle: 'invalid'}));
   console.log('✓ Required-field failures');
+  const missingProvenance = { ...p };
+  delete missingProvenance.provenance;
+  const missingProvenanceResult = B.resolveProfileCandidate(null, missingProvenance);
+  assert.strictEqual(missingProvenanceResult.success, false);
 
   const admit = B.resolveProfileCandidate(null, p);
   assert.strictEqual(admit.success, true);
@@ -167,7 +171,7 @@ function runTests() {
   assert.strictEqual(dup.success, true);
   assert.strictEqual(dup.idempotent, true);
 
-  const owner = P.updateProfile(p.id, {userId:'different-user'});
+  const owner = P.updateProfile({...p, userId:'different-user'});
   assert.strictEqual(owner.success, false);
   assert.strictEqual(P.getProfile(p.id).userId,
     'profile-test-user');
@@ -209,6 +213,28 @@ function runTests() {
 
   const terminal = L.transitionProfile(superseded.profile, 'active');
   assert.strictEqual(terminal.success, false);
+
+  const boundaryLifecycle = B.createProfile({
+    userId: 'lifecycle-boundary-test',
+    type: 'attribute',
+    subject: 'creatorName',
+    value: 'Boundary Test',
+    provenance: { sourceType: 'test' }
+  });
+  assert.strictEqual(boundaryLifecycle.success, true);
+
+  const invalidBoundaryTransition = B.updateProfile(
+    { id: boundaryLifecycle.profile.id, lifecycle: 'superseded' },
+    'lifecycle-boundary-test'
+  );
+  assert.strictEqual(invalidBoundaryTransition.success, false);
+
+  const unchangedBoundaryProfile = B.getProfile(
+    boundaryLifecycle.profile.id,
+    'lifecycle-boundary-test'
+  );
+  assert.strictEqual(unchangedBoundaryProfile.success, true);
+  assert.strictEqual(unchangedBoundaryProfile.profile.lifecycle, 'proposed');
 
   console.log('✓ Profile lifecycle transitions');
   console.log('\n=== ALL PROFILE FOUNDATION TESTS PASSED ===\n');

@@ -35,6 +35,9 @@ function validateCandidate(profile) {
         return { valid: false, error: 'Profile value is required.' };
     }
 
+    if (!profile.provenance || typeof profile.provenance !== 'object' || Array.isArray(profile.provenance)) {
+        return { valid: false, error: 'Profile provenance is required.' };
+    }
     if (!isValidLifecycleState(profile.lifecycle)) {
         return { valid: false, error: 'Invalid profile lifecycle state.' };
     }
@@ -177,6 +180,7 @@ function updateProfile(profile, userId) {
     const existing = getRegisteredProfile(profile.id);
     if (!existing) return { success: false, profile: null, error: "Profile not found." };
     if (!userId || existing.userId !== userId) return { success: false, profile: null, error: "Profile ownership violation." };
+    if (Object.prototype.hasOwnProperty.call(profile, "lifecycle") && profile.lifecycle !== existing.lifecycle) return { success: false, profile: existing, error: "Lifecycle changes must use the Profile lifecycle boundary." };
     const updated = { ...existing, ...profile, id: existing.id, userId: existing.userId };
     const validation = validateCandidate(updated);
     if (!validation.valid) return { success: false, profile: existing, error: validation.error };
