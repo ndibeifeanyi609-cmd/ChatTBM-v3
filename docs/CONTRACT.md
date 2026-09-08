@@ -1073,7 +1073,30 @@ Verification, Failure Testing, and Documentation stages are complete.
 - Documentation MUST describe verified canonical Profile behavior, ownership, authority, lifecycle, integration boundaries, and failure behavior.
 - Legacy behavior MUST be documented as legacy unless it has been explicitly incorporated through the canonical Profile contract.
 
-## 28. Final Canonical Contract Rule
+## 28. Context Contract
+
+The canonical Context package owns interaction-scoped conversational state and continuity. Context MUST remain distinct from Memory, Profile, Learning, Creator Intelligence, Skill Routing, and Application state.
+
+### 28.1 Ownership and Scope
+Context MUST have explicit user and interaction ownership and an explicit conversation or interaction scope.
+
+### 28.2 Interaction State
+Context MAY contain interaction history and continuity state required across turns. Such state MUST NOT silently become durable Memory, Profile attributes, Learning objects, routing decisions, or Application records.
+
+### 28.3 Identity and Lifecycle
+Context identity MUST be domain-owned, deterministic, stable, and resistant to uncontrolled duplicates. Lifecycle MUST define states, transitions, invalid-transition behavior, and terminal-state behavior. Exact identity and lifecycle details remain Design-phase decisions.
+
+### 28.4 Persistence and Registry
+Persistence MUST be authoritative when the chosen Context scope requires state to survive beyond the current operation or request. A registry MUST exist if Context instances require domain-wide registration or domain-scoped retrieval authority.
+
+### 28.5 Legacy Services
+Legacy context, conversation, timeline, and history services are not canonical merely because they exist or store conversational data. No migration or deletion is implied.
+
+### 28.6 Design Decisions Reserved
+The exact Context hierarchy, turn model, identity formula, lifecycle names, persistence, registry, retention, history limits, summarization, context-window management, external API, and migration strategy remain Design-phase decisions.
+
+
+## 29. Final Canonical Contract Rule
 
 The ChatTBM Contract establishes the following mandatory rule:
 
