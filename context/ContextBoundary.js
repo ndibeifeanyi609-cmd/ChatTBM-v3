@@ -1,124 +1,237 @@
 'use strict';
 
-const crypto = require('crypto');
+// =====================================
+// ChatTBM
+// REG-090 Context
+//
+// Canonical Context Boundary
+// =====================================
 
 const {
-  createContextObject
+    createContextObject
 } = require('./ContextObject');
 
 const {
-  saveContext,
-  getContext
+    ContextLifecycleStates,
+    transitionContext
+} = require('./ContextLifecycle');
+
+const {
+    createContextId,
+    saveContext,
+    updateContext: persistContext,
+    updateContextLifecycle: persistContextLifecycle,
+    getContext: persistGetContext,
+    getContextsByUser,
+    deleteContext: persistDeleteContext
 } = require('./ContextPersistence');
 
-function createContextId(userId) {
-  return crypto
-    .createHash('sha256')
-    .update(`${userId}:${Date.now()}:${Math.random()}`)
-    .digest('hex');
+function createContext({
+    userId,
+    interactionId,
+    value = {}
+} = {}) {
+    try {
+        const id = createContextId(
+            userId,
+            interactionId
+        );
+
+        const context = createContextObject({
+            id,
+            userId,
+            interactionId,
+            value,
+            lifecycle:
+                ContextLifecycleStates.ACTIVE
+        });
+
+        const saved = saveContext(context);
+
+        if (!saved.success) {
+            return saved;
+        }
+
+        return {
+            success: true,
+            context: saved.context
+        };
+    } catch (error) {
+        return {
+            success: false,
+            context: null,
+            error: error.message
+        };
+    }
 }
 
-function createContext({
-  userId,
-  value = {}
-} = {}) {
-  try {
-    const context = createContextObject({
-      id: createContextId(userId),
-      userId,
-      value
-    });
+function getContext(id, userId) {
+    const result = persistGetContext(id);
 
-    const saved = saveContext(context);
+    if (!result.success) {
+        return result;
+    }
 
-    if (!saved.success) {
-      return saved;
+    if (result.context.userId !== userId) {
+        return {
+            success: false,
+            context: null,
+            error: 'Context ownership violation.'
+        };
     }
 
     return {
-      success: true,
-      context: saved.context
+        success: true,
+        context: result.context
     };
-  } catch (error) {
-    return {
-      success: false,
-      context: null,
-      error: error.message
-    };
-  }
 }
 
-function resolveContext(id, userId) {
-  const result = getContext(id);
+function updateContext(
+    id,
+    userId,
+    {
+        expectedVersion,
+        changes = {}
+    } = {}
+) {
+    const resolved = getContext(id, userId);
 
-  if (!result.success) {
-    return result;
-  }
+    if (!resolved.success) {
+        return resolved;
+    }
 
-  if (result.context.userId !== userId) {
-    return {
-      success: false,
-      context: null,
-      error: 'Context ownership violation.'
+    if (!Number.isInteger(expectedVersion)) {
+        return {
+            success: false,
+            context: resolved.context,
+            error: 'Expected context version is required.'
+        };
+    }
+
+    if (
+        resolved.context.version !==
+        expectedVersion
+    ) {
+        return {
+            success: false,
+            context: resolved.context,
+            code: 'CONTEXT_CONFLICT',
+            error: 'Context version conflict.'
+        };
+    }
+
+    const nextContext = {
+        ...resolved.context,
+        value:
+            Object.prototype.hasOwnProperty.call(
+                changes,
+                'value'
+            )
+                ? changes.value
+                : resolved.context.value,
+        id: resolved.context.id,
+        version:
+            resolved.context.version + 1,
+        schemaVersion:
+            resolved.context.schemaVersion,
+        userId:
+            resolved.context.userId,
+        interactionId:
+            resolved.context.interactionId,
+        lifecycle:
+            resolved.context.lifecycle,
+        createdAt:
+            resolved.context.createdAt,
+        updatedAt:
+            new Date().toISOString()
     };
-  }
 
-  return {
-    success: true,
-    context: result.context
-  };
+    const saved = persistContext(nextContext);
+
+    if (!saved.success) {
+        return saved;
+    }
+
+    return {
+        success: true,
+        context: saved.context
+    };
+}
+
+function transitionContextLifecycle(
+    id,
+    userId,
+    nextState
+) {
+    const resolved = getContext(id, userId);
+
+    if (!resolved.success) {
+        return resolved;
+    }
+
+    const transitioned = transitionContext(
+        resolved.context,
+        nextState
+    );
+
+    if (!transitioned.success) {
+        return transitioned;
+    }
+
+    if (transitioned.idempotent) {
+        return {
+            success: true,
+            context: transitioned.context,
+            idempotent: true
+        };
+    }
+
+    const saved = persistContextLifecycle(
+        transitioned.context
+    );
+
+    if (!saved.success) {
+        return saved;
+    }
+
+    return {
+        success: true,
+        context: saved.context,
+        previousState:
+            transitioned.previousState,
+        currentState:
+            transitioned.currentState
+    };
+}
+
+function closeContext(id, userId) {
+    return transitionContextLifecycle(
+        id,
+        userId,
+        ContextLifecycleStates.CLOSED
+    );
+}
+
+function listContextsByUser(userId) {
+    return getContextsByUser(userId);
+}
+
+function deleteContext(id, userId) {
+    const resolved = getContext(id, userId);
+
+    if (!resolved.success) {
+        return resolved;
+    }
+
+    return persistDeleteContext(id);
 }
 
 module.exports = {
-  createContext,
-  getContext: resolveContext
+    createContext,
+    getContext,
+    updateContext,
+    transitionContextLifecycle,
+    closeContext,
+    listContextsByUser,
+    deleteContext
 };
-
-function updateContext(id, userId, {
-  expectedVersion,
-  changes = {}
-} = {}) {
-  const resolved = resolveContext(id, userId);
-
-  if (!resolved.success) {
-    return resolved;
-  }
-
-  if (!Number.isInteger(expectedVersion)) {
-    return {
-      success: false,
-      context: resolved.context,
-      error: 'Expected context version is required.'
-    };
-  }
-
-  if (resolved.context.version !== expectedVersion) {
-    return {
-      success: false,
-      context: resolved.context,
-      code: 'CONTEXT_CONFLICT'
-    };
-  }
-
-  const nextContext = {
-    ...resolved.context,
-    ...changes,
-    id: resolved.context.id,
-    userId: resolved.context.userId,
-    version: resolved.context.version + 1,
-    updatedAt: new Date().toISOString()
-  };
-
-  const saved = saveContext(nextContext);
-
-  if (!saved.success) {
-    return saved;
-  }
-
-  return {
-    success: true,
-    context: saved.context
-  };
-}
-
-module.exports.updateContext = updateContext;

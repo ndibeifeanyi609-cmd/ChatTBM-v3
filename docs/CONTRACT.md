@@ -1078,22 +1078,45 @@ Verification, Failure Testing, and Documentation stages are complete.
 The canonical Context package owns interaction-scoped conversational state and continuity. Context MUST remain distinct from Memory, Profile, Learning, Creator Intelligence, Skill Routing, and Application state.
 
 ### 28.1 Ownership and Scope
-Context MUST have explicit user and interaction ownership and an explicit conversation or interaction scope.
+Context MUST have explicit user ownership through `userId` and explicit interaction scope through `interactionId`. The `interactionId` MUST be supplied by the caller; Context MUST NOT invent or import legacy conversation or session identifiers.
 
 ### 28.2 Interaction State
 Context MAY contain interaction history and continuity state required across turns. Such state MUST NOT silently become durable Memory, Profile attributes, Learning objects, routing decisions, or Application records.
 
-### 28.3 Identity and Lifecycle
-Context identity MUST be domain-owned, deterministic, stable, and resistant to uncontrolled duplicates. Lifecycle MUST define states, transitions, invalid-transition behavior, and terminal-state behavior. Exact identity and lifecycle details remain Design-phase decisions.
+### 28.3 Identity
+Context identity is owned by the Context domain and is defined by the combination of `userId` and `interactionId`.
 
-### 28.4 Persistence and Registry
-Persistence MUST be authoritative when the chosen Context scope requires state to survive beyond the current operation or request. A registry MUST exist if Context instances require domain-wide registration or domain-scoped retrieval authority.
+The canonical identity key MUST be deterministic and stable and MUST use SHA-256 over the ordered identity components. The public `context.id` MUST be deterministically derived from the same identity and MUST NOT depend on uncontrolled randomness or wall-clock uniqueness.
 
-### 28.5 Legacy Services
+A Context identity MUST remain immutable after creation. Attempts to change `userId` or `interactionId` MUST fail. Identity collisions MUST be rejected.
+
+### 28.4 Lifecycle
+Context uses the lifecycle states `active` and `closed`.
+
+The only state transition is `active → closed`. `closed` is terminal and MUST NOT transition back to `active`. Repeating an already-applied transition MUST be handled idempotently. Invalid transitions MUST fail without mutating the stored Context.
+
+Lifecycle authority MUST remain separate from ordinary Context content updates.
+
+### 28.5 Persistence and Versioning
+Canonical Context persistence is authoritative for stored Context state. Persistence MUST preserve deterministic identity, ownership, immutable identity fields, lifecycle integrity, and canonical timestamps.
+
+Ordinary Context content updates MUST use optimistic version checking. A caller MUST provide the expected current version, and a successful content update MUST advance the version by one. Stale versions MUST fail without overwriting newer state.
+
+Lifecycle transitions MUST preserve the Context version and MUST be persisted through the dedicated lifecycle persistence operation.
+
+### 28.6 Registry
+No Context Registry is required at this stage. Context Persistence and the Context Boundary provide the canonical storage and access authority. A registry MUST NOT be introduced unless a future architectural requirement establishes a need for domain-wide Context registration or retrieval authority.
+
+### 28.7 Boundary
+The Context Boundary is the canonical cross-domain entry point for Context creation, retrieval, content updates, lifecycle transitions, listing, and deletion.
+
+The Boundary MUST enforce user ownership and MUST prevent callers from mutating canonical fields such as `id`, `userId`, `interactionId`, `schemaVersion`, `createdAt`, and `lifecycle` through ordinary content updates.
+
+### 28.8 Legacy Services
 Legacy context, conversation, timeline, and history services are not canonical merely because they exist or store conversational data. No migration or deletion is implied.
 
-### 28.6 Design Decisions Reserved
-The exact Context hierarchy, turn model, identity formula, lifecycle names, persistence, registry, retention, history limits, summarization, context-window management, external API, and migration strategy remain Design-phase decisions.
+### 28.9 Design Decisions Reserved
+Future Context decisions concerning retention, history limits, summarization, context-window management, external APIs, migration, and broader conversation/thread models remain subject to architectural evaluation and explicit design approval.
 
 
 ## 29. Final Canonical Contract Rule

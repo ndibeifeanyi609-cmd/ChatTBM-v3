@@ -1,118 +1,259 @@
 'use strict';
 
+// =====================================
+// ChatTBM
+// REG-090 Context
+//
+// Canonical Context Boundary Tests
+// =====================================
+
 const assert = require('assert');
 
 const {
-  createContext,
-  getContext,
-  updateContext,
+    createContext,
+    getContext,
+    updateContext,
+    closeContext,
+    listContextsByUser,
+    deleteContext
 } = require('./ContextBoundary');
 
-const created = createContext({ userId: 'test-user' });
+const {
+    createContextId,
+    clearContexts
+} = require('./ContextPersistence');
 
-assert.strictEqual(created.success, true);
-assert.ok(created.context);
-assert.ok(created.context.id);
-assert.strictEqual(created.context.userId, 'test-user');
-assert.strictEqual(created.context.version, 1);
+clearContexts();
 
-const ownership = getContext(
-  created.context.id,
-  'different-user'
-);
-
-assert.strictEqual(ownership.success, false);
-assert.strictEqual(
-  ownership.error,
-  'Context ownership violation.'
-);
-
-const missingVersion = updateContext(
-  created.context.id,
-  'test-user',
-  {
-    expectedVersion: undefined,
-    changes: {}
-  }
-);
-
-assert.strictEqual(missingVersion.success, false);
-
-const updated = updateContext(
-  created.context.id,
-  'test-user',
-  {
-    expectedVersion: 1,
-    changes: {}
-  }
-);
-
-assert.strictEqual(updated.success, true);
-assert.strictEqual(updated.context.version, 2);
-
-const stale = updateContext(
-  created.context.id,
-  'test-user',
-  {
-    expectedVersion: 1,
-    changes: {}
-  }
-);
-
-assert.strictEqual(stale.success, false);
-assert.strictEqual(stale.code, 'CONTEXT_CONFLICT');
-
-const afterStale = getContext(
-  created.context.id,
-  'test-user'
-);
-
-assert.deepStrictEqual(
-  afterStale.context,
-  updated.context
-);
-
-
-const failureCreated = createContext({
-  userId: 'failure-test-user',
-  value: { state: 'original' }
+const created = createContext({
+    userId: 'test-user',
+    interactionId: 'interaction-1',
+    value: {
+        message: 'hello'
+    }
 });
 
-const failureUpdated = updateContext(
-  failureCreated.context.id,
-  'failure-test-user',
-  {
-    expectedVersion: 1,
-    changes: {
-      value: { state: 'updated' }
+assert.strictEqual(
+    created.success,
+    true
+);
+
+assert.ok(
+    created.context
+);
+
+assert.strictEqual(
+    created.context.userId,
+    'test-user'
+);
+
+assert.strictEqual(
+    created.context.interactionId,
+    'interaction-1'
+);
+
+assert.strictEqual(
+    created.context.lifecycle,
+    'active'
+);
+
+assert.strictEqual(
+    created.context.version,
+    1
+);
+
+assert.strictEqual(
+    created.context.id,
+    createContextId(
+        'test-user',
+        'interaction-1'
+    )
+);
+
+const id = created.context.id;
+
+const duplicate = createContext({
+    userId: 'test-user',
+    interactionId: 'interaction-1',
+    value: {
+        message: 'different'
     }
-  }
+});
+
+assert.strictEqual(
+    duplicate.success,
+    false
 );
 
-assert.strictEqual(failureUpdated.success, true);
-assert.strictEqual(failureUpdated.context.version, 2);
+const ownerRead = getContext(
+    id,
+    'test-user'
+);
 
-const failureStale = updateContext(
-  failureCreated.context.id,
-  'failure-test-user',
-  {
-    expectedVersion: 1,
-    changes: {
-      value: { state: 'MUST-NOT-APPLY' }
+assert.strictEqual(
+    ownerRead.success,
+    true
+);
+
+const wrongOwnerRead = getContext(
+    id,
+    'other-user'
+);
+
+assert.strictEqual(
+    wrongOwnerRead.success,
+    false
+);
+
+const missingExpectedVersion = updateContext(
+    id,
+    'test-user',
+    {
+        changes: {
+            value: {
+                message: 'invalid'
+            }
+        }
     }
-  }
 );
 
-assert.strictEqual(failureStale.success, false);
-assert.strictEqual(failureStale.code, 'CONTEXT_CONFLICT');
-
-const failureCurrent = getContext(
-  failureCreated.context.id,
-  'failure-test-user'
+assert.strictEqual(
+    missingExpectedVersion.success,
+    false
 );
 
-assert.strictEqual(failureCurrent.context.version, 2);
-assert.deepStrictEqual(
-  failureCurrent.context.value,
-  { state: 'updated' }
+const updated = updateContext(
+    id,
+    'test-user',
+    {
+        expectedVersion: 1,
+        changes: {
+            value: {
+                message: 'updated'
+            }
+        }
+    }
+);
+
+assert.strictEqual(
+    updated.success,
+    true
+);
+
+assert.strictEqual(
+    updated.context.version,
+    2
+);
+
+assert.strictEqual(
+    updated.context.interactionId,
+    'interaction-1'
+);
+
+const stale = updateContext(
+    id,
+    'test-user',
+    {
+        expectedVersion: 1,
+        changes: {
+            value: {
+                message: 'stale'
+            }
+        }
+    }
+);
+
+assert.strictEqual(
+    stale.success,
+    false
+);
+
+assert.strictEqual(
+    stale.code,
+    'CONTEXT_CONFLICT'
+);
+
+assert.strictEqual(
+    stale.context.value.message,
+    'updated'
+);
+
+const closed = closeContext(
+    id,
+    'test-user'
+);
+
+assert.strictEqual(
+    closed.success,
+    true
+);
+
+assert.strictEqual(
+    closed.context.lifecycle,
+    'closed'
+);
+
+const closedAgain = closeContext(
+    id,
+    'test-user'
+);
+
+assert.strictEqual(
+    closedAgain.success,
+    true
+);
+
+assert.strictEqual(
+    closedAgain.idempotent,
+    true
+);
+
+const list = listContextsByUser(
+    'test-user'
+);
+
+assert.strictEqual(
+    list.success,
+    true
+);
+
+assert.strictEqual(
+    list.contexts.length,
+    1
+);
+
+const wrongOwnerDelete = deleteContext(
+    id,
+    'other-user'
+);
+
+assert.strictEqual(
+    wrongOwnerDelete.success,
+    false
+);
+
+const deleted = deleteContext(
+    id,
+    'test-user'
+);
+
+assert.strictEqual(
+    deleted.success,
+    true
+);
+
+const afterDelete = getContext(
+    id,
+    'test-user'
+);
+
+assert.strictEqual(
+    afterDelete.success,
+    false
+);
+
+clearContexts();
+
+console.log(
+    'REG-090 Context Boundary tests passed.'
 );
