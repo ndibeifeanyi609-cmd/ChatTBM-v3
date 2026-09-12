@@ -441,6 +441,17 @@ Potential future packages may address areas such as:
 - Additional AI providers
 - Additional application consumers
 
+- Software-Building Assistant
+  - Controlled software-building application capability
+  - Extends the established Assistant Engine and AI execution path
+  - Does not bypass canonical AI Provider or domain boundaries
+  - Produces structured build objectives and plans before consequential operations
+  - Does not establish canonical Project, Workspace, Tool, Action, or Verification authority in its first implementation
+  - Does not provide unrestricted filesystem, shell, process, network, or external execution authority
+  - Coordinates approved build steps through explicit boundaries
+  - Must distinguish requested intent, authorized operations, completed operations, and verified results
+  - Must produce controlled failures and prevent false success
+
 These areas are not automatically canonical merely because corresponding legacy services or files already exist.
 
 Each future package requires its own architectural justification, contract, design, implementation, verification, and failure testing.

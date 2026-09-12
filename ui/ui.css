@@ -293,3 +293,70 @@
         transition: none;
     }
 }
+
+.ui-sidebar-brand {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    margin-bottom: 18px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.ui-sidebar-nav,
+.ui-sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ui-sidebar-actions {
+    margin-top: 18px;
+}
+
+.ui-sidebar-item,
+.ui-sidebar-action {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--ui-text-muted);
+}
+
+.ui-sidebar-item:hover,
+.ui-sidebar-action:hover {
+    background: var(--ui-surface-raised);
+    border-color: var(--ui-border);
+    color: var(--ui-text);
+}
+
+.ui-sidebar-item[data-action="chat"] {
+    background: var(--ui-surface-raised);
+    color: var(--ui-text);
+}
+
+.ui-sidebar-logo {
+    width: 32px;
+    height: 32px;
+    display: block;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.ui-sidebar-brand {
+    gap: 10px;
+}
+
+
+@media (min-width: 768px) {
+    .ui-icon-button {
+        display: none;
+    }
+}

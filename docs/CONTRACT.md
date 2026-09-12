@@ -609,10 +609,7 @@ implementation:
 - Ownership
 - Canonical object or record
 - Required fields
-- Identity m
-        cat >> docs/CONTRACT.md <<'EOF'
-
- model
+- Identity model
 - Ownership model
 - Lifecycle model where applicable
 - Persistence model where applicable
@@ -1119,7 +1116,47 @@ Legacy context, conversation, timeline, and history services are not canonical m
 Future Context decisions concerning retention, history limits, summarization, context-window management, external APIs, migration, and broader conversation/thread models remain subject to architectural evaluation and explicit design approval.
 
 
-## 29. Final Canonical Contract Rule
+## 29. Software-Building Assistant Contract
+
+The Software-Building Assistant is an application capability for controlled software-building assistance. It MUST extend established framework authority without creating competing canonical domains or bypassing existing boundaries.
+
+### 29.1 Architectural Position
+It operates above the established Assistant Engine and AI execution path and MUST NOT bypass the Assistant Engine, AI Engine, or AI Provider Boundary.
+
+### 29.2 Responsibility
+It MAY interpret software-building requests, create structured build objectives and plans, coordinate approved build steps, maintain transient build-operation state, and normalize build-specific failures.
+
+### 29.3 Authority Exclusions
+It MUST NOT own canonical Context, Memory, Profile, Learning, Application, Project, Workspace, Tool, Action, or Verification state. It MUST NOT own provider SDKs, credentials, arbitrary filesystem authority, shell/process authority, or provider state.
+
+### 29.4 Project and Workspace
+The first implementation MUST NOT establish canonical Project or Workspace persistence. Any future canonical Project or Workspace domain requires separate architectural justification, Contract, Design, implementation, verification, and failure testing.
+
+### 29.5 Build Planning
+A build request MUST become a controlled objective and structured plan before consequential operations. Requested intent MUST remain distinct from authorized and available operations.
+
+### 29.6 Tool and Action Boundary
+It MUST NOT provide unrestricted filesystem, shell, process, network, or external execution authority. Consequential actions MUST cross an explicitly approved boundary.
+
+### 29.7 Verification Boundary
+It MAY coordinate verification but MUST NOT become the canonical Verification Engine.
+
+### 29.8 Context and Memory
+It MAY consume approved Context, Memory, Profile, or Learning information through canonical boundaries but MUST NOT directly mutate or promote interaction state into durable canonical state.
+
+### 29.9 Failure Behavior
+Invalid requests, unsupported operations, unauthorized actions, unavailable capabilities, and delegated failures MUST produce explicit controlled failures. It MUST NOT report false success.
+
+### 29.10 Verification
+Verification MUST cover request validation, build objectives, plan structure, delegation, ownership isolation where applicable, unsupported operations, unauthorized-execution protection, failure normalization, and false-success prevention.
+
+### 29.11 Legacy Rule
+Legacy CodingSkill, SkillRouter, ProblemSolvingSkill, editorBrain, offlineBrain, and related behavior are not canonical merely because they exist. Reuse requires an approved architectural boundary.
+
+### 29.12 Change Control
+Changes establishing canonical Project, Workspace, Tool, Action, Verification, or persistent build-state authority MUST undergo architectural review and Contract impact analysis before implementation.
+
+## 30. Final Canonical Contract Rule
 
 The ChatTBM Contract establishes the following mandatory rule:
 

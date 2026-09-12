@@ -1,351 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>ChatTBM - AI Assistant</title>
 
-<title>
-ChatTBM - AI Assistant
-</title>
-
-
-<link rel="stylesheet" href="style.css">
-
+<link rel="stylesheet" href="ui/ui.css">
 
 <link
-rel="icon"
-type="image/png"
-href="IMG_4450.png">
-
+    rel="icon"
+    type="image/png"
+    href="IMG_4450.png"
+>
 
 <link
-rel="manifest"
-href="manifest.json">
-
-
+    rel="manifest"
+    href="manifest.json"
+>
 </head>
 
-
 <body>
+<script type="module">
+import { mountChatTBM } from './ui/ChatTBMBrowser.mjs';
 
-
-<div class="app-container">
-
-
-<header class="app-header">
-
-
-<div class="brand">
-
-
-<img
-src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-alt="ChatTBM"
-class="hero-logo">
-
-
-<div class="brand-text">
-
-
-<h1>
-ChatTBM
-</h1>
-
-
-<p>
-Your Personal AI Assistant
-</p>
-
-
-</div>
-
-
-</div>
-
-
-</header>
-
-
-
-
-
-<section class="welcome-screen">
-
-
-<img
-src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-alt="ChatTBM Logo"
-class="logo">
-
-
-<h2>
-Welcome to ChatTBM
-</h2>
-
-
-<p>
-Your AI assistant for learning,
-creating, coding, business,
-creator strategy and problem solving.
-</p>
-
-
-</section>
-
-
-
-
-
-<main class="chat-container">
-
-
-<div
-id="chat-box"
-class="chat-box">
-
-
-<div class="message bot-message">
-
-
-<p>
-
-Hello 👋 I am ChatTBM.
-
-<br><br>
-
-I can help you with:
-
-<br><br>
-
-🧠 General questions
-
-<br>
-💻 Coding
-
-<br>
-📚 Learning
-
-<br>
-✍️ Writing
-
-<br>
-💼 Business
-
-<br>
-🎬 Creator ideas
-
-<br>
-💡 Problem solving
-
-</p>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="input-area">
-
-
-<button
-id="upload-btn"
-class="upload-btn">
-
-+
-
-</button>
-
-
-<input
-type="text"
-id="user-input"
-placeholder="Ask ChatTBM anything...">
-
-
-<button
-id="voice-btn">
-
-🎤
-
-</button>
-
-
-<button
-id="send-btn">
-
-Send
-
-</button>
-
-
-</div>
-
-
-</main>
-
-
-
-
-
-<footer class="app-footer">
-
-
-<p>
-ChatTBM AI Assistant
-</p>
-
-
-</footer>
-
-
-</div>
-
-
-
-
-
-
-
-<!-- ==============================
-     CHATTBM CORE MEMORY
-================================ -->
-
-<script src="MemoryEngine.js"></script>
-
-
-
-
-
-<!-- ==============================
-     INTELLIGENCE SYSTEMS
-================================ -->
-
-<script src="creatorIntelligence.js"></script>
-
-<script src="creatorProfileEngine.js"></script>
-
-
-
-
-
-<!-- ==============================
-     SKILLS
-================================ -->
-
-<script src="GeneralAssistantSkill.js"></script>
-
-<script src="LearningSkill.js"></script>
-
-<script src="CodingSkill.js"></script>
-
-<script src="WritingSkill.js"></script>
-
-<script src="BusinessSkill.js"></script>
-
-<script src="CreatorSkill.js"></script>
-
-
-
-
-
-<!-- ==============================
-     ROUTER
-================================ -->
-
-<script src="SkillRouter.js"></script>
-
-
-
-
-
-<!-- ==============================
-     AI CORE
-================================ -->
-
-<script src="AICore.js"></script>
-
-
-
-
-
-<!-- ==============================
-     VOICE ENGINE
-================================ -->
-
-<script src="VoiceEngine.js"></script>
-
-
-
-
-
-<!-- ==============================
-     AI CONNECTION
-================================ -->
-
-<script src="ai.js"></script>
-
-
-
-
-
-<!-- ==============================
-     FRONTEND BRIDGE
-================================ -->
-
-<script src="script.js"></script>
-
-
-
-
-
-
-
-<!-- ==============================
-     SERVICE WORKER
-================================ -->
-
-<script>
-
-
-if("serviceWorker" in navigator){
-
-
-window.addEventListener(
-
-"load",
-
-()=>{
-
-
-navigator.serviceWorker.register(
-
-"service-worker.js"
-
-);
-
-
-}
-
-
-);
-
-
-}
-
-
+mountChatTBM();
 </script>
 
-
-
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+    });
+}
+</script>
 </body>
-
 </html>

@@ -81,6 +81,11 @@ class ChatTBMApp {
         return this.state.composer.value;
     }
 
+    getComposerValue() {
+        return this.state.composer.value;
+    }
+
+
     toggleSidebar() {
         this.state.navigation.sidebarOpen =
             !this.state.navigation.sidebarOpen;
@@ -92,8 +97,12 @@ class ChatTBMApp {
         this.state.navigation.sidebarOpen = false;
     }
 
+    createInteractionId() {
+        return `interaction-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+
     newConversation(interactionId) {
-        this.setInteractionId(interactionId);
+        this.setInteractionId(interactionId || this.createInteractionId());
 
         this.state.conversation.messages = [];
         this.state.conversation.status = UI_STATUS.IDLE;
