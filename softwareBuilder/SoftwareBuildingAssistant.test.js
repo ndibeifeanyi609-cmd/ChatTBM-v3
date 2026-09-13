@@ -74,6 +74,16 @@ async function run() {
   assert.strictEqual(accessResult.valid, true);
   assert.strictEqual(accessResult.access.authorized, true);
 
+  for (const request of [
+    { operationId: 'op-006', userId: '' },
+    { operationId: 'op-006', userId: null },
+    { operationId: 'op-006' }
+  ]) {
+    const result = authorizeOperation(request, 'write-file');
+    assert.strictEqual(result.valid, false);
+    assert.strictEqual(result.error.code, 'UNAUTHORIZED_OPERATION');
+  }
+
   const unsupportedResult = authorizeOperation(
     { operationId: 'op-001', userId: 'user-1' },
     'write-file'
