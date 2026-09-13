@@ -91,6 +91,9 @@ class ChatTBMBrowser {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'ui-sidebar-item';
+            if (item.active) {
+                button.classList.add('is-active');
+            }
             button.textContent = item.label;
             button.dataset.action = item.id;
             nav.appendChild(button);

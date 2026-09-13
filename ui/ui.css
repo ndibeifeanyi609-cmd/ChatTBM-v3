@@ -337,7 +337,7 @@
     color: var(--ui-text);
 }
 
-.ui-sidebar-item[data-action="chat"] {
+.ui-sidebar-item.is-active {
     background: var(--ui-surface-raised);
     color: var(--ui-text);
 }
