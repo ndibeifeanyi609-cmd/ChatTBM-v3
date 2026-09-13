@@ -101,6 +101,15 @@ async function run() {
   assert.strictEqual(unauthorizedResult.valid, false);
   assert.strictEqual(unauthorizedResult.error.code, 'UNAUTHORIZED_OPERATION');
 
+  for (const operation of ['write-file', 'delete-file', 'run-process', 'network-request']) {
+    const result = authorizeOperation(
+      { operationId: 'op-005', userId: 'user-1' },
+      operation
+    );
+    assert.strictEqual(result.valid, false);
+    assert.strictEqual(result.error.code, 'UNSUPPORTED_OPERATION');
+  }
+
   const buildResult = createBuild({
     operationId: 'op-001',
     userId: 'user-1',
