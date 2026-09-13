@@ -49,6 +49,8 @@ const chatRoutes =
     require("./routes/chatRoutes");
 const forecastRoutes =
     require("./routes/forecastRoutes");
+const softwareBuildingRoutes =
+    require("./routes/softwareBuildingRoutes");
 // =====================================
 // REGISTER CHAT ROUTES
 // =====================================
@@ -62,6 +64,13 @@ app.use(
 app.use(
     "/api/forecast",
     forecastRoutes
+);
+// =====================================
+// REGISTER SOFTWARE-BUILDING ROUTES
+// =====================================
+app.use(
+    "/api/software-builder",
+    softwareBuildingRoutes
 );
 // =====================================
 // HEALTH CHECK
@@ -92,6 +101,7 @@ app.get(
             endpoints: [
                 "/api/chat",
                 "/api/forecast",
+                "/api/software-builder",
                 "/api/health"
             ]
         });
@@ -184,6 +194,9 @@ app.listen(
         );
         console.log(
             "Forecast API: /api/forecast"
+        );
+        console.log(
+            "Software Building API: /api/software-builder"
         );
         console.log(
             "AI Assistant Platform Ready"
