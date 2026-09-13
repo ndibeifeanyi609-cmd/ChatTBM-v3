@@ -287,10 +287,6 @@
         min-height: 100dvh;
     }
 
-    .ui-mobile-menu {
-        display: none;
-    }
-
     .ui-header {
         padding-left: 24px;
         padding-right: 24px;
