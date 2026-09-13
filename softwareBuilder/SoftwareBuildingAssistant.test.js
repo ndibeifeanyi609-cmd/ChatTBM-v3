@@ -228,6 +228,15 @@ async function run() {
     'PROVIDER_UNAVAILABLE'
   );
 
+  const missingCauseCodeFailure = normalizeDelegatedFailure({
+    success: false,
+    error: { message: 'Assistant failed without a code.' }
+  });
+
+  assert.strictEqual(missingCauseCodeFailure.valid, false);
+  assert.strictEqual(missingCauseCodeFailure.error.code, 'DELEGATED_ASSISTANT_FAILURE');
+  assert.strictEqual(missingCauseCodeFailure.error.causeCode, 'ASSISTANT_ERROR');
+
   const delegationResult = await delegateBuildReasoning(buildResult.build);
 
   assert.strictEqual(delegationResult.valid, false);
