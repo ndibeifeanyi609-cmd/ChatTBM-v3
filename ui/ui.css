@@ -71,6 +71,22 @@
     transform: translateX(0);
 }
 
+.ui-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    border: 0;
+    background: rgba(0, 0, 0, 0.52);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+}
+
+.ui-sidebar.is-open + .ui-sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 .ui-main {
     min-width: 0;
     width: 100%;
@@ -254,6 +270,10 @@
 }
 
 @media (min-width: 768px) {
+    .ui-sidebar-backdrop {
+        display: none;
+    }
+
     .ui-sidebar {
         position: sticky;
         transform: none;

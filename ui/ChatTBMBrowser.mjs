@@ -22,6 +22,13 @@ class ChatTBMBrowser {
 
         shell.appendChild(this.renderSidebar(model.sidebar));
 
+        const backdrop = document.createElement('button');
+        backdrop.type = 'button';
+        backdrop.className = 'ui-sidebar-backdrop';
+        backdrop.setAttribute('aria-label', 'Close navigation');
+        backdrop.dataset.action = 'close-sidebar';
+        shell.appendChild(backdrop);
+
         const main = document.createElement('main');
         main.className = 'ui-main';
         main.appendChild(this.renderHeader(model.header));
@@ -273,6 +280,15 @@ class ChatTBMBrowser {
                 }
             });
         }
+
+        root.querySelectorAll(
+            '[data-action="close-sidebar"]'
+        ).forEach(button => {
+            button.addEventListener('click', () => {
+                this.app.closeSidebar();
+                this.render();
+            });
+        });
 
         root.querySelectorAll(
             '[data-action="menu"]'
