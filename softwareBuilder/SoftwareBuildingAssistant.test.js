@@ -87,6 +87,17 @@ async function run() {
     'write-file'
   );
 
+  const executionBoundaryResult = authorizeOperation(
+    { operationId: 'op-001', userId: 'user-1' },
+    'shell-command'
+  );
+
+  assert.strictEqual(executionBoundaryResult.valid, false);
+  assert.strictEqual(
+    executionBoundaryResult.error.code,
+    'UNSUPPORTED_OPERATION'
+  );
+
   assert.strictEqual(unauthorizedResult.valid, false);
   assert.strictEqual(unauthorizedResult.error.code, 'UNAUTHORIZED_OPERATION');
 
