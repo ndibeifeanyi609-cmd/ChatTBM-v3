@@ -165,6 +165,12 @@ async function run() {
     'INVALID_DELEGATION_REQUEST'
   );
 
+  const falseSuccessResult = normalizeDelegatedFailure({ success: true });
+
+  assert.strictEqual(falseSuccessResult.valid, false);
+  assert.strictEqual(falseSuccessResult.error.code, 'DELEGATED_ASSISTANT_FAILURE');
+  assert.strictEqual(falseSuccessResult.error.causeCode, 'INVALID_ASSISTANT_RESULT');
+
   const normalizedFailure = normalizeDelegatedFailure({
     success: false,
     error: {
