@@ -141,6 +141,26 @@ async function run() {
   assert.strictEqual(malformedPlanResult.valid, false);
   assert.strictEqual(malformedPlanResult.error.code, 'INVALID_DELEGATION_REQUEST');
 
+  const emptyPlanResult = await delegateBuildReasoning({
+    objective: {
+      id: 'build-objective:op-004',
+      operationId: 'op-004',
+      userId: 'user-1',
+      intent: 'test'
+    },
+    plan: {
+      id: 'build-plan:op-004',
+      operationId: 'op-004',
+      objectiveId: 'build-objective:op-004',
+      userId: 'user-1',
+      steps: []
+    }
+  });
+
+  assert.strictEqual(emptyPlanResult.valid, false);
+  assert.strictEqual(emptyPlanResult.error.code, 'INVALID_DELEGATION_REQUEST');
+  assert.strictEqual(emptyPlanResult.error.message, 'Build delegation requires an objective and a non-empty plan.');
+
   const ownershipMismatchResult = await delegateBuildReasoning({
     objective: {
       id: 'build-objective:op-001',

@@ -85,12 +85,12 @@ async function delegateBuildReasoning(build) {
   const objective = build.objective;
   const plan = build.plan;
 
-  if (!objective || !plan || !Array.isArray(plan.steps)) {
+  if (!objective || !plan || !Array.isArray(plan.steps) || plan.steps.length === 0) {
     return {
       valid: false,
       error: {
         code: 'INVALID_DELEGATION_REQUEST',
-        message: 'Build delegation requires an objective and plan.'
+        message: 'Build delegation requires an objective and a non-empty plan.'
       }
     };
   }
