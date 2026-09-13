@@ -130,6 +130,30 @@ async function run() {
   assert.strictEqual(malformedPlanResult.valid, false);
   assert.strictEqual(malformedPlanResult.error.code, 'INVALID_DELEGATION_REQUEST');
 
+  const ownershipMismatchResult = await delegateBuildReasoning({
+    objective: {
+      id: 'build-objective:op-001',
+      operationId: 'op-001',
+      userId: 'user-1',
+      intent: 'Build a web application'
+    },
+    plan: {
+      id: 'build-plan:op-002',
+      operationId: 'op-002',
+      objectiveId: 'build-objective:op-001',
+      userId: 'user-2',
+      steps: [
+        { type: 'analyze' }
+      ]
+    }
+  });
+
+  assert.strictEqual(ownershipMismatchResult.valid, false);
+  assert.strictEqual(
+    ownershipMismatchResult.error.code,
+    'INVALID_DELEGATION_REQUEST'
+  );
+
   const normalizedFailure = normalizeDelegatedFailure({
     success: false,
     error: {

@@ -95,6 +95,22 @@ async function delegateBuildReasoning(build) {
     };
   }
 
+  if (
+    objective.id !== `build-objective:${objective.operationId}` ||
+    plan.id !== `build-plan:${plan.operationId}` ||
+    plan.operationId !== objective.operationId ||
+    plan.objectiveId !== objective.id ||
+    plan.userId !== objective.userId
+  ) {
+    return {
+      valid: false,
+      error: {
+        code: 'INVALID_DELEGATION_REQUEST',
+        message: 'Build objective and plan identity or ownership do not match.'
+      }
+    };
+  }
+
   try {
     const result = await generateReply({
       userId: objective.userId,
