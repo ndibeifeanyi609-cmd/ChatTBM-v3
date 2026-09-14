@@ -68,6 +68,12 @@
     opacity: 0.9;
 }
 
+.ui-sidebar,
+.ui-main {
+    position: relative;
+    z-index: 1;
+}
+
 .ui-sidebar {
     position: fixed;
     inset: 0 auto 0 0;
