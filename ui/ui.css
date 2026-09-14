@@ -50,10 +50,22 @@
 }
 
 .ui-app-shell {
+    position: relative;
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     background: var(--ui-bg);
+}
+
+.ui-app-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.055), transparent 34%),
+        radial-gradient(circle at 12% 80%, rgba(255, 255, 255, 0.025), transparent 30%);
+    opacity: 0.9;
 }
 
 .ui-sidebar {
