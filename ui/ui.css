@@ -1,6 +1,6 @@
 :root {
-    --ui-bg: #050505;
-    --ui-surface: #090909;
+    --ui-bg: #030303;
+    --ui-surface: #0a0a0a;
     --ui-surface-raised: #151515;
     --ui-border: rgba(255, 255, 255, 0.07);
     --ui-border-strong: rgba(255, 255, 255, 0.12);
@@ -63,8 +63,8 @@
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.055), transparent 34%),
-        radial-gradient(circle at 12% 80%, rgba(255, 255, 255, 0.025), transparent 30%);
+        radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.085), transparent 38%),
+        radial-gradient(circle at 12% 80%, rgba(255, 255, 255, 0.04), transparent 34%);
     opacity: 0.9;
 }
 
