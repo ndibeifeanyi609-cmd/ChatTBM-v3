@@ -191,13 +191,29 @@
 }
 
 .ui-welcome {
+    position: relative;
     width: min(100%, var(--ui-content-width));
     margin: 0 auto;
     padding: 15vh 24px 96px;
     text-align: center;
 }
 
+.ui-welcome::before {
+    content: "";
+    position: absolute;
+    top: 8%;
+    left: 50%;
+    width: min(620px, 92vw);
+    height: 420px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.075), transparent 68%);
+    filter: blur(18px);
+}
+
 .ui-welcome-title {
+    position: relative;
+    z-index: 1;
     margin-bottom: 16px;
     font-size: clamp(30px, 7vw, 46px);
     line-height: 1.1;
@@ -205,6 +221,8 @@
 }
 
 .ui-welcome-subtitle {
+    position: relative;
+    z-index: 1;
     max-width: 560px;
     margin: 0 auto;
     color: var(--ui-text-muted);
