@@ -1156,7 +1156,143 @@ Legacy CodingSkill, SkillRouter, ProblemSolvingSkill, editorBrain, offlineBrain,
 ### 29.12 Change Control
 Changes establishing canonical Project, Workspace, Tool, Action, Verification, or persistent build-state authority MUST undergo architectural review and Contract impact analysis before implementation.
 
-## 30. Final Canonical Contract Rule
+## 30. Chat Interaction Boundary Contract
+
+The Chat Interaction Boundary is the canonical application-level boundary for coordinating a normal ChatTBM interaction across established framework authorities.
+
+It MUST coordinate existing canonical boundaries without creating competing domain ownership, persistent interaction authority, or an alternative assistant execution path.
+
+### 30.1 Architectural Position
+The Chat Interaction Boundary operates between the Chat HTTP/application surface and established canonical framework boundaries.
+
+The canonical interaction path is:
+
+HTTP/Application
+→ Chat Interaction Boundary
+→ approved domain boundaries
+→ Assistant Engine
+→ AI Engine
+→ AI Provider Boundary
+
+The Chat Interaction Boundary MUST NOT bypass the Assistant Engine, AI Engine, or AI Provider Boundary.
+
+It MUST NOT become a replacement for the Assistant Engine or an Intelligence Orchestration domain.
+
+### 30.2 Canonical Interaction Request
+A canonical Chat Interaction request MUST contain:
+
+- `userId`
+- `interactionId`
+- `message`
+
+`userId` identifies the owning user.
+
+`interactionId` identifies the interaction being coordinated.
+
+`message` contains the user-provided interaction input.
+
+The Boundary MUST preserve the supplied `userId` and `interactionId` without silently replacing, regenerating, or reassigning them.
+
+The caller is responsible for establishing the interaction identity.
+
+### 30.3 Context Coordination
+The Chat Interaction Boundary MUST use the canonical Context Boundary for Context operations.
+
+It MUST NOT directly access Context persistence or introduce competing Context storage.
+
+Context ownership MUST remain with the Context domain.
+
+The Boundary MUST preserve the relationship between `userId` and `interactionId` when resolving or coordinating Context.
+
+A missing, invalid, unavailable, or unauthorized Context operation MUST produce a controlled failure rather than silently creating competing interaction state.
+
+### 30.4 Assistant Delegation
+Assistant generation MUST be delegated through the established Assistant Engine.
+
+The Chat Interaction Boundary MUST NOT access AI provider SDKs directly.
+
+It MUST NOT own provider credentials, provider state, AI execution state, or competing assistant execution logic.
+
+The Assistant Engine remains responsible for assistant request validation, AI request construction, AI delegation, and assistant failure normalization within its established authority.
+
+### 30.5 Approved Domain Integration
+The Boundary MAY coordinate approved Memory, Profile, or Learning information when an applicable canonical boundary explicitly provides that capability.
+
+Any such information MUST be resolved through its owning canonical boundary.
+
+The Chat Interaction Boundary MUST NOT directly access or mutate Memory, Profile, Learning, Forecast, Evaluation, Application, or other canonical domain persistence.
+
+The Boundary MUST NOT promote transient interaction information into durable canonical state without the owning domain’s approved authority.
+
+### 30.6 Intelligence Orchestration Exclusion
+The Chat Interaction Boundary MUST NOT become a canonical Intelligence Orchestration domain.
+
+It MUST NOT establish a competing intelligence registry, intelligence persistence layer, intelligence lifecycle, or intelligence-owned state.
+
+Future Intelligence Orchestration requires separate architectural justification, Contract, Design, implementation, verification, and failure testing.
+
+### 30.7 HTTP Boundary Relationship
+The Chat Controller and Chat Route remain transport/application-surface concerns.
+
+The Chat Route MUST remain a thin route to the appropriate handler.
+
+The Chat Controller MUST translate HTTP input and results without becoming the owner of Context, Memory, Profile, Learning, AI provider, or interaction state.
+
+The Chat Interaction Boundary is the canonical coordination authority for the interaction itself.
+
+### 30.8 Ownership and Identity Protection
+The Boundary MUST preserve canonical identity supplied by owning domains.
+
+It MUST validate references before using them.
+
+It MUST preserve user ownership when coordinating Context or other user-scoped canonical domains.
+
+It MUST NOT mutate another domain’s canonical identity, lifecycle, persistence, or registry authority.
+
+### 30.9 Failure Behavior
+Invalid interaction requests, missing identity, invalid interaction identity, Context failures, ownership violations, unavailable capabilities, delegated Assistant failures, and unexpected coordination failures MUST produce explicit controlled failures.
+
+A partial or failed delegated operation MUST NOT be represented as successful interaction completion.
+
+The Boundary MUST distinguish controlled application failure from successful AI execution.
+
+Live external provider execution MUST remain subject to the External Execution Limitation.
+
+### 30.10 Verification
+Verification MUST cover:
+
+- required `userId`
+- required `interactionId`
+- message validation
+- interaction identity preservation
+- Context Boundary delegation
+- Context ownership protection
+- Assistant Engine delegation
+- AI Provider Boundary preservation
+- approved domain integration behavior
+- Intelligence Orchestration separation
+- HTTP/controller separation
+- controlled failure normalization
+- unavailable capability behavior
+- false-success prevention
+
+Verification MUST distinguish structural, integration, failure, and live external execution according to the External Execution Limitation.
+
+### 30.11 Legacy Rule
+Legacy conversation, history, timeline, assistant, intelligence, routing, and related services are not canonical merely because they exist or contain interaction-like behavior.
+
+Reuse MUST occur through an approved architectural boundary.
+
+Legacy storage MUST NOT become canonical Chat Interaction persistence without explicit architectural approval.
+
+### 30.12 Change Control
+The Chat Interaction Boundary MUST remain a coordination boundary unless a future architectural decision explicitly establishes additional canonical authority.
+
+Changes introducing canonical Conversation, Thread, interaction-history persistence, orchestration state, intelligence state, or additional execution authority MUST undergo architectural review and Contract impact analysis before implementation.
+
+The Boundary MUST NOT silently expand its authority to compensate for missing future domains.
+
+## 31. Final Canonical Contract Rule
 
 The ChatTBM Contract establishes the following mandatory rule:
 
