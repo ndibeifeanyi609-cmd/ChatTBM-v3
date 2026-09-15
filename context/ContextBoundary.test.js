@@ -12,6 +12,7 @@ const assert = require('assert');
 const {
     createContext,
     getContext,
+    getContextByInteraction,
     updateContext,
     closeContext,
     listContextsByUser,
@@ -94,6 +95,42 @@ assert.strictEqual(
     ownerRead.success,
     true
 );
+
+const interactionRead = getContextByInteraction(
+    'test-user',
+    'interaction-1'
+);
+
+assert.strictEqual(
+    interactionRead.success,
+    true
+);
+
+assert.strictEqual(
+    interactionRead.context.id,
+    id
+);
+
+assert.strictEqual(
+    interactionRead.context.userId,
+    'test-user'
+);
+
+assert.strictEqual(
+    interactionRead.context.interactionId,
+    'interaction-1'
+);
+
+const wrongInteractionOwner = getContextByInteraction(
+    'other-user',
+    'interaction-1'
+);
+
+assert.strictEqual(
+    wrongInteractionOwner.success,
+    false
+);
+
 
 const wrongOwnerRead = getContext(
     id,

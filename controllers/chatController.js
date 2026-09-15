@@ -1,19 +1,27 @@
 'use strict';
 
 // =====================================
-// ChatTBM V7.0
-// Chat Controller
+// ChatTBM
+// REG-091 Chat Interaction Boundary
+//
+// HTTP/application-surface adapter.
 //
 // Responsibility:
-// - Receive requests
-// - Validate input
-// - Call Assistant Engine
-// - Translate Assistant results to HTTP
+// - Receive HTTP requests
+// - Pass canonical interaction input to
+//   Chat Interaction Boundary
+// - Translate controlled results to HTTP
+//
+// MUST NOT:
+// - Own interaction state
+// - Coordinate Context
+// - Call Assistant Engine directly
+// - Access AI Provider boundaries
 // =====================================
 
 const {
-    generateReply
-} = require("../services/assistantEngine");
+    handleInteraction
+} = require('../chatInteraction/ChatInteractionBoundary');
 
 // =====================================
 // CHAT HANDLER
@@ -23,78 +31,65 @@ async function chatHandler(req, res) {
 
     try {
 
-        const {
-            message,
-            userId = "guest"
-        } = req.body;
-
-        // ===============================
-        // VALIDATION
-        // ===============================
+        const result = await handleInteraction(
+            req?.body || {}
+        );
 
         if (
-            !message ||
-            typeof message !== "string" ||
-            message.trim() === ""
+            !result ||
+            result.success === false
         ) {
 
-            return res.status(400).json({
+            const errorCode =
+                result?.error?.code;
+
+            const status =
+                errorCode === 'CHAT_INTERACTION_ERROR' &&
+                !result?.userId
+                    ? 400
+                    : errorCode === 'CONTEXT_UNAVAILABLE'
+                        ? 503
+                        : errorCode === 'ASSISTANT_ERROR' ||
+                          errorCode === 'PROVIDER_UNAVAILABLE'
+                            ? 503
+                            : 400;
+
+            return res.status(status).json({
 
                 success: false,
 
-                message: "Message is required."
+                version: '7.0.0',
 
-            });
+                userId:
+                    result?.userId,
 
-        }
-
-        // ===============================
-        // ASSISTANT EXECUTION
-        // ===============================
-
-        const reply = await generateReply({
-
-            userId,
-            message
-
-        });
-
-        // ===============================
-        // CONTROLLED ASSISTANT FAILURE
-        // ===============================
-
-        if (
-            !reply ||
-            reply.success === false
-        ) {
-
-            return res.status(503).json({
-
-                success: false,
-
-                version: "7.0.0",
+                interactionId:
+                    result?.interactionId,
 
                 error:
-                    reply?.error || {
-                        code: "ASSISTANT_ERROR",
-                        message: "Assistant execution failed."
+                    result?.error || {
+                        code: 'CHAT_INTERACTION_ERROR',
+                        message: 'Chat interaction failed.'
                     }
 
             });
 
         }
 
-        // ===============================
-        // SUCCESS RESPONSE
-        // ===============================
-
         return res.json({
 
             success: true,
 
-            version: "7.0.0",
+            version: '7.0.0',
 
-            response: reply.response
+            userId:
+                result.userId,
+
+            interactionId:
+                result.interactionId,
+
+            response:
+                result.response
 
         });
 
@@ -108,10 +103,10 @@ async function chatHandler(req, res) {
 
             success: false,
 
-            message: "Unable to process request.",
+            message: 'Unable to process request.',
 
             error:
-                process.env.NODE_ENV === "development"
+                process.env.NODE_ENV === 'development'
                     ? error.message
                     : undefined
 

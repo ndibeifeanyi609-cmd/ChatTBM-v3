@@ -6,9 +6,17 @@ const {
     chatHandler
 } = require("../controllers/chatController");
 
+const {
+    createContext
+} = require("../context/ContextBoundary");
+
+const {
+    clearContexts
+} = require("../context/ContextPersistence");
+
 async function runTests() {
 
-    console.log("\n=== CHAT CONTROLLER TEST ===\n");
+    console.log("\n=== REG-091 CHAT CONTROLLER TEST ===\n");
 
     // =====================================
     // RESPONSE MOCK
@@ -41,39 +49,138 @@ async function runTests() {
 
     }
 
+    clearContexts();
+
     // =====================================
-    // INVALID REQUEST
+    // MISSING USER ID
     // =====================================
 
-    const invalidResponse =
+    const missingUserResponse =
         createResponseMock();
 
     await chatHandler(
         {
             body: {
-                message: ""
+                interactionId: "interaction-091",
+                message: "hello"
             }
         },
-        invalidResponse
+        missingUserResponse
     );
 
     assert.strictEqual(
-        invalidResponse.statusCode,
+        missingUserResponse.statusCode,
         400
     );
 
     assert.strictEqual(
-        invalidResponse.body.success,
+        missingUserResponse.body.success,
         false
     );
 
     assert.strictEqual(
-        invalidResponse.body.message,
+        missingUserResponse.body.error.code,
+        "CHAT_INTERACTION_ERROR"
+    );
+
+    assert.strictEqual(
+        missingUserResponse.body.error.message,
+        "userId is required."
+    );
+
+    console.log(
+        "✓ Missing userId HTTP protection"
+    );
+
+    // =====================================
+    // MISSING INTERACTION ID
+    // =====================================
+
+    const missingInteractionResponse =
+        createResponseMock();
+
+    await chatHandler(
+        {
+            body: {
+                userId: "user-091",
+                message: "hello"
+            }
+        },
+        missingInteractionResponse
+    );
+
+    assert.strictEqual(
+        missingInteractionResponse.statusCode,
+        400
+    );
+
+    assert.strictEqual(
+        missingInteractionResponse.body.success,
+        false
+    );
+
+    assert.strictEqual(
+        missingInteractionResponse.body.error.message,
+        "interactionId is required."
+    );
+
+    console.log(
+        "✓ Missing interactionId HTTP protection"
+    );
+
+    // =====================================
+    // MISSING MESSAGE
+    // =====================================
+
+    const missingMessageResponse =
+        createResponseMock();
+
+    await chatHandler(
+        {
+            body: {
+                userId: "user-091",
+                interactionId: "interaction-091",
+                message: ""
+            }
+        },
+        missingMessageResponse
+    );
+
+    assert.strictEqual(
+        missingMessageResponse.statusCode,
+        400
+    );
+
+    assert.strictEqual(
+        missingMessageResponse.body.success,
+        false
+    );
+
+    assert.strictEqual(
+        missingMessageResponse.body.error.message,
         "Message is required."
     );
 
     console.log(
-        "✓ Invalid request HTTP protection"
+        "✓ Missing message HTTP protection"
+    );
+
+    // =====================================
+    // CANONICAL CONTEXT
+    // =====================================
+
+    const contextResult =
+        createContext({
+            userId: "user-091",
+            interactionId: "interaction-091",
+            value: {
+                message: "controller test"
+            }
+        });
+
+    assert.strictEqual(
+        contextResult.success,
+        true
     );
 
     // =====================================
@@ -86,6 +193,8 @@ async function runTests() {
     await chatHandler(
         {
             body: {
+                userId: "user-091",
+                interactionId: "interaction-091",
                 message:
                     "Controller provider failure test"
             }
@@ -94,13 +203,18 @@ async function runTests() {
     );
 
     assert.strictEqual(
-        failureResponse.statusCode,
-        503
+        failureResponse.body.success,
+        false
     );
 
     assert.strictEqual(
-        failureResponse.body.success,
-        false
+        failureResponse.body.userId,
+        "user-091"
+    );
+
+    assert.strictEqual(
+        failureResponse.body.interactionId,
+        "interaction-091"
     );
 
     assert.ok(
@@ -134,14 +248,14 @@ async function runTests() {
     );
 
     console.log(
-        "\n=== CHAT CONTROLLER VERIFIED ===\n"
+        "\n=== REG-091 CHAT CONTROLLER VERIFIED ===\n"
     );
 }
 
 runTests().catch(error => {
 
     console.error(
-        "\n=== CHAT CONTROLLER FAILED ==="
+        "\n=== REG-091 CHAT CONTROLLER FAILED ==="
     );
 
     console.error(error);

@@ -86,6 +86,32 @@ function getContext(id, userId) {
     };
 }
 
+function getContextByInteraction(userId, interactionId) {
+    if (!userId) {
+        return {
+            success: false,
+            context: null,
+            error: "Context userId is required."
+        };
+    }
+
+    if (!interactionId) {
+        return {
+            success: false,
+            context: null,
+            error: "Context interactionId is required."
+        };
+    }
+
+    const id = createContextId(
+        userId,
+        interactionId
+    );
+
+    return getContext(id, userId);
+}
+
+
 function updateContext(
     id,
     userId,
@@ -229,6 +255,7 @@ function deleteContext(id, userId) {
 module.exports = {
     createContext,
     getContext,
+    getContextByInteraction,
     updateContext,
     transitionContextLifecycle,
     closeContext,
