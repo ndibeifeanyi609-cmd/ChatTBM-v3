@@ -194,7 +194,7 @@
     position: relative;
     width: min(100%, var(--ui-content-width));
     margin: 0 auto;
-    padding: 15vh 24px 96px;
+    padding: 18vh 24px 96px;
     text-align: center;
 }
 
@@ -414,5 +414,244 @@
 @media (min-width: 768px) {
     .ui-icon-button {
         display: none;
+    }
+}
+
+/* ChatTBM welcome refinement */
+.ui-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100%;
+    padding: clamp(72px, 14vh, 132px) 18px 190px;
+    overflow: hidden;
+}
+
+.ui-welcome-identity {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.ui-welcome-logo {
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-border-strong);
+    border-radius: 19px;
+    background: rgba(255,255,255,.06);
+    box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+
+.ui-welcome-logo span {
+    font-size: 22px;
+}
+
+.ui-welcome-brand {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ui-welcome-title {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 14px;
+    font-size: clamp(30px, 8vw, 48px);
+    line-height: 1.06;
+    letter-spacing: -.045em;
+}
+
+.ui-welcome-subtitle {
+    position: relative;
+    z-index: 1;
+    max-width: 540px;
+    margin: 0 auto;
+    color: var(--ui-text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+}
+
+.ui-welcome-prompts {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 620px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 34px;
+}
+
+.ui-welcome-prompt {
+    min-width: 0;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--ui-border);
+    border-radius: 18px;
+    background: rgba(255,255,255,.025);
+    color: var(--ui-text);
+    text-align: left;
+}
+
+.ui-welcome-prompt:hover {
+    border-color: var(--ui-border-strong);
+    background: rgba(255,255,255,.055);
+}
+
+.ui-welcome-prompt-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-border);
+    border-radius: 12px;
+    background: rgba(255,255,255,.035);
+}
+
+.ui-welcome-prompt-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ui-welcome-prompt-copy strong {
+    font-size: 14px;
+}
+
+.ui-welcome-prompt-copy span {
+    color: var(--ui-text-subtle);
+    font-size: 12px;
+}
+
+@media (max-width: 480px) {
+    .ui-welcome {
+        padding-top: 76px;
+    }
+
+    .ui-welcome-prompts {
+        gap: 8px;
+    }
+
+    .ui-welcome-prompt {
+        min-height: 72px;
+        padding: 12px;
+        gap: 9px;
+        border-radius: 16px;
+    }
+
+    .ui-welcome-prompt-icon {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+    }
+}
+
+/* ChatTBM assistant message actions */
+.ui-message-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.ui-message-copy {
+    appearance: none;
+    border: 1px solid var(--ui-border);
+    border-radius: 10px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,.025);
+    color: var(--ui-text-subtle);
+    font: inherit;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        border-color .18s ease,
+        background .18s ease,
+        color .18s ease,
+        transform .18s ease;
+}
+
+.ui-message-copy:hover {
+    border-color: var(--ui-border-strong);
+    background: rgba(255,255,255,.06);
+    color: var(--ui-text);
+}
+
+.ui-message-copy:active {
+    transform: scale(.97);
+}
+
+.ui-message-copy:focus-visible {
+    outline: 2px solid var(--ui-text);
+    outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+    .ui-message-actions {
+        margin-top: 8px;
+    }
+
+    .ui-message-copy {
+        min-height: 32px;
+        padding: 7px 11px;
+    }
+}
+
+/* ChatTBM voice input */
+.ui-voice-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    border: 1px solid var(--ui-border);
+    border-radius: 15px;
+    background: rgba(255,255,255,.035);
+    color: var(--ui-text-muted);
+    font: inherit;
+    font-size: 10px;
+    cursor: pointer;
+    transition:
+        border-color .18s ease,
+        background .18s ease,
+        color .18s ease,
+        transform .18s ease;
+}
+
+.ui-voice-button:hover {
+    border-color: var(--ui-border-strong);
+    background: rgba(255,255,255,.07);
+    color: var(--ui-text);
+}
+
+.ui-voice-button:active {
+    transform: scale(.96);
+}
+
+.ui-voice-button.is-listening {
+    border-color: var(--ui-border-strong);
+    background: rgba(255,255,255,.12);
+    color: var(--ui-text);
+}
+
+.ui-voice-button:focus-visible {
+    outline: 2px solid var(--ui-text);
+    outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+    .ui-voice-button {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
     }
 }

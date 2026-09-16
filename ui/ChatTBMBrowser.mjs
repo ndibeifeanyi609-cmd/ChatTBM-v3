@@ -8,6 +8,9 @@ class ChatTBMBrowser {
         this.app = options.app || new ChatTBMApp({
             userId: options.userId
         });
+
+        this.voiceRecognition = null;
+        this.voiceListening = false;
     }
 
     render() {
@@ -149,6 +152,24 @@ class ChatTBMBrowser {
         const element = document.createElement('div');
         element.className = 'ui-welcome';
 
+        const identity = document.createElement('div');
+        identity.className = 'ui-welcome-identity';
+
+        const logo = document.createElement('div');
+        logo.className = 'ui-welcome-logo';
+        logo.setAttribute('aria-hidden', 'true');
+
+        const logoMark = document.createElement('span');
+        logoMark.textContent = '◉';
+        logo.appendChild(logoMark);
+
+        const brand = document.createElement('div');
+        brand.className = 'ui-welcome-brand';
+        brand.textContent = 'ChatTBM';
+
+        identity.appendChild(logo);
+        identity.appendChild(brand);
+
         const title = document.createElement('h1');
         title.className = 'ui-welcome-title';
         title.textContent = model.title;
@@ -157,8 +178,42 @@ class ChatTBMBrowser {
         subtitle.className = 'ui-welcome-subtitle';
         subtitle.textContent = model.subtitle;
 
+        const prompts = document.createElement('div');
+        prompts.className = 'ui-welcome-prompts';
+        prompts.setAttribute('aria-label', 'Starter prompts');
+
+        (model.prompts || []).forEach(prompt => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'ui-welcome-prompt';
+            button.dataset.prompt = prompt.id;
+
+            const icon = document.createElement('span');
+            icon.className = 'ui-welcome-prompt-icon';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.textContent = prompt.icon;
+
+            const copy = document.createElement('span');
+            copy.className = 'ui-welcome-prompt-copy';
+
+            const promptTitle = document.createElement('strong');
+            promptTitle.textContent = prompt.title;
+
+            const description = document.createElement('span');
+            description.textContent = prompt.description;
+
+            copy.appendChild(promptTitle);
+            copy.appendChild(description);
+
+            button.appendChild(icon);
+            button.appendChild(copy);
+            prompts.appendChild(button);
+        });
+
+        element.appendChild(identity);
         element.appendChild(title);
         element.appendChild(subtitle);
+        element.appendChild(prompts);
 
         return element;
     }
@@ -182,6 +237,23 @@ class ChatTBMBrowser {
             content.textContent = message.content;
 
             item.appendChild(content);
+
+            if (message.role === 'assistant') {
+                const actions = document.createElement('div');
+                actions.className = 'ui-message-actions';
+
+                const copy = document.createElement('button');
+                copy.type = 'button';
+                copy.className = 'ui-message-copy';
+                copy.textContent = 'Copy';
+                copy.setAttribute('aria-label', 'Copy assistant response');
+                copy.dataset.action = 'copy-message';
+                copy.dataset.messageId = message.id || '';
+
+                actions.appendChild(copy);
+                item.appendChild(actions);
+            }
+
             list.appendChild(item);
         });
 
@@ -235,6 +307,13 @@ class ChatTBMBrowser {
             'Message ChatTBM'
         );
 
+        const voice = document.createElement('button');
+        voice.type = 'button';
+        voice.className = 'ui-voice-button';
+        voice.textContent = '●';
+        voice.setAttribute('aria-label', 'Use voice input');
+        voice.dataset.action = 'voice-input';
+
         const button = document.createElement('button');
         button.type = 'submit';
         button.className = 'ui-send-button';
@@ -246,6 +325,7 @@ class ChatTBMBrowser {
         button.disabled = !model.submitAvailable;
 
         form.appendChild(textarea);
+        form.appendChild(voice);
         form.appendChild(button);
         wrapper.appendChild(form);
 
@@ -315,6 +395,165 @@ class ChatTBMBrowser {
                 this.retry();
             });
         });
+
+        root.querySelectorAll(
+            '[data-action="voice-input"]'
+        ).forEach(button => {
+            button.addEventListener('click', () => {
+                this.toggleVoiceInput(button);
+            });
+        });
+
+        root.querySelectorAll(
+            '[data-action="copy-message"]'
+        ).forEach(button => {
+            button.addEventListener('click', async () => {
+                const messageId = button.dataset.messageId;
+
+                const message =
+                    this.app.state.conversation.messages.find(
+                        item => String(item.id) === String(messageId)
+                    );
+
+                if (!message || message.role !== 'assistant') {
+                    return;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(message.content);
+
+                    button.textContent = 'Copied';
+                    button.setAttribute(
+                        'aria-label',
+                        'Assistant response copied'
+                    );
+
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                        button.setAttribute(
+                            'aria-label',
+                            'Copy assistant response'
+                        );
+                    }, 1400);
+                } catch (error) {
+                    button.textContent = 'Copy failed';
+
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                    }, 1400);
+                }
+            });
+        });
+    }
+
+    toggleVoiceInput(button) {
+        const Recognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+        if (!Recognition) {
+            button.textContent = 'N/A';
+            button.setAttribute(
+                'aria-label',
+                'Voice input is not supported in this browser'
+            );
+
+            setTimeout(() => {
+                button.textContent = '●';
+                button.setAttribute(
+                    'aria-label',
+                    'Use voice input'
+                );
+            }, 1400);
+
+            return;
+        }
+
+        if (this.voiceListening) {
+            if (this.voiceRecognition) {
+                this.voiceRecognition.stop();
+            }
+            return;
+        }
+
+        const input =
+            this.root.querySelector('[data-role="composer"]');
+
+        if (!input) {
+            return;
+        }
+
+        const recognition = new Recognition();
+
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        this.voiceRecognition = recognition;
+        this.voiceListening = true;
+
+        button.classList.add('is-listening');
+        button.textContent = '●';
+        button.setAttribute(
+            'aria-label',
+            'Stop voice input'
+        );
+
+        recognition.onresult = event => {
+            const result = event.results &&
+                event.results[0] &&
+                event.results[0][0];
+
+            const transcript =
+                result && typeof result.transcript === 'string'
+                    ? result.transcript.trim()
+                    : '';
+
+            if (!transcript) {
+                return;
+            }
+
+            this.app.setComposerValue(transcript);
+            input.value = transcript;
+
+            const sendButton =
+                input.form.querySelector('.ui-send-button');
+
+            if (sendButton) {
+                sendButton.disabled =
+                    !this.app.components.composer.canSubmit();
+            }
+        };
+
+        recognition.onerror = () => {
+            this.stopVoiceInput(button);
+        };
+
+        recognition.onend = () => {
+            this.stopVoiceInput(button);
+        };
+
+        try {
+            recognition.start();
+        } catch (error) {
+            this.stopVoiceInput(button);
+        }
+    }
+
+    stopVoiceInput(button) {
+        this.voiceListening = false;
+        this.voiceRecognition = null;
+
+        if (!button) {
+            return;
+        }
+
+        button.classList.remove('is-listening');
+        button.textContent = '●';
+        button.setAttribute(
+            'aria-label',
+            'Use voice input'
+        );
     }
 
     async submit() {

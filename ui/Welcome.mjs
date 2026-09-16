@@ -12,14 +12,42 @@ class Welcome {
             typeof options.subtitle === 'string' &&
             options.subtitle.trim()
                 ? options.subtitle.trim()
-                : 'Ask anything, build ideas, and solve real-world problems.';
+                : 'Ask anything. Build ideas. Solve real-world problems.';
+
+        this.prompts = [
+            {
+                id: 'create',
+                icon: '✦',
+                title: 'Create',
+                description: 'Create something'
+            },
+            {
+                id: 'solve',
+                icon: '⚡',
+                title: 'Solve',
+                description: 'Solve a problem'
+            },
+            {
+                id: 'write',
+                icon: '✎',
+                title: 'Write',
+                description: 'Write & refine'
+            },
+            {
+                id: 'explore',
+                icon: '◉',
+                title: 'Explore',
+                description: 'Explore ideas'
+            }
+        ];
     }
 
     render() {
         return {
             type: 'welcome',
             title: this.title,
-            subtitle: this.subtitle
+            subtitle: this.subtitle,
+            prompts: this.prompts.map(prompt => ({ ...prompt }))
         };
     }
 }
