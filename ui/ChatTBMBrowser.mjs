@@ -187,6 +187,7 @@ class ChatTBMBrowser {
             button.type = 'button';
             button.className = 'ui-welcome-prompt';
             button.dataset.prompt = prompt.id;
+        button.dataset.promptMessage = prompt.message || '';
 
             const icon = document.createElement('span');
             icon.className = 'ui-welcome-prompt-icon';
@@ -310,7 +311,7 @@ class ChatTBMBrowser {
         const voice = document.createElement('button');
         voice.type = 'button';
         voice.className = 'ui-voice-button';
-        voice.textContent = '●';
+        this.setVoiceButtonIcon(voice);
         voice.setAttribute('aria-label', 'Use voice input');
         voice.dataset.action = 'voice-input';
 
@@ -397,6 +398,24 @@ class ChatTBMBrowser {
         });
 
         root.querySelectorAll(
+            '.ui-welcome-prompt'
+        ).forEach(button => {
+            button.addEventListener('click', () => {
+                const message = button.dataset.promptMessage || '';
+                if (!message) return;
+                const input = this.root.querySelector('[data-role="composer"]');
+                if (!input) return;
+                this.app.setComposerValue(message);
+                input.value = message;
+                input.focus();
+                const sendButton = input.form.querySelector('.ui-send-button');
+                if (sendButton) {
+                    sendButton.disabled = !this.app.components.composer.canSubmit();
+                }
+            });
+        });
+
+        root.querySelectorAll(
             '[data-action="voice-input"]'
         ).forEach(button => {
             button.addEventListener('click', () => {
@@ -459,7 +478,7 @@ class ChatTBMBrowser {
             );
 
             setTimeout(() => {
-                button.textContent = '●';
+                this.setVoiceButtonIcon(button);
                 button.setAttribute(
                     'aria-label',
                     'Use voice input'
@@ -493,7 +512,7 @@ class ChatTBMBrowser {
         this.voiceListening = true;
 
         button.classList.add('is-listening');
-        button.textContent = '●';
+        this.setVoiceButtonIcon(button);
         button.setAttribute(
             'aria-label',
             'Stop voice input'
@@ -540,6 +559,11 @@ class ChatTBMBrowser {
         }
     }
 
+    setVoiceButtonIcon(button) {
+        if (!button) return;
+        button.innerHTML = '<span class="ui-voice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="12" rx="4"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v3"></path><path d="M9 21h6"></path></svg></span>';
+    }
+
     stopVoiceInput(button) {
         this.voiceListening = false;
         this.voiceRecognition = null;
@@ -549,7 +573,7 @@ class ChatTBMBrowser {
         }
 
         button.classList.remove('is-listening');
-        button.textContent = '●';
+        this.setVoiceButtonIcon(button);
         button.setAttribute(
             'aria-label',
             'Use voice input'

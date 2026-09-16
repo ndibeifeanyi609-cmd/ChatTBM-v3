@@ -19,25 +19,29 @@ class Welcome {
                 id: 'create',
                 icon: '✦',
                 title: 'Create',
-                description: 'Create something'
+                description: 'Create something',
+                message: 'Help me create something useful.'
             },
             {
                 id: 'solve',
                 icon: '⚡',
                 title: 'Solve',
-                description: 'Solve a problem'
+                description: 'Solve a problem',
+                message: 'Help me solve a problem.'
             },
             {
                 id: 'write',
                 icon: '✎',
                 title: 'Write',
-                description: 'Write & refine'
+                description: 'Write & refine',
+                message: 'Help me write and refine something.'
             },
             {
                 id: 'explore',
                 icon: '◉',
                 title: 'Explore',
-                description: 'Explore ideas'
+                description: 'Explore ideas',
+                message: 'Help me explore an idea.'
             }
         ];
     }

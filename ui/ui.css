@@ -655,3 +655,57 @@
         height: 44px;
     }
 }
+
+/* ChatTBM mobile edge-to-edge refinement */
+html,
+body {
+    margin: 0;
+    min-width: 100%;
+    min-height: 100%;
+    background: var(--ui-bg);
+}
+
+body {
+    overflow-x: hidden;
+}
+
+.ui-app {
+    width: 100%;
+    min-width: 100%;
+    min-height: 100dvh;
+}
+
+/* ChatTBM microphone icon */
+.ui-voice-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ui-voice-icon svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+.ui-voice-button.is-listening .ui-voice-icon {
+    transform: scale(1.08);
+}
+
+@media (max-width: 480px) {
+    .ui-welcome {
+        padding-top: 64px;
+        padding-bottom: 176px;
+    }
+
+    .ui-welcome-prompts {
+        margin-top: 28px;
+    }
+
+    .ui-composer-wrap {
+        left: 0;
+        right: 0;
+    }
+}
