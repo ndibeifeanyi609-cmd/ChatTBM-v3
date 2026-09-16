@@ -12,6 +12,7 @@ const assert = require('assert');
 const {
     validateInteractionRequest,
     normalizeInteractionError,
+    normalizeAssistantInteractionError,
     handleInteraction
 } = require('./ChatInteractionBoundary');
 
@@ -113,6 +114,41 @@ async function runTests() {
     );
 
     console.log('✓ Interaction failure normalization');
+
+    // =====================================
+    // ASSISTANT ERROR NORMALIZATION
+    // =====================================
+
+    const assistantError =
+        normalizeAssistantInteractionError({
+            code: 'PROVIDER_UNAVAILABLE',
+            message: 'Provider is unavailable.',
+            internalDetail: 'must-not-leak'
+        });
+
+    assert.deepStrictEqual(
+        assistantError,
+        {
+            code: 'PROVIDER_UNAVAILABLE',
+            message: 'Provider is unavailable.'
+        }
+    );
+
+    const fallbackAssistantError =
+        normalizeAssistantInteractionError(null);
+
+    assert.deepStrictEqual(
+        fallbackAssistantError,
+        {
+            code: 'ASSISTANT_ERROR',
+            message: 'Assistant execution failed.'
+        }
+    );
+
+    console.log(
+        '✓ Assistant failures are normalized at the interaction boundary'
+    );
+
 
     // =====================================
     // CONTEXT GATE

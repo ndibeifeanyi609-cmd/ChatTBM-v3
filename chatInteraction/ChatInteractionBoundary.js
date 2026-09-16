@@ -62,6 +62,27 @@ function validateInteractionRequest(data) {
     };
 }
 
+function normalizeAssistantInteractionError(error) {
+    const normalized =
+        error && typeof error === 'object'
+            ? error
+            : {};
+
+    return {
+        code:
+            typeof normalized.code === 'string' &&
+            normalized.code.trim() !== ''
+                ? normalized.code
+                : 'ASSISTANT_ERROR',
+
+        message:
+            typeof normalized.message === 'string' &&
+            normalized.message.trim() !== ''
+                ? normalized.message
+                : 'Assistant execution failed.'
+    };
+}
+
 function normalizeInteractionError(error) {
     return {
         code: error?.code || 'CHAT_INTERACTION_ERROR',
@@ -112,10 +133,9 @@ async function handleInteraction(data = {}) {
                 userId: request.userId,
                 interactionId: request.interactionId,
                 error:
-                    assistantResult?.error || {
-                        code: 'ASSISTANT_ERROR',
-                        message: 'Assistant execution failed.'
-                    }
+                    normalizeAssistantInteractionError(
+                        assistantResult?.error
+                    )
             };
         }
 
@@ -138,5 +158,6 @@ async function handleInteraction(data = {}) {
 module.exports = {
     validateInteractionRequest,
     normalizeInteractionError,
+    normalizeAssistantInteractionError,
     handleInteraction
 };
