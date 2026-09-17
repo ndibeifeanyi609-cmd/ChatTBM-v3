@@ -263,6 +263,19 @@ function updateMemory(
             };
 
         }
+        // Lifecycle changes must go through MemoryLifecycle authority.
+        if (
+            memory.lifecycle !== undefined &&
+            memory.lifecycle !== existing.lifecycle
+        ) {
+            return {
+                success: false,
+                memory: existing,
+                error:
+                    'Memory lifecycle must be changed through the lifecycle authority.'
+            };
+        }
+
 
         const updatedMemory = {
             ...existing,

@@ -177,6 +177,19 @@ function updateMemory(memory) {
         };
     }
 
+    if (
+        existing.type !== memory.type ||
+        existing.subject !== memory.subject
+    ) {
+        return {
+            success: false,
+            memory: { ...existing },
+            conflict: true,
+            error:
+                'Memory identity cannot be changed.'
+        };
+    }
+
     const oldKey =
         createMemoryKey(existing);
 
