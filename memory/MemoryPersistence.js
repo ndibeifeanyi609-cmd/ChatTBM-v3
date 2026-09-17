@@ -1,398 +1,607 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
+
+const STORAGE_VERSION = '1.0';
+
+const DEFAULT_STORAGE_FILE =
+  path.join(__dirname, '..', 'storage', 'memory.json');
+
+let storageFilePath =
+  process.env.CHAT_TBM_MEMORY_STORAGE_PATH ||
+  DEFAULT_STORAGE_FILE;
 
 const memoriesById = new Map();
 const memoryIdsByKey = new Map();
 
-// =====================================
-// CREATE MEMORY IDENTITY KEY
-// =====================================
+let persistenceLoaded = false;
+
+function cloneMemory(memory) {
+  return JSON.parse(JSON.stringify(memory));
+}
 
 function createMemoryKey(memory) {
+  const identity = [
+    memory.userId,
+    memory.type,
+    memory.subject
+  ];
 
-    if (
-        !memory ||
-        typeof memory !== 'object'
-    ) {
-        return null;
-    }
-
-    const identity = JSON.stringify([
-        memory.userId ?? null,
-        memory.type ?? null,
-        memory.subject ?? null
-        
-    ]);
-
-    return crypto
-        .createHash('sha256')
-        .update(identity)
-        .digest('hex');
-
+  return crypto
+    .createHash('sha256')
+    .update(JSON.stringify(identity))
+    .digest('hex');
 }
 
-// =====================================
-// SAVE MEMORY
-// =====================================
+function getMemoryStoragePath() {
+  return storageFilePath;
+}
 
-function saveMemory(memory) {
+function configureMemoryPersistence(filePath) {
+  if (!filePath || typeof filePath !== 'string') {
+    throw new Error(
+      'Memory persistence file path must be a non-empty string.'
+    );
+  }
 
-    if (
-        !memory ||
-        !memory.id ||
-        !memory.userId ||
-        !memory.version ||
-        !memory.type
-    ) {
-        return {
-            success: false,
-            memory: null,
-            error: 'Invalid memory.'
-        };
-    }
+  storageFilePath = path.resolve(filePath);
 
-    const memoryKey =
-        createMemoryKey(memory);
+  memoriesById.clear();
+  memoryIdsByKey.clear();
+  persistenceLoaded = false;
 
-    if (!memoryKey) {
-        return {
-            success: false,
-            memory: null,
-            error:
-                'Unable to create memory identity.'
-        };
-    }
+  return storageFilePath;
+}
 
-    const existingById =
-        memoriesById.get(memory.id);
+function createStorageEnvelope(memories) {
+  return {
+    version: STORAGE_VERSION,
+    memories: memories.map(cloneMemory)
+  };
+}
 
-    if (existingById) {
+function validateStorageEnvelope(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error(
+      'Memory storage must contain a JSON object.'
+    );
+  }
 
-        if (
-            JSON.stringify(existingById) ===
-            JSON.stringify(memory)
-        ) {
-            return {
-                success: true,
-                memory: { ...existingById },
-                memoryKey,
-                idempotent: true,
-                conflict: false
-            };
-        }
+  if (data.version !== STORAGE_VERSION) {
+    throw new Error(
+      `Unsupported memory storage version: ${data.version}`
+    );
+  }
 
-        return {
-            success: false,
-            memory: { ...existingById },
-            memoryKey,
-            idempotent: false,
-            conflict: true,
-            error:
-                'Memory ID already exists.'
-        };
-    }
+  if (!Array.isArray(data.memories)) {
+    throw new Error(
+      'Memory storage field "memories" must be an array.'
+    );
+  }
 
-    const existingId =
-        memoryIdsByKey.get(memoryKey);
+  return data;
+}
 
-    if (
-        existingId &&
-        existingId !== memory.id
-    ) {
+function writeStorage() {
+  const directory = path.dirname(storageFilePath);
+  const tempFilePath = `${storageFilePath}.tmp`;
 
-        const existing =
-            memoriesById.get(existingId);
+  try {
+    fs.mkdirSync(directory, { recursive: true });
 
-        return {
-            success: false,
-            memory: existing
-                ? { ...existing }
-                : null,
-            memoryKey,
-            idempotent: false,
-            conflict: true,
-            error:
-                'Memory identity already exists.'
-        };
-    }
-
-    memoriesById.set(
-        memory.id,
-        { ...memory }
+    const memories = Array.from(
+      memoriesById.values()
     );
 
-    memoryIdsByKey.set(
-        memoryKey,
-        memory.id
+    const envelope = createStorageEnvelope(memories);
+
+    fs.writeFileSync(
+      tempFilePath,
+      JSON.stringify(envelope, null, 2),
+      'utf8'
     );
 
+    fs.renameSync(
+      tempFilePath,
+      storageFilePath
+    );
+  } catch (error) {
+    try {
+      if (fs.existsSync(tempFilePath)) {
+        fs.unlinkSync(tempFilePath);
+      }
+    } catch (_) {
+      // Preserve the original write failure.
+    }
+
+    throw new Error(
+      `Memory persistence write failed: ${error.message}`
+    );
+  }
+}
+
+function loadMemoryPersistence() {
+  if (persistenceLoaded) {
     return {
-        success: true,
-        memory: { ...memory },
-        memoryKey,
-        idempotent: false,
-        conflict: false
+      loaded: true,
+      empty: memoriesById.size === 0,
+      count: memoriesById.size,
+      path: storageFilePath
     };
-}
+  }
 
-// =====================================
-// UPDATE MEMORY
-// =====================================
+  const nextMemoriesById = new Map();
+  const nextMemoryIdsByKey = new Map();
 
-function updateMemory(memory) {
-
-    if (
-        !memory ||
-        !memory.id ||
-        !memory.userId
-    ) {
-        return {
-            success: false,
-            memory: null,
-            error: 'Invalid memory.'
-        };
-    }
-
-    const existing =
-        memoriesById.get(memory.id);
-
-    if (!existing) {
-        return {
-            success: false,
-            memory: null,
-            error: 'Memory not found.'
-        };
-    }
-
-    if (
-        existing.userId !==
-        memory.userId
-    ) {
-        return {
-            success: false,
-            memory: { ...existing },
-            error:
-                'Memory ownership cannot be changed.'
-        };
-    }
-
-    if (
-        existing.type !== memory.type ||
-        existing.subject !== memory.subject
-    ) {
-        return {
-            success: false,
-            memory: { ...existing },
-            conflict: true,
-            error:
-                'Memory identity cannot be changed.'
-        };
-    }
-
-    const oldKey =
-        createMemoryKey(existing);
-
-    const newKey =
-        createMemoryKey(memory);
-
-    if (!newKey) {
-        return {
-            success: false,
-            memory: { ...existing },
-            error:
-                'Unable to create memory identity.'
-        };
-    }
-
-    const existingId =
-        memoryIdsByKey.get(newKey);
-
-    if (
-        existingId &&
-        existingId !== memory.id
-    ) {
-
-        const conflictingMemory =
-            memoriesById.get(existingId);
-
-        return {
-
-            success: false,
-            memory:
-                conflictingMemory
-                    ? { ...conflictingMemory }
-                    : { ...existing },
-            memoryKey: newKey,
-            conflict: true,
-            error:
-                'Memory identity already exists.'
-        };
-    }
-
-    memoriesById.set(
-        memory.id,
-        { ...memory }
-    );
-
-    if (
-        oldKey &&
-        oldKey !== newKey &&
-        memoryIdsByKey.get(oldKey) ===
-            memory.id
-    ) {
-        memoryIdsByKey.delete(oldKey);
-    }
-
-    memoryIdsByKey.set(
-        newKey,
-        memory.id
-    );
-
-    return {
-        success: true,
-        memory: { ...memory },
-        memoryKey: newKey,
-        conflict: false
-    };
-}
-
-// =====================================
-// GET MEMORY
-// =====================================
-
-function getMemory(id) {
-
-    if (!id) {
-        return null;
-    }
-
-    const memory =
-        memoriesById.get(id);
-
-    return memory
-        ? { ...memory }
-        : null;
-}
-
-// =====================================
-// GET MEMORIES BY USER
-// =====================================
-
-function getMemoriesByUser(userId) {
-
-    if (!userId) {
-        return [];
-    }
-
-    return [
-        ...memoriesById.values()
-    ]
-        .filter(
-            memory =>
-                memory.userId === userId
-        )
-        .map(
-            memory => ({ ...memory })
-        );
-}
-
-// =====================================
-// DELETE MEMORY
-// =====================================
-
-function deleteMemory(
-    id,
-    userId
-) {
-
-    const memory =
-        memoriesById.get(id);
-
-    if (!memory) {
-        return {
-            success: false,
-            memory: null,
-            error: 'Memory not found.'
-        };
-    }
-
-    if (
-        memory.userId !== userId
-    ) {
-        return {
-            success: false,
-            memory: { ...memory },
-            error:
-                'Memory ownership violation.'
-        };
-    }
-
-    const memoryKey =
-        createMemoryKey(memory);
-
-    memoriesById.delete(id);
-
-    if (
-        memoryKey &&
-        memoryIdsByKey.get(memoryKey) === id
-    ) {
-        memoryIdsByKey.delete(
-            memoryKey
-        );
-    }
-
-    return {
-        success: true,
-        memory: { ...memory }
-    };
-}
-
-// =====================================
-// CLEAR USER MEMORIES
-// =====================================
-
-function clearMemoriesByUser(userId) {
-
-    if (!userId) {
-        return 0;
-    }
-
-    const memories =
-        getMemoriesByUser(userId);
-
-    memories.forEach(memory => {
-
-        deleteMemory(
-            memory.id,
-            userId
-        );
-
-    });
-
-    return memories.length;
-}
-
-// =====================================
-// CLEAR ALL STORAGE
-// =====================================
-
-function clearMemoryPersistence() {
-
+  if (!fs.existsSync(storageFilePath)) {
     memoriesById.clear();
     memoryIdsByKey.clear();
+    persistenceLoaded = true;
 
+    return {
+      loaded: true,
+      empty: true,
+      count: 0,
+      path: storageFilePath
+    };
+  }
+
+  let parsed;
+
+  try {
+    const raw = fs.readFileSync(
+      storageFilePath,
+      'utf8'
+    );
+
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw new Error(
+      `Memory persistence load failed: ${error.message}`
+    );
+  }
+
+  validateStorageEnvelope(parsed);
+
+  const MemoryRegistry =
+    require('./MemoryRegistry');
+
+  for (const memory of parsed.memories) {
+    MemoryRegistry.validateMemory(memory);
+
+    const id = memory.id;
+    const key = createMemoryKey(memory);
+
+    if (nextMemoriesById.has(id)) {
+      throw new Error(
+        `Duplicate persisted Memory id: ${id}`
+      );
+    }
+
+    if (nextMemoryIdsByKey.has(key)) {
+      throw new Error(
+        `Duplicate persisted Memory identity: ${key}`
+      );
+    }
+
+    nextMemoriesById.set(
+      id,
+      cloneMemory(memory)
+    );
+
+    nextMemoryIdsByKey.set(
+      key,
+      id
+    );
+  }
+
+  memoriesById.clear();
+  memoryIdsByKey.clear();
+
+  for (const [id, memory] of nextMemoriesById) {
+    memoriesById.set(id, memory);
+  }
+
+  for (const [key, id] of nextMemoryIdsByKey) {
+    memoryIdsByKey.set(key, id);
+  }
+
+  persistenceLoaded = true;
+
+  return {
+    loaded: true,
+    empty: memoriesById.size === 0,
+    count: memoriesById.size,
+    path: storageFilePath
+  };
+}
+
+function ensureLoaded() {
+  if (!persistenceLoaded) {
+    loadMemoryPersistence();
+  }
+}
+
+function saveMemory(memory) {
+  ensureLoaded();
+
+  if (!memory || typeof memory !== 'object') {
+    throw new Error('Memory record is required.');
+  }
+
+  if (!memory.id) {
+    throw new Error('Memory id is required.');
+  }
+
+  if (!memory.userId) {
+    throw new Error('Memory userId is required.');
+  }
+
+  if (!memory.version) {
+    throw new Error('Memory version is required.');
+  }
+
+  if (!memory.type) {
+    throw new Error('Memory type is required.');
+  }
+
+  const id = memory.id;
+  const key = createMemoryKey(memory);
+
+  const existingById =
+    memoriesById.get(id);
+
+  if (existingById) {
+    if (
+      JSON.stringify(existingById) ===
+      JSON.stringify(memory)
+    ) {
+      return {
+        success: true,
+        saved: false,
+        idempotent: true,
+        memory: cloneMemory(existingById)
+      };
+    }
+
+    return {
+      success: false,
+      conflict: true,
+      error:
+        `Memory id already exists: ${id}`
+    };
+  }
+
+  const existingId =
+    memoryIdsByKey.get(key);
+
+  if (existingId) {
+    return {
+      success: false,
+      conflict: true,
+      error:
+        `Memory identity already exists: ${key}`
+    };
+  }
+
+  memoriesById.set(
+    id,
+    cloneMemory(memory)
+  );
+
+  memoryIdsByKey.set(
+    key,
+    id
+  );
+
+  try {
+    writeStorage();
+  } catch (error) {
+    memoriesById.delete(id);
+    memoryIdsByKey.delete(key);
+    throw error;
+  }
+
+  return {
+    success: true,
+    saved: true,
+    memory: cloneMemory(memory)
+  };
+}
+
+function updateMemory(memory) {
+  ensureLoaded();
+
+  if (!memory || typeof memory !== 'object') {
+    throw new Error('Memory record is required.');
+  }
+
+  if (!memory.id) {
+    throw new Error('Memory id is required.');
+  }
+
+  if (!memory.userId) {
+    throw new Error('Memory userId is required.');
+  }
+
+  const id = memory.id;
+  const existing =
+    memoriesById.get(id);
+
+  if (!existing) {
+    return {
+      success: false,
+      notFound: true,
+      error:
+        `Memory not found: ${id}`
+    };
+  }
+
+  if (existing.userId !== memory.userId) {
+    return {
+      success: false,
+      ownershipFailure: true,
+      error:
+        `Memory ownership mismatch: ${id}`
+    };
+  }
+
+  const oldKey =
+    createMemoryKey(existing);
+
+  const newKey =
+    createMemoryKey(memory);
+
+  if (oldKey !== newKey) {
+    return {
+      success: false,
+      conflict: true,
+      error:
+        'Memory identity cannot change during update.'
+    };
+  }
+
+  const existingId =
+    memoryIdsByKey.get(newKey);
+
+  if (
+    existingId &&
+    existingId !== id
+  ) {
+    return {
+      success: false,
+      conflict: true,
+      error:
+        `Memory identity already belongs to: ${existingId}`
+    };
+  }
+
+  const previousMemory =
+    cloneMemory(existing);
+
+  memoriesById.set(
+    id,
+    cloneMemory(memory)
+  );
+
+  try {
+    writeStorage();
+  } catch (error) {
+    memoriesById.set(
+      id,
+      previousMemory
+    );
+    throw error;
+  }
+
+  return {
+    success: true,
+    updated: true,
+    memory: cloneMemory(memory)
+  };
+}
+
+function getMemory(id) {
+  ensureLoaded();
+
+  const memory =
+    memoriesById.get(id);
+
+  return memory
+    ? cloneMemory(memory)
+    : null;
+}
+
+function getMemoriesByUser(userId) {
+  ensureLoaded();
+
+  if (!userId) {
+    return [];
+  }
+
+  return Array.from(
+    memoriesById.values()
+  )
+    .filter(
+      memory =>
+        memory.userId === userId
+    )
+    .map(cloneMemory);
+}
+
+function getAllPersistedMemories() {
+  ensureLoaded();
+
+  return Array.from(
+    memoriesById.values()
+  ).map(cloneMemory);
+}
+
+function deleteMemory(id, userId) {
+  ensureLoaded();
+
+  if (!id) {
+    throw new Error('Memory id is required.');
+  }
+
+  const existing =
+    memoriesById.get(id);
+
+  if (!existing) {
+    return {
+      success: false,
+      notFound: true,
+      error:
+        `Memory not found: ${id}`
+    };
+  }
+
+  if (
+    userId &&
+    existing.userId !== userId
+  ) {
+    return {
+      success: false,
+      ownershipFailure: true,
+      error:
+        `Memory ownership mismatch: ${id}`
+    };
+  }
+
+  const key =
+    createMemoryKey(existing);
+
+  const previousMemory =
+    cloneMemory(existing);
+
+  memoriesById.delete(id);
+  memoryIdsByKey.delete(key);
+
+  try {
+    writeStorage();
+  } catch (error) {
+    memoriesById.set(
+      id,
+      previousMemory
+    );
+
+    memoryIdsByKey.set(
+      key,
+      id
+    );
+
+    throw error;
+  }
+
+  return {
+    success: true,
+    deleted: true,
+    id
+  };
+}
+
+function clearMemoriesByUser(userId) {
+  ensureLoaded();
+
+  if (!userId) {
+    return {
+      success: false,
+      error: 'Memory userId is required.'
+    };
+  }
+
+  const removed = [];
+
+  for (const [id, memory] of memoriesById) {
+    if (memory.userId === userId) {
+      removed.push({
+        id,
+        key: createMemoryKey(memory),
+        memory: cloneMemory(memory)
+      });
+    }
+  }
+
+  if (removed.length === 0) {
+    return {
+      success: true,
+      cleared: 0
+    };
+  }
+
+  for (const item of removed) {
+    memoriesById.delete(item.id);
+    memoryIdsByKey.delete(item.key);
+  }
+
+  try {
+    writeStorage();
+  } catch (error) {
+    for (const item of removed) {
+      memoriesById.set(
+        item.id,
+        item.memory
+      );
+
+      memoryIdsByKey.set(
+        item.key,
+        item.id
+      );
+    }
+
+    throw error;
+  }
+
+  return {
+    success: true,
+    cleared: removed.length
+  };
+}
+
+function clearMemoryPersistence() {
+  memoriesById.clear();
+  memoryIdsByKey.clear();
+
+  const tempFilePath =
+    `${storageFilePath}.tmp`;
+
+  try {
+    if (fs.existsSync(storageFilePath)) {
+      fs.unlinkSync(storageFilePath);
+    }
+
+    if (fs.existsSync(tempFilePath)) {
+      fs.unlinkSync(tempFilePath);
+    }
+  } catch (error) {
+    throw new Error(
+      `Memory persistence clear failed: ${error.message}`
+    );
+  }
+
+  persistenceLoaded = true;
+
+  return {
+    success: true,
+    cleared: true,
+    path: storageFilePath
+  };
 }
 
 module.exports = {
-
-    createMemoryKey,
-    saveMemory,
-    updateMemory,
-    getMemory,
-    getMemoriesByUser,
-    deleteMemory,
-    clearMemoriesByUser,
-    clearMemoryPersistence
-
+  STORAGE_VERSION,
+  createMemoryKey,
+  getMemoryStoragePath,
+  configureMemoryPersistence,
+  loadMemoryPersistence,
+  getAllPersistedMemories,
+  saveMemory,
+  updateMemory,
+  getMemory,
+  getMemoriesByUser,
+  deleteMemory,
+  clearMemoriesByUser,
+  clearMemoryPersistence
 };

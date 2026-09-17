@@ -20,6 +20,7 @@
 // - Forecast Controller
 // =====================================
 require("dotenv").config();
+const MemoryRuntime = require("./memory/MemoryRuntime");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
@@ -169,6 +170,24 @@ app.use(
     }
 );
 // =====================================
+// =====================================
+// INITIALIZE MEMORY RUNTIME
+// =====================================
+try {
+    const memoryRuntime =
+        MemoryRuntime.initializeMemoryRuntime();
+
+    console.log(
+        `Memory runtime initialized: ${memoryRuntime.count} persisted memories`
+    );
+} catch (error) {
+    console.error(
+        "Memory runtime initialization failed."
+    );
+    console.error(error.message);
+    process.exit(1);
+}
+// =====================================
 // START SERVER
 // =====================================
 app.listen(
@@ -178,7 +197,7 @@ app.listen(
             "===================================="
         );
         console.log(
-            "ChatTBM REG-086.41"
+            "ChatTBM REG-092"
         );
         console.log(
             "===================================="
