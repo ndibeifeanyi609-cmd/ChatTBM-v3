@@ -1,3 +1,11 @@
+## Canonical Status
+
+The Software-Building Assistant is a canonical application capability governed by Contract §29.
+
+The existing `softwareBuilder/` implementation is the admitted implementation for this capability. Its build objectives and plans remain transient orchestration records and do not establish canonical Project, Workspace, Tool, Action, Verification, Context, Memory, Profile, or Learning authority.
+
+The current implementation provides no consequential software-building execution boundary. Any future consequential execution requires a separate approved boundary and architectural review under §29.
+
 # Software-Building Assistant Design
 
 ## 1. Package Structure

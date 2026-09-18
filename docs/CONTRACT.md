@@ -670,6 +670,10 @@ The canonical application foundation includes:
 - ApplicationRegistry
 - LearningApplicationBoundary
 
+The canonical application capabilities include:
+
+- Software-Building Assistant (§29)
+
 The canonical AI provider foundation includes:
 
 - AIProviderBoundary
