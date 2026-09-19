@@ -340,9 +340,9 @@ class ChatTBMBrowser {
         );
         button.disabled = !model.submitAvailable;
 
-        form.appendChild(textarea);
         form.appendChild(fileInput);
         form.appendChild(fileButton);
+        form.appendChild(textarea);
         form.appendChild(voice);
         form.appendChild(button);
         wrapper.appendChild(form);
