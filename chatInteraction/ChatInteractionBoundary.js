@@ -24,7 +24,7 @@
 // - become Intelligence Orchestration
 // =====================================
 
-const { getContextByInteraction } = require('../context/ContextBoundary');
+const { createContext, getContextByInteraction } = require('../context/ContextBoundary');
 const { generateReply } = require('../services/assistantEngine');
 
 function validateInteractionRequest(data) {
@@ -96,7 +96,7 @@ async function handleInteraction(data = {}) {
     try {
         request = validateInteractionRequest(data);
 
-        const contextResult = getContextByInteraction(
+        let contextResult = getContextByInteraction(
             request.userId,
             request.interactionId
         );
@@ -106,17 +106,33 @@ async function handleInteraction(data = {}) {
             contextResult.success === false ||
             !contextResult.context
         ) {
-            return {
-                success: false,
-                userId: request.userId,
-                interactionId: request.interactionId,
-                error: {
-                    code: 'CONTEXT_UNAVAILABLE',
-                    message:
-                        contextResult?.error ||
-                        'Context is unavailable.'
-                }
-            };
+            const isMissingContext =
+                contextResult?.error === 'Context not found.';
+
+            if (isMissingContext) {
+                contextResult = createContext({
+                    userId: request.userId,
+                    interactionId: request.interactionId
+                });
+            }
+
+            if (
+                !contextResult ||
+                contextResult.success === false ||
+                !contextResult.context
+            ) {
+                return {
+                    success: false,
+                    userId: request.userId,
+                    interactionId: request.interactionId,
+                    error: {
+                        code: 'CONTEXT_UNAVAILABLE',
+                        message:
+                            contextResult?.error ||
+                            'Context is unavailable.'
+                    }
+                };
+            }
         }
 
         const assistantResult = await generateReply({

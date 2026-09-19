@@ -11,6 +11,7 @@ class ChatTBMBrowser {
 
         this.voiceRecognition = null;
         this.voiceListening = false;
+        this.selectedFile = null;
     }
 
     render() {
@@ -308,6 +309,20 @@ class ChatTBMBrowser {
             'Message ChatTBM'
         );
 
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.className = 'ui-file-input';
+        fileInput.accept = 'image/*,.pdf,.txt,.md,.doc,.docx';
+        fileInput.setAttribute('aria-label', 'Choose a file');
+        fileInput.dataset.role = 'file-input';
+
+        const fileButton = document.createElement('button');
+        fileButton.type = 'button';
+        fileButton.className = 'ui-file-button';
+        fileButton.textContent = '+';
+        fileButton.setAttribute('aria-label', 'Attach a file');
+        fileButton.dataset.action = 'file-attachment';
+
         const voice = document.createElement('button');
         voice.type = 'button';
         voice.className = 'ui-voice-button';
@@ -326,6 +341,8 @@ class ChatTBMBrowser {
         button.disabled = !model.submitAvailable;
 
         form.appendChild(textarea);
+        form.appendChild(fileInput);
+        form.appendChild(fileButton);
         form.appendChild(voice);
         form.appendChild(button);
         wrapper.appendChild(form);
@@ -359,6 +376,24 @@ class ChatTBMBrowser {
                     event.preventDefault();
                     this.submit();
                 }
+            });
+        }
+
+        const fileButton =
+            root.querySelector('[data-action="file-attachment"]');
+        const fileInput =
+            root.querySelector('[data-role="file-input"]');
+
+        if (fileButton && fileInput) {
+            fileButton.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', () => {
+                this.selectedFile =
+                    fileInput.files && fileInput.files[0]
+                        ? fileInput.files[0]
+                        : null;
             });
         }
 

@@ -649,14 +649,16 @@ boundary.
 
 ## 23. Current Canonical Contract Coverage
 
-The currently established REG-087 framework contracts cover:
+The currently established framework contracts cover:
 
 - Forecast Foundation
 - Evaluation Foundation
 - Learning Foundation
 - Profile Foundation
+- Conversation Contract
 - Profile Boundary
 - Learning Boundary
+
 - Learning / Evaluation Boundary
 - Learning Application Boundary
 - AI Provider Boundary
@@ -1339,4 +1341,315 @@ exists in the repository.
 This Contract is therefore the detailed behavioral authority beneath the
 ChatTBM Framework Blueprint and above individual package designs and
 implementations.
+
+## 32. Conversation Contract
+
+The canonical Conversation domain owns user-scoped conversational containers
+that organize related interactions while remaining distinct from interaction-
+scoped Context, durable Memory, Profile, Learning, Skills, and Intelligence
+Orchestration.
+
+### 32.1 Architectural Position
+
+Conversation is a canonical domain above individual interaction-scoped Context.
+
+Conversation MUST integrate with established canonical domains through their
+approved boundaries.
+
+Conversation MUST NOT bypass the Context Boundary, Memory Boundary, Profile
+Boundary, Learning authority, Assistant Engine, AI Engine, or AI Provider
+Boundary.
+
+Conversation MUST NOT become an Intelligence Orchestration domain.
+
+### 32.2 Responsibility
+
+The canonical Conversation domain MAY own:
+
+- Conversation identity
+- User ownership
+- Conversation lifecycle
+- Conversation-level metadata explicitly defined by the canonical contract
+- Explicit ordered references to associated interaction Context records
+
+Conversation MUST NOT own the internal state of an associated Context.
+
+Conversation MUST NOT become a substitute for Context, Memory, Profile,
+Learning, Skills, or Intelligence state.
+
+A Conversation record MUST represent the conversational container and its
+approved relationships, not arbitrary copies of state owned by other domains.
+
+### 32.3 Ownership
+
+Every canonical Conversation MUST have explicit user ownership through
+`userId`.
+
+Conversation ownership MUST be preserved across creation, retrieval, updates,
+lifecycle transitions, persistence, references, and deletion.
+
+A Conversation identifier MUST NOT by itself be treated as authorization to
+access or modify another user's Conversation.
+
+Ownership conflicts MUST fail explicitly.
+
+Conversation MUST NOT silently reassign ownership.
+
+### 32.4 Identity
+
+Conversation identity is owned by the canonical Conversation domain.
+
+Conversation identity MUST be deterministic and stable across legitimate
+content and lifecycle updates.
+
+The identity model MUST distinguish the owning `userId` from the unique
+Conversation identifier.
+
+A Conversation identity MUST remain immutable after creation.
+
+Attempts to change canonical identity or `userId` MUST fail.
+
+Identity collisions MUST be rejected rather than silently overwritten.
+
+Conversation identity MUST remain distinct from Context identity.
+
+Context identity remains defined by the canonical Context contract as the
+combination of `userId` and `interactionId`.
+
+### 32.5 Conversation and Context Relationship
+
+A Conversation MAY contain ordered references to interaction-scoped Context
+records where the approved Design establishes such a relationship.
+
+Conversation MAY reference Context identity, but MUST NOT take ownership of
+Context state.
+
+Context remains authoritative for interaction-scoped state, continuity,
+content updates, and Context lifecycle.
+
+A Context MUST NOT silently establish, mutate, or delete canonical Conversation
+state merely because an interaction occurs.
+
+Conversation operations involving Context MUST resolve through the approved
+Context authority where Context state or ownership must be verified.
+
+Invalid, missing, conflicting, or unauthorized Context references MUST fail
+explicitly.
+
+A Conversation MUST NOT duplicate Context-owned conversational state merely
+to create an alternative authoritative history.
+
+### 32.6 Lifecycle
+
+Conversation lifecycle MUST be explicitly defined by the canonical
+Conversation lifecycle authority.
+
+Lifecycle transitions MUST be controlled and deterministic.
+
+A lifecycle transition MUST NOT silently mutate Conversation identity or
+ownership.
+
+Invalid lifecycle transitions MUST fail without corrupting canonical
+Conversation state.
+
+Repeated application of an already-applied valid terminal transition SHOULD
+be handled idempotently where the approved Design permits it.
+
+Conversation lifecycle MUST remain distinct from Context lifecycle.
+
+Closing a Context MUST NOT implicitly close its Conversation.
+
+Closing a Conversation MUST NOT silently rewrite, invalidate, or mutate
+associated Context records unless an explicit future contract authorizes that
+behavior.
+
+### 32.7 Persistence and Versioning
+
+Canonical Conversation persistence MUST be authoritative.
+
+Persistence MUST preserve canonical Conversation identity, ownership,
+lifecycle, timestamps, approved metadata, validated Context references, and
+version state.
+
+Persistence conflicts MUST fail explicitly.
+
+Ordinary mutable Conversation content MUST use controlled version checking
+where optimistic concurrency is required by the approved Design.
+
+Stale updates MUST fail rather than silently overwrite newer canonical state.
+
+Conversation persistence MUST NOT become an alternative authority for Context,
+Memory, Profile, Learning, or Intelligence state.
+
+### 32.8 Registry
+
+A Conversation Registry MAY be established only if the approved Design
+demonstrates a clear architectural need.
+
+If established, the Conversation Registry MUST be authoritative for the
+responsibilities assigned to it.
+
+Registry behavior MUST preserve identity, ownership, duplicate detection,
+conflict handling, and deletion or cleanup semantics defined by the approved
+Design.
+
+No competing Conversation registry or store may become authoritative.
+
+If a separate Registry is not required, canonical Conversation Persistence
+and the Conversation Boundary remain the authoritative mechanisms for the
+responsibilities assigned to them.
+
+### 32.9 Boundary
+
+A canonical Conversation Boundary MUST be the approved cross-domain entry
+point for Conversation operations established by the approved Design.
+
+Where supported, those operations MAY include creation, retrieval, update,
+lifecycle transition, Context relationship management, listing, and deletion.
+
+All canonical Conversation reads and writes MUST cross the approved
+Conversation Boundary.
+
+The Boundary MUST enforce identity, ownership, immutable identity fields,
+lifecycle rules, valid Context references, version rules, and controlled
+failure behavior.
+
+The Conversation Boundary MUST NOT directly take ownership of state belonging
+to another canonical domain.
+
+Cross-domain operations MUST delegate to the owning authority.
+
+### 32.10 Memory, Profile, Learning, and Context Separation
+
+Conversation, Context, Memory, Profile, and Learning remain distinct
+canonical domains with separate ownership authority.
+
+Conversational content MUST NOT be promoted into durable Memory, Profile, or
+Learning state without an approved integration.
+
+Memory, Profile, and Learning MUST NOT directly mutate canonical Conversation
+state.
+
+Context content MUST NOT silently become Conversation metadata.
+
+Conversation metadata MUST NOT silently become Context, Memory, Profile, or
+Learning state.
+
+### 32.11 Legacy Services
+
+Legacy conversation, conversation history, conversation timeline,
+conversation-memory, offline-brain, and related services discovered during
+architectural discovery remain noncanonical unless explicitly incorporated
+through an approved canonical boundary.
+
+Legacy existence, successful execution, or existing callers MUST NOT grant
+canonical authority.
+
+No migration or deletion of legacy services is implied by this Contract.
+
+Browser `localStorage` conversation history and transient in-memory
+conversation timelines MUST NOT become canonical Conversation persistence
+without explicit architectural approval.
+
+### 32.12 Failure Behavior
+
+Canonical Conversation operations MUST explicitly control failures involving:
+
+- Invalid input
+- Missing required data
+- Invalid identity
+- Unauthorized ownership
+- Missing Conversation
+- Duplicate identity
+- Identity conflict
+- Invalid or unauthorized Context reference
+- Invalid lifecycle transition
+- Stale version
+- Persistence failure
+- Registry failure where a Registry exists
+- Integration failure
+- Unexpected internal failure
+
+Failures MUST NOT produce corrupt canonical state.
+
+Failures MUST NOT be reported as false success.
+
+Unavailable future capabilities MUST fail in a controlled and explicit manner.
+
+### 32.13 Verification
+
+Conversation verification MUST prove, as applicable:
+
+- Required fields
+- Identity determinism and immutability
+- Ownership protection
+- Lifecycle behavior
+- Persistence behavior
+- Version and stale-update protection
+- Registry behavior where a Registry exists
+- Context reference validation
+- Context ownership protection
+- Conversation Boundary behavior
+- Separation from Memory, Profile, Learning, Context, Skills, and Intelligence
+- Controlled failure behavior
+- Protection against legacy services becoming competing authority
+
+Verification MUST include failure testing for ownership, identity, lifecycle,
+persistence, reference, concurrency, boundary, and integration failures where
+those behaviors exist.
+
+Structural verification, integration verification, failure verification, and
+live external-service verification MUST remain distinct.
+
+Successful behavior in a legacy service MUST NOT be treated as verification of
+canonical Conversation behavior.
+
+### 32.14 External API Rule
+
+No external API is required merely to establish the canonical Conversation
+architecture.
+
+Any future external API integration MUST be introduced through an approved
+Conversation Boundary and must define its purpose, ownership, integration
+model, authorization, availability assumptions, failure behavior, verification
+requirements, security considerations, and configuration.
+
+No ad-hoc external API may become a competing Conversation authority.
+
+### 32.15 Reserved Future Decisions
+
+The following remain separate architectural decisions and MUST NOT be
+implicitly introduced by the Conversation implementation:
+
+- Conversation-to-Thread modeling
+- Retention policy
+- Conversation history limits
+- Summarization
+- Context-window management
+- Conversation search or indexing
+- Folders or categorization
+- Archiving
+- Sharing
+- Multi-device synchronization
+- Export and import
+- Conversation analytics
+- External APIs
+- Legacy migration
+- Automatic Conversation creation
+- Automatic Context membership
+- Conversation-level intelligence
+- Conversation-level orchestration
+
+Legacy behavior MUST NOT be treated as approval for any of these decisions.
+
+### 32.16 Change Control
+
+Changes that introduce or materially alter canonical Conversation state,
+Conversation persistence, Conversation Registry authority, Thread authority,
+interaction-history persistence, automatic Context membership, or additional
+Conversation execution authority MUST undergo architectural review and
+Contract impact analysis.
+
+No such authority may be introduced through an implementation detail,
+legacy reuse, or ad-hoc integration.
 

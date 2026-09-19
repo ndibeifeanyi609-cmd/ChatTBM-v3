@@ -151,10 +151,10 @@ async function runTests() {
 
 
     // =====================================
-    // CONTEXT GATE
+    // CONTEXT INITIALIZATION
     // =====================================
 
-    const missingContext =
+    const newInteraction =
         await handleInteraction({
             userId: 'user-091',
             interactionId: 'missing-interaction-091',
@@ -162,26 +162,47 @@ async function runTests() {
         });
 
     assert.strictEqual(
-        missingContext.success,
+        newInteraction.success,
         false
     );
 
     assert.strictEqual(
-        missingContext.userId,
+        newInteraction.userId,
         'user-091'
     );
 
     assert.strictEqual(
-        missingContext.interactionId,
+        newInteraction.interactionId,
         'missing-interaction-091'
     );
 
     assert.strictEqual(
-        missingContext.error.code,
-        'CONTEXT_UNAVAILABLE'
+        newInteraction.error.code,
+        'PROVIDER_UNAVAILABLE'
     );
 
-    console.log('✓ Missing Context produces controlled failure');
+    const initializedContext =
+        getContextByInteraction(
+            'user-091',
+            'missing-interaction-091'
+        );
+
+    assert.strictEqual(
+        initializedContext.success,
+        true
+    );
+
+    assert.strictEqual(
+        initializedContext.context.userId,
+        'user-091'
+    );
+
+    assert.strictEqual(
+        initializedContext.context.interactionId,
+        'missing-interaction-091'
+    );
+
+    console.log('✓ Missing Context is initialized through canonical Context capability');
 
     // =====================================
     // CANONICAL CONTEXT COORDINATION

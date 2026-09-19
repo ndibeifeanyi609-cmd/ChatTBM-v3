@@ -2,7 +2,8 @@
 
 async function generateReply({
     message,
-    userId = 'guest'
+    userId = 'guest',
+    context
 } = {}) {
     if (typeof message !== 'string' || !message.trim()) {
         return {
@@ -22,6 +23,7 @@ async function generateReply({
             },
             body: JSON.stringify({
                 message: message.trim(),
+                interactionId: context?.interactionId,
                 userId
             })
         });
