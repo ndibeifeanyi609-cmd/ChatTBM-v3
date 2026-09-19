@@ -504,3 +504,45 @@ Blueprint
 → Push
 → Repository Confirmation
 
+
+---
+
+## 15. REG-094 Conversation Foundation
+
+REG-094 establishes the canonical Conversation domain above interaction-scoped
+Context.
+
+The verified Conversation architecture establishes:
+
+- Canonical Conversation identity and immutable identity fields
+- Explicit user ownership
+- `active` and `closed` lifecycle states
+- Controlled lifecycle transitions with terminal idempotence
+- Authoritative Conversation persistence
+- Optimistic version checking for ordinary mutable updates
+- Explicit stale-version failure behavior
+- Ordered Context references without taking ownership of Context state
+- Context-reference validation through the canonical Context Boundary
+- Canonical Conversation Boundary for cross-domain operations
+- Ownership protection across reads, writes, lifecycle operations, references,
+  listing, and deletion
+- Explicit controlled failure behavior
+- Separation from Context, Memory, Profile, Learning, Skills, and Intelligence
+- No separate Conversation Registry
+- Legacy conversation/history/timeline services remaining noncanonical
+
+REG-094 implementation and failure verification must remain governed by
+Contract §32 and the approved `docs/CONVERSATION_DESIGN.md`.
+
+The completed REG-094 sequence is:
+
+Contract
+→ Design
+→ Implementation
+→ Verification
+→ Failure Testing
+→ Documentation
+→ Checkpoint
+→ Commit
+→ Push
+→ Repository Confirmation
