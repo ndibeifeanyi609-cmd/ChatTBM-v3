@@ -1653,3 +1653,265 @@ Contract impact analysis.
 No such authority may be introduced through an implementation detail,
 legacy reuse, or ad-hoc integration.
 
+
+---
+
+## 33. Intelligence Orchestration Contract
+
+### 33.1 Architectural Position
+
+Intelligence Orchestration is a canonical coordination capability that operates between approved canonical domain boundaries and the Assistant Engine.
+
+Its purpose is to coordinate approved intelligence inputs, compose a controlled intelligence operation, and produce a structured orchestration result for an approved downstream consumer.
+
+Intelligence Orchestration MUST NOT replace the Assistant Engine, AI Engine, or AI Provider Boundary.
+
+Intelligence Orchestration MUST NOT become an alternative owner of Memory, Profile, Learning, Context, Conversation, Forecast, Evaluation, Application, Project, Workspace, Tool, Action, or Verification state.
+
+### 33.2 Responsibility
+
+The canonical Intelligence Orchestration capability MAY:
+
+- validate an orchestration request
+- preserve user and operation identity
+- resolve approved intelligence inputs through owning canonical boundaries
+- coordinate multiple approved intelligence inputs
+- compose a transient orchestration context
+- produce a structured intelligence result
+- coordinate approved downstream execution
+- normalize orchestration-specific failures
+
+Intelligence Orchestration MUST distinguish:
+
+- requested intent
+- available information
+- authorized operations
+- composed intelligence
+- delegated execution
+- completed execution
+- verified results
+
+Intelligence Orchestration MUST NOT claim completion merely because an orchestration plan or delegated request was created.
+
+### 33.3 Canonical Orchestration Request
+
+A canonical Intelligence Orchestration request MUST contain:
+
+- `userId`
+- `operationId`
+- `input`
+
+`userId` identifies the owning user.
+
+`operationId` identifies the orchestration operation.
+
+`input` contains the request requiring intelligence coordination.
+
+The Intelligence Orchestration Boundary MUST preserve supplied identity without silently replacing, regenerating, or reassigning it.
+
+The canonical request MUST NOT contain embedded copies of canonical domain state that are treated as authoritative.
+
+Where domain information is required, it MUST be resolved through the owning canonical boundary.
+
+### 33.4 Ownership and Identity
+
+Intelligence Orchestration owns the orchestration operation and its transient coordination state only.
+
+It MUST NOT own the canonical state represented by an intelligence input.
+
+Canonical domain identity remains authoritative within the owning domain.
+
+Intelligence Orchestration MUST preserve user ownership across all approved domain interactions.
+
+An orchestration operation MUST NOT use information belonging to another user or silently substitute another user's canonical state.
+
+Identity fields defining the orchestration operation MUST remain immutable after creation.
+
+### 33.5 Lifecycle
+
+An Intelligence Orchestration operation MAY use a transient lifecycle:
+
+- `requested`
+- `resolving`
+- `composed`
+- `completed`
+- `failed`
+
+Only valid lifecycle transitions defined by the approved Design MAY occur.
+
+A failed operation MUST NOT be represented as completed.
+
+A completed orchestration operation MUST represent only work actually completed by the orchestration capability and its approved delegates.
+
+Lifecycle state is coordination state and MUST NOT become a substitute for the lifecycle authority of another canonical domain.
+
+### 33.6 State and Persistence
+
+The first canonical Intelligence Orchestration implementation MUST use transient operation state only.
+
+No canonical Intelligence Persistence layer is established by this Contract.
+
+Intelligence Orchestration MUST NOT persist copies of Memory, Profile, Learning, Context, Conversation, Forecast, Evaluation, or other canonical domain state.
+
+Transient orchestration state MUST NOT silently become durable canonical state.
+
+Any future requirement for durable intelligence state requires separate architectural justification and Contract impact analysis.
+
+### 33.7 Registry
+
+The first canonical Intelligence Orchestration implementation MUST NOT establish an Intelligence Registry.
+
+Operation identity MUST be enforced by the Intelligence Orchestration Boundary and the approved transient operation mechanism.
+
+A future Intelligence Registry MAY be established only when architectural discovery demonstrates a clear canonical need.
+
+No competing intelligence registry or in-memory store may become an alternative canonical authority.
+
+### 33.8 Boundary
+
+A canonical Intelligence Orchestration Boundary MUST be the approved entry point for Intelligence Orchestration operations.
+
+All canonical Intelligence Orchestration operations MUST cross the approved Boundary.
+
+The Boundary MUST enforce:
+
+- request validity
+- operation identity
+- user ownership
+- lifecycle validity
+- approved domain references
+- controlled integration
+- failure normalization
+- false-success prevention
+
+The Boundary MUST NOT directly take ownership of another canonical domain's state.
+
+Cross-domain operations MUST delegate to the owning authority.
+
+### 33.9 Approved Domain Integration
+
+Intelligence Orchestration MAY consume information from approved canonical domains only through their established canonical boundaries.
+
+Approved domain integration MUST preserve the ownership and authority of the supplying domain.
+
+Intelligence Orchestration MUST NOT directly mutate canonical Memory, Profile, Learning, Context, Conversation, Forecast, Evaluation, or Application state.
+
+Where an approved domain boundary provides information, Intelligence Orchestration MAY compose that information into transient orchestration state without becoming its owner.
+
+Cross-domain integration MUST be explicit and MUST NOT create an implicit dependency that bypasses an established canonical boundary.
+
+If a required domain capability does not have an approved canonical boundary, Intelligence Orchestration MUST NOT create an ad-hoc substitute for that boundary.
+
+### 33.10 Assistant and AI Relationship
+
+Intelligence Orchestration MUST remain separate from the Assistant Engine.
+
+When an orchestration operation requires assistant generation, Intelligence Orchestration MUST delegate through the established Assistant Engine boundary.
+
+Intelligence Orchestration MUST NOT bypass the Assistant Engine to call the AI Engine directly.
+
+The Assistant Engine remains responsible for assistant request validation, request construction, AI execution delegation, and controlled assistant failures within its established boundary.
+
+The AI Engine remains responsible for AI execution through the established AI Provider Boundary.
+
+Intelligence Orchestration MUST NOT access provider SDKs, provider credentials, or provider-specific execution state directly.
+
+Intelligence Orchestration MAY prepare approved intelligence inputs for downstream assistant execution, but it MUST NOT become an alternative assistant or AI execution authority.
+
+### 33.11 Legacy Intelligence Services
+
+Existing intelligence-related services, including legacy response, fusion, brain, strategy, prediction, memory-intelligence, and intelligence-core implementations, MUST NOT be treated as canonical Intelligence Orchestration merely because they perform orchestration-like behavior.
+
+Legacy implementations MAY be used as architectural discovery references, but they MUST NOT establish competing canonical identity, lifecycle, persistence, registry, or ownership authority.
+
+The canonical Intelligence Orchestration implementation MUST NOT reproduce legacy cross-domain state ownership merely to preserve historical behavior.
+
+Any reuse of legacy intelligence behavior MUST occur through an approved canonical boundary and MUST preserve the ownership rules established by this Contract.
+
+Legacy intelligence services MUST NOT bypass the Intelligence Orchestration Boundary, Assistant Engine, AI Engine, or AI Provider Boundary.
+
+### 33.12 Failure Behavior
+
+Intelligence Orchestration MUST return controlled failures when an orchestration request cannot be validated, resolved, composed, delegated, or completed.
+
+Failure results MUST preserve the orchestration operation identity where that identity was successfully established.
+
+The Boundary MUST normalize orchestration-specific failures without exposing provider credentials, internal secrets, or uncontrolled implementation details.
+
+A failure resolving an approved canonical domain MUST NOT be represented as successful intelligence composition.
+
+A failure during downstream assistant or AI execution MUST NOT be represented as successful assistant execution.
+
+A failed orchestration operation MUST remain distinguishable from a completed operation.
+
+Intelligence Orchestration MUST NOT fabricate intelligence, execution results, verification results, or completion status when an approved dependency fails or required information is unavailable.
+
+### 33.13 Verification
+
+The canonical Intelligence Orchestration implementation MUST verify:
+
+- canonical request validation
+- immutable operation identity
+- user ownership enforcement
+- valid lifecycle transitions
+- transient operation-state behavior
+- absence of unauthorized persistence
+- absence of an Intelligence Registry
+- approved canonical-boundary integration
+- separation from Assistant Engine and AI execution authority
+- controlled failure behavior
+- false-success prevention
+- legacy intelligence-service non-authority
+
+Verification MUST include successful orchestration paths and controlled failure paths.
+
+Failure testing MUST demonstrate that invalid identity, ownership violations, invalid lifecycle transitions, unavailable canonical inputs, downstream execution failures, and incomplete operations cannot produce false successful results.
+
+Verification MUST NOT require live external provider execution when the established provider boundary cannot execute because credentials or external access are unavailable.
+
+### 33.14 External API Rule
+
+Intelligence Orchestration MUST NOT introduce direct external API or provider execution outside the established AI Provider Boundary.
+
+Any future external intelligence service integration MUST have explicit architectural justification and MUST preserve the approved provider and execution boundaries.
+
+External credentials MUST NOT be stored in Intelligence Orchestration state or embedded in orchestration requests, objects, or results.
+
+Absence of external credentials MUST produce a controlled unavailable-dependency result rather than simulated or fabricated external execution.
+
+External execution MUST remain distinguishable from orchestration composition and MUST NOT be represented as completed when it was not actually executed.
+
+### 33.15 Reserved Future Decisions
+
+The following remain separate architectural decisions and MUST NOT be implicitly introduced by the first Intelligence Orchestration implementation:
+
+- durable Intelligence state
+- Intelligence Persistence
+- Intelligence Registry
+- Intelligence history or search
+- intelligence analytics
+- autonomous execution
+- autonomous tool or action authority
+- Project authority
+- Workspace authority
+- Tool authority
+- Action authority
+- Verification Engine authority
+- new canonical Strategy, Voice, Audience, Growth, or Decision domains
+- external intelligence providers outside the established provider boundary
+- provider-specific orchestration state
+- unrestricted filesystem, shell, process, or network execution
+
+Legacy intelligence behavior MUST NOT be treated as approval for any of these decisions.
+
+Any such capability MUST undergo separate architectural discovery and Contract impact analysis before implementation.
+
+### 33.16 Change Control
+
+Changes that introduce or materially alter canonical Intelligence Orchestration state, orchestration identity, lifecycle authority, persistence, registry authority, cross-domain execution authority, autonomous execution, or provider execution MUST undergo architectural review and Contract impact analysis.
+
+No such authority may be introduced through legacy reuse, an implementation detail, an ad-hoc integration, or an unapproved downstream consumer.
+
+Changes to the relationship between Intelligence Orchestration and the Assistant Engine, AI Engine, or AI Provider Boundary MUST also undergo Contract impact analysis before implementation.
+
+The first Intelligence Orchestration implementation MUST remain within the responsibility, ownership, lifecycle, persistence, registry, boundary, failure, verification, and external API constraints defined by this Contract.
