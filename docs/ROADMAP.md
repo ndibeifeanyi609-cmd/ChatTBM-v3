@@ -162,6 +162,34 @@ aiEngine
 
 Live Gemini execution remains dependent on configured provider credentials.
 
+### Memory Foundation
+
+Canonical Memory owns durable user-owned memory state.
+
+### Profile Foundation
+
+Canonical Profile owns user-scoped profile and identity state.
+
+### Context Foundation
+
+Canonical Context owns interaction-scoped conversational state.
+
+### Conversation Foundation
+
+Canonical Conversation owns user-scoped conversational containers and Context references.
+
+### Chat Interaction Boundary
+
+Chat Interaction Boundary coordinates normal chat interactions through canonical Context and Assistant Engine boundaries.
+
+### Software-Building Assistant
+
+Software-Building Assistant is an application capability operating above the canonical Assistant Engine and AI path.
+
+### Intelligence Orchestration
+
+Intelligence Orchestration coordinates transient intelligence composition across approved canonical boundaries.
+
 ---
 
 ## 5. Canonical Development Workflow
@@ -338,11 +366,6 @@ implementation commitments.
 
 Potential areas include:
 
-- Memory
-- Profile
-- Context
-- Conversation
-- Intelligence orchestration
 - Skills
 - Research
 - General assistance
@@ -412,12 +435,23 @@ ChatTBM has established verified foundations for:
 - Learning boundaries
 - Learning / Evaluation interaction
 - Learning application
+- Memory
+- Profile
+- Context
+- Conversation
+- Chat Interaction Boundary
+- Software-Building Assistant
+- Intelligence Orchestration
 - AI provider abstraction
 - AI engine provider integration
 
 The framework is therefore at the stage where future REG work should
 extend canonical architecture rather than continue isolated feature
 development.
+
+REG-095 Intelligence Orchestration is the latest synchronized checkpoint.
+No next REG package is selected until discovery establishes a concrete
+missing canonical responsibility.
 
 ---
 

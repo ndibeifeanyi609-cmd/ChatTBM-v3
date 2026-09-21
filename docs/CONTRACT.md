@@ -654,8 +654,12 @@ The currently established framework contracts cover:
 - Forecast Foundation
 - Evaluation Foundation
 - Learning Foundation
+- Memory Foundation
 - Profile Foundation
+- Context Foundation
 - Conversation Contract
+- Chat Interaction Boundary
+- Intelligence Orchestration
 - Profile Boundary
 - Learning Boundary
 
