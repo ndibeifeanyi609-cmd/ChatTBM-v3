@@ -496,6 +496,7 @@
     height: 46px;
     display: block;
     object-fit: contain;
+    border-radius: 50%;
 }
 
 .ui-welcome-brand {
