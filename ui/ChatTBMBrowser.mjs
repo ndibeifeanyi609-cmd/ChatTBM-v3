@@ -301,7 +301,7 @@ class ChatTBMBrowser {
 
         const textarea = document.createElement('textarea');
         textarea.value = model.value || '';
-        textarea.placeholder = 'Ask ChatTBM anything…';
+        textarea.placeholder = 'Ask ChatTBM';
         textarea.rows = 1;
         textarea.dataset.role = 'composer';
         textarea.setAttribute(
@@ -316,10 +316,23 @@ class ChatTBMBrowser {
         fileInput.setAttribute('aria-label', 'Choose a file');
         fileInput.dataset.role = 'file-input';
 
+        const logoMark = document.createElement('div');
+        logoMark.className = 'ui-composer-logo';
+        logoMark.setAttribute('aria-hidden', 'true');
+
+        const composerLogo = document.createElement('img');
+        composerLogo.src = '4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png';
+        composerLogo.alt = '';
+        logoMark.appendChild(composerLogo);
+
         const fileButton = document.createElement('button');
         fileButton.type = 'button';
         fileButton.className = 'ui-file-button';
-        fileButton.textContent = '+';
+        fileButton.innerHTML = `
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 1 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+        `;
         fileButton.setAttribute('aria-label', 'Attach a file');
         fileButton.dataset.action = 'file-attachment';
 
@@ -341,6 +354,7 @@ class ChatTBMBrowser {
         button.disabled = !model.submitAvailable;
 
         form.appendChild(fileInput);
+        form.appendChild(logoMark);
         form.appendChild(fileButton);
         form.appendChild(textarea);
         form.appendChild(voice);
