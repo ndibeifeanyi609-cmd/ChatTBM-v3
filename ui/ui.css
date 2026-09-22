@@ -491,8 +491,11 @@
     box-shadow: 0 18px 50px rgba(0,0,0,.45);
 }
 
-.ui-welcome-logo span {
-    font-size: 22px;
+.ui-welcome-logo img {
+    width: 46px;
+    height: 46px;
+    display: block;
+    object-fit: contain;
 }
 
 .ui-welcome-brand {
@@ -651,25 +654,6 @@
 }
 
 
-/* ChatTBM composer logo + attachment icon */
-.ui-composer-logo {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 15px;
-    overflow: hidden;
-}
-
-.ui-composer-logo img {
-    width: 30px;
-    height: 30px;
-    display: block;
-    object-fit: contain;
-}
-
 .ui-file-button svg {
     width: 22px;
     height: 22px;
@@ -680,25 +664,6 @@
     stroke-width: 1.9;
     stroke-linecap: round;
     stroke-linejoin: round;
-}
-
-@media (max-width: 480px) {
-    .ui-composer-logo {
-        width: 42px;
-        min-width: 42px;
-        height: 42px;
-    }
-
-    .ui-composer-logo img {
-        width: 28px;
-        height: 28px;
-    }
-
-    .ui-file-button {
-        width: 44px;
-        min-width: 44px;
-        height: 44px;
-    }
 }
 
 /* ChatTBM voice input */

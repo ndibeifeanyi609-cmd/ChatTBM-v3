@@ -160,9 +160,10 @@ class ChatTBMBrowser {
         logo.className = 'ui-welcome-logo';
         logo.setAttribute('aria-hidden', 'true');
 
-        const logoMark = document.createElement('span');
-        logoMark.textContent = '◉';
-        logo.appendChild(logoMark);
+        const welcomeLogo = document.createElement('img');
+        welcomeLogo.src = '4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png';
+        welcomeLogo.alt = '';
+        logo.appendChild(welcomeLogo);
 
         const brand = document.createElement('div');
         brand.className = 'ui-welcome-brand';
@@ -316,15 +317,6 @@ class ChatTBMBrowser {
         fileInput.setAttribute('aria-label', 'Choose a file');
         fileInput.dataset.role = 'file-input';
 
-        const logoMark = document.createElement('div');
-        logoMark.className = 'ui-composer-logo';
-        logoMark.setAttribute('aria-hidden', 'true');
-
-        const composerLogo = document.createElement('img');
-        composerLogo.src = '4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png';
-        composerLogo.alt = '';
-        logoMark.appendChild(composerLogo);
-
         const fileButton = document.createElement('button');
         fileButton.type = 'button';
         fileButton.className = 'ui-file-button';
@@ -354,7 +346,6 @@ class ChatTBMBrowser {
         button.disabled = !model.submitAvailable;
 
         form.appendChild(fileInput);
-        form.appendChild(logoMark);
         form.appendChild(fileButton);
         form.appendChild(textarea);
         form.appendChild(voice);
