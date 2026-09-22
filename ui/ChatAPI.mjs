@@ -1,5 +1,12 @@
 'use strict';
 
+const API_BASE_URL = (() => {
+    if (typeof window === 'undefined') return '';
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return '';
+    return 'https://chattbm-backend.onrender.com';
+})();
+
 async function generateReply({
     message,
     userId = 'guest',
@@ -16,7 +23,7 @@ async function generateReply({
     }
 
     try {
-        const response = await fetch('/api/chat', {
+        const response = await fetch(API_BASE_URL + '/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
