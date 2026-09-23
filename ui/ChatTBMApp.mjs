@@ -54,6 +54,8 @@ class ChatTBMApp {
             new MessageList({
                 conversation: this.components.conversation
             });
+
+        this.newConversation();
     }
 
     setInteractionId(interactionId) {
