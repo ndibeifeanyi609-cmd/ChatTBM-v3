@@ -702,6 +702,60 @@ class ChatTBMBrowser {
         );
     }
 
+    async createImageAttachment(file) {
+        if (!file) {
+            return null;
+        }
+
+        if (
+            typeof file.type !== 'string' ||
+            !file.type.startsWith('image/')
+        ) {
+            throw new Error(
+                'Only image attachments are supported right now.'
+            );
+        }
+
+        const maxSize = 10 * 1024 * 1024;
+
+        if (file.size > maxSize) {
+            throw new Error(
+                'Image attachments must be 10 MB or smaller.'
+            );
+        }
+
+        const buffer = await file.arrayBuffer();
+
+        let binary = '';
+
+        const bytes = new Uint8Array(buffer);
+
+        const chunkSize = 0x8000;
+
+        for (
+            let offset = 0;
+            offset < bytes.length;
+            offset += chunkSize
+        ) {
+            const chunk =
+                bytes.subarray(
+                    offset,
+                    Math.min(
+                        offset + chunkSize,
+                        bytes.length
+                    )
+                );
+
+            binary += String.fromCharCode(...chunk);
+        }
+
+        return {
+            type: 'image',
+            mimeType: file.type,
+            data: btoa(binary)
+        };
+    }
+
     async submit() {
         const message =
             this.app.getComposerValue();
@@ -710,12 +764,44 @@ class ChatTBMBrowser {
             return;
         }
 
+        let attachment = null;
+
+        if (this.selectedFile) {
+            try {
+                attachment =
+                    await this.createImageAttachment(
+                        this.selectedFile
+                    );
+            } catch (error) {
+                this.app.state.error.currentError = {
+                    code: 'INVALID_ATTACHMENT',
+                    message:
+                        error?.message ||
+                        'The selected image could not be attached.'
+                };
+
+                this.render();
+
+                return {
+                    success: false,
+                    error:
+                        this.app.state.error.currentError
+                };
+            }
+        }
+
         const pending =
-            this.app.submitMessage(message);
+            this.app.submitMessage(message, {
+                attachment
+            });
 
         this.render();
 
         const result = await pending;
+
+        if (result?.success === true) {
+            this.selectedFile = null;
+        }
 
         this.render();
 

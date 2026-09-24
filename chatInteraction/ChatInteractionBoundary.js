@@ -32,7 +32,12 @@ function validateInteractionRequest(data) {
         throw new Error('Interaction request is required.');
     }
 
-    const { userId, interactionId, message } = data;
+    const {
+        userId,
+        interactionId,
+        message,
+        attachment
+    } = data;
 
     if (
         typeof userId !== 'string' ||
@@ -55,10 +60,38 @@ function validateInteractionRequest(data) {
         throw new Error('Message is required.');
     }
 
+    let normalizedAttachment = null;
+
+    if (attachment !== undefined && attachment !== null) {
+        if (
+            typeof attachment !== 'object' ||
+            Array.isArray(attachment)
+        ) {
+            throw new Error('Invalid attachment.');
+        }
+
+        if (
+            attachment.type !== 'image' ||
+            typeof attachment.mimeType !== 'string' ||
+            !attachment.mimeType.startsWith('image/') ||
+            typeof attachment.data !== 'string' ||
+            !attachment.data.trim()
+        ) {
+            throw new Error('Invalid image attachment.');
+        }
+
+        normalizedAttachment = {
+            type: 'image',
+            mimeType: attachment.mimeType,
+            data: attachment.data
+        };
+    }
+
     return {
         userId,
         interactionId,
-        message
+        message,
+        attachment: normalizedAttachment
     };
 }
 
@@ -137,7 +170,8 @@ async function handleInteraction(data = {}) {
 
         const assistantResult = await generateReply({
             userId: request.userId,
-            message: request.message
+            message: request.message,
+            attachment: request.attachment
         });
 
         if (

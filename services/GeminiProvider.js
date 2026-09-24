@@ -101,10 +101,25 @@ ${request.message}`;
 
         try {
 
+            const contents = request.attachment
+                ? [{
+                    role: "user",
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: request.attachment.mimeType,
+                                data: request.attachment.data
+                            }
+                        }
+                    ]
+                }]
+                : prompt;
+
             const result =
                 await this.client.models.generateContent({
                     model: this.model,
-                    contents: prompt
+                    contents
                 });
 
             const responseText =

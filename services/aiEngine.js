@@ -57,7 +57,9 @@ async function generateAIResponse({
 
     message,
 
-    userId
+    userId,
+
+    attachment = null
 
 }) {
 
@@ -68,7 +70,9 @@ async function generateAIResponse({
 
             message,
 
-            userId
+            userId,
+
+            attachment
 
         });
 
