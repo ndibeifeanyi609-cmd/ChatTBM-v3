@@ -180,43 +180,9 @@ class ChatTBMBrowser {
         subtitle.className = 'ui-welcome-subtitle';
         subtitle.textContent = model.subtitle;
 
-        const prompts = document.createElement('div');
-        prompts.className = 'ui-welcome-prompts';
-        prompts.setAttribute('aria-label', 'Starter prompts');
-
-        (model.prompts || []).forEach(prompt => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'ui-welcome-prompt';
-            button.dataset.prompt = prompt.id;
-        button.dataset.promptMessage = prompt.message || '';
-
-            const icon = document.createElement('span');
-            icon.className = 'ui-welcome-prompt-icon';
-            icon.setAttribute('aria-hidden', 'true');
-            icon.textContent = prompt.icon;
-
-            const copy = document.createElement('span');
-            copy.className = 'ui-welcome-prompt-copy';
-
-            const promptTitle = document.createElement('strong');
-            promptTitle.textContent = prompt.title;
-
-            const description = document.createElement('span');
-            description.textContent = prompt.description;
-
-            copy.appendChild(promptTitle);
-            copy.appendChild(description);
-
-            button.appendChild(icon);
-            button.appendChild(copy);
-            prompts.appendChild(button);
-        });
-
         element.appendChild(identity);
         element.appendChild(title);
         element.appendChild(subtitle);
-        element.appendChild(prompts);
 
         return element;
     }
