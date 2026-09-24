@@ -245,14 +245,21 @@
     width: min(100%, var(--ui-content-width));
     margin: 0 auto;
     display: flex;
-    align-items: flex-end;
-    gap: 10px;
+    flex-direction: column;
+    gap: 0;
     padding: 9px;
     background: rgba(5, 5, 5, 0.86);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--ui-border-strong);
     border-radius: 22px;
+}
+
+.ui-composer-controls {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
 }
 
 .ui-composer textarea {
@@ -279,6 +286,73 @@
     opacity: 0;
     pointer-events: none;
 }
+
+.ui-attachment-preview {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--ui-border);
+    overflow: hidden;
+}
+
+.ui-attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.ui-attachment-thumbnail {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex: 0 0 auto;
+}
+
+.ui-attachment-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 20px;
+    flex: 0 0 auto;
+}
+
+.ui-attachment-name {
+    min-width: 0;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    color: var(--ui-text);
+}
+
+.ui-attachment-remove {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--ui-text-muted);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+
+.ui-attachment-remove:hover {
+    color: var(--ui-text);
+}
+
 
 .ui-file-button {
     width: 44px;

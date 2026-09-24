@@ -294,6 +294,11 @@ class ChatTBMBrowser {
         fileButton.setAttribute('aria-label', 'Attach a file');
         fileButton.dataset.action = 'file-attachment';
 
+        const attachmentPreview = document.createElement('div');
+        attachmentPreview.className = 'ui-attachment-preview';
+        attachmentPreview.dataset.role = 'attachment-preview';
+        attachmentPreview.hidden = true;
+
         const voice = document.createElement('button');
         voice.type = 'button';
         voice.className = 'ui-voice-button';
@@ -311,12 +316,20 @@ class ChatTBMBrowser {
         );
         button.disabled = !model.submitAvailable;
 
-        form.appendChild(fileInput);
-        form.appendChild(fileButton);
-        form.appendChild(textarea);
-        form.appendChild(voice);
-        form.appendChild(button);
+        const controls = document.createElement('div');
+        controls.className = 'ui-composer-controls';
+
+        controls.appendChild(fileInput);
+        controls.appendChild(fileButton);
+        controls.appendChild(textarea);
+        controls.appendChild(voice);
+        controls.appendChild(button);
+
+        form.appendChild(attachmentPreview);
+        form.appendChild(controls);
         wrapper.appendChild(form);
+
+        this.renderAttachmentPreview(wrapper);
 
         return wrapper;
     }
@@ -365,6 +378,8 @@ class ChatTBMBrowser {
                     fileInput.files && fileInput.files[0]
                         ? fileInput.files[0]
                         : null;
+
+                this.renderAttachmentPreview(root);
             });
         }
 
@@ -471,6 +486,80 @@ class ChatTBMBrowser {
         });
     }
 
+    renderAttachmentPreview(root) {
+        const preview =
+            root.querySelector('[data-role="attachment-preview"]');
+
+        if (!preview) {
+            return;
+        }
+
+        preview.innerHTML = '';
+
+        const file = this.selectedFile;
+
+        if (!file) {
+            preview.hidden = true;
+            return;
+        }
+
+        preview.hidden = false;
+
+        const item = document.createElement('div');
+        item.className = 'ui-attachment-item';
+
+        if (file.type && file.type.startsWith('image/')) {
+            const image = document.createElement('img');
+            image.className = 'ui-attachment-thumbnail';
+            image.alt = file.name || 'Selected image';
+
+            const objectUrl = URL.createObjectURL(file);
+            image.src = objectUrl;
+
+            image.addEventListener('load', () => {
+                URL.revokeObjectURL(objectUrl);
+            }, { once: true });
+
+            item.appendChild(image);
+        } else {
+            const icon = document.createElement('span');
+            icon.className = 'ui-attachment-icon';
+            icon.textContent = '📄';
+            icon.setAttribute('aria-hidden', 'true');
+
+            item.appendChild(icon);
+        }
+
+        const name = document.createElement('span');
+        name.className = 'ui-attachment-name';
+        name.textContent = file.name || 'Selected file';
+        name.title = file.name || 'Selected file';
+
+        item.appendChild(name);
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'ui-attachment-remove';
+        remove.textContent = '×';
+        remove.setAttribute('aria-label', 'Remove selected file');
+
+        remove.addEventListener('click', () => {
+            this.selectedFile = null;
+
+            const fileInput =
+                root.querySelector('[data-role="file-input"]');
+
+            if (fileInput) {
+                fileInput.value = '';
+            }
+
+            this.renderAttachmentPreview(root);
+        });
+
+        item.appendChild(remove);
+        preview.appendChild(item);
+    }
+
     toggleVoiceInput(button) {
         const Recognition =
             window.SpeechRecognition ||
@@ -550,11 +639,38 @@ class ChatTBMBrowser {
             }
         };
 
-        recognition.onerror = () => {
+        recognition.onerror = event => {
+            const errorCode =
+                event && typeof event.error === 'string'
+                    ? event.error
+                    : 'unknown';
+
+            this.voiceErrorActive = true;
+
             this.stopVoiceInput(button);
+
+            button.textContent = 'Voice unavailable';
+
+            button.setAttribute(
+                'aria-label',
+                `Voice input error: ${errorCode}`
+            );
+
+            setTimeout(() => {
+                this.setVoiceButtonIcon(button);
+                button.setAttribute(
+                    'aria-label',
+                    'Use voice input'
+                );
+            }, 1800);
         };
 
         recognition.onend = () => {
+            if (this.voiceErrorActive) {
+                this.voiceErrorActive = false;
+                return;
+            }
+
             this.stopVoiceInput(button);
         };
 
