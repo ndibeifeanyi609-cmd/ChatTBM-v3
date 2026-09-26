@@ -52,6 +52,28 @@ const forecastRoutes =
     require("./routes/forecastRoutes");
 const softwareBuildingRoutes =
     require("./routes/softwareBuildingRoutes");
+const { createVoiceRoutes } = require("./routes/voiceRoutes");
+const { STTProviderBoundary } = require("./voice/STTProviderBoundary");
+const { VoiceSTTBoundary } = require("./voice/VoiceSTTBoundary");
+const { GeminiSTTProvider } = require("./voice/GeminiSTTProvider");
+const { createVoiceTranscribeHandler } = require("./controllers/voiceController");
+
+const sttProviderBoundary = new STTProviderBoundary();
+const geminiSTTProvider = new GeminiSTTProvider();
+sttProviderBoundary.registerProvider("gemini", geminiSTTProvider);
+sttProviderBoundary.setProvider("gemini");
+
+const voiceSTTBoundary = new VoiceSTTBoundary({
+    providerBoundary: sttProviderBoundary
+});
+
+const voiceTranscribeHandler =
+    createVoiceTranscribeHandler({
+        voiceSTTBoundary
+    });
+
+const voiceRoutes =
+    createVoiceRoutes(voiceTranscribeHandler);
 // =====================================
 // REGISTER CHAT ROUTES
 // =====================================
@@ -60,6 +82,13 @@ app.use(
     chatRoutes
 );
 // =====================================
+// REGISTER VOICE ROUTES
+// =====================================
+app.use(
+    "/api/voice",
+    voiceRoutes
+);
+
 // REGISTER FORECAST ROUTES
 // =====================================
 app.use(

@@ -1,6 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
+import { transcribeVoice } from './ChatAPI.mjs';
 
 class ChatTBMBrowser {
     constructor(options = {}) {
@@ -11,6 +12,10 @@ class ChatTBMBrowser {
 
         this.voiceRecognition = null;
         this.voiceListening = false;
+        this.voiceRecorder = null;
+        this.voiceStream = null;
+        this.voiceAudioChunks = [];
+        this.voiceFallbackActive = false;
         this.selectedFile = null;
     }
 
@@ -566,21 +571,7 @@ class ChatTBMBrowser {
             window.webkitSpeechRecognition;
 
         if (!Recognition) {
-            button.textContent = 'N/A';
-            button.setAttribute(
-                'aria-label',
-                'Voice input is not supported in this browser'
-            );
-
-            setTimeout(() => {
-                this.setVoiceButtonIcon(button);
-                button.setAttribute(
-                    'aria-label',
-                    'Use voice input'
-                );
-            }, 1400);
-
-            return;
+            return this.toggleVoiceRecorder(button);
         }
 
         if (this.voiceListening) {
@@ -681,6 +672,204 @@ class ChatTBMBrowser {
         }
     }
 
+    async toggleVoiceRecorder(button) {
+        if (
+            typeof MediaRecorder === 'undefined' ||
+            !navigator.mediaDevices ||
+            typeof navigator.mediaDevices.getUserMedia !== 'function'
+        ) {
+            button.textContent = 'N/A';
+            return;
+        }
+
+        if (this.voiceFallbackActive) {
+            this.stopVoiceRecorder(button);
+            return;
+        }
+
+        try {
+            const stream =
+                await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+
+            const supportedTypes = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/mp4',
+                'audio/aac',
+                'audio/ogg;codecs=opus'
+            ];
+
+            const type =
+                supportedTypes.find(candidate =>
+                    MediaRecorder.isTypeSupported(candidate)
+                ) || '';
+            const recorder =
+                type
+                    ? new MediaRecorder(stream, { mimeType: type })
+                    : new MediaRecorder(stream);
+
+            this.voiceStream = stream;
+            this.voiceRecorder = recorder;
+            this.voiceAudioChunks = [];
+            this.voiceFallbackActive = true;
+            this.voiceRecordingTimer = setTimeout(() => {
+                if (this.voiceFallbackActive) {
+                    this.stopVoiceRecorder(button);
+                }
+            }, 60000);
+
+            button.classList.add('is-listening');
+            this.setVoiceButtonIcon(button);
+            button.setAttribute('aria-label', 'Stop voice input');
+
+            recorder.ondataavailable = event => {
+                if (event.data && event.data.size > 0) {
+                    this.voiceAudioChunks.push(event.data);
+                }
+            };
+
+            recorder.onerror = () => {
+                this.stopVoiceRecorder(button);
+            };
+            recorder.onstop = async () => {
+                const chunks = this.voiceAudioChunks;
+                const mimeType =
+                    recorder.mimeType || type || 'audio/webm';
+
+                this.stopVoiceRecorder(button);
+
+                if (!chunks.length) {
+                    return;
+                }
+
+                try {
+                    const blob =
+                        new Blob(chunks, { type: mimeType });
+
+                    const audio =
+                        await this.blobToBase64(blob);
+
+                    const result =
+                        await transcribeVoice({
+                            audio,
+                            mimeType,
+                            language: 'en-US'
+                        });
+
+                    if (
+                        !result ||
+                        result.success !== true ||
+                        !result.transcript
+                    ) {
+                        throw new Error(
+                            result?.error?.message ||
+                            'Voice transcription failed.'
+                        );
+                    }
+
+                    const input =
+                        this.root.querySelector(
+                            '[data-role="composer"]'
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    this.app.setComposerValue(
+                        result.transcript
+                    );
+
+                    input.value = result.transcript;
+
+                    const sendButton =
+                        input.form.querySelector('.ui-send-button');
+
+                    if (sendButton) {
+                        sendButton.disabled =
+                            !this.app.components.composer.canSubmit();
+                    }
+                } catch (error) {
+                    button.textContent = 'Voice unavailable';
+                    setTimeout(() => {
+                        this.setVoiceButtonIcon(button);
+                    }, 1800);
+                }
+            };
+
+            recorder.start();
+        } catch (error) {
+            this.stopVoiceRecorder(button);
+            button.textContent = 'Microphone unavailable';
+
+            setTimeout(() => {
+                this.setVoiceButtonIcon(button);
+            }, 1800);
+        }
+    }
+
+    stopVoiceRecorder(button) {
+        const recorder = this.voiceRecorder;
+
+        if (
+            recorder &&
+            recorder.state !== 'inactive'
+        ) {
+            recorder.stop();
+        }
+
+        if (this.voiceStream) {
+            this.voiceStream
+                .getTracks()
+                .forEach(track => track.stop());
+        }
+
+        if (this.voiceRecordingTimer) {
+            clearTimeout(this.voiceRecordingTimer);
+            this.voiceRecordingTimer = null;
+        }
+
+        this.voiceRecorder = null;
+        this.voiceStream = null;
+        this.voiceAudioChunks = [];
+        this.voiceFallbackActive = false;
+
+        if (button) {
+            button.classList.remove('is-listening');
+            this.setVoiceButtonIcon(button);
+            button.setAttribute('aria-label', 'Use voice input');
+        }
+    }
+    blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onloadend = () => {
+                const result = reader.result;
+
+                if (typeof result !== 'string') {
+                    reject(new Error('Unable to encode audio.'));
+                    return;
+                }
+
+                const commaIndex = result.indexOf(',');
+
+                resolve(
+                    commaIndex >= 0
+                        ? result.slice(commaIndex + 1)
+                        : result
+                );
+            };
+
+            reader.onerror = () => {
+                reject(new Error('Unable to read audio.'));
+            };
+
+            reader.readAsDataURL(blob);
+        });
+    }
     setVoiceButtonIcon(button) {
         if (!button) return;
         button.innerHTML = '<span class="ui-voice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="12" rx="4"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v3"></path><path d="M9 21h6"></path></svg></span>';
