@@ -744,6 +744,13 @@ class ChatTBMBrowser {
                     return;
                 }
 
+                button.classList.add("is-processing");
+                button.disabled = true;
+                button.setAttribute(
+                    "aria-label",
+                    "Transcribing voice input"
+                );
+
                 try {
                     const blob =
                         new Blob(chunks, { type: mimeType });
@@ -796,6 +803,19 @@ class ChatTBMBrowser {
                     setTimeout(() => {
                         this.setVoiceButtonIcon(button);
                     }, 1800);
+                }
+                finally {
+                    button.classList.remove("is-processing");
+                    button.disabled = false;
+                    if (
+                        button.getAttribute("aria-label") ===
+                        "Transcribing voice input"
+                    ) {
+                        button.setAttribute(
+                            "aria-label",
+                            "Use voice input"
+                        );
+                    }
                 }
             };
 
