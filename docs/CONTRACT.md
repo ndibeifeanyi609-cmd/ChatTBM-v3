@@ -1919,3 +1919,384 @@ No such authority may be introduced through legacy reuse, an implementation deta
 Changes to the relationship between Intelligence Orchestration and the Assistant Engine, AI Engine, or AI Provider Boundary MUST also undergo Contract impact analysis before implementation.
 
 The first Intelligence Orchestration implementation MUST remain within the responsibility, ownership, lifecycle, persistence, registry, boundary, failure, verification, and external API constraints defined by this Contract.
+
+## 34. Payment & Subscription Contract (REG-096)
+
+### 34.1 Purpose
+
+The Payment & Subscription domain owns canonical ChatTBM payment transaction,
+subscription, and entitlement state.
+
+It provides a provider-independent commercial state model for ChatTBM.
+
+The domain MUST remain independent of Flutterwave, Apple In-App Purchase,
+or any other external payment provider.
+
+External provider execution MUST occur only through an approved Payment
+Boundary and provider adapter.
+
+### 34.2 Canonical Responsibility
+
+Payment & Subscription MUST own:
+
+- Payment Transaction identity and state
+- Subscription identity and state
+- Entitlement identity and state
+- User ownership
+- Provider references
+- Normalized provider results
+- Payment lifecycle
+- Subscription lifecycle
+- Entitlement lifecycle
+- Idempotency and conflict handling
+- Canonical persistence
+- Registry authority
+- Provider-event normalization
+
+Payment & Subscription MUST NOT own:
+
+- authentication
+- user profile state
+- conversation state
+- AI state
+- provider credentials
+- provider SDK execution
+- Flutterwave checkout UI
+- Apple StoreKit UI
+- external provider internal state
+
+### 34.3 Canonical Identity
+
+Every Payment Transaction MUST have a stable canonical identity.
+
+Every Subscription MUST have a stable canonical identity.
+
+Every Entitlement MUST have a stable canonical identity.
+
+Canonical identities MUST be immutable after creation.
+
+External provider identifiers MUST NOT replace canonical ChatTBM identities.
+
+Provider references MUST be associated with the relevant canonical object
+through controlled provider-reference records.
+
+### 34.4 Ownership
+
+Every Payment Transaction, Subscription, and Entitlement MUST have explicit
+user ownership.
+
+Ownership MUST be established at creation.
+
+Ownership MUST remain immutable.
+
+A request attempting to access or modify another user's payment,
+subscription, or entitlement state MUST fail.
+
+Ownership reassignment MUST NOT be supported by the initial implementation.
+
+### 34.5 Payment Transaction Lifecycle
+
+Payment Transaction states MUST be:
+
+- `created`
+- `pending`
+- `succeeded`
+- `failed`
+- `cancelled`
+
+Valid transitions:
+
+- `created` → `pending`
+- `created` → `failed`
+- `created` → `cancelled`
+- `pending` → `succeeded`
+- `pending` → `failed`
+- `pending` → `cancelled`
+
+Terminal states:
+
+- `succeeded`
+- `failed`
+- `cancelled`
+
+Terminal Payment Transaction states MUST NOT transition to another state
+unless a future Contract explicitly defines such a transition.
+
+A payment MUST NOT be considered successful solely because a provider
+request was created or initiated.
+
+### 34.6 Subscription Lifecycle
+
+Subscription states MUST be:
+
+- `pending`
+- `active`
+- `past_due`
+- `cancelled`
+- `expired`
+
+Valid transitions:
+
+- `pending` → `active`
+- `pending` → `cancelled`
+- `active` → `past_due`
+- `active` → `cancelled`
+- `active` → `expired`
+- `past_due` → `active`
+- `past_due` → `cancelled`
+- `past_due` → `expired`
+- `cancelled` → `expired`
+
+`expired` MUST be terminal.
+
+A provider-reported subscription state MUST be normalized through the
+Payment Boundary before affecting canonical Subscription state.
+
+### 34.7 Entitlement Lifecycle
+
+Entitlement states MUST be:
+
+- `pending`
+- `active`
+- `suspended`
+- `revoked`
+- `expired`
+
+Valid transitions:
+
+- `pending` → `active`
+- `pending` → `revoked`
+- `active` → `suspended`
+- `active` → `revoked`
+- `active` → `expired`
+- `suspended` → `active`
+- `suspended` → `revoked`
+- `suspended` → `expired`
+
+`revoked` and `expired` MUST be terminal.
+
+An Entitlement MUST NOT become `active` unless the associated payment or
+subscription authority has been successfully verified.
+### 34.8 Provider References
+
+Provider references MUST identify external payment objects without becoming
+canonical authority.
+
+A provider reference MUST contain sufficient information to distinguish:
+
+- provider
+- provider object type
+- provider object identifier
+- canonical object association
+
+Repeated association of the same canonical object MUST be classified as an
+idempotent duplicate.
+
+### 34.9 Idempotency
+
+Repeated processing of the same provider event or payment operation MUST
+NOT create duplicate canonical state.
+
+Equivalent repeated operations MUST produce an idempotent result.
+
+Conflicting reuse of an idempotency key MUST fail.
+
+Conflicting provider references MUST fail.
+
+### 34.10 Persistence
+
+Canonical Payment & Subscription state MUST be persisted through the
+canonical Payment & Subscription persistence component.
+
+External provider state MUST NOT be treated as ChatTBM persistence authority.
+
+Persistence MUST preserve:
+
+- canonical identity
+- user ownership
+- lifecycle state
+- provider references
+- idempotency
+- conflict behavior
+
+Persistence failure MUST NOT be converted into successful payment,
+subscription, or entitlement state.
+
+### 34.11 Registry Authority
+
+The Payment & Subscription registry MUST be the authoritative mechanism
+for registering and retrieving canonical payment objects.
+
+The registry MUST enforce:
+
+- canonical identity uniqueness
+- user ownership
+- lifecycle-controlled updates
+- provider-reference uniqueness
+- conflict detection
+
+No competing payment registry may be introduced through legacy code,
+provider adapters, controllers, or downstream consumers.
+
+### 34.12 Payment Boundary
+
+All external payment-provider interaction MUST pass through the Payment
+Boundary.
+
+The Payment Boundary MUST:
+
+- validate incoming requests
+- validate canonical ownership
+- preserve canonical identity
+- enforce idempotency
+- delegate provider-specific execution
+- normalize provider results
+- normalize provider failures
+- prevent unauthorized state changes
+- prevent false entitlement activation
+
+Higher-level ChatTBM components MUST NOT directly invoke provider SDKs,
+provider APIs, or provider credentials.
+
+### 34.13 Provider Independence
+
+The canonical Payment & Subscription domain MUST NOT depend on provider-
+specific implementation details.
+
+Flutterwave MAY provide web payment execution.
+
+Apple In-App Purchase MAY provide iOS purchase execution.
+
+Neither provider may become the canonical authority for ChatTBM subscription
+or entitlement identity.
+
+Adding another provider MUST NOT require changing canonical Payment
+Transaction, Subscription, or Entitlement identity.
+
+### 34.14 External Provider Events
+
+External provider events MUST enter ChatTBM through the Payment Boundary.
+
+Provider events MUST be:
+
+1. validated
+2. associated with a canonical object
+3. checked for idempotency
+4. normalized
+5. evaluated against the canonical lifecycle
+6. persisted through canonical persistence
+
+Unknown, malformed, conflicting, or unauthorized provider events MUST fail
+in a controlled manner.
+
+Provider events MUST NOT directly mutate canonical state outside the
+Payment Boundary.
+
+### 34.15 Failure Semantics
+
+The domain MUST distinguish at minimum:
+
+- invalid request
+- missing user identity
+- unauthorized ownership
+- duplicate operation
+- provider-reference conflict
+- invalid lifecycle transition
+- persistence failure
+- registry failure
+- provider failure
+- unavailable provider
+- incomplete payment
+- unverified payment
+- entitlement activation failure
+
+A provider failure MUST NOT be represented as a successful payment.
+
+An unavailable provider MUST produce a controlled unavailable-dependency
+result.
+
+A payment whose success cannot be verified MUST remain non-successful.
+
+An Entitlement MUST NOT be activated from an unverified payment result.
+
+### 34.16 Provider Credentials
+
+Provider credentials MUST remain outside canonical payment objects,
+subscriptions, entitlements, provider references, and persisted domain state.
+
+Credentials MUST be supplied only through the approved provider execution
+boundary.
+
+Missing credentials MUST produce a controlled unavailable-dependency
+result.
+
+Credentials MUST NOT be returned through API responses, logs, canonical
+objects, or error messages.
+
+### 34.17 External API Contract
+
+The initial REG-096 implementation MUST be verifiable without live external
+payment execution.
+
+Controlled provider adapters or mocks MAY be used for foundation
+verification.
+
+Live Flutterwave or Apple execution MUST NOT be claimed until:
+
+- provider credentials are configured
+- provider integration is available
+- the external request is actually executed
+- the external result is received
+- the result is normalized and verified
+
+### 34.18 Cross-Domain Access
+
+Other ChatTBM domains MUST consume canonical entitlement or subscription
+state through approved interfaces.
+
+Other domains MUST NOT:
+
+- create payment transactions directly
+- mutate subscription state directly
+- activate entitlements directly
+- access provider credentials
+- access provider SDKs directly
+- establish competing commercial state
+
+Payment & Subscription MUST remain the authority for its canonical state.
+
+### 34.19 Reserved Future Decisions
+
+The following MUST NOT be implicitly introduced by REG-096:
+
+- pricing strategy
+- tax calculation
+- invoicing
+- accounting
+- revenue recognition
+- refund policy
+- promotional pricing
+- coupons
+- affiliate commissions
+- marketplace functionality
+- payment analytics
+- additional commercial domains
+- provider-specific canonical state
+
+Each requires separate architectural discovery and Contract impact analysis
+before introducing new canonical authority.
+
+### 34.20 Change Control
+
+Changes that introduce or materially alter Payment Transaction,
+Subscription, Entitlement, provider-reference identity, lifecycle authority,
+persistence, registry authority, payment-provider execution, or entitlement
+activation MUST undergo architectural review and Contract impact analysis.
+
+No payment authority may be introduced through legacy reuse, an
+implementation detail, an ad-hoc provider integration, or an unapproved
+downstream consumer.
+
+The first REG-096 implementation MUST remain within the responsibility,
+ownership, identity, lifecycle, persistence, registry, boundary, failure,
+verification, and external API constraints defined by this Contract.
