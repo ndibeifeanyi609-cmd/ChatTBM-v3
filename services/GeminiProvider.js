@@ -6,11 +6,11 @@ class GeminiProvider {
 
         this.model =
             options.model ||
-            "gemini-2.5-flash";
+            "gemini-3.8-flash";
 
         this.apiKey =
             options.apiKey ||
-            process.env.AI_API_KEY ||
+            process.env.GEMINI_API_KEY ||
             null;
 
         this.client = null;

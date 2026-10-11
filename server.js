@@ -188,6 +188,7 @@ try {
     process.exit(1);
 }
 // =====================================
+app.get("/api/health",(q,r)=>r.json({ok:true}));
 // START SERVER
 // =====================================
 app.listen(
