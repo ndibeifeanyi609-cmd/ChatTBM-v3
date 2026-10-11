@@ -1,9 +1,17 @@
 'use strict';
 
+const API_BASE_URL = (() => {
+    if (typeof window === 'undefined') return '';
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return '';
+    return 'https://chattbm-backend.onrender.com';
+})();
+
 async function generateReply({
     message,
     userId = 'guest',
-    context
+    context,
+    attachment = null
 } = {}) {
     if (typeof message !== 'string' || !message.trim()) {
         return {
@@ -16,7 +24,7 @@ async function generateReply({
     }
 
     try {
-        const response = await fetch('/api/chat', {
+        const response = await fetch(API_BASE_URL + '/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -24,7 +32,8 @@ async function generateReply({
             body: JSON.stringify({
                 message: message.trim(),
                 interactionId: context?.interactionId,
-                userId
+                userId,
+                attachment
             })
         });
 
@@ -62,4 +71,81 @@ async function generateReply({
     }
 }
 
-export { generateReply };
+async function transcribeVoice({
+    audio,
+    mimeType = 'audio/webm',
+    language = 'en-US'
+} = {}) {
+    if (!audio) {
+        return {
+            success: false,
+            error: {
+                code: 'INVALID_AUDIO',
+                message: 'Audio input is required.'
+            }
+        };
+    }
+
+    try {
+        const response = await fetch(
+            API_BASE_URL + '/api/voice/transcribe',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    audio,
+                    mimeType,
+                    language
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (
+            !response.ok ||
+            !data ||
+            data.success !== true
+        ) {
+            return {
+                success: false,
+                error: {
+                    code:
+                        data?.error?.code ||
+                        'VOICE_API_ERROR',
+                    message:
+                        data?.error?.message ||
+                        data?.message ||
+                        'Voice transcription failed.'
+                }
+            };
+        }
+
+        return {
+            success: true,
+            transcript: data.transcript,
+            provider: data.provider,
+            model: data.model,
+            metadata: data.metadata || {}
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                code:
+                    error?.code ||
+                    'VOICE_API_UNAVAILABLE',
+                message:
+                    error?.message ||
+                    'Unable to connect to the voice transcription service.'
+            }
+        };
+    }
+}
+
+export {
+    generateReply,
+    transcribeVoice
+};

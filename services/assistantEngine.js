@@ -95,6 +95,27 @@ function validateAssistantRequest(data) {
         );
     }
 
+    if (
+        data.attachment !== undefined &&
+        data.attachment !== null
+    ) {
+        const attachment = data.attachment;
+
+        if (
+            typeof attachment !== "object" ||
+            Array.isArray(attachment) ||
+            attachment.type !== "image" ||
+            typeof attachment.mimeType !== "string" ||
+            !attachment.mimeType.startsWith("image/") ||
+            typeof attachment.data !== "string" ||
+            !attachment.data.trim()
+        ) {
+            throw new Error(
+                "Invalid image attachment"
+            );
+        }
+    }
+
     return true;
 }
 
@@ -162,7 +183,10 @@ If you don't know something, say so instead of inventing information.`,
 
         message,
 
-        userId
+        userId,
+
+        attachment:
+            data.attachment || null
     };
 }
 

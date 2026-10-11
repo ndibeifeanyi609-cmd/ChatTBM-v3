@@ -54,6 +54,8 @@ class ChatTBMApp {
             new MessageList({
                 conversation: this.components.conversation
             });
+
+        this.newConversation();
     }
 
     setInteractionId(interactionId) {
@@ -177,6 +179,9 @@ class ChatTBMApp {
 
         const content = message.trim();
 
+        const attachment =
+            options.attachment || null;
+
         const appendUserMessage =
             options.appendUserMessage !== false;
 
@@ -205,6 +210,7 @@ class ChatTBMApp {
             const result = await this.generateReply({
                 message: content,
                 userId: this.userId,
+                attachment,
                 context:
                     this.state.conversation.interactionId
                         ? {

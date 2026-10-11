@@ -1,6 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
+import { transcribeVoice } from './ChatAPI.mjs';
 
 class ChatTBMBrowser {
     constructor(options = {}) {
@@ -11,6 +12,10 @@ class ChatTBMBrowser {
 
         this.voiceRecognition = null;
         this.voiceListening = false;
+        this.voiceRecorder = null;
+        this.voiceStream = null;
+        this.voiceAudioChunks = [];
+        this.voiceFallbackActive = false;
         this.selectedFile = null;
     }
 
@@ -160,9 +165,10 @@ class ChatTBMBrowser {
         logo.className = 'ui-welcome-logo';
         logo.setAttribute('aria-hidden', 'true');
 
-        const logoMark = document.createElement('span');
-        logoMark.textContent = '◉';
-        logo.appendChild(logoMark);
+        const welcomeLogo = document.createElement('img');
+        welcomeLogo.src = '4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png';
+        welcomeLogo.alt = '';
+        logo.appendChild(welcomeLogo);
 
         const brand = document.createElement('div');
         brand.className = 'ui-welcome-brand';
@@ -179,43 +185,9 @@ class ChatTBMBrowser {
         subtitle.className = 'ui-welcome-subtitle';
         subtitle.textContent = model.subtitle;
 
-        const prompts = document.createElement('div');
-        prompts.className = 'ui-welcome-prompts';
-        prompts.setAttribute('aria-label', 'Starter prompts');
-
-        (model.prompts || []).forEach(prompt => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'ui-welcome-prompt';
-            button.dataset.prompt = prompt.id;
-        button.dataset.promptMessage = prompt.message || '';
-
-            const icon = document.createElement('span');
-            icon.className = 'ui-welcome-prompt-icon';
-            icon.setAttribute('aria-hidden', 'true');
-            icon.textContent = prompt.icon;
-
-            const copy = document.createElement('span');
-            copy.className = 'ui-welcome-prompt-copy';
-
-            const promptTitle = document.createElement('strong');
-            promptTitle.textContent = prompt.title;
-
-            const description = document.createElement('span');
-            description.textContent = prompt.description;
-
-            copy.appendChild(promptTitle);
-            copy.appendChild(description);
-
-            button.appendChild(icon);
-            button.appendChild(copy);
-            prompts.appendChild(button);
-        });
-
         element.appendChild(identity);
         element.appendChild(title);
         element.appendChild(subtitle);
-        element.appendChild(prompts);
 
         return element;
     }
@@ -301,7 +273,7 @@ class ChatTBMBrowser {
 
         const textarea = document.createElement('textarea');
         textarea.value = model.value || '';
-        textarea.placeholder = 'Ask ChatTBM anything…';
+        textarea.placeholder = 'Ask ChatTBM';
         textarea.rows = 1;
         textarea.dataset.role = 'composer';
         textarea.setAttribute(
@@ -319,9 +291,18 @@ class ChatTBMBrowser {
         const fileButton = document.createElement('button');
         fileButton.type = 'button';
         fileButton.className = 'ui-file-button';
-        fileButton.textContent = '+';
+        fileButton.innerHTML = `
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 1 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+        `;
         fileButton.setAttribute('aria-label', 'Attach a file');
         fileButton.dataset.action = 'file-attachment';
+
+        const attachmentPreview = document.createElement('div');
+        attachmentPreview.className = 'ui-attachment-preview';
+        attachmentPreview.dataset.role = 'attachment-preview';
+        attachmentPreview.hidden = true;
 
         const voice = document.createElement('button');
         voice.type = 'button';
@@ -340,12 +321,20 @@ class ChatTBMBrowser {
         );
         button.disabled = !model.submitAvailable;
 
-        form.appendChild(fileInput);
-        form.appendChild(fileButton);
-        form.appendChild(textarea);
-        form.appendChild(voice);
-        form.appendChild(button);
+        const controls = document.createElement('div');
+        controls.className = 'ui-composer-controls';
+
+        controls.appendChild(fileInput);
+        controls.appendChild(fileButton);
+        controls.appendChild(textarea);
+        controls.appendChild(voice);
+        controls.appendChild(button);
+
+        form.appendChild(attachmentPreview);
+        form.appendChild(controls);
         wrapper.appendChild(form);
+
+        this.renderAttachmentPreview(wrapper);
 
         return wrapper;
     }
@@ -394,6 +383,8 @@ class ChatTBMBrowser {
                     fileInput.files && fileInput.files[0]
                         ? fileInput.files[0]
                         : null;
+
+                this.renderAttachmentPreview(root);
             });
         }
 
@@ -500,27 +491,87 @@ class ChatTBMBrowser {
         });
     }
 
+    renderAttachmentPreview(root) {
+        const preview =
+            root.querySelector('[data-role="attachment-preview"]');
+
+        if (!preview) {
+            return;
+        }
+
+        preview.innerHTML = '';
+
+        const file = this.selectedFile;
+
+        if (!file) {
+            preview.hidden = true;
+            return;
+        }
+
+        preview.hidden = false;
+
+        const item = document.createElement('div');
+        item.className = 'ui-attachment-item';
+
+        if (file.type && file.type.startsWith('image/')) {
+            const image = document.createElement('img');
+            image.className = 'ui-attachment-thumbnail';
+            image.alt = file.name || 'Selected image';
+
+            const objectUrl = URL.createObjectURL(file);
+            image.src = objectUrl;
+
+            image.addEventListener('load', () => {
+                URL.revokeObjectURL(objectUrl);
+            }, { once: true });
+
+            item.appendChild(image);
+        } else {
+            const icon = document.createElement('span');
+            icon.className = 'ui-attachment-icon';
+            icon.textContent = '📄';
+            icon.setAttribute('aria-hidden', 'true');
+
+            item.appendChild(icon);
+        }
+
+        const name = document.createElement('span');
+        name.className = 'ui-attachment-name';
+        name.textContent = file.name || 'Selected file';
+        name.title = file.name || 'Selected file';
+
+        item.appendChild(name);
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'ui-attachment-remove';
+        remove.textContent = '×';
+        remove.setAttribute('aria-label', 'Remove selected file');
+
+        remove.addEventListener('click', () => {
+            this.selectedFile = null;
+
+            const fileInput =
+                root.querySelector('[data-role="file-input"]');
+
+            if (fileInput) {
+                fileInput.value = '';
+            }
+
+            this.renderAttachmentPreview(root);
+        });
+
+        item.appendChild(remove);
+        preview.appendChild(item);
+    }
+
     toggleVoiceInput(button) {
         const Recognition =
             window.SpeechRecognition ||
             window.webkitSpeechRecognition;
 
         if (!Recognition) {
-            button.textContent = 'N/A';
-            button.setAttribute(
-                'aria-label',
-                'Voice input is not supported in this browser'
-            );
-
-            setTimeout(() => {
-                this.setVoiceButtonIcon(button);
-                button.setAttribute(
-                    'aria-label',
-                    'Use voice input'
-                );
-            }, 1400);
-
-            return;
+            return this.toggleVoiceRecorder(button);
         }
 
         if (this.voiceListening) {
@@ -579,11 +630,38 @@ class ChatTBMBrowser {
             }
         };
 
-        recognition.onerror = () => {
+        recognition.onerror = event => {
+            const errorCode =
+                event && typeof event.error === 'string'
+                    ? event.error
+                    : 'unknown';
+
+            this.voiceErrorActive = true;
+
             this.stopVoiceInput(button);
+
+            button.textContent = 'Voice unavailable';
+
+            button.setAttribute(
+                'aria-label',
+                `Voice input error: ${errorCode}`
+            );
+
+            setTimeout(() => {
+                this.setVoiceButtonIcon(button);
+                button.setAttribute(
+                    'aria-label',
+                    'Use voice input'
+                );
+            }, 1800);
         };
 
         recognition.onend = () => {
+            if (this.voiceErrorActive) {
+                this.voiceErrorActive = false;
+                return;
+            }
+
             this.stopVoiceInput(button);
         };
 
@@ -594,6 +672,224 @@ class ChatTBMBrowser {
         }
     }
 
+    async toggleVoiceRecorder(button) {
+        if (
+            typeof MediaRecorder === 'undefined' ||
+            !navigator.mediaDevices ||
+            typeof navigator.mediaDevices.getUserMedia !== 'function'
+        ) {
+            button.textContent = 'N/A';
+            return;
+        }
+
+        if (this.voiceFallbackActive) {
+            this.stopVoiceRecorder(button);
+            return;
+        }
+
+        try {
+            const stream =
+                await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+
+            const supportedTypes = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/mp4',
+                'audio/aac',
+                'audio/ogg;codecs=opus'
+            ];
+
+            const type =
+                supportedTypes.find(candidate =>
+                    MediaRecorder.isTypeSupported(candidate)
+                ) || '';
+            const recorder =
+                type
+                    ? new MediaRecorder(stream, { mimeType: type })
+                    : new MediaRecorder(stream);
+
+            this.voiceStream = stream;
+            this.voiceRecorder = recorder;
+            this.voiceAudioChunks = [];
+            this.voiceFallbackActive = true;
+            this.voiceRecordingTimer = setTimeout(() => {
+                if (this.voiceFallbackActive) {
+                    this.stopVoiceRecorder(button);
+                }
+            }, 60000);
+
+            button.classList.add('is-listening');
+            this.setVoiceButtonIcon(button);
+            button.setAttribute('aria-label', 'Stop voice input');
+
+            recorder.ondataavailable = event => {
+                if (event.data && event.data.size > 0) {
+                    this.voiceAudioChunks.push(event.data);
+                }
+            };
+
+            recorder.onerror = () => {
+                this.stopVoiceRecorder(button);
+            };
+            recorder.onstop = async () => {
+                const chunks = this.voiceAudioChunks;
+                const mimeType =
+                    recorder.mimeType || type || 'audio/webm';
+
+                this.stopVoiceRecorder(button);
+
+                if (!chunks.length) {
+                    return;
+                }
+
+                button.classList.add("is-processing");
+                button.disabled = true;
+                button.setAttribute(
+                    "aria-label",
+                    "Transcribing voice input"
+                );
+
+                try {
+                    const blob =
+                        new Blob(chunks, { type: mimeType });
+
+                    const audio =
+                        await this.blobToBase64(blob);
+
+                    const result =
+                        await transcribeVoice({
+                            audio,
+                            mimeType,
+                            language: 'en-US'
+                        });
+
+                    if (
+                        !result ||
+                        result.success !== true ||
+                        !result.transcript
+                    ) {
+                        throw new Error(
+                            result?.error?.message ||
+                            'Voice transcription failed.'
+                        );
+                    }
+
+                    const input =
+                        this.root.querySelector(
+                            '[data-role="composer"]'
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    this.app.setComposerValue(
+                        result.transcript
+                    );
+
+                    input.value = result.transcript;
+
+                    const sendButton =
+                        input.form.querySelector('.ui-send-button');
+
+                    if (sendButton) {
+                        sendButton.disabled =
+                            !this.app.components.composer.canSubmit();
+                    }
+                } catch (error) {
+                    button.textContent = 'Voice unavailable';
+                    setTimeout(() => {
+                        this.setVoiceButtonIcon(button);
+                    }, 1800);
+                }
+                finally {
+                    button.classList.remove("is-processing");
+                    button.disabled = false;
+                    if (
+                        button.getAttribute("aria-label") ===
+                        "Transcribing voice input"
+                    ) {
+                        button.setAttribute(
+                            "aria-label",
+                            "Use voice input"
+                        );
+                    }
+                }
+            };
+
+            recorder.start();
+        } catch (error) {
+            this.stopVoiceRecorder(button);
+            button.textContent = 'Microphone unavailable';
+
+            setTimeout(() => {
+                this.setVoiceButtonIcon(button);
+            }, 1800);
+        }
+    }
+
+    stopVoiceRecorder(button) {
+        const recorder = this.voiceRecorder;
+
+        if (
+            recorder &&
+            recorder.state !== 'inactive'
+        ) {
+            recorder.stop();
+        }
+
+        if (this.voiceStream) {
+            this.voiceStream
+                .getTracks()
+                .forEach(track => track.stop());
+        }
+
+        if (this.voiceRecordingTimer) {
+            clearTimeout(this.voiceRecordingTimer);
+            this.voiceRecordingTimer = null;
+        }
+
+        this.voiceRecorder = null;
+        this.voiceStream = null;
+        this.voiceAudioChunks = [];
+        this.voiceFallbackActive = false;
+
+        if (button) {
+            button.classList.remove('is-listening');
+            this.setVoiceButtonIcon(button);
+            button.setAttribute('aria-label', 'Use voice input');
+        }
+    }
+    blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onloadend = () => {
+                const result = reader.result;
+
+                if (typeof result !== 'string') {
+                    reject(new Error('Unable to encode audio.'));
+                    return;
+                }
+
+                const commaIndex = result.indexOf(',');
+
+                resolve(
+                    commaIndex >= 0
+                        ? result.slice(commaIndex + 1)
+                        : result
+                );
+            };
+
+            reader.onerror = () => {
+                reject(new Error('Unable to read audio.'));
+            };
+
+            reader.readAsDataURL(blob);
+        });
+    }
     setVoiceButtonIcon(button) {
         if (!button) return;
         button.innerHTML = '<span class="ui-voice-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="12" rx="4"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v3"></path><path d="M9 21h6"></path></svg></span>';
@@ -615,6 +911,60 @@ class ChatTBMBrowser {
         );
     }
 
+    async createImageAttachment(file) {
+        if (!file) {
+            return null;
+        }
+
+        if (
+            typeof file.type !== 'string' ||
+            !file.type.startsWith('image/')
+        ) {
+            throw new Error(
+                'Only image attachments are supported right now.'
+            );
+        }
+
+        const maxSize = 10 * 1024 * 1024;
+
+        if (file.size > maxSize) {
+            throw new Error(
+                'Image attachments must be 10 MB or smaller.'
+            );
+        }
+
+        const buffer = await file.arrayBuffer();
+
+        let binary = '';
+
+        const bytes = new Uint8Array(buffer);
+
+        const chunkSize = 0x8000;
+
+        for (
+            let offset = 0;
+            offset < bytes.length;
+            offset += chunkSize
+        ) {
+            const chunk =
+                bytes.subarray(
+                    offset,
+                    Math.min(
+                        offset + chunkSize,
+                        bytes.length
+                    )
+                );
+
+            binary += String.fromCharCode(...chunk);
+        }
+
+        return {
+            type: 'image',
+            mimeType: file.type,
+            data: btoa(binary)
+        };
+    }
+
     async submit() {
         const message =
             this.app.getComposerValue();
@@ -623,12 +973,44 @@ class ChatTBMBrowser {
             return;
         }
 
+        let attachment = null;
+
+        if (this.selectedFile) {
+            try {
+                attachment =
+                    await this.createImageAttachment(
+                        this.selectedFile
+                    );
+            } catch (error) {
+                this.app.state.error.currentError = {
+                    code: 'INVALID_ATTACHMENT',
+                    message:
+                        error?.message ||
+                        'The selected image could not be attached.'
+                };
+
+                this.render();
+
+                return {
+                    success: false,
+                    error:
+                        this.app.state.error.currentError
+                };
+            }
+        }
+
         const pending =
-            this.app.submitMessage(message);
+            this.app.submitMessage(message, {
+                attachment
+            });
 
         this.render();
 
         const result = await pending;
+
+        if (result?.success === true) {
+            this.selectedFile = null;
+        }
 
         this.render();
 
