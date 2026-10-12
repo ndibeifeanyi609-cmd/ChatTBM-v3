@@ -43,7 +43,7 @@ async function runTests() {
 
     assert.strictEqual(
         provider.model,
-        "gemini-2.5-flash"
+        "gemini-3.8-flash"
     );
 
     console.log(
