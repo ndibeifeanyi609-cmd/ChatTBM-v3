@@ -9,7 +9,7 @@ class GeminiProvider {
             "gemini-3.8-flash";
 
         this.apiKey =
-            options.apiKey ||
+             options.apiKey !== undefined ? options.apiKey :
             process.env.GEMINI_API_KEY ||
             null;
 
