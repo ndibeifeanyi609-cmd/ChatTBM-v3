@@ -218,7 +218,10 @@ function normalizeAssistantError(error) {
 // GENERATE REPLY
 // =====================================
 
-async function generateReply(data = {}, responseGenerator = generateAIResponse) {
+async function generateReply(
+    data = {},
+    responseGenerator = generateAIResponse
+) {
 
     validateAssistantRequest(data);
 
