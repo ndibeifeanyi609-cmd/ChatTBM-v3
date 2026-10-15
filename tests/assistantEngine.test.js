@@ -171,7 +171,7 @@ async function runTests() {
     // CONTROLLED PROVIDER FAILURE
     // =====================================
 
-    const result = await generateReply(
+        const result = await generateReply(
         { message: "Test provider availability" },
         async () => {
             const error = new Error(
