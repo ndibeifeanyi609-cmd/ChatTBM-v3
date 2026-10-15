@@ -234,7 +234,7 @@ async function generateReply(data = {}, responseGenerator = generateAIResponse) 
     try {
 
         const response =
-            await generateAIResponse(aiRequest);
+            await responseGenerator(aiRequest);
 
         return {
             success: true,
