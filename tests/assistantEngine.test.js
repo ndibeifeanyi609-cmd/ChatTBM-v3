@@ -165,30 +165,41 @@ async function runTests() {
 
     console.log("✓ Assistant failure normalization");
 
-   // =====================================
-// CONTROLLED PROVIDER FAILURE
-// =====================================
-const controlledFailure = new Error(
-    "No AI provider is configured."
-);
-controlledFailure.code = "PROVIDER_UNAVAILABLE";
-const result = await (async () => {
-    try {
-        throw controlledFailure;
-    } catch (error) {
-        const normalized = normalizeAssistantError(error);
-        return {
-            success: false,
-            userId: "guest",
-            error: normalized
-        };
-    }
-})();
-assert.strictEqual(result.success, false);
-assert.strictEqual(result.userId, "guest");
-assert.strictEqual(result.error.code, "PROVIDER_UNAVAILABLE");
-console.log("✓ Controlled provider-unavailable handling");
+   
+    // =====================================
+    // CONTROLLED PROVIDER FAILURE
+    // =====================================
+
+    const controlledFailure = new Error(
+        "No AI provider is configured."
     );
+
+    controlledFailure.code = "PROVIDER_UNAVAILABLE";
+
+    const result = await (async () => {
+        try {
+            throw controlledFailure;
+        } catch (error) {
+            const normalized =
+                normalizeAssistantError(error);
+
+            return {
+                success: false,
+                userId: "guest",
+                error: normalized
+            };
+        }
+    })();
+
+    assert.strictEqual(result.success, false);
+    assert.strictEqual(result.userId, "guest");
+    assert.strictEqual(
+        result.error.code,
+        "PROVIDER_UNAVAILABLE"
+    );
+
+    console.log("✓ Controlled provider-unavailable handling");
+
 
     console.log(
         "\n=== ASSISTANT ENGINE VERIFIED ===\n"
