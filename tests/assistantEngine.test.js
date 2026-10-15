@@ -166,30 +166,23 @@ async function runTests() {
     console.log("✓ Assistant failure normalization");
 
    
+  
     // =====================================
     // CONTROLLED PROVIDER FAILURE
     // =====================================
 
-    const controlledFailure = new Error(
-        "No AI provider is configured."
-    );
+    const result = await generateReply(
+        { message: "Test provider availability" },
+        async () => {
+            const error = new Error(
+                "No AI provider is configured."
+            );
 
-    controlledFailure.code = "PROVIDER_UNAVAILABLE";
+            error.code = "PROVIDER_UNAVAILABLE";
 
-    const result = await (async () => {
-        try {
-            throw controlledFailure;
-        } catch (error) {
-            const normalized =
-                normalizeAssistantError(error);
-
-            return {
-                success: false,
-                userId: "guest",
-                error: normalized
-            };
+            throw error;
         }
-    })();
+    );
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.userId, "guest");
@@ -199,6 +192,7 @@ async function runTests() {
     );
 
     console.log("✓ Controlled provider-unavailable handling");
+
 
 
     console.log(
