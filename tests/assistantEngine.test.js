@@ -163,37 +163,37 @@ async function runTests() {
         "Simulated assistant failure"
     );
 
+
     console.log("✓ Assistant failure normalization");
 
-   
-  
     // =====================================
     // CONTROLLED PROVIDER FAILURE
     // =====================================
 
-        const result = await generateReply(
-        { message: "Test provider availability" },
-        async () => {
-            const error = new Error(
-                "No AI provider is configured."
-            );
+  const result = await generateReply({ message: "Test provider availability" }, async () => { const error = new Error("No Ai provider is configured."); error.code = "PROVIDER_UNAVAILABLE"; throw error; });
 
-            error.code = "PROVIDER_UNAVAILABLE";
-
-            throw error;
-        }
+    assert.strictEqual(
+        result.success,
+        false
     );
 
-    assert.strictEqual(result.success, false);
-    assert.strictEqual(result.userId, "guest");
+    assert.strictEqual(
+        result.userId,
+        "guest"
+    );
+
+    assert.ok(
+        result.error
+    );
+
     assert.strictEqual(
         result.error.code,
-        "PROVIDER_UNAVAILABLE"
+                "PROVIDER_UNAVAILABLE"
     );
 
-    console.log("✓ Controlled provider-unavailable handling");
-
-
+    console.log(
+        "✓ Controlled provider-unavailable handling"
+    );
 
     console.log(
         "\n=== ASSISTANT ENGINE VERIFIED ===\n"
