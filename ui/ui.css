@@ -1004,3 +1004,56 @@ body {
         padding-bottom: 300px;
     }
 }
+
+
+/* Final mobile chat layout: a genuinely bounded, scrollable conversation */
+.ui-app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ui-app-shell {
+    display: flex;
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ui-main {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ui-conversation {
+    flex: 1 1 0;
+    height: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: 280px;
+}
+
+.ui-message-list {
+    padding-bottom: 300px;
+}
+
+.ui-message--assistant .ui-message-content hr {
+    margin: 1.1em 0;
+    border: 0;
+    border-top: 1px solid var(--ui-border-strong);
+}
+
+@media (max-width: 480px) {
+    .ui-message-list {
+        padding: 24px 18px 320px;
+    }
+}
