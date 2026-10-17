@@ -208,6 +208,7 @@ class ChatTBMBrowser {
 
             const content = document.createElement('div');
             content.className = 'ui-message-content';
+            
             content.textContent = message.content;
 
             item.appendChild(content);
