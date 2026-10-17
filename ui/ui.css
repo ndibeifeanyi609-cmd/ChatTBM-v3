@@ -1130,3 +1130,63 @@ body {
         padding: 24px 18px 24px;
     }
 }
+
+
+/* Mobile chat: fixed composer with a dedicated scroll clearance */
+.ui-app {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+.ui-app-shell,
+.ui-main {
+    height: 100%;
+    min-height: 0;
+}
+
+.ui-main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.ui-conversation {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow-y: auto;
+    padding-bottom: 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ui-composer-wrap {
+    position: relative;
+    flex: 0 0 auto;
+    bottom: auto;
+    z-index: 20;
+    background: var(--ui-bg);
+}
+
+.ui-message-list {
+    padding-bottom: 12px;
+}
+
+.ui-message--assistant .ui-message-content h1,
+.ui-message--assistant .ui-message-content h2,
+.ui-message--assistant .ui-message-content h3,
+.ui-message--assistant .ui-message-content h4 {
+    margin-top: 0.55em;
+    margin-bottom: 0.3em;
+}
+
+.ui-message--assistant .ui-message-content hr {
+    margin: 0.65em 0;
+}
+
+@media (max-width: 480px) {
+    .ui-message-list {
+        padding: 18px 18px 12px;
+    }
+}
