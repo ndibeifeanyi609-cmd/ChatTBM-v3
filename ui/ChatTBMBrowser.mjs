@@ -77,6 +77,9 @@ class ChatTBMBrowser {
         main.appendChild(conversation);
         main.appendChild(this.renderComposer(model.composer));
 
+        // Keep the newest message visible after each render.
+        conversation.scrollTop = conversation.scrollHeight;
+
         shell.appendChild(main);
         app.appendChild(shell);
         this.root.appendChild(app);
