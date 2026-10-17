@@ -923,3 +923,34 @@ body {
     border: 1px solid var(--ui-border-strong);
     text-align: left;
 }
+
+
+/* Compact assistant spacing and keep replies clear of the fixed composer */
+.ui-message-list {
+    padding-bottom: 220px;
+}
+
+.ui-message--assistant .ui-message-content h1,
+.ui-message--assistant .ui-message-content h2,
+.ui-message--assistant .ui-message-content h3,
+.ui-message--assistant .ui-message-content h4 {
+    margin-top: 0.8em;
+    margin-bottom: 0.4em;
+}
+
+.ui-message--assistant .ui-message-content p {
+    margin-top: 0;
+    margin-bottom: 0.8em;
+}
+
+.ui-message--assistant .ui-message-content ul,
+.ui-message--assistant .ui-message-content ol {
+    margin-top: 0.35em;
+    margin-bottom: 0.8em;
+}
+
+@media (max-width: 480px) {
+    .ui-message-list {
+        padding: 24px 18px 250px;
+    }
+}
