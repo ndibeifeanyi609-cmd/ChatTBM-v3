@@ -1057,3 +1057,44 @@ body {
         padding: 24px 18px 320px;
     }
 }
+
+
+/* Keep the composer in document flow so it cannot cover messages */
+.ui-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ui-conversation {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ui-composer-wrap {
+    position: sticky;
+    inset: auto;
+    bottom: 0;
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--ui-bg) 80%, transparent);
+}
+
+.ui-message-list {
+    padding-bottom: 36px;
+}
+
+@media (max-width: 480px) {
+    .ui-message-list {
+        padding: 24px 18px 36px;
+    }
+
+    .ui-composer-wrap {
+        padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+    }
+}
