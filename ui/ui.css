@@ -954,3 +954,53 @@ body {
         padding: 24px 18px 250px;
     }
 }
+
+
+/* Mobile conversation scrolling: reserve room for the fixed composer */
+html,
+body {
+    height: 100%;
+}
+
+body {
+    min-height: 100dvh;
+}
+
+.ui-app,
+.ui-app-shell,
+.ui-main {
+    min-height: 0;
+}
+
+.ui-app {
+    height: 100dvh;
+}
+
+.ui-app-shell {
+    height: 100%;
+}
+
+.ui-main {
+    height: 100%;
+}
+
+.ui-conversation {
+    min-height: 0;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: 260px;
+}
+
+.ui-message-list {
+    padding-bottom: 280px;
+}
+
+.ui-composer-wrap {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 480px) {
+    .ui-message-list {
+        padding-bottom: 300px;
+    }
+}
