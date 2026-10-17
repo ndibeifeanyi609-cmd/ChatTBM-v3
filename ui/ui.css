@@ -1098,3 +1098,35 @@ body {
         padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
     }
 }
+
+
+/* Final mobile composer and scroll behavior */
+.ui-composer-wrap {
+    position: relative;
+    inset: auto;
+    bottom: auto;
+    flex: 0 0 auto;
+    width: 100%;
+    z-index: 20;
+    padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--ui-bg);
+}
+
+.ui-conversation {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+}
+
+.ui-message-list {
+    padding-bottom: 24px;
+}
+
+@media (max-width: 480px) {
+    .ui-message-list {
+        padding: 24px 18px 24px;
+    }
+}
