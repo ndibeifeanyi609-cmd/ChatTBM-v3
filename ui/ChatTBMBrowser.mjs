@@ -2,6 +2,13 @@
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
 import { transcribeVoice } from './ChatAPI.mjs';
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
+import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
+
+marked.setOptions({
+    gfm: true,
+    breaks: true
+});
 
 class ChatTBMBrowser {
     constructor(options = {}) {
@@ -208,8 +215,14 @@ class ChatTBMBrowser {
 
             const content = document.createElement('div');
             content.className = 'ui-message-content';
-            
-            content.textContent = message.content;
+
+            if (message.role === 'assistant') {
+                content.innerHTML = DOMPurify.sanitize(
+                    marked.parse(message.content || '')
+                );
+            } else {
+                content.textContent = message.content;
+            }
 
             item.appendChild(content);
 
