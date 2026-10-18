@@ -54,6 +54,54 @@ function logoutAccount() {
     return authRequest('logout', {});
 }
 
+async function conversationHistoryRequest(path, method = 'GET', body) {
+    try {
+        const response = await fetch(API_BASE_URL + '/api/conversations' + path, {
+            method,
+            credentials: 'include',
+            headers: body ? { 'Content-Type': 'application/json' } : {},
+            ...(body ? { body: JSON.stringify(body) } : {})
+        });
+        const data = await response.json();
+        if (!response.ok || !data || data.success !== true) {
+            return {
+                success: false,
+                error: {
+                    code: data?.error?.code || 'CONVERSATION_HISTORY_ERROR',
+                    message: data?.error?.message || 'Conversation history request failed.'
+                }
+            };
+        }
+        return data;
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                code: error?.code || 'CONVERSATION_HISTORY_UNAVAILABLE',
+                message: 'Unable to sync conversation history with the server.'
+            }
+        };
+    }
+}
+
+function getConversationHistory() {
+    return conversationHistoryRequest('');
+}
+
+function saveConversationHistory(conversation) {
+    if (!conversation || typeof conversation.interactionId !== 'string') {
+        return Promise.resolve({
+            success: false,
+            error: { code: 'INVALID_CONVERSATION', message: 'Conversation id is required.' }
+        });
+    }
+    return conversationHistoryRequest(
+        '/' + encodeURIComponent(conversation.interactionId),
+        'PUT',
+        { messages: conversation.messages }
+    );
+}
+
 async function generateReply({
     message,
     userId = 'guest',
@@ -200,5 +248,7 @@ export {
     registerAccount,
     loginAccount,
     getCurrentUser,
-    logoutAccount
+    logoutAccount,
+    getConversationHistory,
+    saveConversationHistory
 };
