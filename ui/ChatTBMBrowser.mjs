@@ -494,6 +494,13 @@ class ChatTBMBrowser {
                 this.render();
             });
         }
+        root.querySelectorAll('[data-action="auth-open"]').forEach(button => {
+            button.addEventListener('click', () => {
+                this.authMode = 'login';
+                this.authMessage = '';
+                this.render();
+            });
+        });
         root.querySelectorAll('[data-action="auth-toggle"]').forEach(button => {
             button.addEventListener('click', () => {
                 this.authMode = this.authMode === 'closed' ? 'login' : 'closed';
