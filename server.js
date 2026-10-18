@@ -105,17 +105,20 @@ app.use(
 // =====================================
 // HEALTH CHECK
 // =====================================
+const { initializeDatabase, checkDatabase } = require("./database/Postgres");
+
 app.get(
     "/api/health",
-    (req, res) => {
+    async (req, res) => {
+        const database = await checkDatabase();
         res.json({
             success: true,
             name: "ChatTBM",
             status: "Online",
             ai: "Connected",
             forecasting: "Ready",
-            timestamp:
-                new Date().toISOString()
+            database: database.status,
+            timestamp: new Date().toISOString()
         });
     }
 );
@@ -217,41 +220,22 @@ try {
     process.exit(1);
 }
 // =====================================
-app.get("/api/health",(q,r)=>r.json({ok:true}));
+
 // START SERVER
 // =====================================
-app.listen(
-    PORT,
-    () => {
-        console.log(
-            "===================================="
-        );
-        console.log(
-            "ChatTBM REG-092"
-        );
-        console.log(
-            "===================================="
-        );
-        console.log(
-            `Server running on port ${PORT}`
-        );
-        console.log(
-            `Health: http://localhost:${PORT}/api/health`
-        );
-        console.log(
-            "Chat API: /api/chat"
-        );
-        console.log(
-            "Forecast API: /api/forecast"
-        );
-        console.log(
-            "Software Building API: /api/software-builder"
-        );
-        console.log(
-            "AI Assistant Platform Ready"
-        );
-        console.log(
-            "===================================="
-        );
+async function startServer() {
+    try {
+        const database = await initializeDatabase();
+        console.log("PostgreSQL status: " + database.status);
+    } catch (error) {
+        console.error("PostgreSQL initialization failed: " + error.message);
     }
-);
+
+    app.listen(PORT, () => {
+        console.log("ChatTBM server running on port " + PORT);
+        console.log("Health: /api/health");
+        console.log("Chat API: /api/chat");
+    });
+}
+
+startServer();
