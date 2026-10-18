@@ -140,6 +140,30 @@ class ChatTBMBrowser {
         aside.appendChild(nav);
         aside.appendChild(actions);
 
+        if (model.conversations && model.conversations.length) {
+            const history = document.createElement('div');
+            history.className = 'ui-sidebar-history';
+
+            const heading = document.createElement('div');
+            heading.className = 'ui-sidebar-history-title';
+            heading.textContent = 'Recent chats';
+            history.appendChild(heading);
+
+            model.conversations.forEach(conversation => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'ui-sidebar-item ui-sidebar-conversation';
+                if (conversation.active) button.classList.add('is-active');
+                button.textContent = conversation.label;
+                button.title = conversation.label;
+                button.dataset.action = 'open-conversation';
+                button.dataset.conversationId = conversation.id;
+                history.appendChild(button);
+            });
+
+            aside.appendChild(history);
+        }
+
         return aside;
     }
 
@@ -428,6 +452,15 @@ class ChatTBMBrowser {
         ).forEach(button => {
             button.addEventListener('click', () => {
                 this.app.newConversation();
+                this.render();
+            });
+        });
+
+        root.querySelectorAll(
+            '[data-action="open-conversation"]'
+        ).forEach(button => {
+            button.addEventListener('click', () => {
+                this.app.openConversation(button.dataset.conversationId);
                 this.render();
             });
         });
