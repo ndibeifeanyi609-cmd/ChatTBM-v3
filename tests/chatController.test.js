@@ -196,7 +196,7 @@ async function runTests() {
         {
             authUser: { id: "user-091" },
             body: {
-                userId: "user-091",
+                userId: "attacker-controlled-id",
                 interactionId: "interaction-091",
                 message:
                     "Controller provider failure test"
