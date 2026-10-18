@@ -29,12 +29,20 @@ class ChatTBMBrowser {
         this.authMessage = '';
         getCurrentUser().then(result => {
             if (result.success && result.user) {
-                this.authUser = result.user;
-                this.app.userId = result.user.id;
-                this.app.restoreConversation();
+                this.switchAccount(result.user);
                 this.render();
             }
         });
+    }
+
+    switchAccount(user) {
+        // Save/reset under the previous identity before changing userId. This
+        // prevents guest or another account's in-memory messages being shown
+        // when the authenticated identity changes.
+        this.app.newConversation();
+        this.app.userId = user.id;
+        this.authUser = user;
+        this.app.restoreConversation();
     }
 
     render() {
@@ -485,9 +493,7 @@ class ChatTBMBrowser {
                     this.render();
                     return;
                 }
-                this.authUser = result.user;
-                this.app.userId = result.user.id;
-                this.app.restoreConversation();
+                this.switchAccount(result.user);
                 this.authMode = 'closed';
                 this.authMessage = '';
                 this.render();
