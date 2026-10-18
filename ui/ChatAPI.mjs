@@ -139,6 +139,7 @@ async function transcribeVoice({
             API_BASE_URL + '/api/voice/transcribe',
             {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
