@@ -31,9 +31,22 @@ async function chatHandler(req, res) {
 
     try {
 
-        const result = await handleInteraction(
-            req?.body || {}
-        );
+        const body = req?.body || {};
+        const authenticatedUserId = req?.authUser?.id;
+        if (typeof authenticatedUserId !== "string" || !authenticatedUserId) {
+            return res.status(401).json({
+                success: false,
+                error: {
+                    code: "AUTHENTICATION_REQUIRED",
+                    message: "Sign in to continue."
+                }
+            });
+        }
+
+        const result = await handleInteraction({
+            ...body,
+            userId: authenticatedUserId
+        });
 
         if (
             !result ||
