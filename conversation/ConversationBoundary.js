@@ -57,7 +57,7 @@ async function updateConversationById(id, userId, { expectedVersion, metadata } 
 }
 
 async function transitionConversationLifecycleById(id, userId, nextLifecycle) {
-    const resolved = getConversation(id, userId);
+    const resolved = await getConversation(id, userId);
     if (!resolved.success) return resolved;
     const transitioned = transitionConversationLifecycle(resolved.conversation, nextLifecycle);
     if (!transitioned.success) return transitioned;
@@ -123,7 +123,7 @@ async function removeContextReference(id, userId, contextId, expectedVersion) {
         contextIds: resolved.conversation.contextIds.filter(existingId => existingId !== normalizedContextId),
         updatedAt: new Date().toISOString()
     };
-    return updateConversationContextIds(updated, expectedVersion);
+    return await updateConversationContextIds(updated, expectedVersion);
 }
 async function listConversationsByUser(userId) {
     try {
