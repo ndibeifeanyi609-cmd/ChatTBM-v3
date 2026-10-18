@@ -52,7 +52,11 @@ app.use(cors({
 app.use((req, res, next) => {
     if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method) && req.path.startsWith("/api/auth/")) {
         const origin = req.get("origin");
-        if (origin && !isAllowedRequestOrigin(origin, allowedOrigins)) {
+        const hasBearerToken = /^Bearer\s+\S+/i.test(req.get("authorization") || "");
+        if (
+            (origin && !isAllowedRequestOrigin(origin, allowedOrigins)) ||
+            (!origin && !hasBearerToken)
+        ) {
             return res.status(403).json({ success: false, error: "Origin is not allowed." });
         }
     }
