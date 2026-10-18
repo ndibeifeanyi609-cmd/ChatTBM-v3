@@ -276,6 +276,7 @@ async function startServer() {
         console.log("PostgreSQL status: " + database.status);
     } catch (error) {
         console.error("PostgreSQL initialization failed: " + error.message);
+        process.exit(1);
     }
 
     app.listen(PORT, () => {
