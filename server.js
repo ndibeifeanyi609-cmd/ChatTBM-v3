@@ -27,7 +27,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./auth/authRoutes");
 const { requireAuth } = require("./auth/requireAuth");
-const { isAllowedRequestOrigin } = require("./auth/requestOrigin");
+const { isTrustedMutationRequest } = require("./auth/requestOrigin");
 const app = express();
 const PORT =
     process.env.PORT || 3000;
@@ -50,14 +50,17 @@ app.use(cors({
 }));
 
 app.use((req, res, next) => {
-    if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method) && req.path.startsWith("/api/auth/")) {
-        const origin = req.get("origin");
-        const hasBearerToken = /^Bearer\s+\S+/i.test(req.get("authorization") || "");
-        if (
-            (origin && !isAllowedRequestOrigin(origin, allowedOrigins)) ||
-            (!origin && !hasBearerToken)
-        ) {
-            return res.status(403).json({ success: false, error: "Origin is not allowed." });
+    const isMutation = ["POST", "PUT", "PATCH", "DELETE"].includes(req.method);
+    if (isMutation && req.path.startsWith("/api/")) {
+        if (!isTrustedMutationRequest(
+            req.get("origin"),
+            req.get("authorization"),
+            allowedOrigins
+        )) {
+            return res.status(403).json({
+                success: false,
+                error: "Origin is not allowed."
+            });
         }
     }
     next();
