@@ -24,13 +24,37 @@ const MemoryRuntime = require("./memory/MemoryRuntime");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const authRoutes = require("./auth/authRoutes");
 const app = express();
 const PORT =
     process.env.PORT || 3000;
 // =====================================
 // MIDDLEWARE
 // =====================================
-app.use(cors());
+const allowedOrigins = new Set(
+    (process.env.FRONTEND_ORIGINS || "https://ndibeifeanyi609-cmd.github.io,https://chattbm.com,https://www.chattbm.com")
+        .split(",")
+        .map(origin => origin.trim())
+        .filter(Boolean)
+);
+
+app.use(cors({
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+        return callback(new Error("Origin is not allowed."));
+    },
+    credentials: true
+}));
+
+app.use((req, res, next) => {
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method) && req.path.startsWith("/api/auth/")) {
+        const origin = req.get("origin");
+        if (origin && !allowedOrigins.has(origin)) {
+            return res.status(403).json({ success: false, error: "Origin is not allowed." });
+        }
+    }
+    next();
+});
 app.use(express.json({ limit: "15mb" }));
 app.use(
     express.urlencoded({
@@ -132,6 +156,10 @@ app.get(
             success: true,
             application: "ChatTBM",
             endpoints: [
+                "/api/auth/register",
+                "/api/auth/login",
+                "/api/auth/me",
+                "/api/auth/logout",
                 "/api/chat",
                 "/api/forecast",
                 "/api/software-builder",
