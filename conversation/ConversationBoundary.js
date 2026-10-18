@@ -87,7 +87,7 @@ function validateContextReference(contextId, userId) {
 }
 
 async function addContextReference(id, userId, contextId, expectedVersion) {
-    const resolved = getConversation(id, userId);
+    const resolved = await getConversation(id, userId);
     if (!resolved.success) return resolved;
     const context = validateContextReference(contextId, userId);
     if (!context.success) return context;
@@ -106,7 +106,7 @@ async function addContextReference(id, userId, contextId, expectedVersion) {
 }
 
 async function removeContextReference(id, userId, contextId, expectedVersion) {
-    const resolved = getConversation(id, userId);
+    const resolved = await getConversation(id, userId);
     if (!resolved.success) return resolved;
     if (typeof contextId !== 'string' || contextId.trim() === '') {
         return { success: false, code: 'INVALID_CONTEXT_REFERENCE', error: 'Context id is required.' };
