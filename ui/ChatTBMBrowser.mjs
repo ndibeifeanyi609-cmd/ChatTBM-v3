@@ -524,6 +524,13 @@ class ChatTBMBrowser {
                 }
                 this.authUser = null;
                 this.app.userId = 'guest';
+                this.app.state.conversation.messages = [];
+                this.app.state.conversation.status = 'idle';
+                this.app.state.composer.submitting = false;
+                this.app.state.error.currentError = null;
+                this.app.state.conversation.interactionId = this.app.createInteractionId();
+                this.app.state.composer.value = '';
+                this.app.components.composer.clear();
                 this.authMessage = 'You have signed out.';
                 this.render();
             });
