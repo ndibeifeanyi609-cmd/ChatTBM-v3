@@ -70,9 +70,25 @@ class ChatTBMApp {
 
     getConversationList() {
         try {
+            if (typeof window === 'undefined' || !window.localStorage) return [];
+
             const saved = window.localStorage.getItem(this.getConversationsKey());
             const list = saved ? JSON.parse(saved) : [];
-            return Array.isArray(list) ? list : [];
+            if (Array.isArray(list) && list.length) return list;
+
+            // Show a conversation saved by the original single-chat version.
+            const legacy = window.localStorage.getItem(this.getStorageKey());
+            const conversation = legacy ? JSON.parse(legacy) : null;
+            if (
+                conversation &&
+                typeof conversation.interactionId === 'string' &&
+                Array.isArray(conversation.messages) &&
+                conversation.messages.length
+            ) {
+                return [conversation];
+            }
+
+            return [];
         } catch (error) {
             return [];
         }
