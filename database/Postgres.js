@@ -66,6 +66,16 @@ async function initializeDatabase() {
     `);
 
     await db.query(`
+        CREATE TABLE IF NOT EXISTS chattbm_chat_history (
+            user_id TEXT NOT NULL REFERENCES chattbm_users(id) ON DELETE CASCADE,
+            conversation_id TEXT NOT NULL,
+            messages JSONB NOT NULL CHECK (jsonb_typeof(messages) = 'array'),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            PRIMARY KEY (user_id, conversation_id)
+        )
+    `);
+
+    await db.query(`
         CREATE TABLE IF NOT EXISTS chattbm_auth_sessions (
             id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL REFERENCES chattbm_users(id) ON DELETE CASCADE,
