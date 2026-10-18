@@ -64,26 +64,58 @@ class ChatTBMApp {
         return `chattbm:conversation:${this.userId}`;
     }
 
+    getConversationsKey() {
+        return `chattbm:conversations:${this.userId}`;
+    }
+
+    getConversationList() {
+        try {
+            const saved = window.localStorage.getItem(this.getConversationsKey());
+            const list = saved ? JSON.parse(saved) : [];
+            return Array.isArray(list) ? list : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
     saveConversation() {
         try {
             if (typeof window === 'undefined' || !window.localStorage) return false;
-            window.localStorage.setItem(this.getStorageKey(), JSON.stringify({
+            const conversation = {
                 interactionId: this.state.conversation.interactionId,
-                messages: this.state.conversation.messages
-            }));
+                messages: this.state.conversation.messages,
+                updatedAt: Date.now()
+            };
+            if (!conversation.messages.length) return true;
+
+            const list = this.getConversationList().filter(
+                item => item.interactionId !== conversation.interactionId
+            );
+            list.unshift(conversation);
+            window.localStorage.setItem(this.getConversationsKey(), JSON.stringify(list.slice(0, 50)));
+            window.localStorage.setItem(this.getStorageKey(), JSON.stringify(conversation));
+            window.localStorage.setItem(
+                `chattbm:active:${this.userId}`,
+                conversation.interactionId
+            );
             return true;
         } catch (error) {
             return false;
         }
     }
 
-    restoreConversation() {
+    restoreConversation(interactionId) {
         try {
             if (typeof window === 'undefined' || !window.localStorage) return false;
-            const saved = window.localStorage.getItem(this.getStorageKey());
-            if (!saved) return false;
+            const list = this.getConversationList();
+            const activeId = interactionId ||
+                window.localStorage.getItem(`chattbm:active:${this.userId}`);
+            let parsed = list.find(item => item.interactionId === activeId);
 
-            const parsed = JSON.parse(saved);
+            if (!parsed) {
+                const legacy = window.localStorage.getItem(this.getStorageKey());
+                parsed = legacy ? JSON.parse(legacy) : null;
+            }
             if (!parsed || typeof parsed.interactionId !== 'string' || !Array.isArray(parsed.messages)) {
                 return false;
             }
@@ -107,10 +139,21 @@ class ChatTBMApp {
             this.state.conversation.interactionId = parsed.interactionId;
             this.state.conversation.messages = messages;
             this.state.conversation.status = UI_STATUS.SUCCESS;
+            window.localStorage.setItem(`chattbm:active:${this.userId}`, parsed.interactionId);
             return true;
         } catch (error) {
             return false;
         }
+    }
+
+    openConversation(interactionId) {
+        this.saveConversation();
+        if (!this.restoreConversation(interactionId)) return false;
+        this.state.error.currentError = null;
+        this.state.composer.value = '';
+        this.components.composer.clear();
+        this.closeSidebar();
+        return true;
     }
 
     setInteractionId(interactionId) {
@@ -159,7 +202,13 @@ class ChatTBMApp {
     }
 
     newConversation(interactionId) {
+        this.saveConversation();
         this.setInteractionId(interactionId || this.createInteractionId());
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.setItem(`chattbm:active:${this.userId}`, this.state.conversation.interactionId);
+            }
+        } catch (error) {}
 
         this.state.conversation.messages = [];
         this.state.conversation.status = UI_STATUS.IDLE;
