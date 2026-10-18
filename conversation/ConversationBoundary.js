@@ -71,7 +71,7 @@ async function closeConversation(id, userId) {
     return await transitionConversationLifecycleById(id, userId, CONVERSATION_LIFECYCLE_STATES.CLOSED);
 }
 
-function validateContextReference(contextId, userId) {
+async function validateContextReference(contextId, userId) {
     if (typeof contextId !== 'string' || contextId.trim() === '') {
         return { success: false, code: 'INVALID_CONTEXT_REFERENCE', error: 'Context id is required.' };
     }
