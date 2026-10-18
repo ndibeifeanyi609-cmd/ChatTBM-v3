@@ -157,10 +157,30 @@ async function deleteConversation(id, userId) {
     return { success: true, deleted: true, conversation: clone(result.rows[0].payload) };
 }
 
+async function updateConversationContextIds(conversation, expectedVersion) {
+    const checked = validate(conversation);
+    if (!checked.success) return checked;
+    if (!Array.isArray(checked.conversation.contextIds)) return failure('INVALID_CONTEXT_REFERENCE', 'Conversation contextIds must be an array.');
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 1) return failure('INVALID_CONVERSATION_VERSION', 'Conversation expectedVersion must be a positive integer.');
+    const value = checked.conversation;
+    const pool = database();
+    const current = await pool.query('SELECT payload FROM chattbm_conversations WHERE id = $1 AND user_id = $2', [value.id, value.userId]);
+    if (!current.rowCount) return failure('CONVERSATION_NOT_FOUND', 'Conversation was not found.');
+    const previous = current.rows[0].payload;
+    if (previous.version !== expectedVersion) return failure('CONVERSATION_CONFLICT', 'Conversation version conflict.');
+    if (previous.conversationKey !== value.conversationKey || previous.createdAt !== value.createdAt || previous.schemaVersion !== value.schemaVersion) return failure('CONVERSATION_IDENTITY_CONFLICT', 'Conversation identity fields are immutable.');
+    if (previous.lifecycle !== value.lifecycle) return failure('CONVERSATION_LIFECYCLE_CONFLICT', 'Conversation lifecycle must be changed through lifecycle authority.');
+    const updated = { ...previous, contextIds: [...value.contextIds], version: previous.version + 1, updatedAt: value.updatedAt };
+    const result = await pool.query('UPDATE chattbm_conversations SET version = $1, updated_at = $2, payload = $3::jsonb WHERE id = $4 AND user_id = $5 AND version = $6 RETURNING payload', [updated.version, updated.updatedAt, JSON.stringify(updated), value.id, value.userId, expectedVersion]);
+    if (!result.rowCount) return failure('CONVERSATION_CONFLICT', 'Conversation version conflict.');
+    return { success: true, conversation: clone(result.rows[0].payload) };
+}
+
 module.exports = {
     saveConversation,
     updateConversation,
     updateConversationLifecycle,
+    updateConversationContextIds,
     getConversation,
     getConversationsByUser,
     deleteConversation
