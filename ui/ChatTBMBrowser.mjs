@@ -87,7 +87,22 @@ class ChatTBMBrowser {
         }
 
         main.appendChild(conversation);
-        main.appendChild(this.renderComposer(model.composer));
+
+        if (this.authUser) {
+            main.appendChild(this.renderComposer(model.composer));
+        } else {
+            const gate = document.createElement('section');
+            gate.className = 'ui-auth-chat-gate';
+            const message = document.createElement('p');
+            message.textContent = 'Sign in or create an account to start chatting and keep your conversations private.';
+            gate.appendChild(message);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = 'Sign in to ChatTBM';
+            button.dataset.action = 'auth-open';
+            gate.appendChild(button);
+            main.appendChild(gate);
+        }
 
         shell.appendChild(main);
         app.appendChild(shell);
