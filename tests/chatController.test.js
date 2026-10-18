@@ -172,7 +172,7 @@ async function runTests() {
     // =====================================
 
     const contextResult =
-        createContext({
+        await createContext({
             userId: "user-091",
             interactionId: "interaction-091",
             value: {
