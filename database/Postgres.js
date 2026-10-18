@@ -86,6 +86,7 @@ async function closeDatabase() {
 }
 
 module.exports = {
+    getPool,
     initializeDatabase,
     checkDatabase,
     getDatabaseStatus,
