@@ -45,7 +45,17 @@ class Sidebar {
                     id: 'new-chat',
                     label: 'New chat'
                 }
-            ]
+            ],
+            conversations: this.app && typeof this.app.getConversationList === 'function'
+                ? this.app.getConversationList().map(item => ({
+                    id: item.interactionId,
+                    label: (
+                        item.messages.find(message => message.role === 'user')?.content ||
+                        'New conversation'
+                    ).slice(0, 36),
+                    active: item.interactionId === this.app.state.conversation.interactionId
+                }))
+                : []
         };
     }
 }
