@@ -55,7 +55,62 @@ class ChatTBMApp {
                 conversation: this.components.conversation
             });
 
-        this.newConversation();
+        if (!this.restoreConversation()) {
+            this.newConversation();
+        }
+    }
+
+    getStorageKey() {
+        return `chattbm:conversation:${this.userId}`;
+    }
+
+    saveConversation() {
+        try {
+            if (typeof window === 'undefined' || !window.localStorage) return false;
+            window.localStorage.setItem(this.getStorageKey(), JSON.stringify({
+                interactionId: this.state.conversation.interactionId,
+                messages: this.state.conversation.messages
+            }));
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    restoreConversation() {
+        try {
+            if (typeof window === 'undefined' || !window.localStorage) return false;
+            const saved = window.localStorage.getItem(this.getStorageKey());
+            if (!saved) return false;
+
+            const parsed = JSON.parse(saved);
+            if (!parsed || typeof parsed.interactionId !== 'string' || !Array.isArray(parsed.messages)) {
+                return false;
+            }
+
+            const messages = parsed.messages
+                .filter(message =>
+                    message &&
+                    typeof message.id === 'string' &&
+                    (message.role === 'user' || message.role === 'assistant') &&
+                    typeof message.content === 'string' &&
+                    message.content.trim()
+                )
+                .map(message => Object.freeze({
+                    id: message.id,
+                    role: message.role,
+                    content: message.content,
+                    timestamp: Number(message.timestamp) || Date.now()
+                }));
+
+            if (!messages.length) return false;
+            this.state.conversation.interactionId = parsed.interactionId;
+            this.state.conversation.messages = messages;
+            this.state.conversation.status = UI_STATUS.SUCCESS;
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     setInteractionId(interactionId) {
@@ -193,6 +248,7 @@ class ChatTBMApp {
             });
 
             this.state.conversation.messages.push(userMessage);
+            this.saveConversation();
         }
 
         this.state.conversation.status =
@@ -253,6 +309,7 @@ class ChatTBMApp {
 
             this.state.conversation.status =
                 UI_STATUS.SUCCESS;
+            this.saveConversation();
 
             return {
                 success: true,
