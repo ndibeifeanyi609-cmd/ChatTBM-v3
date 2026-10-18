@@ -1,6 +1,13 @@
 'use strict';
 
 const assert = require('assert');
+const os = require('os');
+const path = require('path');
+
+process.env.CHAT_TBM_CONVERSATION_STORAGE_PATH = path.join(
+    os.tmpdir(),
+    'chattbm-boundary-test-' + Date.now() + '.json'
+);
 
 const {
     createConversation,
