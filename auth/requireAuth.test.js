@@ -60,3 +60,31 @@ test('returns a controlled 503 when the auth database is unavailable', async () 
   assert.equal(res.body.error.code, 'AUTH_UNAVAILABLE');
   assert.equal(JSON.stringify(res.body).includes('private database details'), false);
 });
+
+test('reads bearer tokens when the session cookie is absent', () => {
+  const { readSessionToken } = require('./requireAuth');
+  const req = {
+    cookies: {},
+    get(name) {
+      return name.toLowerCase() === 'authorization'
+        ? 'Bearer bearer-session-token'
+        : '';
+    }
+  };
+  assert.equal(readSessionToken(req), 'bearer-session-token');
+});
+
+test('prefers the session cookie over an authorization header', () => {
+  const { readSessionToken } = require('./requireAuth');
+  const req = {
+    cookies: { chattbm_session: 'cookie-session-token' },
+    get() { return 'Bearer other-session-token'; }
+  };
+  assert.equal(readSessionToken(req), 'cookie-session-token');
+});
+
+test('rejects an empty bearer token', () => {
+  const { readSessionToken } = require('./requireAuth');
+  const req = { cookies: {}, get() { return 'Bearer   '; } };
+  assert.equal(readSessionToken(req), null);
+});
