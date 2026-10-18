@@ -191,7 +191,7 @@ async function transitionContextLifecycle(
     userId,
     nextState
 ) {
-    const resolved = getContext(id, userId);
+    const resolved = await getContext(id, userId);
 
     if (!resolved.success) {
         return resolved;
