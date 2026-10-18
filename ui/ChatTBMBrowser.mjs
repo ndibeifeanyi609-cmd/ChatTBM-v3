@@ -140,7 +140,7 @@ class ChatTBMBrowser {
         aside.appendChild(nav);
         aside.appendChild(actions);
 
-        if (model.conversations && model.conversations.length) {
+        if (model.sidebar.conversations && model.sidebar.conversations.length) {
             const history = document.createElement('div');
             history.className = 'ui-sidebar-history';
 
@@ -149,7 +149,7 @@ class ChatTBMBrowser {
             heading.textContent = 'Recent chats';
             history.appendChild(heading);
 
-            model.conversations.forEach(conversation => {
+            model.sidebar.conversations.forEach(conversation => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'ui-sidebar-item ui-sidebar-conversation';
