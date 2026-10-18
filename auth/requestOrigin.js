@@ -7,4 +7,9 @@ function isAllowedRequestOrigin(origin, allowedOrigins) {
         allowedOrigins.has(origin);
 }
 
-module.exports = { isAllowedRequestOrigin };
+function isTrustedMutationRequest(origin, authorization, allowedOrigins) {
+    if (origin) return isAllowedRequestOrigin(origin, allowedOrigins);
+    return /^Bearer\s+\S+/i.test(typeof authorization === 'string' ? authorization : '');
+}
+
+module.exports = { isAllowedRequestOrigin, isTrustedMutationRequest };
