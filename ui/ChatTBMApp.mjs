@@ -88,13 +88,12 @@ class ChatTBMApp {
                 return [conversation];
             }
 
-            // Last-resort fallback: expose the active in-memory chat.
+            // Always expose the active chat, including a new empty chat.
             const active = this.state && this.state.conversation;
             if (
                 active &&
                 typeof active.interactionId === 'string' &&
-                Array.isArray(active.messages) &&
-                active.messages.length
+                Array.isArray(active.messages)
             ) {
                 return [{
                     interactionId: active.interactionId,
