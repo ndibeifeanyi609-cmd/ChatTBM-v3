@@ -38,11 +38,10 @@ Test password hashing and non-disclosure; generic credential failures; malformed
 - The frontend still stores conversations in browser localStorage. Server-backed cross-device conversation history is not implemented or verified. Existing guest history must not be treated as authenticated account history.
 
 ## Remaining blockers before production
-- Chat still accepts a client-supplied `userId`; account sessions do not yet authorize chat requests or derive ownership from the authenticated session.
-- The frontend defaults to guest and stores conversation history in localStorage. Canonical ConversationBoundary is not integrated with the live chat UI.
-- Add rate limiting, CSRF protection for cookie-authenticated state changes, and tests for duplicate registration, invalid credentials, expired/revoked sessions, database errors, and cross-user access.
-- Verify package-lock synchronization and all tests in a clean CI run.
-- Email verification and password recovery are not implemented. Do not represent accounts as verified or provide recovery until secure delivery is configured.
-- Do not deploy or merge this work until CI passes and protected chat/conversation routes enforce the authenticated account identity.
-
+- Conversation history is still browser-local. Implement and test server-backed persistence with every read/write constrained by the authenticated account ID before claiming cross-device history.
+- Add end-to-end tests against a disposable PostgreSQL database for registration, duplicate registration, valid/invalid login, expired/revoked sessions, logout, and database failures.
+- Verify cookie behavior, allowed origins, and mutation-origin/CSRF defenses in the actual production frontend/backend deployment. Unit tests alone do not prove browser cookie behavior.
+- Verify schema initialization/migrations and dependency-lock reproducibility in a clean environment.
+- Email verification and password recovery are not implemented. Do not represent accounts as verified or offer recovery until secure delivery is configured.
+- Do not merge or deploy until the above production-critical checks are completed and the live service is verified. Passing CI is necessary but does not establish production readiness.
 This is an incomplete authentication implementation on a feature branch, not a production-ready account system. Cross-device conversation history is not implemented.
