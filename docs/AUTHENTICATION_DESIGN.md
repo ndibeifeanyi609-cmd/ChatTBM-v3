@@ -29,11 +29,13 @@ Test password hashing and non-disclosure; generic credential failures; malformed
 
 ## Implementation status (feature branch only)
 - Added Node.js scrypt password hashing and verification helpers plus random session-token generation and SHA-256 token digests in `auth/AuthCrypto.js`.
-- Added a PostgreSQL account/session schema and database initialization for `chattbm_users` and `chattbm_auth_sessions`.
-- Added an account service for registration, login, session validation, and revocation in `auth/AuthService.js`.
-- Added registration, login, current-session, and logout handlers in `auth/authRoutes.js`, and mounted the routes in `server.js`.
-- Added cookie parsing and restricted CORS to configured frontend origins. Production cross-site cookies require HTTPS and `SameSite=None`; browser credentialed requests and CSRF protections still require end-to-end verification.
-- Added unit tests for crypto primitives and invalid registration inputs. GitHub Actions has not yet confirmed a successful run for the latest feature-branch changes; a pull-request run is currently marked `action_required`.
+- Added PostgreSQL account/session tables and initialization for `chattbm_users` and `chattbm_auth_sessions`.
+- Added registration, login, current-session, and logout handlers in `auth/authRoutes.js`, with rate limits on registration and login.
+- Added an authentication middleware that validates the session against PostgreSQL and attaches the verified account to the request. The chat, voice, forecast, and software-builder API route groups are mounted behind this middleware.
+- Chat identity is derived from the verified session in `auth/chatIdentity.js`; the body-supplied `userId` is overwritten by the verified identity before the interaction boundary is called.
+- Added browser sign-in, registration, current-session restoration, sign-out, and an unauthenticated chat gate in `ui/ChatTBMBrowser.mjs`. Browser credentials are sent with `credentials: 'include'`.
+- Added unit coverage for authentication middleware success, invalid/missing sessions, database-unavailable responses, and session-token extraction. GitHub Actions run #78 passed after these tests were added.
+- The frontend still stores conversations in browser localStorage. Server-backed cross-device conversation history is not implemented or verified. Existing guest history must not be treated as authenticated account history.
 
 ## Remaining blockers before production
 - Chat still accepts a client-supplied `userId`; account sessions do not yet authorize chat requests or derive ownership from the authenticated session.
