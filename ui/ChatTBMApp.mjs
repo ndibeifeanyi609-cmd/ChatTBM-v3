@@ -140,6 +140,12 @@ class ChatTBMApp {
             this.state.conversation.messages = messages;
             this.state.conversation.status = UI_STATUS.SUCCESS;
             window.localStorage.setItem(`chattbm:active:${this.userId}`, parsed.interactionId);
+
+            // Migrate conversations saved by the earlier single-chat version.
+            if (!list.some(item => item.interactionId === parsed.interactionId)) {
+                this.saveConversation();
+            }
+
             return true;
         } catch (error) {
             return false;
