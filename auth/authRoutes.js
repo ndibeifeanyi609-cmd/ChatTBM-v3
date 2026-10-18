@@ -9,6 +9,9 @@ const {
 } = require('./AuthService');
 
 const router = express.Router();
+const { createRateLimiter } = require('./rateLimit');
+const limitRegistration = createRateLimiter({ max: 5 });
+const limitLogin = createRateLimiter({ max: 10 });
 const COOKIE_NAME = 'chattbm_session';
 const COOKIE_OPTIONS = {
     httpOnly: true,
@@ -35,7 +38,7 @@ function sessionToken(req) {
     return null;
 }
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', limitRegistration, async (req, res, next) => {
     try {
         const result = await register(
             req.body && req.body.email,
@@ -61,7 +64,7 @@ router.post('/register', async (req, res, next) => {
     }
 });
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', limitLogin, async (req, res, next) => {
     try {
         const result = await login(
             req.body && req.body.email,
