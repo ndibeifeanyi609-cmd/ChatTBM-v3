@@ -37,7 +37,7 @@ class ChatTBMApp {
 
         this.components = {
             shell: new AppShell(this),
-            sidebar: new Sidebar(this),
+            sidebar: new Sidebar({ app: this }),
             header: new Header(this),
             conversation: new Conversation({ app: this }),
             welcome: new Welcome(),
