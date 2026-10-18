@@ -4,9 +4,10 @@ const assert = require('assert');
 const os = require('os');
 const path = require('path');
 
+const suffix = Date.now();
 process.env.CHAT_TBM_CONVERSATION_STORAGE_PATH = path.join(
     os.tmpdir(),
-    'chattbm-persistence-test-' + Date.now() + '.json'
+    'chattbm-conversation-test-' + suffix + '.json'
 );
 
 const {
@@ -24,7 +25,6 @@ const {
     deleteConversation
 } = require('./ConversationPersistence');
 
-const suffix = Date.now();
 const userA = 'persistence-test-a-' + suffix;
 const userB = 'persistence-test-b-' + suffix;
 
