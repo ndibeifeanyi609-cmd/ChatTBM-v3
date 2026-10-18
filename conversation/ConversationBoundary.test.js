@@ -16,6 +16,7 @@ const {
 
 const { createContext } = require('../context/ContextBoundary');
 
+async function run() {
 const suffix = Date.now();
 const userA = 'conversation-test-a-' + suffix;
 const userB = 'conversation-test-b-' + suffix;
@@ -40,7 +41,7 @@ const contextB = createContext({
 
 assert.strictEqual(contextB.success, true);
 
-const created = createConversation({
+const created = await createConversation({
     userId: userA,
     conversationKey: 'conversation-' + suffix,
     metadata: {
@@ -57,12 +58,12 @@ assert.deepStrictEqual(created.conversation.contextIds, []);
 
 const id = created.conversation.id;
 
-const ownerRead = getConversation(id, userA);
+const ownerRead = await getConversation(id, userA);
 
 assert.strictEqual(ownerRead.success, true);
 assert.strictEqual(ownerRead.conversation.id, id);
 
-const wrongOwnerRead = getConversation(id, userB);
+const wrongOwnerRead = await getConversation(id, userB);
 
 assert.strictEqual(wrongOwnerRead.success, false);
 assert.strictEqual(
@@ -70,7 +71,7 @@ assert.strictEqual(
     'CONVERSATION_OWNERSHIP_CONFLICT'
 );
 
-const duplicate = createConversation({
+const duplicate = await createConversation({
     userId: userA,
     conversationKey: 'conversation-' + suffix,
     metadata: {
@@ -80,7 +81,7 @@ const duplicate = createConversation({
 
 assert.strictEqual(duplicate.success, false);
 
-const updated = updateConversation(
+const updated = await updateConversation(
     id,
     userA,
     {
@@ -95,7 +96,7 @@ assert.strictEqual(updated.success, true);
 assert.strictEqual(updated.conversation.version, 2);
 assert.strictEqual(updated.conversation.metadata.label, 'updated');
 
-const stale = updateConversation(
+const stale = await updateConversation(
     id,
     userA,
     {
@@ -109,7 +110,7 @@ const stale = updateConversation(
 assert.strictEqual(stale.success, false);
 assert.strictEqual(stale.code, 'CONVERSATION_CONFLICT');
 
-const added = addContextReference(
+const added = await addContextReference(
     id,
     userA,
     contextA.context.id,
@@ -123,7 +124,7 @@ assert.deepStrictEqual(
     [contextA.context.id]
 );
 
-const duplicateReference = addContextReference(
+const duplicateReference = await addContextReference(
     id,
     userA,
     contextA.context.id,
@@ -134,7 +135,7 @@ assert.strictEqual(duplicateReference.success, true);
 assert.strictEqual(duplicateReference.idempotent, true);
 assert.strictEqual(duplicateReference.conversation.version, 3);
 
-const unauthorizedReference = addContextReference(
+const unauthorizedReference = await addContextReference(
     id,
     userA,
     contextB.context.id,
@@ -147,7 +148,7 @@ assert.strictEqual(
     'CONTEXT_REFERENCE_INVALID'
 );
 
-const missingReference = addContextReference(
+const missingReference = await addContextReference(
     id,
     userA,
     'missing-context-' + suffix,
@@ -160,7 +161,7 @@ assert.strictEqual(
     'CONTEXT_REFERENCE_INVALID'
 );
 
-const staleReference = addContextReference(
+const staleReference = await addContextReference(
     id,
     userA,
     'another-context-' + suffix,
@@ -169,7 +170,7 @@ const staleReference = addContextReference(
 
 assert.strictEqual(staleReference.success, false);
 
-const afterReferenceFailures = getConversation(id, userA);
+const afterReferenceFailures = await getConversation(id, userA);
 
 assert.strictEqual(afterReferenceFailures.success, true);
 assert.strictEqual(afterReferenceFailures.conversation.version, 3);
@@ -178,7 +179,7 @@ assert.deepStrictEqual(
     [contextA.context.id]
 );
 
-const removed = removeContextReference(
+const removed = await removeContextReference(
     id,
     userA,
     contextA.context.id,
@@ -189,18 +190,18 @@ assert.strictEqual(removed.success, true);
 assert.strictEqual(removed.conversation.version, 4);
 assert.deepStrictEqual(removed.conversation.contextIds, []);
 
-const closed = closeConversation(id, userA);
+const closed = await closeConversation(id, userA);
 
 assert.strictEqual(closed.success, true);
 assert.strictEqual(closed.conversation.lifecycle, 'closed');
 assert.strictEqual(closed.conversation.version, 4);
 
-const repeatedClose = closeConversation(id, userA);
+const repeatedClose = await closeConversation(id, userA);
 
 assert.strictEqual(repeatedClose.success, true);
 assert.strictEqual(repeatedClose.idempotent, true);
 
-const reopened = transitionConversationLifecycle(
+const reopened = await transitionConversationLifecycle(
     id,
     userA,
     'active'
@@ -212,7 +213,7 @@ assert.strictEqual(
     'CONVERSATION_INVALID_LIFECYCLE_TRANSITION'
 );
 
-const ownerList = listConversationsByUser(userA);
+const ownerList = await listConversationsByUser(userA);
 
 assert.strictEqual(ownerList.success, true);
 assert.strictEqual(
@@ -220,7 +221,7 @@ assert.strictEqual(
     true
 );
 
-const otherOwnerList = listConversationsByUser(userB);
+const otherOwnerList = await listConversationsByUser(userB);
 
 assert.strictEqual(otherOwnerList.success, true);
 assert.strictEqual(
@@ -228,7 +229,7 @@ assert.strictEqual(
     false
 );
 
-const wrongOwnerDelete = deleteConversation(id, userB);
+const wrongOwnerDelete = await deleteConversation(id, userB);
 
 assert.strictEqual(wrongOwnerDelete.success, false);
 assert.strictEqual(
@@ -236,12 +237,12 @@ assert.strictEqual(
     'CONVERSATION_OWNERSHIP_CONFLICT'
 );
 
-const deleted = deleteConversation(id, userA);
+const deleted = await deleteConversation(id, userA);
 
 assert.strictEqual(deleted.success, true);
 assert.strictEqual(deleted.deleted, true);
 
-const afterDelete = getConversation(id, userA);
+const afterDelete = await getConversation(id, userA);
 
 assert.strictEqual(afterDelete.success, false);
 assert.strictEqual(
@@ -250,3 +251,6 @@ assert.strictEqual(
 );
 
 console.log('\n=== CONVERSATION BOUNDARY TEST PASSED ===\n');
+}
+
+run().catch(error => { console.error(error); process.exitCode = 1; });
