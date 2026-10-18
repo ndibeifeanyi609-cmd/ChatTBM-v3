@@ -24,6 +24,7 @@ const MemoryRuntime = require("./memory/MemoryRuntime");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const authRoutes = require("./auth/authRoutes");
 const app = express();
 const PORT =
@@ -56,6 +57,7 @@ app.use((req, res, next) => {
     next();
 });
 app.use(express.json({ limit: "15mb" }));
+app.use(cookieParser());
 app.use(
     express.urlencoded({
         extended: true
