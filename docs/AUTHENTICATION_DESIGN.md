@@ -27,11 +27,20 @@ Proposed endpoints: POST /api/auth/register, POST /api/auth/login, POST /api/aut
 ## Required verification
 Test password hashing and non-disclosure; generic credential failures; malformed, expired, revoked, and forged sessions; cross-user conversation access; CSRF/CORS; logout and expiry; rate limiting; database failures; migrations; and dependency-lock reproducibility. Do not deploy until protected routes enforce sessions and CI tests pass.
 
-## Current blockers
-- Chat currently accepts a client-supplied userId, which is not authentication.
-- The frontend defaults to guest and stores history in localStorage.
-- Canonical ConversationBoundary is not integrated with the live chat UI.
-- package-lock.json is out of sync with package.json and must be regenerated using the supported Node/npm toolchain and verified in CI.
-- No account/session implementation, email-delivery configuration, or automated auth tests have been verified.
+## Implementation status (feature branch only)
+- Added Node.js scrypt password hashing and verification helpers plus random session-token generation and SHA-256 token digests in `auth/AuthCrypto.js`.
+- Added a PostgreSQL account/session schema and database initialization for `chattbm_users` and `chattbm_auth_sessions`.
+- Added an account service for registration, login, session validation, and revocation in `auth/AuthService.js`.
+- Added registration, login, current-session, and logout handlers in `auth/authRoutes.js`, and mounted the routes in `server.js`.
+- Added cookie parsing and restricted CORS to configured frontend origins. Production cross-site cookies require HTTPS and `SameSite=None`; browser credentialed requests and CSRF protections still require end-to-end verification.
+- Added unit tests for crypto primitives and invalid registration inputs. GitHub Actions has not yet confirmed a successful run for the latest feature-branch changes; a pull-request run is currently marked `action_required`.
 
-This is a design checkpoint only. Authentication and cross-device history are not implemented.
+## Remaining blockers before production
+- Chat still accepts a client-supplied `userId`; account sessions do not yet authorize chat requests or derive ownership from the authenticated session.
+- The frontend defaults to guest and stores conversation history in localStorage. Canonical ConversationBoundary is not integrated with the live chat UI.
+- Add rate limiting, CSRF protection for cookie-authenticated state changes, and tests for duplicate registration, invalid credentials, expired/revoked sessions, database errors, and cross-user access.
+- Verify package-lock synchronization and all tests in a clean CI run.
+- Email verification and password recovery are not implemented. Do not represent accounts as verified or provide recovery until secure delivery is configured.
+- Do not deploy or merge this work until CI passes and protected chat/conversation routes enforce the authenticated account identity.
+
+This is an incomplete authentication implementation on a feature branch, not a production-ready account system. Cross-device conversation history is not implemented.
