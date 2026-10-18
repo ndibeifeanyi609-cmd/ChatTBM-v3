@@ -29,6 +29,8 @@ const authRoutes = require("./auth/authRoutes");
 const { requireAuth } = require("./auth/requireAuth");
 const { isTrustedMutationRequest } = require("./auth/requestOrigin");
 const app = express();
+// Render runs behind one reverse proxy; preserve client IPs for rate limiting.
+app.set("trust proxy", 1);
 const PORT =
     process.env.PORT || 3000;
 // =====================================
