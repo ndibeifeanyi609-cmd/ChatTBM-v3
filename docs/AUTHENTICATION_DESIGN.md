@@ -39,10 +39,12 @@ Test password hashing and non-disclosure; generic credential failures; malformed
 - Added the `chattbm_chat_history` PostgreSQL table and migration `database/migrations/002_chat_history.sql`, with a composite account/conversation primary key and account foreign key.
 - Added route tests for payload validation, unauthenticated requests, per-account listing, and cross-account read isolation. GitHub Actions run #100 passed the full Node test suite after this change.
 - The browser now fetches account history on sign-in/session restoration and queues conversation saves to the server while retaining localStorage as a cache. Existing guest history is not automatically uploaded into an account; only local history already under that account's browser key is eligible for reconciliation.
+- Architectural boundary: `chattbm_chat_history` stores the chat transcript separately from the canonical Conversation object. It does not replace or write through `ConversationBoundary`. This is a provisional transcript persistence layer; the transcript's contract/ownership relationship to canonical Conversation and Context must be explicitly reviewed before production approval.
 
 ## Remaining blockers before production
 - Run end-to-end tests against a disposable PostgreSQL database to verify table initialization, real authenticated history saves/reads, and persistence across separate browser sessions/devices.
 - Verify sync behavior for offline/failed saves and local/server conflict resolution; CI unit tests do not prove cross-device behavior in a deployed environment.
+- Resolve the architectural contract for transcript persistence: explicitly approve a separate transcript domain or integrate it through the appropriate canonical boundary before treating the feature as production-ready.
 - Add end-to-end tests against a disposable PostgreSQL database for registration, duplicate registration, valid/invalid login, expired/revoked sessions, logout, and database failures.
 - Verify cookie behavior, allowed origins, and mutation-origin/CSRF defenses in the actual production frontend/backend deployment. Unit tests alone do not prove browser cookie behavior.
 - Verify schema initialization/migrations and dependency-lock reproducibility in a clean environment.
