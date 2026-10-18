@@ -1,6 +1,14 @@
 'use strict';
 
 const assert = require('assert');
+const os = require('os');
+const path = require('path');
+
+const suffix = Date.now();
+process.env.CHAT_TBM_CONVERSATION_STORAGE_PATH = path.join(
+    os.tmpdir(),
+    'chattbm-conversation-test-' + suffix + '.json'
+);
 
 const {
     createConversationId,
@@ -17,7 +25,6 @@ const {
     deleteConversation
 } = require('./ConversationPersistence');
 
-const suffix = Date.now();
 const userA = 'persistence-test-a-' + suffix;
 const userB = 'persistence-test-b-' + suffix;
 
