@@ -24,9 +24,10 @@ const {
     clearContexts
 } = require('./ContextPersistence');
 
+async function run() {
 clearContexts();
 
-const created = createContext({
+const created = await createContext({
     userId: 'test-user',
     interactionId: 'interaction-1',
     value: {
@@ -73,7 +74,7 @@ assert.strictEqual(
 
 const id = created.context.id;
 
-const duplicate = createContext({
+const duplicate = await createContext({
     userId: 'test-user',
     interactionId: 'interaction-1',
     value: {
@@ -86,7 +87,7 @@ assert.strictEqual(
     false
 );
 
-const ownerRead = getContext(
+const ownerRead = await getContext(
     id,
     'test-user'
 );
@@ -96,7 +97,7 @@ assert.strictEqual(
     true
 );
 
-const interactionRead = getContextByInteraction(
+const interactionRead = await getContextByInteraction(
     'test-user',
     'interaction-1'
 );
@@ -121,7 +122,7 @@ assert.strictEqual(
     'interaction-1'
 );
 
-const wrongInteractionOwner = getContextByInteraction(
+const wrongInteractionOwner = await getContextByInteraction(
     'other-user',
     'interaction-1'
 );
@@ -132,7 +133,7 @@ assert.strictEqual(
 );
 
 
-const wrongOwnerRead = getContext(
+const wrongOwnerRead = await getContext(
     id,
     'other-user'
 );
@@ -142,7 +143,7 @@ assert.strictEqual(
     false
 );
 
-const missingExpectedVersion = updateContext(
+const missingExpectedVersion = await updateContext(
     id,
     'test-user',
     {
@@ -159,7 +160,7 @@ assert.strictEqual(
     false
 );
 
-const updated = updateContext(
+const updated = await updateContext(
     id,
     'test-user',
     {
@@ -187,7 +188,7 @@ assert.strictEqual(
     'interaction-1'
 );
 
-const stale = updateContext(
+const stale = await updateContext(
     id,
     'test-user',
     {
@@ -215,7 +216,7 @@ assert.strictEqual(
     'updated'
 );
 
-const closed = closeContext(
+const closed = await closeContext(
     id,
     'test-user'
 );
@@ -230,7 +231,7 @@ assert.strictEqual(
     'closed'
 );
 
-const closedAgain = closeContext(
+const closedAgain = await closeContext(
     id,
     'test-user'
 );
@@ -245,7 +246,7 @@ assert.strictEqual(
     true
 );
 
-const list = listContextsByUser(
+const list = await listContextsByUser(
     'test-user'
 );
 
@@ -259,7 +260,7 @@ assert.strictEqual(
     1
 );
 
-const wrongOwnerDelete = deleteContext(
+const wrongOwnerDelete = await deleteContext(
     id,
     'other-user'
 );
@@ -269,7 +270,7 @@ assert.strictEqual(
     false
 );
 
-const deleted = deleteContext(
+const deleted = await deleteContext(
     id,
     'test-user'
 );
@@ -279,7 +280,7 @@ assert.strictEqual(
     true
 );
 
-const afterDelete = getContext(
+const afterDelete = await getContext(
     id,
     'test-user'
 );
@@ -294,3 +295,6 @@ clearContexts();
 console.log(
     'REG-090 Context Boundary tests passed.'
 );
+}
+
+run().catch(error => { console.error(error); process.exitCode = 1; });
