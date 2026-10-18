@@ -24,7 +24,7 @@
 // - become Intelligence Orchestration
 // =====================================
 
-const { createContext, getContextByInteraction } = require('../context/ContextBoundary');
+const { createContext, getContextByInteraction, updateContext } = require('../context/ContextBoundary');
 const { generateReply } = require('../services/assistantEngine');
 
 function validateInteractionRequest(data) {
@@ -129,7 +129,7 @@ async function handleInteraction(data = {}) {
     try {
         request = validateInteractionRequest(data);
 
-        let contextResult = getContextByInteraction(
+        let contextResult = await getContextByInteraction(
             request.userId,
             request.interactionId
         );
@@ -143,7 +143,7 @@ async function handleInteraction(data = {}) {
                 contextResult?.error === 'Context not found.';
 
             if (isMissingContext) {
-                contextResult = createContext({
+                contextResult = await createContext({
                     userId: request.userId,
                     interactionId: request.interactionId
                 });
@@ -186,6 +186,33 @@ async function handleInteraction(data = {}) {
                     normalizeAssistantInteractionError(
                         assistantResult?.error
                     )
+            };
+        }
+
+        const persistedTurn = await updateContext(
+            contextResult.context.id,
+            request.userId,
+            {
+                expectedVersion: contextResult.context.version,
+                changes: {
+                    value: {
+                        message: request.message,
+                        response: assistantResult.response,
+                        attachment: request.attachment
+                    }
+                }
+            }
+        );
+
+        if (!persistedTurn || persistedTurn.success !== true) {
+            return {
+                success: false,
+                userId: request.userId,
+                interactionId: request.interactionId,
+                error: {
+                    code: persistedTurn?.code || 'CONTEXT_PERSISTENCE_FAILED',
+                    message: persistedTurn?.error || 'The completed turn could not be saved.'
+                }
             };
         }
 
