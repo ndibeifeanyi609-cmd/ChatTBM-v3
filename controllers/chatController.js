@@ -22,6 +22,7 @@
 const {
     handleInteraction
 } = require('../chatInteraction/ChatInteractionBoundary');
+const { authenticatedUserId } = require('../auth/chatIdentity');
 
 // =====================================
 // CHAT HANDLER
@@ -32,8 +33,8 @@ async function chatHandler(req, res) {
     try {
 
         const body = req?.body || {};
-        const authenticatedUserId = req?.authUser?.id;
-        if (typeof authenticatedUserId !== "string" || !authenticatedUserId) {
+        const userId = authenticatedUserId(req);
+        if (!userId) {
             return res.status(401).json({
                 success: false,
                 error: {
@@ -45,7 +46,7 @@ async function chatHandler(req, res) {
 
         const result = await handleInteraction({
             ...body,
-            userId: authenticatedUserId
+            userId
         });
 
         if (
