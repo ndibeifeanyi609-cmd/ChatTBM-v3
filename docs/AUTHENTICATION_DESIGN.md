@@ -1,6 +1,6 @@
 # ChatTBM Authentication and Account Ownership Design
 
-Status: Incomplete authentication implementation on the feature branch — CI passes for the current commit, but production security and end-to-end behavior are not yet verified.
+Status: Authentication and account-owned conversation-history implementation on the feature branch — CI passes, but production security and PostgreSQL end-to-end behavior are not yet verified.
 
 ## Purpose
 Establish server-verified account identity before exposing PostgreSQL conversation history across devices. A client-supplied userId, email address, conversation ID, or browser storage value is never proof of authorization.
@@ -35,10 +35,14 @@ Test password hashing and non-disclosure; generic credential failures; malformed
 - Chat identity is derived from the verified session in `auth/chatIdentity.js`; the body-supplied `userId` is overwritten by the verified identity before the interaction boundary is called.
 - Added browser sign-in, registration, current-session restoration, sign-out, and an unauthenticated chat gate in `ui/ChatTBMBrowser.mjs`. Browser credentials are sent with `credentials: 'include'`.
 - Added unit coverage for authentication middleware success, invalid/missing sessions, database-unavailable responses, and session-token extraction. Added authentication service tests for registration validation, normalized email, password-hash storage, generic login failures, session authentication, expiry, and logout revocation. GitHub Actions run #83 passed, including the full Node test suite and lockfile synchronization.
-- The frontend still stores conversations in browser localStorage. Server-backed cross-device conversation history is not implemented or verified. Existing guest history must not be treated as authenticated account history.
+- Added authenticated `GET /api/conversations`, `GET /api/conversations/:conversationId`, and `PUT /api/conversations/:conversationId` endpoints. The server derives ownership from the validated session and scopes every history query/write by that account ID.
+- Added the `chattbm_chat_history` PostgreSQL table and migration `database/migrations/002_chat_history.sql`, with a composite account/conversation primary key and account foreign key.
+- Added route tests for payload validation, unauthenticated requests, per-account listing, and cross-account read isolation. GitHub Actions run #100 passed the full Node test suite after this change.
+- The browser now fetches account history on sign-in/session restoration and queues conversation saves to the server while retaining localStorage as a cache. Existing guest history is not automatically uploaded into an account; only local history already under that account's browser key is eligible for reconciliation.
 
 ## Remaining blockers before production
-- Conversation history is still browser-local. Implement and test server-backed persistence with every read/write constrained by the authenticated account ID before claiming cross-device history.
+- Run end-to-end tests against a disposable PostgreSQL database to verify table initialization, real authenticated history saves/reads, and persistence across separate browser sessions/devices.
+- Verify sync behavior for offline/failed saves and local/server conflict resolution; CI unit tests do not prove cross-device behavior in a deployed environment.
 - Add end-to-end tests against a disposable PostgreSQL database for registration, duplicate registration, valid/invalid login, expired/revoked sessions, logout, and database failures.
 - Verify cookie behavior, allowed origins, and mutation-origin/CSRF defenses in the actual production frontend/backend deployment. Unit tests alone do not prove browser cookie behavior.
 - Verify schema initialization/migrations and dependency-lock reproducibility in a clean environment.
