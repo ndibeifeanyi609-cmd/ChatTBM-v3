@@ -101,6 +101,10 @@ const voiceTranscribeHandler =
 const voiceRoutes =
     createVoiceRoutes(voiceTranscribeHandler);
 // =====================================
+// REGISTER AUTH ROUTES
+// =====================================
+app.use("/api/auth", authRoutes);
+
 // REGISTER CHAT ROUTES
 // =====================================
 app.use(
