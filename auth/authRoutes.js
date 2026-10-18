@@ -13,7 +13,7 @@ const COOKIE_NAME = 'chattbm_session';
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: '/api/auth'
 };
 
