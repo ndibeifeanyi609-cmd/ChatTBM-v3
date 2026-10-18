@@ -13,10 +13,12 @@ const {
     getConversationsByUser,
     updateConversationLifecycle: persistConversationLifecycle,
     deleteConversation
-} = require('./ConversationPersistence');
+} = process.env.DATABASE_URL
+    ? require('../database/PostgresConversationPersistence')
+    : require('./ConversationPersistence');
 const { getContext } = require('../context/ContextBoundary');
 
-function createConversation({ userId, conversationKey, metadata = {} } = {}) {
+async function createConversation({ userId, conversationKey, metadata = {} } = {}) {
     try {
         const created = createConversationObject({
             userId,
@@ -26,7 +28,7 @@ function createConversation({ userId, conversationKey, metadata = {} } = {}) {
             lifecycle: CONVERSATION_LIFECYCLE_STATES.ACTIVE
         });
         if (!created.success) return created;
-        const saved = saveConversation(created.conversation);
+        const saved = await saveConversation(created.conversation);
         if (!saved.success) return saved;
         return { success: true, conversation: saved.conversation };
     } catch (error) {
@@ -34,16 +36,16 @@ function createConversation({ userId, conversationKey, metadata = {} } = {}) {
     }
 }
 
-function getConversationById(id, userId) {
+async function getConversationById(id, userId) {
     try {
-        return getConversation(id, userId);
+        return await getConversation(id, userId);
     } catch (error) {
         return { success: false, code: 'CONVERSATION_BOUNDARY_FAILURE', error: error.message };
     }
 }
 
-function updateConversationById(id, userId, { expectedVersion, metadata } = {}) {
-    const resolved = getConversation(id, userId);
+async function updateConversationById(id, userId, { expectedVersion, metadata } = {}) {
+    const resolved = await getConversation(id, userId);
     if (!resolved.success) return resolved;
     if (!Number.isInteger(expectedVersion) || expectedVersion < 1) {
         return { success: false, code: 'INVALID_CONVERSATION_VERSION', error: 'Conversation expectedVersion is required.' };
@@ -51,10 +53,10 @@ function updateConversationById(id, userId, { expectedVersion, metadata } = {}) 
     const changes = { ...resolved.conversation };
     if (metadata !== undefined) changes.metadata = metadata;
     changes.updatedAt = new Date().toISOString();
-    return updateConversation(changes, expectedVersion);
+    return await updateConversation(changes, expectedVersion);
 }
 
-function transitionConversationLifecycleById(id, userId, nextLifecycle) {
+async function transitionConversationLifecycleById(id, userId, nextLifecycle) {
     const resolved = getConversation(id, userId);
     if (!resolved.success) return resolved;
     const transitioned = transitionConversationLifecycle(resolved.conversation, nextLifecycle);
@@ -62,11 +64,11 @@ function transitionConversationLifecycleById(id, userId, nextLifecycle) {
     if (resolved.conversation.lifecycle === transitioned.conversation.lifecycle) {
         return { success: true, conversation: transitioned.conversation, idempotent: true };
     }
-    return persistConversationLifecycle(transitioned.conversation, resolved.conversation.version);
+    return await persistConversationLifecycle(transitioned.conversation, resolved.conversation.version);
 }
 
-function closeConversation(id, userId) {
-    return transitionConversationLifecycleById(id, userId, CONVERSATION_LIFECYCLE_STATES.CLOSED);
+async function closeConversation(id, userId) {
+    return await transitionConversationLifecycleById(id, userId, CONVERSATION_LIFECYCLE_STATES.CLOSED);
 }
 
 function validateContextReference(contextId, userId) {
@@ -84,7 +86,7 @@ function validateContextReference(contextId, userId) {
     return { success: true, contextId: resolved.context.id };
 }
 
-function addContextReference(id, userId, contextId, expectedVersion) {
+async function addContextReference(id, userId, contextId, expectedVersion) {
     const resolved = getConversation(id, userId);
     if (!resolved.success) return resolved;
     const context = validateContextReference(contextId, userId);
@@ -100,10 +102,10 @@ function addContextReference(id, userId, contextId, expectedVersion) {
         contextIds: [...resolved.conversation.contextIds, context.contextId],
         updatedAt: new Date().toISOString()
     };
-    return updateConversationContextIds(updated, expectedVersion);
+    return await updateConversationContextIds(updated, expectedVersion);
 }
 
-function removeContextReference(id, userId, contextId, expectedVersion) {
+async function removeContextReference(id, userId, contextId, expectedVersion) {
     const resolved = getConversation(id, userId);
     if (!resolved.success) return resolved;
     if (typeof contextId !== 'string' || contextId.trim() === '') {
@@ -123,9 +125,9 @@ function removeContextReference(id, userId, contextId, expectedVersion) {
     };
     return updateConversationContextIds(updated, expectedVersion);
 }
-function listConversationsByUser(userId) {
+async function listConversationsByUser(userId) {
     try {
-        return getConversationsByUser(userId);
+        return await getConversationsByUser(userId);
     } catch (error) {
         return {
             success: false,
@@ -135,9 +137,9 @@ function listConversationsByUser(userId) {
     }
 }
 
-function deleteConversationById(id, userId) {
+async function deleteConversationById(id, userId) {
     try {
-        return deleteConversation(id, userId);
+        return await deleteConversation(id, userId);
     } catch (error) {
         return {
             success: false,
