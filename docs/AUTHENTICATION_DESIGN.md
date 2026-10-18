@@ -1,6 +1,6 @@
 # ChatTBM Authentication and Account Ownership Design
 
-Status: Proposed design — not implemented or security-verified.
+Status: Incomplete authentication implementation on the feature branch — CI passes for the current commit, but production security and end-to-end behavior are not yet verified.
 
 ## Purpose
 Establish server-verified account identity before exposing PostgreSQL conversation history across devices. A client-supplied userId, email address, conversation ID, or browser storage value is never proof of authorization.
