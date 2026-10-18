@@ -126,6 +126,7 @@ app.use(
 // =====================================
 app.use(
     "/api/voice",
+    requireAuth,
     voiceRoutes
 );
 
@@ -133,6 +134,7 @@ app.use(
 // =====================================
 app.use(
     "/api/forecast",
+    requireAuth,
     forecastRoutes
 );
 // =====================================
@@ -140,6 +142,7 @@ app.use(
 // =====================================
 app.use(
     "/api/software-builder",
+    requireAuth,
     softwareBuildingRoutes
 );
 // =====================================
