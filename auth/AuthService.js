@@ -12,6 +12,9 @@ const {
 } = require('./AuthCrypto');
 
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+// Keep failed logins on the same expensive password-verification path even
+// when the submitted email does not exist, reducing account-enumeration timing.
+const DUMMY_PASSWORD_HASH = hashPassword('ChatTBM-invalid-login-placeholder-password');
 
 function database() {
     const pool = getPool();
@@ -66,9 +69,10 @@ async function login(emailInput, password) {
         [email]
     );
     const user = result.rows[0];
+    const fallbackHash = await DUMMY_PASSWORD_HASH;
     const matches = await verifyPassword(
         typeof password === 'string' ? password : '',
-        user ? user.password_hash : 'invalid-hash'
+        user ? user.password_hash : fallbackHash
     );
 
     if (!user || !matches || user.disabled_at) {
