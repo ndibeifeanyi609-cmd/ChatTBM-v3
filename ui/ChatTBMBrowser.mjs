@@ -86,9 +86,8 @@ class ChatTBMBrowser {
             );
         }
 
-        main.appendChild(conversation);
-
         if (this.authUser) {
+            main.appendChild(conversation);
             main.appendChild(this.renderComposer(model.composer));
         } else {
             const gate = document.createElement('section');
