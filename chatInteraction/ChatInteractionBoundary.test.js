@@ -182,7 +182,7 @@ async function runTests() {
     );
 
     const initializedContext =
-        getContextByInteraction(
+        await getContextByInteraction(
             'user-091',
             'missing-interaction-091'
         );
@@ -209,7 +209,7 @@ async function runTests() {
     // =====================================
 
     const created =
-        createContext({
+        await createContext({
             userId: 'user-091',
             interactionId: 'interaction-091',
             value: {
@@ -223,7 +223,7 @@ async function runTests() {
     );
 
     const resolved =
-        getContextByInteraction(
+        await getContextByInteraction(
             'user-091',
             'interaction-091'
         );
@@ -251,7 +251,7 @@ async function runTests() {
     // =====================================
 
     const wrongOwner =
-        getContextByInteraction(
+        await getContextByInteraction(
             'other-user-091',
             'interaction-091'
         );
