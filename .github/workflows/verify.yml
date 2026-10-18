@@ -6,7 +6,7 @@ on:
     branches: [main, auth-foundation-design]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
@@ -14,16 +14,33 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: node --test
+
+  sync-lockfile:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/auth-foundation-design'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: auth-foundation-design
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install dependencies and refresh lockfile
+      - name: Refresh npm lockfile
         run: npm install
-      - name: Commit refreshed lockfile on feature branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/auth-foundation-design'
+      - name: Commit refreshed lockfile
         run: |
           if ! git diff --quiet -- package-lock.json; then
             git config user.name "github-actions[bot]"
@@ -32,5 +49,3 @@ jobs:
             git commit -m "build: synchronize npm lockfile"
             git push
           fi
-      - name: Run tests
-        run: node --test
