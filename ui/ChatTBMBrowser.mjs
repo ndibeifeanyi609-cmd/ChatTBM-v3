@@ -1,7 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
-import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount } from './ChatAPI.mjs';
+import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, getConversationHistory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -27,22 +27,31 @@ class ChatTBMBrowser {
         this.authUser = null;
         this.authMode = 'closed';
         this.authMessage = '';
-        getCurrentUser().then(result => {
+        getCurrentUser().then(async result => {
             if (result.success && result.user) {
-                this.switchAccount(result.user);
+                await this.switchAccount(result.user);
                 this.render();
             }
         });
     }
 
-    switchAccount(user) {
-        // Save/reset under the previous identity before changing userId. This
-        // prevents guest or another account's in-memory messages being shown
-        // when the authenticated identity changes.
+    async switchAccount(user) {
+        // Change identity only after preserving the previous in-memory state.
         this.app.newConversation();
         this.app.userId = user.id;
+        this.app.remotePersistenceEnabled = true;
         this.authUser = user;
-        this.app.restoreConversation();
+        const result = await getConversationHistory();
+        if (result.success && Array.isArray(result.conversations)) {
+            this.app.importRemoteConversations(result.conversations);
+            await this.app.flushRemotePersistence();
+            if (this.app.remotePersistenceError) {
+                this.authMessage = 'Some conversation history could not be synced. Please try again.';
+            }
+        } else {
+            this.app.restoreConversation();
+            this.authMessage = 'Server conversation sync is unavailable. Your local history may not be up to date.';
+        }
     }
 
     render() {
@@ -493,7 +502,7 @@ class ChatTBMBrowser {
                     this.render();
                     return;
                 }
-                this.switchAccount(result.user);
+                await this.switchAccount(result.user);
                 this.authMode = 'closed';
                 this.authMessage = '';
                 this.render();
@@ -522,6 +531,12 @@ class ChatTBMBrowser {
         });
         root.querySelectorAll('[data-action="auth-logout"]').forEach(button => {
             button.addEventListener('click', async () => {
+                await this.app.flushRemotePersistence();
+                if (this.app.remotePersistenceError) {
+                    this.authMessage = 'Your latest conversation could not be synced. Please try again before signing out.';
+                    this.render();
+                    return;
+                }
                 const result = await logoutAccount();
                 if (!result.success) {
                     this.authMessage = result.error?.message || 'Sign out failed.';
@@ -529,6 +544,7 @@ class ChatTBMBrowser {
                     return;
                 }
                 this.authUser = null;
+                this.app.remotePersistenceEnabled = false;
                 this.app.userId = 'guest';
                 this.app.state.conversation.messages = [];
                 this.app.state.conversation.status = 'idle';
