@@ -71,11 +71,11 @@ async function closeConversation(id, userId) {
     return await transitionConversationLifecycleById(id, userId, CONVERSATION_LIFECYCLE_STATES.CLOSED);
 }
 
-function validateContextReference(contextId, userId) {
+async function validateContextReference(contextId, userId) {
     if (typeof contextId !== 'string' || contextId.trim() === '') {
         return { success: false, code: 'INVALID_CONTEXT_REFERENCE', error: 'Context id is required.' };
     }
-    const resolved = getContext(contextId.trim(), userId);
+    const resolved = await getContext(contextId.trim(), userId);
     if (!resolved.success) {
         return {
             success: false,
@@ -89,7 +89,7 @@ function validateContextReference(contextId, userId) {
 async function addContextReference(id, userId, contextId, expectedVersion) {
     const resolved = await getConversation(id, userId);
     if (!resolved.success) return resolved;
-    const context = validateContextReference(contextId, userId);
+    const context = await validateContextReference(contextId, userId);
     if (!context.success) return context;
     if (resolved.conversation.contextIds.includes(context.contextId)) {
         return { success: true, conversation: resolved.conversation, idempotent: true };

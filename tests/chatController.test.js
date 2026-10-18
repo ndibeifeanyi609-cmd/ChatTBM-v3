@@ -70,7 +70,7 @@ async function runTests() {
 
     assert.strictEqual(
         missingUserResponse.statusCode,
-        400
+        401
     );
 
     assert.strictEqual(
@@ -80,12 +80,12 @@ async function runTests() {
 
     assert.strictEqual(
         missingUserResponse.body.error.code,
-        "CHAT_INTERACTION_ERROR"
+        "AUTHENTICATION_REQUIRED"
     );
 
     assert.strictEqual(
         missingUserResponse.body.error.message,
-        "userId is required."
+        "Sign in to continue."
     );
 
     console.log(
@@ -101,6 +101,7 @@ async function runTests() {
 
     await chatHandler(
         {
+            authUser: { id: "user-091" },
             body: {
                 userId: "user-091",
                 message: "hello"
@@ -137,6 +138,7 @@ async function runTests() {
 
     await chatHandler(
         {
+            authUser: { id: "user-091" },
             body: {
                 userId: "user-091",
                 interactionId: "interaction-091",
@@ -170,7 +172,7 @@ async function runTests() {
     // =====================================
 
     const contextResult =
-        createContext({
+        await createContext({
             userId: "user-091",
             interactionId: "interaction-091",
             value: {
@@ -192,8 +194,9 @@ async function runTests() {
 
     await chatHandler(
         {
+            authUser: { id: "user-091" },
             body: {
-                userId: "user-091",
+                userId: "attacker-controlled-id",
                 interactionId: "interaction-091",
                 message:
                     "Controller provider failure test"

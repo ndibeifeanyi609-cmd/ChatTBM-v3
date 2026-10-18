@@ -1,6 +1,6 @@
 # ChatTBM Authentication and Account Ownership Design
 
-Status: Incomplete authentication implementation on the feature branch — CI passes for the current commit, but production security and end-to-end behavior are not yet verified.
+Status: Authentication and account-owned conversation-history implementation on the feature branch — CI passes, but production security and PostgreSQL end-to-end behavior are not yet verified.
 
 ## Purpose
 Establish server-verified account identity before exposing PostgreSQL conversation history across devices. A client-supplied userId, email address, conversation ID, or browser storage value is never proof of authorization.
@@ -29,18 +29,25 @@ Test password hashing and non-disclosure; generic credential failures; malformed
 
 ## Implementation status (feature branch only)
 - Added Node.js scrypt password hashing and verification helpers plus random session-token generation and SHA-256 token digests in `auth/AuthCrypto.js`.
-- Added a PostgreSQL account/session schema and database initialization for `chattbm_users` and `chattbm_auth_sessions`.
-- Added an account service for registration, login, session validation, and revocation in `auth/AuthService.js`.
-- Added registration, login, current-session, and logout handlers in `auth/authRoutes.js`, and mounted the routes in `server.js`.
-- Added cookie parsing and restricted CORS to configured frontend origins. Production cross-site cookies require HTTPS and `SameSite=None`; browser credentialed requests and CSRF protections still require end-to-end verification.
-- Added unit tests for crypto primitives and invalid registration inputs. GitHub Actions has not yet confirmed a successful run for the latest feature-branch changes; a pull-request run is currently marked `action_required`.
+- Added PostgreSQL account/session tables and initialization for `chattbm_users` and `chattbm_auth_sessions`.
+- Added registration, login, current-session, and logout handlers in `auth/authRoutes.js`, with rate limits on registration and login.
+- Added an authentication middleware that validates the session against PostgreSQL and attaches the verified account to the request. The chat, voice, forecast, and software-builder API route groups are mounted behind this middleware.
+- Chat identity is derived from the verified session in `auth/chatIdentity.js`; the body-supplied `userId` is overwritten by the verified identity before the interaction boundary is called.
+- Added browser sign-in, registration, current-session restoration, sign-out, and an unauthenticated chat gate in `ui/ChatTBMBrowser.mjs`. Browser credentials are sent with `credentials: 'include'`.
+- Added unit coverage for authentication middleware success, invalid/missing sessions, database-unavailable responses, and session-token extraction. Added authentication service tests for registration validation, normalized email, password-hash storage, generic login failures, session authentication, expiry, and logout revocation. GitHub Actions run #83 passed, including the full Node test suite and lockfile synchronization.
+- Added authenticated `GET /api/conversations`, `GET /api/conversations/:conversationId`, and `PUT /api/conversations/:conversationId` endpoints. The server derives ownership from the validated session and scopes every history query/write by that account ID.
+- Added the `chattbm_chat_history` PostgreSQL table and migration `database/migrations/002_chat_history.sql`, with a composite account/conversation primary key and account foreign key.
+- Added route tests for payload validation, unauthenticated requests, per-account listing, and cross-account read isolation. GitHub Actions run #100 passed the full Node test suite after this change.
+- The browser now fetches account history on sign-in/session restoration and queues conversation saves to the server while retaining localStorage as a cache. Existing guest history is not automatically uploaded into an account; only local history already under that account's browser key is eligible for reconciliation.
+- Architectural boundary: `chattbm_chat_history` stores the chat transcript separately from the canonical Conversation object. It does not replace or write through `ConversationBoundary`. This is a provisional transcript persistence layer; the transcript's contract/ownership relationship to canonical Conversation and Context must be explicitly reviewed before production approval.
 
 ## Remaining blockers before production
-- Chat still accepts a client-supplied `userId`; account sessions do not yet authorize chat requests or derive ownership from the authenticated session.
-- The frontend defaults to guest and stores conversation history in localStorage. Canonical ConversationBoundary is not integrated with the live chat UI.
-- Add rate limiting, CSRF protection for cookie-authenticated state changes, and tests for duplicate registration, invalid credentials, expired/revoked sessions, database errors, and cross-user access.
-- Verify package-lock synchronization and all tests in a clean CI run.
-- Email verification and password recovery are not implemented. Do not represent accounts as verified or provide recovery until secure delivery is configured.
-- Do not deploy or merge this work until CI passes and protected chat/conversation routes enforce the authenticated account identity.
-
+- Run end-to-end tests against a disposable PostgreSQL database to verify table initialization, real authenticated history saves/reads, and persistence across separate browser sessions/devices.
+- Verify sync behavior for offline/failed saves and local/server conflict resolution; CI unit tests do not prove cross-device behavior in a deployed environment.
+- Resolve the architectural contract for transcript persistence: explicitly approve a separate transcript domain or integrate it through the appropriate canonical boundary before treating the feature as production-ready.
+- Add end-to-end tests against a disposable PostgreSQL database for registration, duplicate registration, valid/invalid login, expired/revoked sessions, logout, and database failures.
+- Verify cookie behavior, allowed origins, and mutation-origin/CSRF defenses in the actual production frontend/backend deployment. Unit tests alone do not prove browser cookie behavior.
+- Verify schema initialization/migrations and dependency-lock reproducibility in a clean environment.
+- Email verification and password recovery are not implemented. Do not represent accounts as verified or offer recovery until secure delivery is configured.
+- Do not merge or deploy until the above production-critical checks are completed and the live service is verified. Passing CI is necessary but does not establish production readiness.
 This is an incomplete authentication implementation on a feature branch, not a production-ready account system. Cross-device conversation history is not implemented.

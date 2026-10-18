@@ -1,7 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
-import { transcribeVoice } from './ChatAPI.mjs';
+import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, getConversationHistory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -24,6 +24,34 @@ class ChatTBMBrowser {
         this.voiceAudioChunks = [];
         this.voiceFallbackActive = false;
         this.selectedFile = null;
+        this.authUser = null;
+        this.authMode = 'closed';
+        this.authMessage = '';
+        getCurrentUser().then(async result => {
+            if (result.success && result.user) {
+                await this.switchAccount(result.user);
+                this.render();
+            }
+        });
+    }
+
+    async switchAccount(user) {
+        // Change identity only after preserving the previous in-memory state.
+        this.app.newConversation();
+        this.app.userId = user.id;
+        this.app.remotePersistenceEnabled = true;
+        this.authUser = user;
+        const result = await getConversationHistory();
+        if (result.success && Array.isArray(result.conversations)) {
+            this.app.importRemoteConversations(result.conversations);
+            await this.app.flushRemotePersistence();
+            if (this.app.remotePersistenceError) {
+                this.authMessage = 'Some conversation history could not be synced. Please try again.';
+            }
+        } else {
+            this.app.restoreConversation();
+            this.authMessage = 'Server conversation sync is unavailable. Your local history may not be up to date.';
+        }
     }
 
     render() {
@@ -47,6 +75,7 @@ class ChatTBMBrowser {
 
         const main = document.createElement('main');
         main.className = 'ui-main';
+        main.appendChild(this.renderAuthPanel());
         main.appendChild(this.renderHeader(model.header));
 
         const conversation = document.createElement('section');
@@ -74,8 +103,22 @@ class ChatTBMBrowser {
             );
         }
 
-        main.appendChild(conversation);
-        main.appendChild(this.renderComposer(model.composer));
+        if (this.authUser) {
+            main.appendChild(conversation);
+            main.appendChild(this.renderComposer(model.composer));
+        } else {
+            const gate = document.createElement('section');
+            gate.className = 'ui-auth-chat-gate';
+            const message = document.createElement('p');
+            message.textContent = 'Sign in or create an account to start chatting and keep your conversations private.';
+            gate.appendChild(message);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = 'Sign in to ChatTBM';
+            button.dataset.action = 'auth-open';
+            gate.appendChild(button);
+            main.appendChild(gate);
+        }
 
         shell.appendChild(main);
         app.appendChild(shell);
@@ -87,6 +130,64 @@ class ChatTBMBrowser {
         conversation.scrollTop = conversation.scrollHeight;
 
         return app;
+    }
+
+    renderAuthPanel() {
+        const panel = document.createElement('section');
+        panel.className = 'ui-auth-panel';
+        if (this.authUser) {
+            const status = document.createElement('span');
+            status.textContent = 'Signed in: ' + this.authUser.email;
+            panel.appendChild(status);
+            const logout = document.createElement('button');
+            logout.type = 'button';
+            logout.textContent = 'Sign out';
+            logout.dataset.action = 'auth-logout';
+            panel.appendChild(logout);
+            return panel;
+        }
+
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.textContent = this.authMode === 'closed' ? 'Sign in / Create account' : 'Cancel';
+        toggle.dataset.action = 'auth-toggle';
+        panel.appendChild(toggle);
+
+        if (this.authMode !== 'closed') {
+            const form = document.createElement('form');
+            form.className = 'ui-auth-form';
+            form.dataset.role = 'auth-form';
+            const email = document.createElement('input');
+            email.type = 'email';
+            email.name = 'email';
+            email.autocomplete = 'email';
+            email.placeholder = 'Email address';
+            email.required = true;
+            email.maxLength = 254;
+            const password = document.createElement('input');
+            password.type = 'password';
+            password.name = 'password';
+            password.autocomplete = this.authMode === 'register' ? 'new-password' : 'current-password';
+            password.placeholder = this.authMode === 'register' ? 'Password (12+ characters)' : 'Password';
+            password.required = true;
+            password.minLength = this.authMode === 'register' ? 12 : 1;
+            const submit = document.createElement('button');
+            submit.type = 'submit';
+            submit.textContent = this.authMode === 'register' ? 'Create account' : 'Sign in';
+            const switchMode = document.createElement('button');
+            switchMode.type = 'button';
+            switchMode.dataset.action = 'auth-switch';
+            switchMode.textContent = this.authMode === 'register' ? 'I already have an account' : 'Create an account';
+            form.append(email, password, submit, switchMode);
+            panel.appendChild(form);
+        }
+        if (this.authMessage) {
+            const message = document.createElement('p');
+            message.setAttribute('role', 'status');
+            message.textContent = this.authMessage;
+            panel.appendChild(message);
+        }
+        return panel;
     }
 
     renderSidebar(model) {
@@ -381,6 +482,81 @@ class ChatTBMBrowser {
     }
 
     bind(root) {
+        const authForm = root.querySelector('[data-role="auth-form"]');
+        if (authForm) {
+            authForm.addEventListener('submit', async event => {
+                event.preventDefault();
+                const email = authForm.elements.email.value;
+                const password = authForm.elements.password.value;
+                const result = this.authMode === 'register'
+                    ? await registerAccount(email, password)
+                    : await loginAccount(email, password);
+                if (!result.success) {
+                    this.authMessage = result.error?.message || 'Authentication failed.';
+                    this.render();
+                    return;
+                }
+                if (this.authMode === 'register') {
+                    this.authMode = 'login';
+                    this.authMessage = 'Account created. Please sign in.';
+                    this.render();
+                    return;
+                }
+                await this.switchAccount(result.user);
+                this.authMode = 'closed';
+                this.authMessage = '';
+                this.render();
+            });
+        }
+        root.querySelectorAll('[data-action="auth-open"]').forEach(button => {
+            button.addEventListener('click', () => {
+                this.authMode = 'login';
+                this.authMessage = '';
+                this.render();
+            });
+        });
+        root.querySelectorAll('[data-action="auth-toggle"]').forEach(button => {
+            button.addEventListener('click', () => {
+                this.authMode = this.authMode === 'closed' ? 'login' : 'closed';
+                this.authMessage = '';
+                this.render();
+            });
+        });
+        root.querySelectorAll('[data-action="auth-switch"]').forEach(button => {
+            button.addEventListener('click', () => {
+                this.authMode = this.authMode === 'register' ? 'login' : 'register';
+                this.authMessage = '';
+                this.render();
+            });
+        });
+        root.querySelectorAll('[data-action="auth-logout"]').forEach(button => {
+            button.addEventListener('click', async () => {
+                await this.app.flushRemotePersistence();
+                if (this.app.remotePersistenceError) {
+                    this.authMessage = 'Your latest conversation could not be synced. Please try again before signing out.';
+                    this.render();
+                    return;
+                }
+                const result = await logoutAccount();
+                if (!result.success) {
+                    this.authMessage = result.error?.message || 'Sign out failed.';
+                    this.render();
+                    return;
+                }
+                this.authUser = null;
+                this.app.remotePersistenceEnabled = false;
+                this.app.userId = 'guest';
+                this.app.state.conversation.messages = [];
+                this.app.state.conversation.status = 'idle';
+                this.app.state.composer.submitting = false;
+                this.app.state.error.currentError = null;
+                this.app.state.conversation.interactionId = this.app.createInteractionId();
+                this.app.state.composer.value = '';
+                this.app.components.composer.clear();
+                this.authMessage = 'You have signed out.';
+                this.render();
+            });
+        });
         const input =
             root.querySelector('[data-role="composer"]');
 

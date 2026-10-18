@@ -4,10 +4,25 @@ const {
     createBuild,
     delegateBuildReasoning
 } = require('../softwareBuilder/SoftwareBuildingAssistant');
+const { authenticatedUserId } = require('../auth/chatIdentity');
 
 async function softwareBuildingHandler(req, res) {
     try {
-        const request = req.body;
+        const userId = authenticatedUserId(req);
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: {
+                    code: 'AUTHENTICATION_REQUIRED',
+                    message: 'Sign in to continue.'
+                }
+            });
+        }
+
+        const request = {
+            ...(req.body || {}),
+            userId
+        };
 
         const buildResult = createBuild(request);
 

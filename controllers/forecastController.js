@@ -17,6 +17,7 @@ const {
 const {
     isValidForecastType
 } = require("../forecasting/ForecastTypes");
+const { authenticatedUserId } = require("../auth/chatIdentity");
 
 // =====================================
 // CREATE FORECAST
@@ -33,13 +34,21 @@ async function createForecastHandler(
 
             message,
 
-            userId = "guest",
-
             type = "CONTENT",
 
             context = null
 
         } = req.body || {};
+
+        // Ownership must come from the verified session, never the request body.
+        const userId = authenticatedUserId(req);
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                code: "AUTHENTICATION_REQUIRED",
+                message: "Sign in to continue."
+            });
+        }
 
         // ===============================
         // REQUEST VALIDATION
@@ -60,29 +69,6 @@ async function createForecastHandler(
 
                 message:
                     "Forecast message is required."
-
-            });
-
-        }
-
-        // ===============================
-        // USER ID VALIDATION
-        // ===============================
-
-        if (
-            typeof userId !== "string" ||
-            userId.trim() === ""
-        ) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                code:
-                    "FORECAST_REQUEST_INVALID",
-
-                message:
-                    "Forecast userId must be a valid string."
 
             });
 
@@ -117,8 +103,7 @@ async function createForecastHandler(
         const result =
             forecastService.createForecast({
 
-                userId:
-                    userId.trim(),
+                userId,
 
                 content:
                     message.trim(),

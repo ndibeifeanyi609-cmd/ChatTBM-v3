@@ -24,14 +24,52 @@ const MemoryRuntime = require("./memory/MemoryRuntime");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const authRoutes = require("./auth/authRoutes");
+const conversationHistoryRoutes = require("./routes/conversationHistoryRoutes").router;
+const { requireAuth } = require("./auth/requireAuth");
+const { isTrustedMutationRequest } = require("./auth/requestOrigin");
 const app = express();
+// Render runs behind one reverse proxy; preserve client IPs for rate limiting.
+app.set("trust proxy", 1);
 const PORT =
     process.env.PORT || 3000;
 // =====================================
 // MIDDLEWARE
 // =====================================
-app.use(cors());
+const allowedOrigins = new Set(
+    (process.env.FRONTEND_ORIGINS || "https://ndibeifeanyi609-cmd.github.io,https://chattbm.com,https://www.chattbm.com")
+        .split(",")
+        .map(origin => origin.trim())
+        .filter(Boolean)
+);
+
+app.use(cors({
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+        return callback(new Error("Origin is not allowed."));
+    },
+    credentials: true
+}));
+
+app.use((req, res, next) => {
+    const isMutation = ["POST", "PUT", "PATCH", "DELETE"].includes(req.method);
+    if (isMutation && req.path.startsWith("/api/")) {
+        if (!isTrustedMutationRequest(
+            req.get("origin"),
+            req.get("authorization"),
+            allowedOrigins
+        )) {
+            return res.status(403).json({
+                success: false,
+                error: "Origin is not allowed."
+            });
+        }
+    }
+    next();
+});
 app.use(express.json({ limit: "15mb" }));
+app.use(cookieParser());
 app.use(
     express.urlencoded({
         extended: true
@@ -75,10 +113,16 @@ const voiceTranscribeHandler =
 const voiceRoutes =
     createVoiceRoutes(voiceTranscribeHandler);
 // =====================================
+// REGISTER AUTH ROUTES
+// =====================================
+app.use("/api/auth", authRoutes);
+app.use("/api/conversations", requireAuth, conversationHistoryRoutes);
+
 // REGISTER CHAT ROUTES
 // =====================================
 app.use(
     "/api/chat",
+    requireAuth,
     chatRoutes
 );
 // =====================================
@@ -86,6 +130,7 @@ app.use(
 // =====================================
 app.use(
     "/api/voice",
+    requireAuth,
     voiceRoutes
 );
 
@@ -93,6 +138,7 @@ app.use(
 // =====================================
 app.use(
     "/api/forecast",
+    requireAuth,
     forecastRoutes
 );
 // =====================================
@@ -100,6 +146,7 @@ app.use(
 // =====================================
 app.use(
     "/api/software-builder",
+    requireAuth,
     softwareBuildingRoutes
 );
 // =====================================
@@ -132,6 +179,10 @@ app.get(
             success: true,
             application: "ChatTBM",
             endpoints: [
+                "/api/auth/register",
+                "/api/auth/login",
+                "/api/auth/me",
+                "/api/auth/logout",
                 "/api/chat",
                 "/api/forecast",
                 "/api/software-builder",
@@ -229,6 +280,7 @@ async function startServer() {
         console.log("PostgreSQL status: " + database.status);
     } catch (error) {
         console.error("PostgreSQL initialization failed: " + error.message);
+        process.exit(1);
     }
 
     app.listen(PORT, () => {

@@ -30,6 +30,7 @@ async function runTests() {
 
     await softwareBuildingHandler(
         {
+            authUser: { id: 'controller-test-user' },
             body: {
                 operationId: 'controller-op-001',
                 message: ''
@@ -51,6 +52,7 @@ async function runTests() {
 
     await softwareBuildingHandler(
         {
+            authUser: { id: 'controller-test-user' },
             body: {
                 operationId: 'controller-op-002',
                 message: 'Build a feature'
@@ -76,6 +78,7 @@ async function runTests() {
 
     await softwareBuildingHandler(
         {
+            authUser: { id: 'controller-test-user' },
             body: {
                 operationId: 'controller-op-003',
                 message: 'Build a feature',

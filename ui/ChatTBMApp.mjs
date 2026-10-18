@@ -7,7 +7,8 @@ import {
 } from './AppState.mjs';
 
 import {
-    generateReply
+    generateReply,
+    saveConversationHistory
 } from './ChatAPI.mjs';
 
 import { AppShell } from './AppShell.mjs';
@@ -29,6 +30,10 @@ class ChatTBMApp {
             options.userId.trim()
                 ? options.userId.trim()
                 : 'guest';
+
+        this.remotePersistenceEnabled = options.remotePersistenceEnabled === true;
+        this.remoteSaveQueue = Promise.resolve();
+        this.remotePersistenceError = null;
 
         this.generateReply =
             typeof options.generateReply === 'function'
@@ -66,6 +71,48 @@ class ChatTBMApp {
 
     getConversationsKey() {
         return `chattbm:conversations:${this.userId}`;
+    }
+
+    enqueueRemoteSave(conversation) {
+        if (!this.remotePersistenceEnabled || this.userId === 'guest') return;
+        const snapshot = {
+            interactionId: conversation.interactionId,
+            messages: (conversation.messages || []).map(message => ({
+                id: message.id, role: message.role, content: message.content, timestamp: message.timestamp
+            })),
+            updatedAt: conversation.updatedAt || Date.now()
+        };
+        this.remoteSaveQueue = this.remoteSaveQueue.catch(() => null).then(async () => {
+            const result = await saveConversationHistory(snapshot);
+            this.remotePersistenceError = result.success ? null : (result.error || { message: 'Conversation sync failed.' });
+            return result;
+        });
+    }
+
+    flushRemotePersistence() { return this.remoteSaveQueue; }
+
+    importRemoteConversations(remoteConversations) {
+        if (typeof window === 'undefined' || !window.localStorage || !Array.isArray(remoteConversations)) return false;
+        const local = this.getConversationList();
+        const remoteIds = new Set(remoteConversations.map(item => item.interactionId));
+        const byId = new Map();
+        for (const item of local) if (item && typeof item.interactionId === 'string' && Array.isArray(item.messages)) byId.set(item.interactionId, item);
+        for (const item of remoteConversations) {
+            if (!item || typeof item.interactionId !== 'string' || !Array.isArray(item.messages)) continue;
+            const existing = byId.get(item.interactionId);
+            if (!existing || (Number(item.updatedAt) || 0) >= (Number(existing.updatedAt) || 0)) byId.set(item.interactionId, item);
+        }
+        const merged = [...byId.values()].sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0)).slice(0, 50);
+        try {
+            window.localStorage.setItem(this.getConversationsKey(), JSON.stringify(merged));
+            const oldActive = window.localStorage.getItem('chattbm:active:' + this.userId);
+            const active = merged.find(item => item.interactionId === oldActive) || merged[0];
+            if (active) window.localStorage.setItem('chattbm:active:' + this.userId, active.interactionId);
+        } catch (_) {}
+        for (const item of local) if (item && typeof item.interactionId === 'string' && !remoteIds.has(item.interactionId) && Array.isArray(item.messages) && item.messages.length) this.enqueueRemoteSave(item);
+        if (!merged.length) return false;
+        const activeId = merged.find(item => item.interactionId === (window.localStorage.getItem('chattbm:active:' + this.userId)))?.interactionId || merged[0].interactionId;
+        return this.restoreConversation(activeId);
     }
 
     getConversationList() {
@@ -128,6 +175,7 @@ class ChatTBMApp {
                 `chattbm:active:${this.userId}`,
                 conversation.interactionId
             );
+            this.enqueueRemoteSave(conversation);
             return true;
         } catch (error) {
             return false;

@@ -28,7 +28,7 @@ const suffix = Date.now();
 const userA = 'conversation-test-a-' + suffix;
 const userB = 'conversation-test-b-' + suffix;
 
-const contextA = createContext({
+const contextA = await createContext({
     userId: userA,
     interactionId: 'conversation-test-interaction-a-' + suffix,
     value: {
@@ -38,7 +38,7 @@ const contextA = createContext({
 
 assert.strictEqual(contextA.success, true);
 
-const contextB = createContext({
+const contextB = await createContext({
     userId: userB,
     interactionId: 'conversation-test-interaction-b-' + suffix,
     value: {

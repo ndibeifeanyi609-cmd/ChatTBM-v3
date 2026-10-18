@@ -7,6 +7,101 @@ const API_BASE_URL = (() => {
     return 'https://chattbm-backend.onrender.com';
 })();
 
+
+async function authRequest(path, body) {
+    try {
+        const response = await fetch(API_BASE_URL + '/api/auth/' + path, {
+            method: body ? 'POST' : 'GET',
+            credentials: 'include',
+            headers: body ? { 'Content-Type': 'application/json' } : {},
+            ...(body ? { body: JSON.stringify(body) } : {})
+        });
+        const data = await response.json();
+        if (!response.ok || !data || data.success !== true) {
+            return {
+                success: false,
+                error: {
+                    code: data?.error?.code || 'AUTH_API_ERROR',
+                    message: data?.error?.message || 'Authentication request failed.'
+                }
+            };
+        }
+        return data;
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                code: error?.code || 'AUTH_API_UNAVAILABLE',
+                message: 'Unable to connect to the ChatTBM authentication service.'
+            }
+        };
+    }
+}
+
+function registerAccount(email, password) {
+    return authRequest('register', { email, password });
+}
+
+function loginAccount(email, password) {
+    return authRequest('login', { email, password });
+}
+
+function getCurrentUser() {
+    return authRequest('me');
+}
+
+function logoutAccount() {
+    return authRequest('logout', {});
+}
+
+async function conversationHistoryRequest(path, method = 'GET', body) {
+    try {
+        const response = await fetch(API_BASE_URL + '/api/conversations' + path, {
+            method,
+            credentials: 'include',
+            headers: body ? { 'Content-Type': 'application/json' } : {},
+            ...(body ? { body: JSON.stringify(body) } : {})
+        });
+        const data = await response.json();
+        if (!response.ok || !data || data.success !== true) {
+            return {
+                success: false,
+                error: {
+                    code: data?.error?.code || 'CONVERSATION_HISTORY_ERROR',
+                    message: data?.error?.message || 'Conversation history request failed.'
+                }
+            };
+        }
+        return data;
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                code: error?.code || 'CONVERSATION_HISTORY_UNAVAILABLE',
+                message: 'Unable to sync conversation history with the server.'
+            }
+        };
+    }
+}
+
+function getConversationHistory() {
+    return conversationHistoryRequest('');
+}
+
+function saveConversationHistory(conversation) {
+    if (!conversation || typeof conversation.interactionId !== 'string') {
+        return Promise.resolve({
+            success: false,
+            error: { code: 'INVALID_CONVERSATION', message: 'Conversation id is required.' }
+        });
+    }
+    return conversationHistoryRequest(
+        '/' + encodeURIComponent(conversation.interactionId),
+        'PUT',
+        { messages: conversation.messages }
+    );
+}
+
 async function generateReply({
     message,
     userId = 'guest',
@@ -26,6 +121,7 @@ async function generateReply({
     try {
         const response = await fetch(API_BASE_URL + '/api/chat', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -91,6 +187,7 @@ async function transcribeVoice({
             API_BASE_URL + '/api/voice/transcribe',
             {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -147,5 +244,11 @@ async function transcribeVoice({
 
 export {
     generateReply,
-    transcribeVoice
+    transcribeVoice,
+    registerAccount,
+    loginAccount,
+    getCurrentUser,
+    logoutAccount,
+    getConversationHistory,
+    saveConversationHistory
 };

@@ -24,9 +24,11 @@ const {
     getContext: persistGetContext,
     getContextsByUser,
     deleteContext: persistDeleteContext
-} = require('./ContextPersistence');
+} = process.env.DATABASE_URL
+    ? require('./PostgresContextPersistence')
+    : require('./ContextPersistence');
 
-function createContext({
+async function createContext({
     userId,
     interactionId,
     value = {}
@@ -46,7 +48,7 @@ function createContext({
                 ContextLifecycleStates.ACTIVE
         });
 
-        const saved = saveContext(context);
+        const saved = await saveContext(context);
 
         if (!saved.success) {
             return saved;
@@ -65,8 +67,8 @@ function createContext({
     }
 }
 
-function getContext(id, userId) {
-    const result = persistGetContext(id);
+async function getContext(id, userId) {
+    const result = await persistGetContext(id, userId);
 
     if (!result.success) {
         return result;
@@ -86,7 +88,7 @@ function getContext(id, userId) {
     };
 }
 
-function getContextByInteraction(userId, interactionId) {
+async function getContextByInteraction(userId, interactionId) {
     if (!userId) {
         return {
             success: false,
@@ -108,11 +110,11 @@ function getContextByInteraction(userId, interactionId) {
         interactionId
     );
 
-    return getContext(id, userId);
+    return await getContext(id, userId);
 }
 
 
-function updateContext(
+async function updateContext(
     id,
     userId,
     {
@@ -120,7 +122,7 @@ function updateContext(
         changes = {}
     } = {}
 ) {
-    const resolved = getContext(id, userId);
+    const resolved = await getContext(id, userId);
 
     if (!resolved.success) {
         return resolved;
@@ -172,7 +174,7 @@ function updateContext(
             new Date().toISOString()
     };
 
-    const saved = persistContext(nextContext);
+    const saved = await persistContext(nextContext);
 
     if (!saved.success) {
         return saved;
@@ -184,12 +186,12 @@ function updateContext(
     };
 }
 
-function transitionContextLifecycle(
+async function transitionContextLifecycle(
     id,
     userId,
     nextState
 ) {
-    const resolved = getContext(id, userId);
+    const resolved = await getContext(id, userId);
 
     if (!resolved.success) {
         return resolved;
@@ -212,7 +214,7 @@ function transitionContextLifecycle(
         };
     }
 
-    const saved = persistContextLifecycle(
+    const saved = await persistContextLifecycle(
         transitioned.context
     );
 
@@ -230,26 +232,26 @@ function transitionContextLifecycle(
     };
 }
 
-function closeContext(id, userId) {
-    return transitionContextLifecycle(
+async function closeContext(id, userId) {
+    return await transitionContextLifecycle(
         id,
         userId,
         ContextLifecycleStates.CLOSED
     );
 }
 
-function listContextsByUser(userId) {
-    return getContextsByUser(userId);
+async function listContextsByUser(userId) {
+    return await getContextsByUser(userId);
 }
 
-function deleteContext(id, userId) {
-    const resolved = getContext(id, userId);
+async function deleteContext(id, userId) {
+    const resolved = await getContext(id, userId);
 
     if (!resolved.success) {
         return resolved;
     }
 
-    return persistDeleteContext(id);
+    return await persistDeleteContext(id, userId);
 }
 
 module.exports = {

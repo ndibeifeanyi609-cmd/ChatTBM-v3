@@ -22,6 +22,7 @@
 const {
     handleInteraction
 } = require('../chatInteraction/ChatInteractionBoundary');
+const { authenticatedUserId } = require('../auth/chatIdentity');
 
 // =====================================
 // CHAT HANDLER
@@ -31,9 +32,22 @@ async function chatHandler(req, res) {
 
     try {
 
-        const result = await handleInteraction(
-            req?.body || {}
-        );
+        const body = req?.body || {};
+        const userId = authenticatedUserId(req);
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: {
+                    code: "AUTHENTICATION_REQUIRED",
+                    message: "Sign in to continue."
+                }
+            });
+        }
+
+        const result = await handleInteraction({
+            ...body,
+            userId
+        });
 
         if (
             !result ||
