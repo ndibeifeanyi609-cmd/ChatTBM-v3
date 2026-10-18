@@ -34,7 +34,7 @@ Test password hashing and non-disclosure; generic credential failures; malformed
 - Added an authentication middleware that validates the session against PostgreSQL and attaches the verified account to the request. The chat, voice, forecast, and software-builder API route groups are mounted behind this middleware.
 - Chat identity is derived from the verified session in `auth/chatIdentity.js`; the body-supplied `userId` is overwritten by the verified identity before the interaction boundary is called.
 - Added browser sign-in, registration, current-session restoration, sign-out, and an unauthenticated chat gate in `ui/ChatTBMBrowser.mjs`. Browser credentials are sent with `credentials: 'include'`.
-- Added unit coverage for authentication middleware success, invalid/missing sessions, database-unavailable responses, and session-token extraction. GitHub Actions run #78 passed after these tests were added.
+- Added unit coverage for authentication middleware success, invalid/missing sessions, database-unavailable responses, and session-token extraction. Added authentication service tests for registration validation, normalized email, password-hash storage, generic login failures, session authentication, expiry, and logout revocation. GitHub Actions run #83 passed, including the full Node test suite and lockfile synchronization.
 - The frontend still stores conversations in browser localStorage. Server-backed cross-device conversation history is not implemented or verified. Existing guest history must not be treated as authenticated account history.
 
 ## Remaining blockers before production
