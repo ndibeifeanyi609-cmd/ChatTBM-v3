@@ -80,6 +80,7 @@ router.post('/login', limitLogin, async (req, res, next) => {
         return res.json({
             success: true,
             user: result.user,
+            token: result.token,
             expiresAt: result.expiresAt
         });
     } catch (error) {
