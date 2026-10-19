@@ -8,12 +8,39 @@ const API_BASE_URL = (() => {
 })();
 
 
+function readSessionToken() {
+    try {
+        return window.sessionStorage.getItem('chattbm_session_token') || '';
+    } catch (_) {
+        return '';
+    }
+}
+
+function writeSessionToken(token) {
+    try {
+        if (token) window.sessionStorage.setItem('chattbm_session_token', token);
+    } catch (_) {}
+}
+
+function clearSessionToken() {
+    try {
+        window.sessionStorage.removeItem('chattbm_session_token');
+    } catch (_) {}
+}
+
+function requestHeaders(json = false) {
+    const headers = json ? { 'Content-Type': 'application/json' } : {};
+    const token = readSessionToken();
+    if (token) headers.Authorization = 'Bearer ' + token;
+    return headers;
+}
+
 async function authRequest(path, body) {
     try {
         const response = await fetch(API_BASE_URL + '/api/auth/' + path, {
             method: body ? 'POST' : 'GET',
             credentials: 'include',
-            headers: body ? { 'Content-Type': 'application/json' } : {},
+            headers: requestHeaders(Boolean(body)),
             ...(body ? { body: JSON.stringify(body) } : {})
         });
         const data = await response.json();
@@ -26,6 +53,8 @@ async function authRequest(path, body) {
                 }
             };
         }
+        if (path === 'login' && data.token) writeSessionToken(data.token);
+        if (path === 'logout') clearSessionToken();
         return data;
     } catch (error) {
         return {
@@ -59,7 +88,7 @@ async function conversationHistoryRequest(path, method = 'GET', body) {
         const response = await fetch(API_BASE_URL + '/api/conversations' + path, {
             method,
             credentials: 'include',
-            headers: body ? { 'Content-Type': 'application/json' } : {},
+            headers: requestHeaders(Boolean(body)),
             ...(body ? { body: JSON.stringify(body) } : {})
         });
         const data = await response.json();
@@ -122,9 +151,7 @@ async function generateReply({
         const response = await fetch(API_BASE_URL + '/api/chat', {
             method: 'POST',
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: requestHeaders(true),
             body: JSON.stringify({
                 message: message.trim(),
                 interactionId: context?.interactionId,
@@ -188,9 +215,7 @@ async function transcribeVoice({
             {
                 method: 'POST',
                 credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: requestHeaders(true),
                 body: JSON.stringify({
                     audio,
                     mimeType,
