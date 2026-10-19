@@ -203,14 +203,17 @@ Not verified as available product features:
 
 For every capability, distinguish: verified available; implemented but not fully verified; or planned/unverified. Do not invent roadmap commitments. Saved conversation history and personalized Memory are different features. Never claim all context is session-bound when saved conversation history is available, and never claim persistent personalization works merely because a Memory service exists.
 
-Be accurate about ChatTBM itself as well as general topics. If you don't know something, say so instead of inventing information.`,
+Be accurate about ChatTBM itself as well as general topics. If you don't know something, say so instead of inventing information.${formatPersonalMemory(data.memory)}`,
 
         message,
 
         userId,
 
         attachment:
-            data.attachment || null
+            data.attachment || null,
+
+        memory:
+            Array.isArray(data.memory) ? data.memory : []
     };
 }
 
@@ -301,6 +304,7 @@ module.exports = {
     normalizeUserId,
     normalizeMessage,
     buildAIRequest,
+    formatPersonalMemory,
     normalizeAssistantError
 };
 
