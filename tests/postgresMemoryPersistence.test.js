@@ -91,9 +91,23 @@ async function main() {
         assert.equal(duplicate.success, true);
         assert.equal(duplicate.idempotent, true);
 
+        const retry = await P.save({ ...memory, id: 'memory-retry' });
+        assert.equal(retry.success, true);
+        assert.equal(retry.saved, false);
+        assert.equal(retry.idempotent, true);
+        assert.equal(retry.memory.id, memory.id);
+
         const conflict = await P.save({ ...memory, id: 'memory-2', value: 'Red Kite' });
         assert.equal(conflict.success, false);
         assert.equal(conflict.conflict, true);
+
+        const lifecycleConflict = await P.save({
+            ...memory,
+            id: 'memory-3',
+            lifecycle: 'archived'
+        });
+        assert.equal(lifecycleConflict.success, false);
+        assert.equal(lifecycleConflict.conflict, true);
 
         const updated = await P.update({ ...memory, value: 'Blue Falcon Updated', updatedAt: '2026-10-19T00:01:00.000Z' });
         assert.equal(updated.success, true);

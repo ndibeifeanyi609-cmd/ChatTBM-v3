@@ -2300,3 +2300,36 @@ downstream consumer.
 The first REG-096 implementation MUST remain within the responsibility,
 ownership, identity, lifecycle, persistence, registry, boundary, failure,
 verification, and external API constraints defined by this Contract.
+
+
+---
+
+## 35. PostgreSQL Memory Persistence Idempotency
+
+### 35.1 Repeated Save
+
+PostgreSQL Memory Persistence MUST treat a repeated save as idempotent when
+the existing record has the same canonical identity, stored value, and
+lifecycle.
+
+An idempotent repeat MUST return success and MUST NOT create another record.
+
+### 35.2 Identity Conflict
+
+A save using an existing canonical identity MUST fail with a conflict when
+the requested stored value or lifecycle differs from the existing record.
+
+A conflict MUST NOT overwrite the existing value or lifecycle.
+
+### 35.3 Verification
+
+The PostgreSQL Memory Persistence tests MUST cover:
+
+- repeated save with matching value and lifecycle
+- conflicting value for the same identity
+- conflicting lifecycle for the same identity
+- retry using a new record ID for an existing identity
+- user ownership checks for retrieval, update, and removal
+
+These rules preserve durable Memory identity and prevent retries from
+silently changing canonical user-owned state.
