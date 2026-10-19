@@ -159,23 +159,26 @@ test('canonical Conversation persistence failure returns a controlled result', a
         return;
     }
 
+    const fs = require('node:fs');
     const os = require('node:os');
     const path = require('node:path');
     const persistence = require('../conversation/ConversationPersistence');
     const { resolveOrCreateConversation } = require('../conversation/ConversationBoundary');
 
-    const impossiblePath = path.join(
-        os.tmpdir(),
-        'chattbm-missing-parent-' + Date.now(),
-        'conversations.json'
-    );
-    persistence.configureConversationPersistence(impossiblePath);
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-persistence-failure-'));
+    // The target is an existing directory, so the atomic rename cannot replace it.
+    persistence.configureConversationPersistence(dir);
 
-    const result = await resolveOrCreateConversation({
-        userId: 'persistence-failure-user',
-        conversationKey: 'persistence-failure-interaction'
-    });
+    try {
+        const result = await resolveOrCreateConversation({
+            userId: 'persistence-failure-user',
+            conversationKey: 'persistence-failure-interaction'
+        });
 
-    assert.equal(result.success, false);
-    assert.ok(result.code);
+        assert.equal(result.success, false);
+        assert.ok(result.code);
+    } finally {
+        try { fs.rmSync(dir + '.tmp', { force: true }); } catch (_) {}
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
 });
