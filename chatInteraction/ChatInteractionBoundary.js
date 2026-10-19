@@ -96,6 +96,16 @@ function validateInteractionRequest(data) {
     };
 }
 
+function extractExplicitMemory(message) {
+    if (!/\bremember\b/i.test(message)) return null;
+    const match = message.match(/\bmy\s+([a-z][a-z0-9 _-]{1,50}?)\s+is\s+([^.!?\n]{1,120})/i);
+    if (!match) return null;
+    const subject = match[1].trim().replace(/\s+/g, ' ');
+    const value = match[2].trim().replace(/\s+/g, ' ');
+    if (!subject || !value) return null;
+    return { type: 'fact', subject, value };
+}
+
 function normalizeAssistantInteractionError(error) {
     const normalized =
         error && typeof error === 'object'
@@ -164,6 +174,29 @@ async function handleInteraction(data = {}) {
                         message:
                             contextResult?.error ||
                             'Context is unavailable.'
+                    }
+                };
+            }
+        }
+
+        const memoryIntent = extractExplicitMemory(request.message);
+        if (memoryIntent) {
+            const saved = MemoryBoundary.createMemory({
+                userId: request.userId,
+                type: memoryIntent.type,
+                subject: memoryIntent.subject,
+                value: memoryIntent.value,
+                lifecycle: 'active',
+                provenance: { sourceType: 'explicit-user-request', sourceId: request.interactionId }
+            });
+            if (!saved || saved.success !== true || !saved.memory) {
+                return {
+                    success: false,
+                    userId: request.userId,
+                    interactionId: request.interactionId,
+                    error: {
+                        code: 'MEMORY_SAVE_FAILED',
+                        message: 'I could not safely save that memory. Please try again.'
                     }
                 };
             }
