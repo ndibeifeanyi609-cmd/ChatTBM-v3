@@ -32,3 +32,5 @@ jobs:
         run: node tests/memoryPersistence.test.js
       - name: Test memory boundary reload and ownership
         run: node tests/memoryBoundary.integration.test.js
+      - name: Test PostgreSQL memory adapter
+        run: node tests/postgresMemoryPersistence.test.js
