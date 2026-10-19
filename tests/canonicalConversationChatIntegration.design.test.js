@@ -219,10 +219,17 @@ test('stale Conversation version is rejected and can be safely re-resolved', asy
         assert.equal(fresh.success, true);
         assert.ok(fresh.conversation.version > staleVersion);
 
+        const thirdContext = await createContext({
+            userId,
+            interactionId: interactionId + '-third',
+            value: { message: 'three' }
+        });
+        assert.equal(thirdContext.success, true);
+
         const staleWrite = await ConversationBoundary.addContextReference(
             fresh.conversation.id,
             userId,
-            'missing-context-for-stale-write',
+            thirdContext.context.id,
             staleVersion
         );
         assert.equal(staleWrite.success, false);
