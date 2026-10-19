@@ -276,5 +276,6 @@ module.exports = {
     validateInteractionRequest,
     normalizeInteractionError,
     normalizeAssistantInteractionError,
+    extractExplicitMemory,
     handleInteraction
 };
