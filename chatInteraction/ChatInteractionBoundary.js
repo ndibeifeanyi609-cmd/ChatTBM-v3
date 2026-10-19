@@ -368,5 +368,6 @@ module.exports = {
     normalizeInteractionError,
     normalizeAssistantInteractionError,
     extractExplicitMemory,
+    ensureCanonicalConversation,
     handleInteraction
 };
