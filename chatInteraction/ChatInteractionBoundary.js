@@ -178,7 +178,7 @@ async function handleInteraction(data = {}) {
             userId: request.userId,
             message: request.message,
             attachment: request.attachment,
-            memory: personalMemories
+            memory: { memories: personalMemories }
         });
 
         if (
