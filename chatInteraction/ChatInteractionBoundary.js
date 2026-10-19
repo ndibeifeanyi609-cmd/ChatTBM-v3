@@ -179,16 +179,20 @@ async function handleInteraction(data = {}) {
             }
         }
 
+        const usePostgresMemory = Boolean(process.env.DATABASE_URL);
         const memoryIntent = extractExplicitMemory(request.message);
         if (memoryIntent) {
-            const saved = MemoryBoundary.createMemory({
+            const memoryData = {
                 userId: request.userId,
                 type: memoryIntent.type,
                 subject: memoryIntent.subject,
                 value: memoryIntent.value,
                 lifecycle: 'active',
                 provenance: { sourceType: 'explicit-user-request', sourceId: request.interactionId }
-            });
+            };
+            const saved = usePostgresMemory
+                ? await MemoryBoundary.createPersistentMemory(memoryData)
+                : MemoryBoundary.createMemory(memoryData);
             if (!saved || saved.success !== true || !saved.memory) {
                 return {
                     success: false,
@@ -202,7 +206,9 @@ async function handleInteraction(data = {}) {
             }
         }
 
-        const memoryResult = MemoryBoundary.getMemoriesByUser(request.userId);
+        const memoryResult = usePostgresMemory
+            ? await MemoryBoundary.getPersistentMemoriesByUser(request.userId)
+            : MemoryBoundary.getMemoriesByUser(request.userId);
         if (!memoryResult || memoryResult.success !== true || !Array.isArray(memoryResult.memories)) {
             return {
                 success: false,
