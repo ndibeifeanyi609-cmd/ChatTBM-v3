@@ -203,9 +203,21 @@ async function handleInteraction(data = {}) {
         }
 
         const memoryResult = MemoryBoundary.getMemoriesByUser(request.userId);
-        const personalMemories = memoryResult && memoryResult.success === true && Array.isArray(memoryResult.memories)
-            ? memoryResult.memories.filter(memory => memory && memory.userId === request.userId)
-            : [];
+        if (!memoryResult || memoryResult.success !== true || !Array.isArray(memoryResult.memories)) {
+            return {
+                success: false,
+                userId: request.userId,
+                interactionId: request.interactionId,
+                error: {
+                    code: 'MEMORY_RETRIEVAL_FAILED',
+                    message: 'Personal memory could not be checked safely, so this response was not generated.'
+                }
+            };
+        }
+
+        const personalMemories = memoryResult.memories.filter(memory =>
+            memory && memory.userId === request.userId
+        );
 
         const assistantResult = await generateReply({
             userId: request.userId,
