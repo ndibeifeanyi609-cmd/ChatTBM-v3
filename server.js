@@ -257,33 +257,23 @@ app.use(
     }
 );
 // =====================================
-// =====================================
-// INITIALIZE MEMORY RUNTIME
-// =====================================
-try {
-    const memoryRuntime =
-        MemoryRuntime.initializeMemoryRuntime();
-
-    console.log(
-        `Memory runtime initialized: ${memoryRuntime.count} persisted memories`
-    );
-} catch (error) {
-    console.error(
-        "Memory runtime initialization failed."
-    );
-    console.error(error.message);
-    process.exit(1);
-}
-// =====================================
-
 // START SERVER
 // =====================================
 async function startServer() {
     try {
         const database = await initializeDatabase();
         console.log("PostgreSQL status: " + database.status);
+
+        if (process.env.DATABASE_URL) {
+            const PostgresMemoryPersistence = require("./memory/PostgresMemoryPersistence");
+            await PostgresMemoryPersistence.initialize();
+            console.log("PostgreSQL personal memory persistence initialized.");
+        } else {
+            const memoryRuntime = MemoryRuntime.initializeMemoryRuntime();
+            console.log(`Memory runtime initialized: ${memoryRuntime.count} persisted memories`);
+        }
     } catch (error) {
-        console.error("PostgreSQL initialization failed: " + error.message);
+        console.error("Database or memory initialization failed: " + error.message);
         process.exit(1);
     }
 
