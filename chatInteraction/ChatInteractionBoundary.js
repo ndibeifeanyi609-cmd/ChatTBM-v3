@@ -26,6 +26,7 @@
 
 const { createContext, getContextByInteraction, updateContext } = require('../context/ContextBoundary');
 const { generateReply } = require('../services/assistantEngine');
+const MemoryBoundary = require('../memory/MemoryBoundary');
 
 function validateInteractionRequest(data) {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
