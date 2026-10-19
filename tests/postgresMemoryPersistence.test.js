@@ -101,6 +101,14 @@ async function main() {
         assert.equal(conflict.success, false);
         assert.equal(conflict.conflict, true);
 
+        const lifecycleConflict = await P.save({
+            ...memory,
+            id: 'memory-3',
+            lifecycle: 'archived'
+        });
+        assert.equal(lifecycleConflict.success, false);
+        assert.equal(lifecycleConflict.conflict, true);
+
         const updated = await P.update({ ...memory, value: 'Blue Falcon Updated', updatedAt: '2026-10-19T00:01:00.000Z' });
         assert.equal(updated.success, true);
         assert.equal((await P.getById(memory.id)).value, 'Blue Falcon Updated');
