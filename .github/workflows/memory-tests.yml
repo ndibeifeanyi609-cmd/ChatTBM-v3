@@ -53,3 +53,30 @@ jobs:
         run: node tests/postgresMemoryPersistence.test.js
       - name: Test real PostgreSQL memory integration
         run: node tests/postgresMemoryPersistence.integration.test.js
+
+  test-database-credential:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.CHATTBM_TEST_DATABASE_URL }}
+      NODE_ENV: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Require the test database secret
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::CHATTBM_TEST_DATABASE_URL is not configured."
+            exit 1
+          fi
+      - name: Refuse to connect to a non-test database
+        run: |
+          node -e "const u = new URL(process.env.DATABASE_URL); if (decodeURIComponent(u.pathname.slice(1)) !== 'chattbm_db') { console.error('Refusing to run: expected the chattbm_db test database.'); process.exit(1); }"
+      - name: Verify rotated test database credential
+        run: node tests/postgresMemoryPersistence.integration.test.js
