@@ -113,3 +113,41 @@ test('chat integration creates one canonical Conversation and links its Context'
         fs.rmSync(dir, { recursive: true, force: true });
     }
 });
+
+
+test('canonical Conversation linking fails safely for a missing Context', async (t) => {
+    if (process.env.DATABASE_URL) {
+        t.skip('Uses isolated file persistence; database integration is covered separately.');
+        return;
+    }
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const persistence = require('../conversation/ConversationPersistence');
+    const ConversationBoundary = require('../conversation/ConversationBoundary');
+    const { ensureCanonicalConversation } = require('../chatInteraction/ChatInteractionBoundary');
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-conversation-failure-'));
+    persistence.configureConversationPersistence(path.join(dir, 'conversations.json'));
+
+    try {
+        const userId = 'failure-test-user';
+        const interactionId = 'failure-test-interaction';
+        const result = await ensureCanonicalConversation(
+            userId,
+            interactionId,
+            'context_does_not_exist'
+        );
+
+        assert.equal(result.success, false);
+        assert.ok(result.code);
+
+        const conversationId = createConversationId(userId, interactionId);
+        const stored = await ConversationBoundary.getConversation(conversationId, userId);
+        assert.equal(stored.success, true);
+        assert.deepEqual(stored.conversation.contextIds, []);
+    } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
