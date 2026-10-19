@@ -30,3 +30,21 @@ test('canonical Conversation object rejects identity that does not match user an
     assert.equal(result.success, false);
     assert.equal(result.code, 'CONVERSATION_IDENTITY_CONFLICT');
 });
+
+
+test('canonical Conversation identity trims user and key consistently', () => {
+    const normalized = createConversationId(' user-a ', ' interaction-123 ');
+    const plain = createConversationId('user-a', 'interaction-123');
+    assert.equal(normalized, plain);
+});
+
+test('canonical Conversation identity rejects missing user or key', () => {
+    assert.equal(createConversationId('', 'interaction-123'), null);
+    assert.equal(createConversationId('user-a', ''), null);
+});
+
+test('canonical Context linkage integration remains explicitly unverified until boundary tests exist', () => {
+    // Guard against treating identity-only tests as proof of the full integration.
+    assert.equal(typeof createConversationId, 'function');
+    assert.equal(typeof createConversationObject, 'function');
+});
