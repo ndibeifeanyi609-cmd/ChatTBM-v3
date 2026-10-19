@@ -91,6 +91,12 @@ async function main() {
         assert.equal(duplicate.success, true);
         assert.equal(duplicate.idempotent, true);
 
+        const retry = await P.save({ ...memory, id: 'memory-retry' });
+        assert.equal(retry.success, true);
+        assert.equal(retry.saved, false);
+        assert.equal(retry.idempotent, true);
+        assert.equal(retry.memory.id, memory.id);
+
         const conflict = await P.save({ ...memory, id: 'memory-2', value: 'Red Kite' });
         assert.equal(conflict.success, false);
         assert.equal(conflict.conflict, true);
