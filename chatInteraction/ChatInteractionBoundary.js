@@ -26,6 +26,7 @@
 
 const { createContext, getContextByInteraction, updateContext } = require('../context/ContextBoundary');
 const { generateReply } = require('../services/assistantEngine');
+const MemoryBoundary = require('../memory/MemoryBoundary');
 
 function validateInteractionRequest(data) {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
@@ -93,6 +94,16 @@ function validateInteractionRequest(data) {
         message,
         attachment: normalizedAttachment
     };
+}
+
+function extractExplicitMemory(message) {
+    if (!/\bremember\b/i.test(message)) return null;
+    const match = message.match(/\bmy\s+([a-z][a-z0-9 _-]{1,50}?)\s+is\s+([^.!?\n]{1,120})/i);
+    if (!match) return null;
+    const subject = match[1].trim().replace(/\s+/g, ' ');
+    const value = match[2].trim().replace(/\s+/g, ' ');
+    if (!subject || !value) return null;
+    return { type: 'fact', subject, value };
 }
 
 function normalizeAssistantInteractionError(error) {
@@ -168,10 +179,57 @@ async function handleInteraction(data = {}) {
             }
         }
 
+        const usePostgresMemory = Boolean(process.env.DATABASE_URL);
+        const memoryIntent = extractExplicitMemory(request.message);
+        if (memoryIntent) {
+            const memoryData = {
+                userId: request.userId,
+                type: memoryIntent.type,
+                subject: memoryIntent.subject,
+                value: memoryIntent.value,
+                lifecycle: 'active',
+                provenance: { sourceType: 'explicit-user-request', sourceId: request.interactionId }
+            };
+            const saved = usePostgresMemory
+                ? await MemoryBoundary.createPersistentMemory(memoryData)
+                : MemoryBoundary.createMemory(memoryData);
+            if (!saved || saved.success !== true || !saved.memory) {
+                return {
+                    success: false,
+                    userId: request.userId,
+                    interactionId: request.interactionId,
+                    error: {
+                        code: 'MEMORY_SAVE_FAILED',
+                        message: 'I could not safely save that memory. Please try again.'
+                    }
+                };
+            }
+        }
+
+        const memoryResult = usePostgresMemory
+            ? await MemoryBoundary.getPersistentMemoriesByUser(request.userId)
+            : MemoryBoundary.getMemoriesByUser(request.userId);
+        if (!memoryResult || memoryResult.success !== true || !Array.isArray(memoryResult.memories)) {
+            return {
+                success: false,
+                userId: request.userId,
+                interactionId: request.interactionId,
+                error: {
+                    code: 'MEMORY_RETRIEVAL_FAILED',
+                    message: 'Personal memory could not be checked safely, so this response was not generated.'
+                }
+            };
+        }
+
+        const personalMemories = memoryResult.memories.filter(memory =>
+            memory && memory.userId === request.userId
+        );
+
         const assistantResult = await generateReply({
             userId: request.userId,
             message: request.message,
-            attachment: request.attachment
+            attachment: request.attachment,
+            memory: { memories: personalMemories }
         });
 
         if (
@@ -236,5 +294,6 @@ module.exports = {
     validateInteractionRequest,
     normalizeInteractionError,
     normalizeAssistantInteractionError,
+    extractExplicitMemory,
     handleInteraction
 };

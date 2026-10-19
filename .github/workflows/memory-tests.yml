@@ -1,0 +1,55 @@
+name: Memory Integration Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'chatInteraction/**'
+      - 'memory/**'
+      - 'services/assistantEngine.js'
+      - 'tests/assistantEngine.test.js'
+      - 'tests/explicitMemoryIntent.test.js'
+      - '.github/workflows/memory-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  memory-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: chattbm_test
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: chattbm_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U chattbm_test -d chattbm_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://chattbm_test:test_password@localhost:5432/chattbm_test
+      NODE_ENV: test
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Test assistant memory context
+        run: node tests/assistantEngine.test.js
+      - name: Test explicit memory intent
+        run: node tests/explicitMemoryIntent.test.js
+      - name: Test memory persistence
+        run: node tests/memoryPersistence.test.js
+      - name: Test memory boundary reload and ownership
+        run: node tests/memoryBoundary.integration.test.js
+      - name: Test PostgreSQL memory adapter
+        run: node tests/postgresMemoryPersistence.test.js
+      - name: Test real PostgreSQL memory integration
+        run: node tests/postgresMemoryPersistence.integration.test.js

@@ -577,6 +577,73 @@ function deleteMemory(
 
 
 // =====================================
+// DURABLE POSTGRES MEMORY OPERATIONS
+// =====================================
+const PostgresMemoryPersistence = require('./PostgresMemoryPersistence');
+
+async function createPersistentMemory(data = {}) {
+    try {
+        const memory = createMemoryObject(data);
+        const result = await PostgresMemoryPersistence.save(memory);
+        if (!result.success) {
+            return {
+                success: false,
+                memory: result.memory || null,
+                error: result.error || 'Memory persistence failed.',
+                conflict: Boolean(result.conflict),
+                persistenceFailure: !result.conflict
+            };
+        }
+        return {
+            success: true,
+            memory: result.memory,
+            idempotent: Boolean(result.idempotent),
+            conflict: false
+        };
+    } catch (error) {
+        return { success: false, memory: null, error: error.message || 'Memory creation failed.' };
+    }
+}
+
+async function getPersistentMemoriesByUser(userId) {
+    try {
+        if (!userId) return { success: false, memories: [], error: 'User ID is required.' };
+        const memories = await PostgresMemoryPersistence.getByUser(userId);
+        return { success: true, memories };
+    } catch (error) {
+        return { success: false, memories: [], error: error.message || 'Memory retrieval failed.' };
+    }
+}
+
+async function updatePersistentMemory(memory, userId) {
+    try {
+        if (!memory || !memory.id || !userId) {
+            return { success: false, memory: null, error: 'Memory ID and user ID are required.' };
+        }
+        const existing = await PostgresMemoryPersistence.getById(memory.id);
+        if (!existing) return { success: false, memory: null, error: 'Memory not found.' };
+        if (existing.userId !== userId) return { success: false, memory: null, error: 'Memory ownership violation.' };
+        if (memory.lifecycle !== undefined && memory.lifecycle !== existing.lifecycle) {
+            return { success: false, memory: existing, error: 'Memory lifecycle must be changed through the lifecycle authority.' };
+        }
+        const updated = { ...existing, ...memory, id: existing.id, userId: existing.userId };
+        const result = await PostgresMemoryPersistence.update(updated);
+        return result.success ? result : { success: false, memory: null, error: result.error || 'Memory update failed.' };
+    } catch (error) {
+        return { success: false, memory: null, error: error.message || 'Memory update failed.' };
+    }
+}
+
+async function deletePersistentMemory(memoryId, userId) {
+    try {
+        if (!memoryId || !userId) return { success: false, memory: null, error: 'Memory ID and user ID are required.' };
+        return await PostgresMemoryPersistence.remove(memoryId, userId);
+    } catch (error) {
+        return { success: false, memory: null, error: error.message || 'Memory deletion failed.' };
+    }
+}
+
+// =====================================
 // EXPORTS
 // =====================================
 
@@ -586,5 +653,9 @@ module.exports = {
     getMemoriesByUser,
     updateMemory,
     transitionMemoryLifecycle,
-    deleteMemory
+    deleteMemory,
+    createPersistentMemory,
+    getPersistentMemoriesByUser,
+    updatePersistentMemory,
+    deletePersistentMemory
 };
