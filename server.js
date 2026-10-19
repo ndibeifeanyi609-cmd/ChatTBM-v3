@@ -37,12 +37,16 @@ const PORT =
 // =====================================
 // MIDDLEWARE
 // =====================================
-const allowedOrigins = new Set(
-    (process.env.FRONTEND_ORIGINS || "https://ndibeifeanyi609-cmd.github.io,https://chattbm.com,https://www.chattbm.com")
-        .split(",")
-        .map(origin => origin.trim())
-        .filter(Boolean)
-);
+const defaultOrigins = [
+    "https://ndibeifeanyi609-cmd.github.io",
+    "https://chattbm.com",
+    "https://www.chattbm.com"
+];
+const configuredOrigins = (process.env.FRONTEND_ORIGINS || "")
+    .split(",")
+    .map(origin => origin.trim())
+    .filter(Boolean);
+const allowedOrigins = new Set([...defaultOrigins, ...configuredOrigins]);
 
 app.use(cors({
     origin(origin, callback) {
