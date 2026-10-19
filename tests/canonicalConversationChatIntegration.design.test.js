@@ -151,3 +151,31 @@ test('canonical Conversation linking fails safely for a missing Context', async 
         fs.rmSync(dir, { recursive: true, force: true });
     }
 });
+
+
+test('canonical Conversation persistence failure returns a controlled result', async (t) => {
+    if (process.env.DATABASE_URL) {
+        t.skip('Uses isolated file persistence; database failure injection is separate.');
+        return;
+    }
+
+    const os = require('node:os');
+    const path = require('node:path');
+    const persistence = require('../conversation/ConversationPersistence');
+    const { resolveOrCreateConversation } = require('../conversation/ConversationBoundary');
+
+    const impossiblePath = path.join(
+        os.tmpdir(),
+        'chattbm-missing-parent-' + Date.now(),
+        'conversations.json'
+    );
+    persistence.configureConversationPersistence(impossiblePath);
+
+    const result = await resolveOrCreateConversation({
+        userId: 'persistence-failure-user',
+        conversationKey: 'persistence-failure-interaction'
+    });
+
+    assert.equal(result.success, false);
+    assert.ok(result.code);
+});
