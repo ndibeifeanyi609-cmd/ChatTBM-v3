@@ -92,7 +92,7 @@ async function save(memory) {
     return {
         success: false,
         conflict: true,
-        error: 'A memory with this identity already exists with a different value.',
+        error: 'A memory with this identity already exists with a different value or lifecycle.',
         memory: existing
     };
 }
