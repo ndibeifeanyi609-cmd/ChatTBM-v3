@@ -126,6 +126,14 @@ async function runTests() {
         request.systemPrompt.includes("You are ChatTBM.")
     );
 
+    assert.ok(
+        request.systemPrompt.includes("Verified in the live website:")
+    );
+
+    assert.ok(
+        request.systemPrompt.includes("Saved conversation history and personalized Memory are different features.")
+    );
+
     console.log("✓ AI request construction");
 
     // =====================================
