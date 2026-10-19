@@ -8,6 +8,7 @@ const {
     normalizeUserId,
     normalizeMessage,
     buildAIRequest,
+    formatPersonalMemory,
     normalizeAssistantError
 } = require("../services/assistantEngine");
 
@@ -51,6 +52,44 @@ async function runTests() {
     );
 
     console.log("✓ Message normalization");
+
+    // PERSONAL MEMORY CONTEXT
+    const personalMemory = {
+        memories: [{
+            userId: "user-1",
+            subject: "project nickname",
+            value: "Blue Falcon",
+            lifecycle: "active"
+        }, {
+            userId: "user-1",
+            subject: "unconfirmed note",
+            value: "Do not include",
+            lifecycle: "proposed"
+        }]
+    };
+
+    assert.match(
+        formatPersonalMemory(personalMemory),
+        /project nickname: Blue Falcon/
+    );
+    assert.doesNotMatch(
+        formatPersonalMemory(personalMemory),
+        /unconfirmed note/
+    );
+    assert.strictEqual(
+        formatPersonalMemory({ memories: [] }),
+        ""
+    );
+
+    const memoryRequest = buildAIRequest({
+        userId: "user-1",
+        message: "What is my project nickname?",
+        memory: personalMemory
+    });
+    assert.match(memoryRequest.systemPrompt, /project nickname: Blue Falcon/);
+    assert.strictEqual(memoryRequest.memory, personalMemory);
+
+    console.log("✓ Verified personal memory context");
 
     // =====================================
     // REQUEST VALIDATION
