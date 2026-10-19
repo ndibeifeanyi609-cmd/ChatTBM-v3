@@ -34,3 +34,5 @@ jobs:
         run: node tests/memoryBoundary.integration.test.js
       - name: Test PostgreSQL memory adapter
         run: node tests/postgresMemoryPersistence.test.js
+      - name: Test real PostgreSQL memory integration
+        run: node tests/postgresMemoryPersistence.integration.test.js
