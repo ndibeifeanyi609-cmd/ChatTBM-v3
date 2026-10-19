@@ -182,3 +182,57 @@ test('canonical Conversation persistence failure returns a controlled result', a
         fs.rmSync(dir, { recursive: true, force: true });
     }
 });
+
+
+test('stale Conversation version is rejected and can be safely re-resolved', async (t) => {
+    if (process.env.DATABASE_URL) {
+        t.skip('Uses isolated file persistence; PostgreSQL concurrency verification is separate.');
+        return;
+    }
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const conversationPersistence = require('../conversation/ConversationPersistence');
+    const contextPersistence = require('../context/ContextPersistence');
+    const { createContext } = require('../context/ContextBoundary');
+    const ConversationBoundary = require('../conversation/ConversationBoundary');
+    const { ensureCanonicalConversation } = require('../chatInteraction/ChatInteractionBoundary');
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-stale-version-'));
+    conversationPersistence.configureConversationPersistence(path.join(dir, 'conversations.json'));
+    contextPersistence.clearContexts();
+
+    try {
+        const userId = 'stale-version-user';
+        const interactionId = 'stale-version-interaction';
+        const firstContext = await createContext({ userId, interactionId, value: { message: 'one' } });
+        const secondContext = await createContext({ userId, interactionId: interactionId + '-second', value: { message: 'two' } });
+        assert.equal(firstContext.success, true);
+        assert.equal(secondContext.success, true);
+
+        const initial = await ensureCanonicalConversation(userId, interactionId, firstContext.context.id);
+        assert.equal(initial.success, true);
+        const staleVersion = initial.conversation.version;
+
+        const fresh = await ensureCanonicalConversation(userId, interactionId, secondContext.context.id);
+        assert.equal(fresh.success, true);
+        assert.ok(fresh.conversation.version > staleVersion);
+
+        const staleWrite = await ConversationBoundary.addContextReference(
+            fresh.conversation.id,
+            userId,
+            'missing-context-for-stale-write',
+            staleVersion
+        );
+        assert.equal(staleWrite.success, false);
+        assert.equal(staleWrite.code, 'CONVERSATION_CONFLICT');
+
+        const stored = await ConversationBoundary.getConversation(fresh.conversation.id, userId);
+        assert.equal(stored.success, true);
+        assert.deepEqual(stored.conversation.contextIds, [firstContext.context.id, secondContext.context.id]);
+    } finally {
+        contextPersistence.clearContexts();
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
