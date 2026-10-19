@@ -94,6 +94,20 @@ test('chat integration creates one canonical Conversation and links its Context'
         const otherUser = await ConversationBoundary.getConversation(first.conversation.id, 'different-user');
         assert.equal(otherUser.success, false);
         assert.equal(otherUser.code, 'CONVERSATION_OWNERSHIP_CONFLICT');
+
+        const foreignContext = await createContext({
+            userId: 'different-user',
+            interactionId,
+            value: { message: 'must not link across users' }
+        });
+        assert.equal(foreignContext.success, true);
+
+        const rejectedLink = await ensureCanonicalConversation(
+            userId,
+            interactionId,
+            foreignContext.context.id
+        );
+        assert.equal(rejectedLink.success, false);
     } finally {
         contextPersistence.clearContexts();
         fs.rmSync(dir, { recursive: true, force: true });
