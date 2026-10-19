@@ -64,12 +64,37 @@ async function save(memory) {
             memory.lifecycle, JSON.stringify(memory), memory.createdAt, memory.updatedAt
         ]
     );
-    if (result.rows[0]) return { success: true, saved: true, memory: result.rows[0].payload };
-    const existing = await getByUserAndIdentity(memory.userId, memory.type, memory.subject);
-    if (existing && existing.id === memory.id) {
-        return { success: true, saved: false, idempotent: true, memory: existing };
+    if (result.rows[0]) {
+        return { success: true, saved: true, memory: result.rows[0].payload };
     }
-    return { success: false, conflict: true, error: 'Memory identity already exists.', memory: existing };
+
+    const existing = await getByUserAndIdentity(
+        memory.userId,
+        memory.type,
+        memory.subject
+    );
+
+    // A retry creates a new Memory ID. Treat the same user's same
+    // semantic fact as idempotent only when its value is unchanged.
+    if (
+        existing &&
+        existing.value === memory.value &&
+        existing.lifecycle === memory.lifecycle
+    ) {
+        return {
+            success: true,
+            saved: false,
+            idempotent: true,
+            memory: existing
+        };
+    }
+
+    return {
+        success: false,
+        conflict: true,
+        error: 'A memory with this identity already exists with a different value.',
+        memory: existing
+    };
 }
 
 async function getByUserAndIdentity(userId, type, subject) {
