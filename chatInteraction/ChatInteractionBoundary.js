@@ -169,10 +169,16 @@ async function handleInteraction(data = {}) {
             }
         }
 
+        const memoryResult = MemoryBoundary.getMemoriesByUser(request.userId);
+        const personalMemories = memoryResult && memoryResult.success === true && Array.isArray(memoryResult.memories)
+            ? memoryResult.memories.filter(memory => memory && memory.userId === request.userId)
+            : [];
+
         const assistantResult = await generateReply({
             userId: request.userId,
             message: request.message,
-            attachment: request.attachment
+            attachment: request.attachment,
+            memory: personalMemories
         });
 
         if (
