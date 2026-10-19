@@ -1,27 +1,32 @@
 'use strict';
 
-// REG-094 / REG-091 integration acceptance checklist.
-// These tests intentionally specify required behavior before runtime wiring.
-// Keep this checklist executable by the test runner without changing production behavior.
-
+// REG-094 identity invariants required by canonical chat integration.
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { createConversationId, createConversationObject } = require('../conversation/ConversationObject');
 
-test('canonical Conversation chat integration requirements are explicit', () => {
-    const requirements = [
-        'authenticated user owns deterministic Conversation identity',
-        'interactionId maps to conversationKey',
-        'existing Conversation is retrieved rather than recreated with default state',
-        'Context is resolved only through ContextBoundary',
-        'Conversation references Context only through ConversationBoundary',
-        'Context references are idempotent',
-        'same interactionId for different users cannot share a Conversation',
-        'canonical persistence failure is a controlled chat failure',
-        'stale Conversation versions never overwrite newer state',
-        'legacy transcript persistence and response shape remain compatible'
-    ];
+test('canonical Conversation identity is stable for the same user and key', () => {
+    const first = createConversationId('user-a', 'interaction-123');
+    const repeated = createConversationId('user-a', 'interaction-123');
 
-    assert.equal(requirements.length, 10);
-    assert.equal(new Set(requirements).size, requirements.length);
-    assert.ok(requirements.every(item => item.length > 0));
+    assert.equal(first, repeated);
+    assert.match(first, /^conversation_[a-f0-9]{64}$/);
+});
+
+test('canonical Conversation identity isolates users sharing an interactionId', () => {
+    const first = createConversationId('user-a', 'interaction-123');
+    const second = createConversationId('user-b', 'interaction-123');
+
+    assert.notEqual(first, second);
+});
+
+test('canonical Conversation object rejects identity that does not match user and key', () => {
+    const result = createConversationObject({
+        id: createConversationId('user-a', 'interaction-123'),
+        userId: 'user-b',
+        conversationKey: 'interaction-123'
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.code, 'CONVERSATION_IDENTITY_CONFLICT');
 });
