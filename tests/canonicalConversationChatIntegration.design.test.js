@@ -48,3 +48,54 @@ test('canonical Context linkage integration remains explicitly unverified until 
     assert.equal(typeof createConversationId, 'function');
     assert.equal(typeof createConversationObject, 'function');
 });
+
+
+test('chat integration creates one canonical Conversation and links its Context', async (t) => {
+    if (process.env.DATABASE_URL) {
+        t.skip('Uses isolated file persistence; database integration is covered separately.');
+        return;
+    }
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const conversationPersistence = require('../conversation/ConversationPersistence');
+    const contextPersistence = require('../context/ContextPersistence');
+    const { createContext } = require('../context/ContextBoundary');
+    const ConversationBoundary = require('../conversation/ConversationBoundary');
+    const { ensureCanonicalConversation } = require('../chatInteraction/ChatInteractionBoundary');
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-conversation-'));
+    conversationPersistence.configureConversationPersistence(path.join(dir, 'conversations.json'));
+    contextPersistence.clearContexts();
+
+    try {
+        const userId = 'integration-test-user';
+        const interactionId = 'integration-test-interaction';
+        const context = await createContext({
+            userId,
+            interactionId,
+            value: { message: 'hello' }
+        });
+        assert.equal(context.success, true);
+
+        const first = await ensureCanonicalConversation(userId, interactionId, context.context.id);
+        assert.equal(first.success, true);
+        assert.deepEqual(first.conversation.contextIds, [context.context.id]);
+
+        const repeated = await ensureCanonicalConversation(userId, interactionId, context.context.id);
+        assert.equal(repeated.success, true);
+        assert.equal(repeated.conversation.id, first.conversation.id);
+
+        const stored = await ConversationBoundary.getConversation(first.conversation.id, userId);
+        assert.equal(stored.success, true);
+        assert.deepEqual(stored.conversation.contextIds, [context.context.id]);
+
+        const otherUser = await ConversationBoundary.getConversation(first.conversation.id, 'different-user');
+        assert.equal(otherUser.success, false);
+        assert.equal(otherUser.code, 'CONVERSATION_OWNERSHIP_CONFLICT');
+    } finally {
+        contextPersistence.clearContexts();
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
