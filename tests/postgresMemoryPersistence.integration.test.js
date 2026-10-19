@@ -4,6 +4,11 @@ const assert = require('node:assert/strict');
 const { getPool, closeDatabase } = require('../database/Postgres');
 const Persistence = require('../memory/PostgresMemoryPersistence');
 
+if (!process.env.DATABASE_URL) {
+    console.log('Real PostgreSQL integration test skipped: DATABASE_URL is not configured.');
+    process.exit(0);
+}
+
 async function main() {
     const pool = getPool();
     assert.ok(pool, 'DATABASE_URL must be configured for the PostgreSQL integration test.');
