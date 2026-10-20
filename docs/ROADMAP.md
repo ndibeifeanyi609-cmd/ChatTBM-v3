@@ -646,6 +646,8 @@ evaluation, not a commitment to ship all three before release.
 
 ## 17. Progressive Response Streaming (Proposed — Discovery Required)
 
+Design reference: `docs/STREAMING_DESIGN.md`. Contract requirements: §36 in `docs/CONTRACT.md`.
+
 ChatTBM should evaluate progressive AI response streaming as a user-facing
 chat capability. This is a proposed change, not yet implemented or verified.
 
