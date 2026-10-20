@@ -163,7 +163,7 @@ async function chatStreamHandler(req, res) {
 
     const send = (event) => {
         if (closed || res.destroyed || res.writableEnded) return;
-        res.write(JSON.stringify(event) + '\\n');
+        res.write(JSON.stringify(event) + '\n');
     };
 
     send({ type: 'start' });
