@@ -14,7 +14,7 @@ The user approved the recommended architecture direction on 2026-10-20. This app
 | Registry | Static server-side catalogue | Avoids a new database and competing registry authority in the first version. |
 | User grants/settings | Use existing canonical user identity and settings owner after repository verification | Avoids duplicate identity or permission state. |
 | Provider | **Proposed: Brave Search API**, subject to account, pricing, key, data-handling, and production configuration verification | Gives ChatTBM structured web results behind a replaceable adapter; does not assume an account or key already exists. |
-| Entitlement | Keep entitlement enforcement in the server boundary; begin with the narrowest explicitly approved access policy | UI visibility alone is not authorization; paid access must not be assumed. |
+| Access policy | Web search v1 is available to all authenticated accounts; enforce server-side per-account usage limits and bounded request/result sizes | No premium entitlement gate in v1; cost protection remains mandatory. |
 | Third-party installs | Out of scope for v1 | Requires a separate trust, review, versioning, permission, and isolation model. |
 | Documents | Defer until upload limits, supported formats, privacy, retention, and deletion are defined | Documents introduce additional sensitive-data and storage obligations. |
 | Image generation | Add as a separate adapter after the plugin core passes tests | Keeps image provider setup and costs isolated from the core architecture. |
@@ -43,10 +43,10 @@ The user approved the recommended architecture direction on 2026-10-20. This app
 - [ ] Schema application: **recommended direction** is one numbered-SQL migration runner with a PostgreSQL migration ledger, invoked explicitly during startup before services depend on the new schema. Keep `initializeDatabase()` responsible for connection and legacy bootstrap compatibility; ensure existing numbered migrations are reconciled before enabling the runner. Verify clean-database, already-initialized-database, repeat-startup, migration-failure, CI, and Render behavior before approval.
 - [ ] Grant record details: finalize current-state schema, uniqueness/re-grant behavior, and whether separate audit history is required.
 - [ ] Brave Search API: verify account activation, current plan/credit and usage limits, key creation, query-data handling terms, timeout behavior, and secure Render secret configuration. Keep `BRAVE_API_KEY` server-side only.
-- [ ] Access policy: explicitly decide whether web search is available to all authenticated accounts or requires an existing entitlement.
+- [x] Access policy: all authenticated accounts may use web search v1, subject to server-side per-account usage limits and request/result bounds; no premium entitlement gate in v1.
 - [ ] Permission scopes and consent UI: define the minimal web-search scope and user-facing grant/revocation flow.
 - [ ] Contract, design, and tests: reconcile the approved direction across all documents and approve focused success/failure/security tests.
 
 ## Next step
 
-Resolve and verify the proposed single migration-runner strategy before creating a permission table. The runner must not blindly replay old migrations or assume the database is empty. Then verify Brave account/configuration and access policy, align the Permission Contract, Plugin Contract, and Design, and implement the web-search core in small independently testable steps. No plugin availability should be claimed until configured end-to-end verification succeeds.
+Resolve and verify the proposed single migration-runner strategy before creating a permission table. The runner must not blindly replay old migrations or assume the database is empty. Then verify Brave account/configuration and access policy, align the Permission Contract, Plugin Contract, and Design, and implement the web-search core in small independently testable steps. Provider stays unconfigured until the user separately approves account/billing setup and a server-side key is safely configured. No plugin availability should be claimed until configured end-to-end verification succeeds.
