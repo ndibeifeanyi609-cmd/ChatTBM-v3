@@ -14,7 +14,7 @@ function getPool() {
     if (!pool) {
         pool = new Pool({
             connectionString: process.env.DATABASE_URL,
-            ssl: process.env.NODE_ENV === 'production'
+            ssl: process.env.NODE_ENV === 'production' || process.env.CHATTBM_TEST_DATABASE_SSL === 'true'
                 ? { rejectUnauthorized: false }
                 : undefined,
             max: 5,
