@@ -406,7 +406,7 @@ class ChatTBMApp {
             this.state.conversation.messages.push(createMessage({
                 id: streamMessageId,
                 role: 'assistant',
-                content: ' '
+                content: '…'
             }));
         }
 
@@ -444,6 +444,12 @@ class ChatTBMApp {
                 : await this.generateReply(request);
 
             if (!result || result.success !== true) {
+                if (streaming && !streamedText.trim()) {
+                    this.state.conversation.messages =
+                        this.state.conversation.messages.filter(
+                            item => item.id !== streamMessageId
+                        );
+                }
                 const error = {
                     code:
                         result?.error?.code ||
