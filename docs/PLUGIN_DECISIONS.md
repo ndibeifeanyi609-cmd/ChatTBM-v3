@@ -38,6 +38,15 @@ The user approved the recommended architecture direction on 2026-10-20. This app
 - One capability only: web search, with structured source URLs/titles where available.
 - No third-party plugin code loading, document uploads, new database, or payment-provider integration in the initial core.
 
+## Verified schema-application findings
+
+- `database/Postgres.js` creates `chattbm_chat_history` and `chattbm_contexts` directly during `initializeDatabase()`.
+- `database/migrations/002_chat_history.sql` and `003_context_records.sql` also create those tables with repeatable `IF NOT EXISTS` statements.
+- The reviewed `server.js` calls `initializeDatabase()` during startup; no general migration runner or migration ledger was confirmed in that file.
+- The existing PostgreSQL integration workflow provisions a disposable PostgreSQL 16 service and runs persistence tests, but its current path filters do not include the proposed plugin documents or migration infrastructure.
+- A migration runner cannot simply replay existing numbered files: migration 002 and 003 depend on `chattbm_users`, which is currently created by the bootstrap in `database/Postgres.js`; migration 001 was not found at the expected path.
+- Therefore, the safe next step is a read-only inventory of all migration files and their dependencies, followed by a migration-ledger/backfill design that explicitly preserves existing Render databases. Do not add a plugin permission table or enable a runner until the legacy schema baseline is identified and tested.
+
 ## Remaining implementation gates
 
 - [ ] Schema application: **recommended direction** is one numbered-SQL migration runner with a PostgreSQL migration ledger, invoked explicitly during startup before services depend on the new schema. Keep `initializeDatabase()` responsible for connection and legacy bootstrap compatibility; ensure existing numbered migrations are reconciled before enabling the runner. Verify clean-database, already-initialized-database, repeat-startup, migration-failure, CI, and Render behavior before approval.
