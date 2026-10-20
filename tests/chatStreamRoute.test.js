@@ -33,7 +33,6 @@ Module._load = function(request, parent, isMain) {
 };
 
 const router = require('../routes/chatRoutes');
-Module._load = originalLoad;
 
 test('POST /api/chat/stream emits ordered NDJSON start, deltas, and completion over HTTP', async t => {
     const app = express();
