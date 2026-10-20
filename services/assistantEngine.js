@@ -27,7 +27,8 @@
 // =====================================
 
 const {
-    generateAIResponse
+    generateAIResponse,
+    generateAIStreamResponse
 } = require("./aiEngine");
 
 // =====================================
@@ -294,12 +295,58 @@ async function generateReply(
 
 }
 
+
+async function generateStreamingReply(
+    data = {},
+    onDelta,
+    signal,
+    responseGenerator = generateAIStreamResponse
+) {
+    validateAssistantRequest(data);
+
+    if (typeof onDelta !== "function") {
+        return {
+            success: false,
+            userId: normalizeUserId(data.userId),
+            error: {
+                code: "INVALID_STREAM_CALLBACK",
+                message: "A streaming callback is required."
+            }
+        };
+    }
+
+    const aiRequest = buildAIRequest(data);
+
+    try {
+        const response = await responseGenerator({
+            ...aiRequest,
+            signal,
+            onDelta
+        });
+
+        return {
+            success: true,
+            userId: aiRequest.userId,
+            response
+        };
+    } catch (error) {
+        const normalized = normalizeAssistantError(error);
+        console.error("Assistant Streaming Error:", normalized);
+        return {
+            success: false,
+            userId: aiRequest.userId,
+            error: normalized
+        };
+    }
+}
+
 // =====================================
 // EXPORTS
 // =====================================
 
 module.exports = {
     generateReply,
+    generateStreamingReply,
     validateAssistantRequest,
     normalizeUserId,
     normalizeMessage,

@@ -327,6 +327,17 @@ class ChatTBMBrowser {
         return element;
     }
 
+    updateStreamingMessage(messageId, content) {
+        const item = Array.from(
+            this.root.querySelectorAll('article[data-message-id]')
+        ).find(node => node.dataset.messageId === messageId);
+        if (!item) return;
+        const target = item.querySelector('.ui-message-content');
+        if (target) target.textContent = content;
+        const conversation = this.root.querySelector('.ui-conversation');
+        if (conversation) conversation.scrollTop = conversation.scrollHeight;
+    }
+
     renderMessages(messages) {
         const list = document.createElement('div');
         list.className = 'ui-message-list';
@@ -334,6 +345,7 @@ class ChatTBMBrowser {
         messages.forEach(message => {
             const item = document.createElement('article');
             item.className = 'ui-message';
+            item.dataset.messageId = message.id || '';
 
             item.classList.add(
                 message.role === 'user'
@@ -1227,7 +1239,9 @@ class ChatTBMBrowser {
 
         const pending =
             this.app.submitMessage(message, {
-                attachment
+                attachment,
+                onDelta: (_delta, fullText, messageId) =>
+                    this.updateStreamingMessage(messageId, fullText)
             });
 
         this.render();

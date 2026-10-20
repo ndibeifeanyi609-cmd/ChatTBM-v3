@@ -27,6 +27,25 @@ return {success:true,response:result.response,provider:result.provider||this.act
 return {success:false,response:null,provider:this.activeProvider,model:null,metadata:{},error:{code:"PROVIDER_ERROR",message:error.message||"AI provider failed."}};
 }
 }
+
+async streamResponse(request={},onDelta){
+const fail=(code,message,provider=this.activeProvider,model=null)=>({success:false,response:null,provider,model,metadata:{},error:{code,message}});
+if(!request||typeof request.message!=="string"||!request.message.trim()) return fail("INVALID_REQUEST","A non-empty message is required.");
+if(typeof onDelta!=="function") return fail("INVALID_STREAM_CALLBACK","A streaming callback is required.");
+if(!this.activeProvider) return fail("PROVIDER_UNAVAILABLE","No AI provider is configured.",null);
+const provider=this.providers.get(this.activeProvider);
+if(!provider) return fail("PROVIDER_UNAVAILABLE","Active AI provider is unavailable.");
+if(typeof provider.streamResponse!=="function") return fail("STREAMING_UNSUPPORTED","The active provider does not support streaming.");
+try{
+const result=await provider.streamResponse(request,onDelta);
+if(!result||result.success===false) return fail(result?.error?.code||"PROVIDER_ERROR",result?.error?.message||"AI streaming failed.",result?.provider||this.activeProvider,result?.model||null);
+if(typeof result.response!=="string"||!result.response.trim()) return fail("INVALID_PROVIDER_RESPONSE","Provider returned an invalid streaming response.",this.activeProvider,result.model||null);
+return {success:true,response:result.response,provider:result.provider||this.activeProvider,model:result.model||null,metadata:result.metadata||{}};
+}catch(error){
+return fail(error?.code||"PROVIDER_ERROR",error?.message||"AI streaming failed.",this.activeProvider);
+}
+}
+
 }
 
 class DevelopmentProvider {

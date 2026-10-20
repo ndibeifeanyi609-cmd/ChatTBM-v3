@@ -8,6 +8,7 @@ import {
 
 import {
     generateReply,
+    generateReplyStream,
     saveConversationHistory
 } from './ChatAPI.mjs';
 
@@ -39,6 +40,11 @@ class ChatTBMApp {
             typeof options.generateReply === 'function'
                 ? options.generateReply
                 : generateReply;
+
+        this.generateStreamReply =
+            typeof options.generateStreamReply === 'function'
+                ? options.generateStreamReply
+                : generateReplyStream;
 
         this.components = {
             shell: new AppShell(this),
@@ -392,24 +398,58 @@ class ChatTBMApp {
         this.components.composer.clear();
         this.state.error.currentError = null;
 
+        const streaming = typeof options.onDelta === 'function';
+        const streamMessageId = `assistant-${Date.now()}`;
+        let streamedText = '';
+
+        if (streaming) {
+            this.state.conversation.messages.push(createMessage({
+                id: streamMessageId,
+                role: 'assistant',
+                content: '…'
+            }));
+        }
+
         try {
             this.state.conversation.status =
                 UI_STATUS.RESPONDING;
 
-            const result = await this.generateReply({
+            const request = {
                 message: content,
                 userId: this.userId,
                 attachment,
-                context:
-                    this.state.conversation.interactionId
-                        ? {
-                            interactionId:
-                                this.state.conversation.interactionId
+                context: this.state.conversation.interactionId
+                    ? { interactionId: this.state.conversation.interactionId }
+                    : undefined
+            };
+
+            const result = streaming
+                ? await this.generateStreamReply({
+                    ...request,
+                    onDelta: async delta => {
+                        streamedText += delta;
+                        const index = this.state.conversation.messages.findIndex(
+                            item => item.id === streamMessageId
+                        );
+                        if (index >= 0 && streamedText.trim()) {
+                            this.state.conversation.messages[index] = createMessage({
+                                id: streamMessageId,
+                                role: 'assistant',
+                                content: streamedText
+                            });
                         }
-                        : undefined
-            });
+                        await options.onDelta(delta, streamedText, streamMessageId);
+                    }
+                })
+                : await this.generateReply(request);
 
             if (!result || result.success !== true) {
+                if (streaming && !streamedText.trim()) {
+                    this.state.conversation.messages =
+                        this.state.conversation.messages.filter(
+                            item => item.id !== streamMessageId
+                        );
+                }
                 const error = {
                     code:
                         result?.error?.code ||
@@ -431,14 +471,20 @@ class ChatTBMApp {
             }
 
             const assistantMessage = createMessage({
-                id: `assistant-${Date.now()}`,
+                id: streaming ? streamMessageId : `assistant-${Date.now()}`,
                 role: 'assistant',
                 content: result.response
             });
 
-            this.state.conversation.messages.push(
-                assistantMessage
-            );
+            if (streaming) {
+                const index = this.state.conversation.messages.findIndex(
+                    item => item.id === streamMessageId
+                );
+                if (index >= 0) this.state.conversation.messages[index] = assistantMessage;
+                else this.state.conversation.messages.push(assistantMessage);
+            } else {
+                this.state.conversation.messages.push(assistantMessage);
+            }
 
             this.state.conversation.status =
                 UI_STATUS.SUCCESS;

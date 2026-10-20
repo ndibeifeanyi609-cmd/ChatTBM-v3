@@ -2333,3 +2333,95 @@ The PostgreSQL Memory Persistence tests MUST cover:
 
 These rules preserve durable Memory identity and prevent retries from
 silently changing canonical user-owned state.
+
+---
+
+## 36. Progressive Response Streaming Contract (Proposed)
+
+### 36.1 Compatibility
+
+Streaming MUST be an explicitly selected response mode until the streaming
+path has been verified. Existing non-streaming callers and the existing
+JSON response contract MUST continue to work.
+
+The streaming implementation MUST NOT silently change the semantics of
+existing callers or weaken existing tests.
+
+### 36.2 Architectural Boundaries
+
+Provider-specific streaming MUST remain inside the provider implementation
+and the AI Provider Boundary. The AI Engine and Assistant Engine MUST
+expose only provider-independent streaming behavior to higher layers.
+
+The Chat Interaction Boundary MUST remain responsible for interaction
+validation, canonical Context access, Memory access, and completed-turn
+persistence. The HTTP controller MUST NOT call provider SDKs or own
+canonical interaction state.
+
+The browser MUST consume a documented transport contract and MUST NOT
+receive provider credentials or internal SDK objects.
+
+### 36.3 Stream Events
+
+The approved design MUST define a small, versioned event protocol covering:
+- response start and correlation identity
+- text delta
+- successful completion
+- normalized error
+- cancellation or interrupted connection behavior
+
+Text deltas MUST be treated as untrusted text by the browser and rendered
+using the existing safe rendering approach. A stream MUST NOT be treated as
+complete solely because the connection closed.
+
+### 36.4 Persistence and Completion
+
+Canonical Context MUST store the final complete response only after
+successful generation, using the existing Context Boundary and version
+checks. Partial text MUST NOT be persisted as a successful completed turn.
+
+If generation fails, the stream MUST report a controlled failure where the
+transport permits it. A persistence failure after generation MUST NOT be
+reported as a successful completed turn. The design MUST define how the
+client distinguishes generated text from a response that was durably saved.
+
+### 36.5 Authentication and Ownership
+
+Streaming requests MUST use the existing authenticated chat identity.
+Body-supplied user identifiers MUST NOT override authenticated identity.
+The interaction identifier MUST be validated and associated with the same
+user through the canonical Context boundary.
+
+### 36.6 Cancellation, Disconnects, and Resource Limits
+
+The design MUST define behavior for client cancellation, browser disconnect,
+provider errors, empty streams, malformed provider chunks, request timeout,
+and proxy/server buffering. Cancellation MUST release provider and server
+resources where supported. Resource limits MUST prevent unbounded response
+buffers or indefinite connections.
+
+### 36.7 Provider Compatibility
+
+The provider boundary MUST retain its existing non-streaming method.
+Streaming support MUST be capability-checked or represented by a separately
+defined interface so providers without streaming support fail explicitly
+or use an approved fallback; they MUST NOT be invoked through an undefined
+method.
+
+### 36.8 Verification
+
+Verification MUST include:
+- legacy non-streaming regression tests
+- ordered incremental text delivery
+- successful completion
+- provider failure before the first delta
+- provider failure after one or more deltas
+- malformed or empty provider output
+- client disconnect and cancellation
+- persistence failure after generation
+- authenticated ownership and interaction validation
+- browser rendering safety and mobile behavior
+
+Live streaming MUST NOT be claimed until incremental delivery is observed
+through the real configured provider and deployed transport. Mock-based
+tests establish contract behavior only, not live provider execution.
