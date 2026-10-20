@@ -194,7 +194,11 @@ Before release, tests MUST cover:
 Mock tests prove boundary behavior only. External capability MUST NOT be
 claimed live until configuration and a real end-to-end test succeed.
 
-## 15. Open Decisions Blocking Implementation
+## 15. Permission Contract Alignment
+
+The companion `docs/PLUGIN_PERMISSION_CONTRACT.md` defines the proposed grant record, default-deny behavior, revocation, and permission verification requirements. Both documents must be approved together; neither independently authorizes runtime implementation. The repository review also records that `database/Postgres.js` creates core tables during initialization while numbered SQL migration files exist, and a general migration runner was not confirmed. A permission table must not be added until the schema-application strategy is explicitly resolved and tested.
+
+## 16. Open Decisions Blocking Implementation
 
 Approval is still required for:
 1. Whether registry metadata is canonical persistent state or a simpler
