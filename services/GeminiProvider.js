@@ -178,6 +178,147 @@ ${request.message}`;
 
     }
 
+
+    async streamResponse(request = {}, onDelta) {
+
+        if (
+            !request ||
+            typeof request.message !== "string" ||
+            !request.message.trim()
+        ) {
+            return {
+                success: false,
+                response: null,
+                provider: this.name,
+                model: this.model,
+                metadata: {},
+                error: {
+                    code: "INVALID_REQUEST",
+                    message: "A non-empty message is required."
+                }
+            };
+        }
+
+        if (typeof onDelta !== "function") {
+            return {
+                success: false,
+                response: null,
+                provider: this.name,
+                model: this.model,
+                metadata: {},
+                error: {
+                    code: "INVALID_STREAM_CALLBACK",
+                    message: "A streaming callback is required."
+                }
+            };
+        }
+
+        if (!this.apiKey || !this.client) {
+            return {
+                success: false,
+                response: null,
+                provider: this.name,
+                model: this.model,
+                metadata: {},
+                error: {
+                    code: "PROVIDER_UNAVAILABLE",
+                    message: this.apiKey
+                        ? "Gemini SDK is not available."
+                        : "Gemini API key is not configured."
+                }
+            };
+        }
+
+        const systemPrompt = request.systemPrompt || "";
+        const userId = request.userId || "guest";
+        const prompt =
+`${systemPrompt}
+
+User ID:
+${userId}
+
+User:
+${request.message}`;
+
+        try {
+            const contents = request.attachment
+                ? [{
+                    role: "user",
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: request.attachment.mimeType,
+                                data: request.attachment.data
+                            }
+                        }
+                    ]
+                }]
+                : prompt;
+
+            const config = request.signal
+                ? { abortSignal: request.signal }
+                : undefined;
+
+            const stream = await this.client.models.generateContentStream({
+                model: this.model,
+                contents,
+                ...(config ? { config } : {})
+            });
+
+            let responseText = "";
+
+            for await (const chunk of stream) {
+                if (request.signal?.aborted) {
+                    const error = new Error("Streaming request was cancelled.");
+                    error.code = "STREAM_CANCELLED";
+                    throw error;
+                }
+
+                const delta = chunk && chunk.text;
+
+                if (typeof delta === "string" && delta.length > 0) {
+                    await onDelta(delta);
+                    responseText += delta;
+                }
+            }
+
+            if (!responseText.trim()) {
+                return {
+                    success: false,
+                    response: null,
+                    provider: this.name,
+                    model: this.model,
+                    metadata: {},
+                    error: {
+                        code: "INVALID_PROVIDER_RESPONSE",
+                        message: "Gemini returned an empty streaming response."
+                    }
+                };
+            }
+
+            return {
+                success: true,
+                response: responseText,
+                provider: this.name,
+                model: this.model,
+                metadata: { provider: this.name }
+            };
+        } catch (error) {
+            return {
+                success: false,
+                response: null,
+                provider: this.name,
+                model: this.model,
+                metadata: {},
+                error: {
+                    code: error.code || "PROVIDER_ERROR",
+                    message: error.message || "Gemini streaming failed."
+                }
+            };
+        }
+    }
+
 }
 
 module.exports = {
