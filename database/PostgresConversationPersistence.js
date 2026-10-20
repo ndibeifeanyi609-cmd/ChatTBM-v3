@@ -1,6 +1,7 @@
 'use strict';
 
 const { getPool } = require('./Postgres');
+const { isDeepStrictEqual } = require('node:util');
 const {
     createConversationId,
     createConversationObject
@@ -52,7 +53,7 @@ async function saveConversation(conversation) {
     );
     if (existing.rows.length) {
         const saved = mapRow(existing.rows[0]);
-        if (saved.id === value.id && JSON.stringify(saved) === JSON.stringify(value)) {
+        if (saved.id === value.id && isDeepStrictEqual(saved, value)) {
             return { success: true, conversation: clone(saved), idempotent: true };
         }
         return failure(
