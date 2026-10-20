@@ -194,6 +194,92 @@ async function generateReply({
     }
 }
 
+
+async function generateReplyStream({
+    message,
+    userId = 'guest',
+    context,
+    attachment = null,
+    onDelta,
+    signal
+} = {}) {
+    if (typeof message !== 'string' || !message.trim()) {
+        return { success: false, error: { code: 'INVALID_MESSAGE', message: 'A non-empty message is required.' } };
+    }
+    if (typeof onDelta !== 'function') {
+        return { success: false, error: { code: 'INVALID_STREAM_CALLBACK', message: 'A streaming callback is required.' } };
+    }
+
+    try {
+        const response = await fetch(API_BASE_URL + '/api/chat/stream', {
+            method: 'POST',
+            credentials: 'include',
+            headers: requestHeaders(true),
+            signal,
+            body: JSON.stringify({
+                message: message.trim(),
+                interactionId: context?.interactionId,
+                userId,
+                attachment
+            })
+        });
+
+        if (!response.ok || !response.body) {
+            let data = {};
+            try { data = await response.json(); } catch (_) {}
+            return { success: false, error: {
+                code: data?.error?.code || 'CHAT_STREAM_HTTP_ERROR',
+                message: data?.error?.message || 'The streaming request could not start.'
+            } };
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let complete = null;
+
+        const processLine = async line => {
+            if (!line.trim()) return;
+            let event;
+            try { event = JSON.parse(line); } catch (_) {
+                throw new Error('The server returned an invalid streaming event.');
+            }
+            if (event.type === 'delta' && typeof event.text === 'string') {
+                await onDelta(event.text);
+            } else if (event.type === 'complete') {
+                complete = event;
+            } else if (event.type === 'error') {
+                const error = new Error(event.error?.message || 'Chat streaming failed.');
+                error.code = event.error?.code || 'CHAT_STREAM_FAILED';
+                throw error;
+            }
+        };
+
+        while (true) {
+            const { value, done } = await reader.read();
+            buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+            const lines = buffer.split('\\n');
+            buffer = lines.pop() || '';
+            for (const line of lines) await processLine(line);
+            if (done) break;
+        }
+        if (buffer.trim()) await processLine(buffer);
+
+        if (!complete || typeof complete.response !== 'string') {
+            return { success: false, error: {
+                code: 'STREAM_INTERRUPTED',
+                message: 'The response stream ended before completion.'
+            } };
+        }
+        return { success: true, response: complete.response };
+    } catch (error) {
+        return { success: false, error: {
+            code: error?.code || 'CHAT_STREAM_ERROR',
+            message: error?.message || 'The streaming request was interrupted.'
+        } };
+    }
+}
+
 async function transcribeVoice({
     audio,
     mimeType = 'audio/webm',
@@ -269,6 +355,7 @@ async function transcribeVoice({
 
 export {
     generateReply,
+    generateReplyStream,
     transcribeVoice,
     registerAccount,
     loginAccount,
