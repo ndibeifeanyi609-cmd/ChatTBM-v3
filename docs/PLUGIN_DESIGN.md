@@ -15,7 +15,9 @@ Add a secure, extensible way for ChatTBM to offer optional capabilities through 
 4. Add the remaining capabilities independently after the first one passes verification.
 5. Consider third-party plugins only after a separate trust, review, permission, and compatibility policy is approved.
 
-**Approved first capability:** Web search. **Proposed provider:** Brave Search API, subject to account activation, pricing/usage limits, key configuration, data handling, and production verification. Search results must be treated as untrusted data and must never be allowed to override system or user instructions. Search results must be treated as untrusted data and must never be allowed to override system or user instructions.
+**Approved first capability:** Web search. **Proposed provider:** Brave Search API, subject to account activation, pricing/usage limits, key configuration, data handling, and production verification. Search results must be treated as untrusted data and must never be allowed to override system or user instructions.
+
+**Approved access policy:** all authenticated ChatTBM accounts may use web search v1 without a premium entitlement gate. Enforce per-account usage limits, rate/concurrency limits, bounded query/result sizes, and a clear failure when a limit is reached. The provider remains unconfigured; do not activate Brave or claim live search.
 
 ## 3. Proposed responsibility boundaries
 
@@ -50,7 +52,8 @@ Add a secure, extensible way for ChatTBM to offer optional capabilities through 
 
 ### Settings and Entitlements
 - Exposes plugin enable/disable and permission controls through the existing settings architecture once its canonical ownership is confirmed.
-- Applies server-side entitlement checks; hiding a UI control is not authorization.
+- Web search v1 is available to all authenticated accounts; do not add a premium gate in v1.
+- Enforce server-side per-account usage limits and resource bounds; hiding a UI control is not authorization.
 - Keeps the initial plugin core independent of payment-provider details.
 
 ## 4. Invocation flow
@@ -111,7 +114,7 @@ Each capability must have independent tests for:
 3. **Registry persistence:** static/configuration-backed catalogue for v1 (recommended), with user-specific enabled state stored only after the canonical settings owner is confirmed.
 4. **Permission state owner:** confirm the existing canonical identity/settings service to own per-user grants and revocation.
 5. **Provider and credentials:** Brave Search API is the proposed provider; verify account activation, pricing/usage limits, data handling, and secure server-side `BRAVE_API_KEY` configuration before adapter implementation.
-6. **Entitlement policy:** decide whether the first capability is available to all authenticated users or gated by a plan; enforce the decision server-side.
+6. **Access policy (decided):** all authenticated users may use web search v1; no premium gate. Enforce per-account server-side usage limits and resource bounds.
 7. **Document handling:** if document tools are selected, approve file limits, retention, and deletion rules before implementation.
 
 ## 9. Permission contract and database alignment
