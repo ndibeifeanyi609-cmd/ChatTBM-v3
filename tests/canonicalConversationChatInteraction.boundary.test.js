@@ -21,7 +21,7 @@ function loadBoundaryWithMocks(overrides) {
         id: 'conversation_test_1',
         userId: 'user_test_1',
         conversationKey: 'interaction_test_1',
-        contextIds: ['context_test_1'],
+        contextIds: [],
         version: 2
     };
 
@@ -56,7 +56,7 @@ function loadBoundaryWithMocks(overrides) {
             },
             addContextReference: async (...args) => {
                 calls.push(['addContextReference', ...args]);
-                return { success: true, conversation };
+                return { success: true, conversation: { ...conversation, contextIds: ['context_test_1'] } };
             }
         }
     };
