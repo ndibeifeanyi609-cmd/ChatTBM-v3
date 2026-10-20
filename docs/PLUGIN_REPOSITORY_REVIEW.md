@@ -1,39 +1,48 @@
 # ChatTBM Plugin Architecture — Repository Review
 
 **Status:** Discovery checkpoint; no runtime implementation authorized  
-**Reviewed:** `profile/ProfileBoundary.js`, `profile/ProfileTypes.js`, `profile/ProfilePersistence.js`, `docs/PLUGIN_CONTRACT.md`, `docs/PLUGIN_DESIGN.md`, `docs/ROADMAP.md`
+**Reviewed:** `auth/requireAuth.js`, `auth/chatIdentity.js`, `auth/AuthService.js`, `auth/authRoutes.js`, `server.js`, `routes/chatRoutes.js`, `profile/ProfileBoundary.js`, `profile/ProfileTypes.js`, `profile/ProfilePersistence.js`, plugin contract/design documents.
 
 ## Findings
 
-### Canonical Profile is not a plugin-permission store
+### Existing authentication identity is available
 
-The existing Profile domain validates profile ownership and provides canonical profile operations. Its current types are `identity` and `attribute`; there is no plugin-grant or consent type in the inspected type file. Profile state in `profile/ProfilePersistence.js` is backed by in-process Maps. The inspected code does not establish a durable settings or permission authority.
+`auth/requireAuth.js` validates a session through `authenticateSession` and attaches the verified account to `req.authUser`. `auth/chatIdentity.js` exposes `authenticatedUserId(req)`, which reads that verified identity. This is the intended source of user identity for a Plugin Boundary; plugin authorization must never trust a body-supplied `userId`.
 
-Therefore, plugin permissions MUST NOT be stored as arbitrary Profile values or assumed durable by using ProfilePersistence. Doing so would conflate profile/identity state with authorization and would give a false impression of durable revocation.
+The authentication service uses PostgreSQL-backed account/session operations. However, the repository's own `docs/AUTHENTICATION_DESIGN.md` labels production security and PostgreSQL end-to-end behavior as not yet verified. Plugin work must not imply those checks are complete.
 
-### Authentication must be traced before integration
+### Existing Profile is not a plugin-permission store
 
-The Plugin Boundary must use the authenticated principal established by the existing request/authentication path. It must not trust a user ID supplied only in the request body. The current inspection did not establish the full authentication principal contract or identify a canonical settings/consent owner, so that integration point remains unresolved.
+The inspected Profile types are `identity` and `attribute`; no plugin grant or consent type is present. `profile/ProfilePersistence.js` uses in-process Maps. It does not establish durable settings or permission authority.
 
-### No plugin runtime should be added yet
+Plugin permissions MUST NOT be stored as arbitrary Profile values or treated as durable by relying on ProfilePersistence. Consent and authorization are separate responsibilities from profile attributes.
 
-The current review supports a provider-neutral design and static allowlist recommendation, but it does not prove which existing module owns authenticated identity in all routes, how durable per-user consent should be stored, or how settings are represented in production. Those questions must be resolved before implementing permission persistence or user-facing plugin controls.
+### Settings/consent ownership remains unresolved
+
+The inspected files establish authentication identity but do not identify an existing canonical settings/preferences service with durable per-user grants, scopes, and revocation. No such owner has been verified in this review.
+
+If further repository discovery finds no suitable canonical owner, propose a dedicated permission-grant contract and persistence owner rather than reusing Profile, Memory, or Conversation.
+
+### Chat route protection needs a mount-level check
+
+`routes/chatRoutes.js` defines the chat handlers but does not attach authentication middleware itself. `server.js` imports `requireAuth`; before plugin invocation is added, verify that both normal and streaming chat route mounts are actually protected by it and that `authenticatedUserId(req)` is used by the controller path. Do not infer route protection merely from the existence of the middleware.
 
 ## Recommended next discovery checks
 
-1. Trace the existing authentication middleware and the principal it exposes to `POST /api/chat`.
-2. Check whether a canonical settings/preferences package exists and whether it has durable persistence and ownership enforcement.
-3. If no suitable settings/consent authority exists, propose a dedicated permission-grant contract and persistence owner rather than reusing Profile, Memory, or Conversation.
-4. Select a web-search provider only after confirming provider availability, credentials, cost/quota, data handling, and Render configuration.
-5. Update the Plugin Contract and Design with verified owners and the approved first capability before runtime implementation.
+1. Confirm in `server.js` the exact middleware wrapping normal and streaming chat routes.
+2. Inspect `controllers/chatController.js` to confirm identity derivation for both routes.
+3. Search for any existing durable settings/preferences owner before proposing new permission persistence.
+4. Select a web-search provider only after confirming availability, credentials, cost/quota, data handling, and Render configuration.
+5. Update the Plugin Contract and Design with verified owners and approved scope before runtime implementation.
 
 ## Current decision status
 
 - Built-in allowlisted plugins only: recommended, not approved.
 - Static server-owned registry: recommended, not approved.
 - Web search as first capability: recommended, not approved.
-- Permission/settings owner: unresolved.
+- Authenticated identity source: `req.authUser` via `requireAuth`; controller/mount integration still needs verification.
+- Durable permission/settings owner: unresolved.
 - Provider and credential configuration: unresolved.
 - Runtime implementation: not started by this review.
 
-This review records only the findings from the named files; it is not a claim that the entire repository or deployed service has been exhaustively audited.
+This review records findings from the named files only; it is not a claim that the entire repository or deployed service has been exhaustively audited.
