@@ -9,10 +9,7 @@ system. This document is proposed contract text for review; it does not
 authorize implementation or claim that plugin capabilities are available.
 The ChatTBM Blueprint and existing canonical domain contracts remain superior.
 
-The first release should implement one narrowly scoped capability only after
-the responsibility, identity, permission, and persistence decisions below are
-approved. Image generation, web search, and document tools remain independent
-candidate capabilities.
+The user approved web search as the first capability and selected Brave Search API as the proposed first provider, subject to account, pricing, key, data-handling, and production configuration verification. Image generation and document tools remain separate future capabilities.
 
 ## 2. Core Terms
 
@@ -209,8 +206,7 @@ Approval is still required for:
 4. Permission scopes and which operations require per-invocation confirmation.
 5. Invocation idempotency, retry, cancellation, and partial-stream behavior.
 6. Audit retention and privacy policy.
-7. The first capability to implement, including vendor, credentials, cost,
-   data handling, and deployment requirements.
+7. Brave Search API account/credential verification, cost/usage limits, data handling, and deployment requirements.
 
 ## 16. Change Sequence
 
@@ -226,5 +222,4 @@ Discovery
 → Commit and push
 → Repository confirmation
 
-No plugin runtime implementation is authorized by this proposed contract
-until the blocking decisions are approved.
+Brave Search API is the proposed provider, not yet configured or live. No plugin runtime implementation is authorized until the remaining blocking decisions are resolved and the focused contract/design/test plan is finalized.
