@@ -1,6 +1,6 @@
 'use strict';
 
-const { createConversationObject } = require('./ConversationObject');
+const { createConversationObject, createConversationId } = require('./ConversationObject');
 const {
     transitionConversationLifecycle,
     CONVERSATION_LIFECYCLE_STATES
@@ -31,6 +31,32 @@ async function createConversation({ userId, conversationKey, metadata = {} } = {
         const saved = await saveConversation(created.conversation);
         if (!saved.success) return saved;
         return { success: true, conversation: saved.conversation };
+    } catch (error) {
+        return { success: false, code: 'CONVERSATION_BOUNDARY_FAILURE', error: error.message };
+    }
+}
+
+async function resolveOrCreateConversation({ userId, conversationKey, metadata = {} } = {}) {
+    try {
+        const id = createConversationId(userId, conversationKey);
+        if (!id) {
+            return { success: false, code: 'INVALID_CONVERSATION_IDENTITY', error: 'Conversation userId and conversationKey are required.' };
+        }
+
+        const existing = await getConversation(id, userId);
+        if (existing.success) return existing;
+        if (existing.code !== 'CONVERSATION_NOT_FOUND') return existing;
+
+        const created = await createConversation({ userId, conversationKey, metadata });
+        if (created.success) return created;
+
+        // Another request may have created the same deterministic identity.
+        if (created.code === 'CONVERSATION_ID_CONFLICT' || created.code === 'CONVERSATION_IDENTITY_CONFLICT') {
+            const raced = await getConversation(id, userId);
+            if (raced.success) return { ...raced, idempotent: true };
+            return raced;
+        }
+        return created;
     } catch (error) {
         return { success: false, code: 'CONVERSATION_BOUNDARY_FAILURE', error: error.message };
     }
@@ -151,6 +177,7 @@ async function deleteConversationById(id, userId) {
 
 module.exports = {
     createConversation,
+    resolveOrCreateConversation,
     getConversation: getConversationById,
     updateConversation: updateConversationById,
     transitionConversationLifecycle: transitionConversationLifecycleById,

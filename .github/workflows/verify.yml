@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run tests
+        env:
+          CHATTBM_TEST_DATABASE_URL: ${{ secrets.CHATTBM_TEST_DATABASE_URL }}
+          CHATTBM_TEST_DATABASE_SSL: 'true'
         run: node --test
 
   sync-lockfile:

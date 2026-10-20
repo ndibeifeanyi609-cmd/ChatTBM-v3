@@ -27,6 +27,7 @@
 const { createContext, getContextByInteraction, updateContext } = require('../context/ContextBoundary');
 const { generateReply } = require('../services/assistantEngine');
 const MemoryBoundary = require('../memory/MemoryBoundary');
+const ConversationBoundary = require('../conversation/ConversationBoundary');
 
 function validateInteractionRequest(data) {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
@@ -93,6 +94,61 @@ function validateInteractionRequest(data) {
         interactionId,
         message,
         attachment: normalizedAttachment
+    };
+}
+
+async function ensureCanonicalConversation(userId, interactionId, contextId) {
+    let resolved = await ConversationBoundary.resolveOrCreateConversation({
+        userId,
+        conversationKey: interactionId
+    });
+    if (!resolved || resolved.success !== true || !resolved.conversation) {
+        return {
+            success: false,
+            code: resolved?.code || 'CONVERSATION_UNAVAILABLE',
+            error: resolved?.error || 'Canonical Conversation is unavailable.'
+        };
+    }
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+        const current = resolved.conversation;
+        if (current.contextIds.includes(contextId)) {
+            return { success: true, conversation: current, idempotent: true };
+        }
+
+        const linked = await ConversationBoundary.addContextReference(
+            current.id,
+            userId,
+            contextId,
+            current.version
+        );
+        if (linked && linked.success === true) return linked;
+
+        if (linked?.code !== 'CONVERSATION_CONFLICT') {
+            return {
+                success: false,
+                code: linked?.code || 'CONVERSATION_CONTEXT_LINK_FAILED',
+                error: linked?.error || 'Context could not be linked to Conversation.'
+            };
+        }
+
+        resolved = await ConversationBoundary.resolveOrCreateConversation({
+            userId,
+            conversationKey: interactionId
+        });
+        if (!resolved || resolved.success !== true || !resolved.conversation) {
+            return {
+                success: false,
+                code: resolved?.code || 'CONVERSATION_UNAVAILABLE',
+                error: resolved?.error || 'Canonical Conversation could not be reloaded.'
+            };
+        }
+    }
+
+    return {
+        success: false,
+        code: 'CONVERSATION_CONFLICT',
+        error: 'Conversation changed concurrently; please retry.'
     };
 }
 
@@ -177,6 +233,23 @@ async function handleInteraction(data = {}) {
                     }
                 };
             }
+        }
+
+        const canonicalConversation = await ensureCanonicalConversation(
+            request.userId,
+            request.interactionId,
+            contextResult.context.id
+        );
+        if (!canonicalConversation.success) {
+            return {
+                success: false,
+                userId: request.userId,
+                interactionId: request.interactionId,
+                error: {
+                    code: canonicalConversation.code,
+                    message: canonicalConversation.error
+                }
+            };
         }
 
         const usePostgresMemory = Boolean(process.env.DATABASE_URL);
@@ -314,6 +387,24 @@ async function handleStreamingInteraction(data = {}, onDelta, signal) {
             }
         }
 
+
+        const canonicalConversation = await ensureCanonicalConversation(
+            request.userId,
+            request.interactionId,
+            contextResult.context.id
+        );
+        if (!canonicalConversation.success) {
+            return {
+                success: false,
+                userId: request.userId,
+                interactionId: request.interactionId,
+                error: {
+                    code: canonicalConversation.code,
+                    message: canonicalConversation.error
+                }
+            };
+        }
+
         const usePostgresMemory = Boolean(process.env.DATABASE_URL);
         const memoryIntent = extractExplicitMemory(request.message);
         if (memoryIntent) {
@@ -390,11 +481,13 @@ async function handleStreamingInteraction(data = {}, onDelta, signal) {
     }
 }
 
+
 module.exports = {
     validateInteractionRequest,
     normalizeInteractionError,
     normalizeAssistantInteractionError,
     extractExplicitMemory,
+    ensureCanonicalConversation,
     handleInteraction,
     handleStreamingInteraction
 };

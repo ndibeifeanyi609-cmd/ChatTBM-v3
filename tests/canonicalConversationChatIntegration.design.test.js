@@ -1,0 +1,245 @@
+'use strict';
+
+// REG-094 identity invariants required by canonical chat integration.
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { createConversationId, createConversationObject } = require('../conversation/ConversationObject');
+
+test('canonical Conversation identity is stable for the same user and key', () => {
+    const first = createConversationId('user-a', 'interaction-123');
+    const repeated = createConversationId('user-a', 'interaction-123');
+
+    assert.equal(first, repeated);
+    assert.match(first, /^conversation_[a-f0-9]{64}$/);
+});
+
+test('canonical Conversation identity isolates users sharing an interactionId', () => {
+    const first = createConversationId('user-a', 'interaction-123');
+    const second = createConversationId('user-b', 'interaction-123');
+
+    assert.notEqual(first, second);
+});
+
+test('canonical Conversation object rejects identity that does not match user and key', () => {
+    const result = createConversationObject({
+        id: createConversationId('user-a', 'interaction-123'),
+        userId: 'user-b',
+        conversationKey: 'interaction-123'
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.code, 'CONVERSATION_IDENTITY_CONFLICT');
+});
+
+
+test('canonical Conversation identity trims user and key consistently', () => {
+    const normalized = createConversationId(' user-a ', ' interaction-123 ');
+    const plain = createConversationId('user-a', 'interaction-123');
+    assert.equal(normalized, plain);
+});
+
+test('canonical Conversation identity rejects missing user or key', () => {
+    assert.equal(createConversationId('', 'interaction-123'), null);
+    assert.equal(createConversationId('user-a', ''), null);
+});
+
+test('canonical Context linkage integration remains explicitly unverified until boundary tests exist', () => {
+    // Guard against treating identity-only tests as proof of the full integration.
+    assert.equal(typeof createConversationId, 'function');
+    assert.equal(typeof createConversationObject, 'function');
+});
+
+
+test('chat integration creates one canonical Conversation and links its Context', async (t) => {
+    if (process.env.DATABASE_URL) {
+        t.skip('Uses isolated file persistence; database integration is covered separately.');
+        return;
+    }
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const conversationPersistence = require('../conversation/ConversationPersistence');
+    const contextPersistence = require('../context/ContextPersistence');
+    const { createContext } = require('../context/ContextBoundary');
+    const ConversationBoundary = require('../conversation/ConversationBoundary');
+    const { ensureCanonicalConversation } = require('../chatInteraction/ChatInteractionBoundary');
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-conversation-'));
+    conversationPersistence.configureConversationPersistence(path.join(dir, 'conversations.json'));
+    contextPersistence.clearContexts();
+
+    try {
+        const userId = 'integration-test-user';
+        const interactionId = 'integration-test-interaction';
+        const context = await createContext({
+            userId,
+            interactionId,
+            value: { message: 'hello' }
+        });
+        assert.equal(context.success, true);
+
+        const first = await ensureCanonicalConversation(userId, interactionId, context.context.id);
+        assert.equal(first.success, true);
+        assert.deepEqual(first.conversation.contextIds, [context.context.id]);
+
+        const repeated = await ensureCanonicalConversation(userId, interactionId, context.context.id);
+        assert.equal(repeated.success, true);
+        assert.equal(repeated.conversation.id, first.conversation.id);
+
+        const stored = await ConversationBoundary.getConversation(first.conversation.id, userId);
+        assert.equal(stored.success, true);
+        assert.deepEqual(stored.conversation.contextIds, [context.context.id]);
+
+        const otherUser = await ConversationBoundary.getConversation(first.conversation.id, 'different-user');
+        assert.equal(otherUser.success, false);
+        assert.equal(otherUser.code, 'CONVERSATION_OWNERSHIP_CONFLICT');
+
+        const foreignContext = await createContext({
+            userId: 'different-user',
+            interactionId,
+            value: { message: 'must not link across users' }
+        });
+        assert.equal(foreignContext.success, true);
+
+        const rejectedLink = await ensureCanonicalConversation(
+            userId,
+            interactionId,
+            foreignContext.context.id
+        );
+        assert.equal(rejectedLink.success, false);
+    } finally {
+        contextPersistence.clearContexts();
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
+
+
+test('canonical Conversation linking fails safely for a missing Context', async (t) => {
+    if (process.env.DATABASE_URL) {
+        t.skip('Uses isolated file persistence; database integration is covered separately.');
+        return;
+    }
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const persistence = require('../conversation/ConversationPersistence');
+    const ConversationBoundary = require('../conversation/ConversationBoundary');
+    const { ensureCanonicalConversation } = require('../chatInteraction/ChatInteractionBoundary');
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-conversation-failure-'));
+    persistence.configureConversationPersistence(path.join(dir, 'conversations.json'));
+
+    try {
+        const userId = 'failure-test-user';
+        const interactionId = 'failure-test-interaction';
+        const result = await ensureCanonicalConversation(
+            userId,
+            interactionId,
+            'context_does_not_exist'
+        );
+
+        assert.equal(result.success, false);
+        assert.ok(result.code);
+
+        const conversationId = createConversationId(userId, interactionId);
+        const stored = await ConversationBoundary.getConversation(conversationId, userId);
+        assert.equal(stored.success, true);
+        assert.deepEqual(stored.conversation.contextIds, []);
+    } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
+
+
+test('canonical Conversation persistence failure returns a controlled result', async (t) => {
+    if (process.env.DATABASE_URL) {
+        t.skip('Uses isolated file persistence; database failure injection is separate.');
+        return;
+    }
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const persistence = require('../conversation/ConversationPersistence');
+    const { resolveOrCreateConversation } = require('../conversation/ConversationBoundary');
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-persistence-failure-'));
+    // The target is an existing directory, so the atomic rename cannot replace it.
+    persistence.configureConversationPersistence(dir);
+
+    try {
+        const result = await resolveOrCreateConversation({
+            userId: 'persistence-failure-user',
+            conversationKey: 'persistence-failure-interaction'
+        });
+
+        assert.equal(result.success, false);
+        assert.ok(result.code);
+    } finally {
+        try { fs.rmSync(dir + '.tmp', { force: true }); } catch (_) {}
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
+
+
+test('stale Conversation version is rejected and can be safely re-resolved', async (t) => {
+    if (process.env.DATABASE_URL) {
+        t.skip('Uses isolated file persistence; PostgreSQL concurrency verification is separate.');
+        return;
+    }
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const conversationPersistence = require('../conversation/ConversationPersistence');
+    const contextPersistence = require('../context/ContextPersistence');
+    const { createContext } = require('../context/ContextBoundary');
+    const ConversationBoundary = require('../conversation/ConversationBoundary');
+    const { ensureCanonicalConversation } = require('../chatInteraction/ChatInteractionBoundary');
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-stale-version-'));
+    conversationPersistence.configureConversationPersistence(path.join(dir, 'conversations.json'));
+    contextPersistence.clearContexts();
+
+    try {
+        const userId = 'stale-version-user';
+        const interactionId = 'stale-version-interaction';
+        const firstContext = await createContext({ userId, interactionId, value: { message: 'one' } });
+        const secondContext = await createContext({ userId, interactionId: interactionId + '-second', value: { message: 'two' } });
+        assert.equal(firstContext.success, true);
+        assert.equal(secondContext.success, true);
+
+        const initial = await ensureCanonicalConversation(userId, interactionId, firstContext.context.id);
+        assert.equal(initial.success, true);
+        const staleVersion = initial.conversation.version;
+
+        const fresh = await ensureCanonicalConversation(userId, interactionId, secondContext.context.id);
+        assert.equal(fresh.success, true);
+        assert.ok(fresh.conversation.version > staleVersion);
+
+        const thirdContext = await createContext({
+            userId,
+            interactionId: interactionId + '-third',
+            value: { message: 'three' }
+        });
+        assert.equal(thirdContext.success, true);
+
+        const staleWrite = await ConversationBoundary.addContextReference(
+            fresh.conversation.id,
+            userId,
+            thirdContext.context.id,
+            staleVersion
+        );
+        assert.equal(staleWrite.success, false);
+        assert.equal(staleWrite.code, 'CONVERSATION_CONFLICT');
+
+        const stored = await ConversationBoundary.getConversation(fresh.conversation.id, userId);
+        assert.equal(stored.success, true);
+        assert.deepEqual(stored.conversation.contextIds, [firstContext.context.id, secondContext.context.id]);
+    } finally {
+        contextPersistence.clearContexts();
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
