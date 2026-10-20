@@ -580,3 +580,64 @@ Contract
 → Commit
 → Push
 → Repository Confirmation
+
+---
+
+## 16. Plugin Architecture (Proposed — Discovery Required)
+
+ChatTBM should evaluate a secure, extensible plugin architecture before
+app-store release. This is a roadmap candidate, not an implemented or
+approved canonical capability. It must first pass architectural discovery
+and must not bypass the Blueprint, Contract, or existing canonical boundaries.
+
+### Intended Product Direction
+
+Support both:
+- Built-in ChatTBM tools
+- User-enabled third-party integrations through a managed plugin catalogue
+
+Initial capabilities to evaluate:
+- Image generation
+- Web search
+- Document creation and analysis
+
+Each capability requires its own implementation, provider/dependency review,
+security assessment, and verification. Listing a capability here does not
+claim it is already available.
+
+### Architectural Questions for Discovery
+
+Determine whether and how to establish:
+- Plugin Registry: catalogue and lifecycle of available plugins
+- Plugin Boundary: controlled invocation and normalized results/failures
+- Permission and consent controls: user authorization for plugin access/actions
+- AI orchestration integration: selecting tools only through approved boundaries
+- Plugin settings: enable, disable, and manage integrations
+- Future subscription/entitlement checks for premium capabilities
+
+The design must preserve canonical domain ownership, prevent unauthorized
+actions, define timeout and provider-failure behavior, and test malformed
+outputs and unavailable dependencies. Secrets and provider API keys must
+remain server-side and must never be exposed to browser clients.
+
+### Required Development Sequence
+
+Begin with discovery; do not create implementation files until the
+architectural responsibility and boundaries are approved.
+
+Discovery
+→ Blueprint / Contract alignment
+→ Contract
+→ Package Design
+→ Implementation
+→ Verification
+→ Failure Testing
+→ Documentation
+→ Checkpoint
+→ Commit
+→ Push
+→ Repository Confirmation
+
+Plugin work must follow the canonical development workflow in §5 and the
+External API Gate in §7. The first release priorities are candidates for
+evaluation, not a commitment to ship all three before release.
