@@ -32,4 +32,4 @@ GitHub Actions passed for the current implementation commit. Identity invariant 
 
 ## Required before merge
 
-Focused tests are still required for repeated chat requests, actual Context linking, persistence failure, ownership rejection, and compatibility with existing chat behavior. Keep PR #7 in draft until these tests and review are complete.
+Focused tests now cover repeated canonical linking, actual Context references, persistence failure, ownership rejection, stale-version conflicts, and boundary orchestration before reply generation. The current GitHub Actions checks passed for the verified implementation commit. Keep PR #7 in draft until a reviewer has inspected the implementation and confirmed compatibility with existing chat behavior.
