@@ -290,10 +290,111 @@ async function handleInteraction(data = {}) {
     }
 }
 
+
+async function handleStreamingInteraction(data = {}, onDelta, signal) {
+    let request;
+
+    try {
+        request = validateInteractionRequest(data);
+        if (typeof onDelta !== 'function') {
+            throw Object.assign(new Error('A streaming callback is required.'), { code: 'INVALID_STREAM_CALLBACK' });
+        }
+
+        let contextResult = await getContextByInteraction(request.userId, request.interactionId);
+        if (!contextResult || contextResult.success === false || !contextResult.context) {
+            if (contextResult?.error === 'Context not found.') {
+                contextResult = await createContext({
+                    userId: request.userId,
+                    interactionId: request.interactionId
+                });
+            }
+            if (!contextResult || contextResult.success === false || !contextResult.context) {
+                return { success: false, userId: request.userId, interactionId: request.interactionId,
+                    error: { code: 'CONTEXT_UNAVAILABLE', message: contextResult?.error || 'Context is unavailable.' } };
+            }
+        }
+
+        const usePostgresMemory = Boolean(process.env.DATABASE_URL);
+        const memoryIntent = extractExplicitMemory(request.message);
+        if (memoryIntent) {
+            const memoryData = {
+                userId: request.userId,
+                type: memoryIntent.type,
+                subject: memoryIntent.subject,
+                value: memoryIntent.value,
+                lifecycle: 'active',
+                provenance: { sourceType: 'explicit-user-request', sourceId: request.interactionId }
+            };
+            const saved = usePostgresMemory
+                ? await MemoryBoundary.createPersistentMemory(memoryData)
+                : MemoryBoundary.createMemory(memoryData);
+            if (!saved || saved.success !== true || !saved.memory) {
+                return { success: false, userId: request.userId, interactionId: request.interactionId,
+                    error: { code: 'MEMORY_SAVE_FAILED', message: 'I could not safely save that memory. Please try again.' } };
+            }
+        }
+
+        const memoryResult = usePostgresMemory
+            ? await MemoryBoundary.getPersistentMemoriesByUser(request.userId)
+            : MemoryBoundary.getMemoriesByUser(request.userId);
+        if (!memoryResult || memoryResult.success !== true || !Array.isArray(memoryResult.memories)) {
+            return { success: false, userId: request.userId, interactionId: request.interactionId,
+                error: { code: 'MEMORY_RETRIEVAL_FAILED', message: 'Personal memory could not be checked safely, so this response was not generated.' } };
+        }
+
+        const personalMemories = memoryResult.memories.filter(memory =>
+            memory && memory.userId === request.userId
+        );
+        const { generateStreamingReply } = require('../services/assistantEngine');
+        const assistantResult = await generateStreamingReply({
+            userId: request.userId,
+            message: request.message,
+            attachment: request.attachment,
+            memory: { memories: personalMemories }
+        }, onDelta, signal);
+
+        if (!assistantResult || assistantResult.success === false) {
+            return { success: false, userId: request.userId, interactionId: request.interactionId,
+                error: normalizeAssistantInteractionError(assistantResult?.error) };
+        }
+
+        if (signal?.aborted) {
+            return { success: false, userId: request.userId, interactionId: request.interactionId,
+                error: { code: 'STREAM_CANCELLED', message: 'Streaming request was cancelled.' } };
+        }
+
+        const persistedTurn = await updateContext(
+            contextResult.context.id,
+            request.userId,
+            {
+                expectedVersion: contextResult.context.version,
+                changes: { value: {
+                    message: request.message,
+                    response: assistantResult.response,
+                    attachment: request.attachment
+                } }
+            }
+        );
+
+        if (!persistedTurn || persistedTurn.success !== true) {
+            return { success: false, userId: request.userId, interactionId: request.interactionId,
+                error: { code: persistedTurn?.code || 'CONTEXT_PERSISTENCE_FAILED',
+                    message: persistedTurn?.error || 'The completed turn could not be saved.' } };
+        }
+
+        return { success: true, userId: request.userId, interactionId: request.interactionId,
+            response: assistantResult.response };
+    } catch (error) {
+        return { success: false, userId: request?.userId, interactionId: request?.interactionId,
+            error: normalizeInteractionError(error) };
+    }
+}
+
 module.exports = {
     validateInteractionRequest,
     normalizeInteractionError,
     normalizeAssistantInteractionError,
     extractExplicitMemory,
-    handleInteraction
+    handleInteraction,
+    handleStreamingInteraction
 };
