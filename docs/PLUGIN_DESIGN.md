@@ -1,6 +1,6 @@
 # ChatTBM Plugin Architecture Design
 
-**Status:** Proposed design — approval required before runtime implementation  
+**Status:** Approved architecture direction; Brave Search API proposed as first provider pending account/configuration verification  
 **Related documents:** `docs/PLUGIN_DISCOVERY.md`, `docs/PLUGIN_CONTRACT.md`
 
 ## 1. Purpose
@@ -15,7 +15,7 @@ Add a secure, extensible way for ChatTBM to offer optional capabilities through 
 4. Add the remaining capabilities independently after the first one passes verification.
 5. Consider third-party plugins only after a separate trust, review, permission, and compatibility policy is approved.
 
-**Recommendation for the first capability:** Web search, because it can demonstrate the plugin lifecycle and source attribution without initially handling user-uploaded documents. This is a recommendation, not an approved decision. Search results must be treated as untrusted data and must never be allowed to override system or user instructions.
+**Approved first capability:** Web search. **Proposed provider:** Brave Search API, subject to account activation, pricing/usage limits, key configuration, data handling, and production verification. Search results must be treated as untrusted data and must never be allowed to override system or user instructions. Search results must be treated as untrusted data and must never be allowed to override system or user instructions.
 
 ## 3. Proposed responsibility boundaries
 
@@ -110,7 +110,7 @@ Each capability must have independent tests for:
 2. **Plugin source for v1:** built-in allowlisted plugins only (recommended); third-party installation remains out of scope.
 3. **Registry persistence:** static/configuration-backed catalogue for v1 (recommended), with user-specific enabled state stored only after the canonical settings owner is confirmed.
 4. **Permission state owner:** confirm the existing canonical identity/settings service to own per-user grants and revocation.
-5. **Provider and credentials:** select the first provider and confirm secure server-side configuration before adapter implementation.
+5. **Provider and credentials:** Brave Search API is the proposed provider; verify account activation, pricing/usage limits, data handling, and secure server-side `BRAVE_API_KEY` configuration before adapter implementation.
 6. **Entitlement policy:** decide whether the first capability is available to all authenticated users or gated by a plan; enforce the decision server-side.
 7. **Document handling:** if document tools are selected, approve file limits, retention, and deletion rules before implementation.
 
@@ -122,4 +122,4 @@ The repository currently creates core tables in `database/Postgres.js` and also 
 
 ## 10. Implementation gate
 
-No plugin runtime files, provider SDKs, or user-facing plugin controls should be added until the contract and the decisions above are approved. Once approved, update the contract and design, implement one boundary at a time, run focused tests and failure tests, document verified behavior, and checkpoint the repository.
+No plugin runtime files, provider SDKs, or user-facing plugin controls should be added until the remaining schema, access-policy, permission-lifecycle, and verification gates are resolved. Brave Search API is not connected yet. Once approved, update the contract and design, implement one boundary at a time, run focused tests and failure tests, document verified behavior, and checkpoint the repository.
