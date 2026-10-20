@@ -68,7 +68,7 @@ All invocations MUST pass through the Plugin Boundary. It MUST:
   network requests;
 - return only validated, documented output fields.
 
-A model-generated tool request is an untrusted proposal, not authorization.
+A model-generated tool request is an untrusted proposal, not authorization. Web search v1 is available to authenticated accounts without a premium entitlement gate, but every invocation MUST pass server-side per-account usage limits, bounded query/result sizes, and rate/concurrency controls.
 A body-supplied user ID MUST NOT override authenticated identity. Existing
 non-plugin chat requests MUST retain their current behavior.
 
