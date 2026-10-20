@@ -96,12 +96,41 @@ async function generateAIResponse({
 
 }
 
+
+async function generateAIStreamResponse({
+    systemPrompt,
+    message,
+    userId,
+    attachment = null,
+    signal,
+    onDelta
+}) {
+    const result = await providerBoundary.streamResponse({
+        systemPrompt,
+        message,
+        userId,
+        attachment,
+        signal
+    }, onDelta);
+
+    if (!result.success) {
+        const error = new Error(
+            result.error?.message || "AI streaming provider failed."
+        );
+        error.code = result.error?.code || "AI_PROVIDER_ERROR";
+        throw error;
+    }
+
+    return result.response;
+}
+
 // =====================================
 // EXPORTS
 // =====================================
 
 module.exports = {
 
-    generateAIResponse
+    generateAIResponse,
+    generateAIStreamResponse
 
 };
