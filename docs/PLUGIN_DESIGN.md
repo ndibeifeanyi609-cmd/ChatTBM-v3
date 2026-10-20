@@ -114,6 +114,12 @@ Each capability must have independent tests for:
 6. **Entitlement policy:** decide whether the first capability is available to all authenticated users or gated by a plan; enforce the decision server-side.
 7. **Document handling:** if document tools are selected, approve file limits, retention, and deletion rules before implementation.
 
-## 9. Implementation gate
+## 9. Permission contract and database alignment
+
+The companion `docs/PLUGIN_PERMISSION_CONTRACT.md` is the proposed source for grant ownership, explicit scopes, revocation, default-deny behavior, and permission failure handling. The Plugin Contract, Permission Contract, and this Design must agree before implementation. In particular, do not wire Profile or Memory as permission storage.
+
+The repository currently creates core tables in `database/Postgres.js` and also contains numbered SQL migrations. A general migration runner was not confirmed in the repository review. The implementation plan must specify one repeatable schema-application strategy and verify it in CI and the deployed environment before adding a permission table.
+
+## 10. Implementation gate
 
 No plugin runtime files, provider SDKs, or user-facing plugin controls should be added until the contract and the decisions above are approved. Once approved, update the contract and design, implement one boundary at a time, run focused tests and failure tests, document verified behavior, and checkpoint the repository.
