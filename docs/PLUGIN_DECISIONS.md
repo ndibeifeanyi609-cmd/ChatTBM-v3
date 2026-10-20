@@ -40,7 +40,7 @@ The user approved the recommended architecture direction on 2026-10-20. This app
 
 ## Remaining implementation gates
 
-- [ ] Schema application: choose and verify a repeatable strategy compatible with both `database/Postgres.js` initialization and numbered SQL migrations.
+- [ ] Schema application: **recommended direction** is one numbered-SQL migration runner with a PostgreSQL migration ledger, invoked explicitly during startup before services depend on the new schema. Keep `initializeDatabase()` responsible for connection and legacy bootstrap compatibility; ensure existing numbered migrations are reconciled before enabling the runner. Verify clean-database, already-initialized-database, repeat-startup, migration-failure, CI, and Render behavior before approval.
 - [ ] Grant record details: finalize current-state schema, uniqueness/re-grant behavior, and whether separate audit history is required.
 - [ ] First provider: confirm credentials, costs/quotas, data handling, timeout behavior, and Render configuration.
 - [ ] Access policy: explicitly decide whether web search is available to all authenticated accounts or requires an existing entitlement.
@@ -49,4 +49,4 @@ The user approved the recommended architecture direction on 2026-10-20. This app
 
 ## Next step
 
-Resolve the database schema-application strategy before creating a permission table. Then finalize provider/configuration and access policy, align the Permission Contract, Plugin Contract, and Design, and implement the web-search core in small independently testable steps. No plugin availability should be claimed until configured end-to-end verification succeeds.
+Resolve and verify the proposed single migration-runner strategy before creating a permission table. The runner must not blindly replay old migrations or assume the database is empty. Then finalize provider/configuration and access policy, align the Permission Contract, Plugin Contract, and Design, and implement the web-search core in small independently testable steps. No plugin availability should be claimed until configured end-to-end verification succeeds.
