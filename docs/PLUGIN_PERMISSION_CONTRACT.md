@@ -9,6 +9,7 @@
 - The permission service is the sole authority for checking and revoking plugin grants.
 - Plugin IDs and permission scopes MUST be declared by the server-owned plugin catalogue. Clients and model-generated tool proposals cannot invent scopes.
 - A plugin grant is separate from plugin availability, account authentication, and subscription entitlement. A successful check in one category does not replace the others.
+- Web search v1 access policy is approved for all authenticated accounts without a premium entitlement gate. Server-side per-account usage limits and resource bounds remain mandatory.
 
 ## 2. Proposed grant record
 
@@ -76,6 +77,6 @@ The user approved the dedicated PostgreSQL-backed permission domain and verified
 1. Approve the exact current-state grant record, uniqueness/re-grant behavior, and whether audit history is required.
 2. Approve the settings surface and user-consent interaction.
 3. Select and verify one repeatable schema-application strategy for development, CI, and Render. The current recommendation is a numbered-SQL migration runner with a migration ledger, introduced only after existing migration/bootstrap behavior is reconciled.
-4. Decide the first plugin's exact scopes after provider and data-handling review.
+4. Decide the first plugin's exact scopes after provider and data-handling review. Usage limits must be enforced server-side for every authenticated account.
 
 This document records approved direction but does not claim plugin permissions exist in the running application or authorize implementation before the remaining gates are resolved.
