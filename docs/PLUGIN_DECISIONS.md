@@ -29,6 +29,20 @@ This record turns the open architecture questions into a small, reviewable set o
 - One capability only: web search, with structured source URLs/titles where available.
 - No third-party plugin code loading, document uploads, new database, or payment-provider integration in the initial core.
 
+## Final approval checklist
+
+The following items must be explicitly resolved before runtime implementation:
+
+- [ ] First capability: web search, image generation, or document tools.
+- [ ] V1 distribution: built-in allowlisted plugins only; no third-party code loading.
+- [ ] Registry: static server-side catalogue, with no new registry database for v1.
+- [ ] Permission authority: approve a dedicated PostgreSQL-backed permission domain or identify an existing canonical owner. The current Profile store is not suitable.
+- [ ] Schema application: choose and verify a repeatable strategy compatible with both `database/Postgres.js` initialization and numbered SQL migrations.
+- [ ] Grant lifecycle: approve plugin-scoped permissions, explicit scopes, default-deny, and revocation behavior.
+- [ ] First provider: confirm credentials, costs/quotas, data handling, timeout behavior, and Render configuration.
+- [ ] Access policy: explicitly decide whether the first capability is available to all authenticated accounts or requires an existing entitlement.
+- [ ] Contract, design, and tests: reconcile all three documents and approve focused success/failure/security tests.
+
 ## Approval gate
 
 Before implementation, confirm:
