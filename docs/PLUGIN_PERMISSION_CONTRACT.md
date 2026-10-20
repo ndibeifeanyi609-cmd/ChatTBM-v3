@@ -1,6 +1,6 @@
 # ChatTBM Plugin Permission Contract
 
-**Status:** Proposed — architectural approval required  
+**Status:** Approved architectural direction (2026-10-20); exact schema and grant lifecycle remain pending verification  
 **Purpose:** Define user-granted plugin permissions without reusing Profile, Memory, Conversation, or payment entitlements as shadow permission stores.
 
 ## 1. Authority and identity
@@ -69,13 +69,13 @@ Tests must cover:
 
 Unit tests alone do not prove PostgreSQL or deployed authentication behavior. Before production release, run integration tests against a disposable PostgreSQL database and verify the same behavior in a configured deployment.
 
-## 7. Decisions still requiring approval
+## 7. Remaining decisions and implementation gates
 
-1. Approve a dedicated PostgreSQL-backed permission domain, rather than assigning permission ownership to Profile.
-2. Approve the proposed current-state grant record and uniqueness/lifecycle model.
-3. Decide whether audit history is required and set retention/access rules.
-4. Approve the settings surface and user-consent interaction.
-5. Confirm schema initialization strategy before adding any runtime table.
-6. Decide the first plugin's exact scopes after provider and data-handling review.
+The user approved the dedicated PostgreSQL-backed permission domain and verified authenticated account identity as the architectural direction on 2026-10-20. These details remain to be finalized before implementation:
 
-Until these decisions are approved, this document is a proposed contract only. It does not authorize runtime implementation or claim plugin permissions exist in the running application.
+1. Approve the exact current-state grant record, uniqueness/re-grant behavior, and whether audit history is required.
+2. Approve the settings surface and user-consent interaction.
+3. Select and verify one repeatable schema-application strategy for development, CI, and Render. The current recommendation is a numbered-SQL migration runner with a migration ledger, introduced only after existing migration/bootstrap behavior is reconciled.
+4. Decide the first plugin's exact scopes after provider and data-handling review.
+
+This document records approved direction but does not claim plugin permissions exist in the running application or authorize implementation before the remaining gates are resolved.
