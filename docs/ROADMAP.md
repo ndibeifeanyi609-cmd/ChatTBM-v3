@@ -641,3 +641,56 @@ Discovery
 Plugin work must follow the canonical development workflow in §5 and the
 External API Gate in §7. The first release priorities are candidates for
 evaluation, not a commitment to ship all three before release.
+
+---
+
+## 17. Progressive Response Streaming (Proposed — Discovery Required)
+
+ChatTBM should evaluate progressive AI response streaming as a user-facing
+chat capability. This is a proposed change, not yet implemented or verified.
+
+### Intended Behavior
+
+- Render generated assistant text progressively while the response is being produced.
+- Preserve authenticated user identity and canonical interaction ownership.
+- Keep AI provider access behind AIProviderBoundary and provider implementations.
+- Preserve the existing non-streaming request behavior unless an explicit,
+  contract-approved streaming mode is requested.
+- Finalize and persist only a well-defined completed response; define what
+  happens when a stream is interrupted or cancelled.
+- Normalize errors that occur before and after response headers are sent.
+- Support mobile browsers and the current chat UI without exposing provider
+  credentials or internal provider details.
+
+### Architectural Discovery
+
+Inspect and define the streaming path across:
+- GeminiProvider and AIProviderBoundary
+- AI engine and Assistant Engine orchestration
+- Chat Interaction Boundary and HTTP controller
+- Browser Chat API and message-rendering UI
+- Conversation persistence and cancellation/error handling
+
+Do not bypass canonical boundaries or add provider SDK calls to the UI or
+HTTP controller. Select and document the transport (for example, Server-Sent
+Events or a streamed fetch response) only after compatibility, authentication,
+proxy buffering, and failure behavior are evaluated.
+
+### Required Sequence
+
+Discovery
+→ Contract / Blueprint alignment
+→ Streaming Design
+→ Implementation
+→ Unit and integration verification
+→ Failure testing (provider errors, interrupted streams, disconnects,
+  malformed chunks, cancellation, and persistence)
+→ Documentation
+→ Checkpoint
+→ Commit
+→ Push
+→ Repository Confirmation
+
+Streaming is not considered complete until the browser visibly receives
+incremental chunks from a live or controlled provider, existing non-streaming
+behavior remains covered, and the relevant tests pass.
