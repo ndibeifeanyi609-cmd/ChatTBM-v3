@@ -9,7 +9,8 @@ const router = express.Router();
 
 const {
 
-    chatHandler
+    chatHandler,
+    chatStreamHandler
 
 } = require("../controllers/chatController");
 
@@ -24,6 +25,8 @@ router.post(
     chatHandler
 
 );
+
+router.post('/stream', chatStreamHandler);
 
 // =====================================
 // EXPORT
