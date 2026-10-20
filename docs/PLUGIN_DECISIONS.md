@@ -1,9 +1,9 @@
-# ChatTBM Plugin Architecture — Decision Proposal
+# ChatTBM Plugin Architecture — Decision Record
 
-**Status:** Proposed defaults for review; not approved implementation authority  
+**Status:** Approved architecture direction; implementation remains gated by unresolved provider, access-policy, and schema-application decisions  
 **Related:** `docs/PLUGIN_DISCOVERY.md`, `docs/PLUGIN_CONTRACT.md`, `docs/PLUGIN_DESIGN.md`
 
-This record turns the open architecture questions into a small, reviewable set of recommendations. These are not decisions made on the user's behalf and do not authorize runtime implementation.
+The user approved the recommended architecture direction on 2026-10-20. This approval records the decisions below; it does not authorize implementation of unresolved details or claim that any plugin is available.
 
 ## Recommended defaults
 
@@ -19,7 +19,16 @@ This record turns the open architecture questions into a small, reviewable set o
 | Documents | Defer until upload limits, supported formats, privacy, retention, and deletion are defined | Documents introduce additional sensitive-data and storage obligations. |
 | Image generation | Add as a separate adapter after the plugin core passes tests | Keeps image provider setup and costs isolated from the core architecture. |
 
-## Minimum v1 scope if approved
+## Approved architecture direction
+
+- First capability: web search.
+- V1 plugin source: built-in, server-allowlisted plugins only; no third-party code loading.
+- Registry: static server-side catalogue; no separate registry database for v1.
+- Permissions: a dedicated PostgreSQL-backed permission domain, separate from Profile, Memory, Conversation, and subscription entitlements.
+- Security baseline: authenticated server-derived account identity, explicit plugin-scoped permissions, default deny, revocation, server-side secrets, bounded execution, safe logging, and independent tests.
+- Implementation remains blocked until the schema-application strategy is resolved and tested, the provider/configuration is selected, the access/entitlement policy is decided, and contract/design/test details are reconciled.
+
+## Minimum v1 scope
 
 - A server-owned registry of built-in plugin descriptors.
 - One Plugin Boundary that validates the request and normalizes results and errors.
@@ -29,27 +38,15 @@ This record turns the open architecture questions into a small, reviewable set o
 - One capability only: web search, with structured source URLs/titles where available.
 - No third-party plugin code loading, document uploads, new database, or payment-provider integration in the initial core.
 
-## Final approval checklist
+## Remaining implementation gates
 
-The following items must be explicitly resolved before runtime implementation:
-
-- [ ] First capability: web search, image generation, or document tools.
-- [ ] V1 distribution: built-in allowlisted plugins only; no third-party code loading.
-- [ ] Registry: static server-side catalogue, with no new registry database for v1.
-- [ ] Permission authority: approve a dedicated PostgreSQL-backed permission domain or identify an existing canonical owner. The current Profile store is not suitable.
 - [ ] Schema application: choose and verify a repeatable strategy compatible with both `database/Postgres.js` initialization and numbered SQL migrations.
-- [ ] Grant lifecycle: approve plugin-scoped permissions, explicit scopes, default-deny, and revocation behavior.
+- [ ] Grant record details: finalize current-state schema, uniqueness/re-grant behavior, and whether separate audit history is required.
 - [ ] First provider: confirm credentials, costs/quotas, data handling, timeout behavior, and Render configuration.
-- [ ] Access policy: explicitly decide whether the first capability is available to all authenticated accounts or requires an existing entitlement.
-- [ ] Contract, design, and tests: reconcile all three documents and approve focused success/failure/security tests.
+- [ ] Access policy: explicitly decide whether web search is available to all authenticated accounts or requires an existing entitlement.
+- [ ] Permission scopes and consent UI: define the minimal web-search scope and user-facing grant/revocation flow.
+- [ ] Contract, design, and tests: reconcile the approved direction across all documents and approve focused success/failure/security tests.
 
-## Approval gate
+## Next step
 
-Before implementation, confirm:
-1. The first capability is web search.
-2. Built-in plugins only for v1.
-3. Static server-side registry for v1.
-4. Existing canonical identity/settings owner will own user grants (must be verified against repository implementation before wiring).
-5. Provider selection and entitlement policy remain blocked until configuration and product decisions are confirmed.
-
-After approval, reconcile these decisions with the Plugin Contract and Design, then implement only the approved minimum scope. Until then, all plugin documents remain proposals and no plugin availability should be claimed.
+Resolve the database schema-application strategy before creating a permission table. Then finalize provider/configuration and access policy, align the Permission Contract, Plugin Contract, and Design, and implement the web-search core in small independently testable steps. No plugin availability should be claimed until configured end-to-end verification succeeds.
