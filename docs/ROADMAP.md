@@ -696,3 +696,79 @@ Discovery
 Streaming is not considered complete until the browser visibly receives
 incremental chunks from a live or controlled provider, existing non-streaming
 behavior remains covered, and the relevant tests pass.
+
+---
+
+## 18. Pre-Store Product Release Requirements
+
+These product-release requirements must be completed and verified before
+submitting ChatTBM to the Apple App Store or Google Play. They supplement the
+canonical framework sequence above and do not bypass its contract, design,
+implementation, verification, failure-testing, documentation, and repository
+synchronization gates.
+
+### Founder / Developer Identity and Entitlement
+
+The intended founder and developer account is `ndibeifeanyi609@gmail.com`.
+This identity must be verified through the normal authentication system before
+any privileged entitlement is granted.
+
+Required behavior:
+
+- Establish a server-authoritative founder/developer role bound to the verified
+  account identity; never trust a client-provided email, role, or browser state.
+- Grant the founder account a developer entitlement that waives ChatTBM
+  subscription charges and provides the agreed premium access.
+- Ensure ordinary users cannot assign themselves founder or developer status.
+- Keep external provider, AI API, hosting, and infrastructure charges separate;
+  founder entitlement does not make third-party services free.
+- Document a secure account-recovery and ownership-verification procedure so
+  founder access does not depend solely on a hard-coded email string.
+
+### Recommended Founder Privileges
+
+Evaluate and implement the following privileges where appropriate, each behind
+server-side authorization and with clear boundaries:
+
+- **Founder badge and identity:** show a Founder / Developer label in the
+  authenticated account profile and developer settings.
+- **Premium entitlement:** bypass ChatTBM subscription billing for the verified
+  founder account without changing the billing status or entitlements of users.
+- **Developer console:** provide access to safe product diagnostics, deployment
+  status, feature readiness, and service health without displaying secrets.
+- **Usage and cost visibility:** show the founder aggregate AI usage, provider
+  consumption, and estimated costs so external spend can be managed.
+- **Feature preview controls:** allow the founder to enable approved beta
+  features and test tools before general availability.
+- **Support and recovery tools:** provide documented account recovery and
+  narrowly scoped account-support actions with confirmation and audit records.
+- **Audit trail:** record privileged changes and access to developer controls,
+  excluding passwords, reset tokens, API keys, and other secrets.
+- **Emergency controls:** permit authorized disabling of a broken feature or
+  provider integration without granting unrestricted access to customer data.
+- **Founder protection:** require strong authentication for sensitive controls,
+  and use least privilege, confirmation for destructive actions, and safe
+  defaults.
+
+Founder status must not bypass authentication, security controls, privacy
+requirements, rate limits needed to protect service availability, or applicable
+store rules. It must not silently grant unrestricted access to private customer
+conversations or credentials. Any administrative access to customer data must
+have a specific purpose, minimum scope, appropriate user/privacy safeguards,
+and auditable authorization.
+
+### Other Required Pre-Store Work
+
+- Add image generation through the approved plugin/tool architecture, with
+  server-side secret handling, permission controls, and independent tests.
+- Complete the planned plugin foundation for image generation, web search, and
+  document tools, including registry, boundary, consent/permissions, settings,
+  orchestration integration, and appropriate subscription controls.
+- Complete production security, authentication, persistence,
+  payment/subscription, mobile usability, and release verification.
+- Verify that Apple In-App Purchase and Google Play billing requirements are
+  followed for digital subscriptions in their respective stores.
+
+These are planned release requirements, not claims that implementation is
+already complete. Each item must be verified and documented before store
+submission.
