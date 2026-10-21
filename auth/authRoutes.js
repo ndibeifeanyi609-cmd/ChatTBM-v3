@@ -7,11 +7,14 @@ const {
     authenticateSession,
     revokeSession
 } = require('./AuthService');
+const { requestPasswordReset, resetPassword } = require('./PasswordResetService');
+const { sendPasswordResetEmail } = require('./PasswordResetEmail');
 
 const router = express.Router();
 const { createRateLimiter } = require('./rateLimit');
 const limitRegistration = createRateLimiter({ max: 5 });
 const limitLogin = createRateLimiter({ max: 10 });
+const limitPasswordReset = createRateLimiter({ max: 5 });
 const COOKIE_NAME = 'chattbm_session';
 const COOKIE_OPTIONS = {
     httpOnly: true,
@@ -82,6 +85,46 @@ router.post('/login', limitLogin, async (req, res, next) => {
             user: result.user,
             token: result.token,
             expiresAt: result.expiresAt
+        });
+    } catch (error) {
+        return next(error);
+    }
+});
+
+router.post('/forgot-password', limitPasswordReset, async (req, res, next) => {
+    try {
+        const result = await requestPasswordReset(req.body && req.body.email);
+        if (result.delivery) {
+            try {
+                await sendPasswordResetEmail({
+                    email: result.delivery.email,
+                    token: result.delivery.token,
+                    userName: result.delivery.email.split('@')[0]
+                });
+            } catch (deliveryError) {
+                console.error('Password reset delivery failed:', deliveryError.code || 'UNKNOWN');
+                // Keep the public response identical to avoid revealing account existence.
+            }
+        }
+        return res.json({
+            success: true,
+            message: 'If an account exists for that email, a password reset link will be sent.'
+        });
+    } catch (error) {
+        return next(error);
+    }
+});
+
+router.post('/reset-password', limitPasswordReset, async (req, res, next) => {
+    try {
+        const result = await resetPassword(
+            req.body && req.body.token,
+            req.body && req.body.password
+        );
+        if (!result.success) return sendFailure(res, result.error, 400);
+        return res.json({
+            success: true,
+            message: 'Password reset successfully. Please sign in again.'
         });
     } catch (error) {
         return next(error);
