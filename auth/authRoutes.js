@@ -96,11 +96,15 @@ router.post('/forgot-password', limitPasswordReset, async (req, res, next) => {
         const result = await requestPasswordReset(req.body && req.body.email);
         if (result.delivery) {
             try {
-                await sendPasswordResetEmail({
+                const delivery = await sendPasswordResetEmail({
                     email: result.delivery.email,
                     token: result.delivery.token,
                     userName: result.delivery.email.split('@')[0]
                 });
+                console.info(
+                    'Password reset event accepted by Resend:',
+                    delivery && typeof delivery.id === 'string' ? delivery.id : 'accepted'
+                );
             } catch (deliveryError) {
                 console.error('Password reset delivery failed:', deliveryError.code || 'UNKNOWN');
                 // Keep the public response identical to avoid revealing account existence.
