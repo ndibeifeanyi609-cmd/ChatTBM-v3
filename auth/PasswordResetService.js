@@ -5,8 +5,7 @@ const { getPool } = require('../database/Postgres');
 const {
     normalizeEmail,
     validatePassword,
-    hashPassword,
-    hashSessionToken
+    hashPassword
 } = require('./AuthCrypto');
 
 const RESET_TTL_MS = 30 * 60 * 1000;
@@ -87,10 +86,14 @@ async function resetPassword(token, newPassword) {
             return { success: false, error: 'This reset link is invalid or expired.' };
         }
         const row = result.rows[0];
-        await client.query(
-            'UPDATE chattbm_users SET password_hash = $1, updated_at = NOW() WHERE id = $2 AND disabled_at IS NULL',
+        const updatedUser = await client.query(
+            'UPDATE chattbm_users SET password_hash = $1, updated_at = NOW() WHERE id = $2 AND disabled_at IS NULL RETURNING id',
             [passwordHash, row.user_id]
         );
+        if (!updatedUser.rows.length) {
+            await client.query('ROLLBACK');
+            return { success: false, error: 'This reset link is invalid or expired.' };
+        }
         await client.query(
             'UPDATE chattbm_password_reset_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL',
             [row.user_id]
