@@ -51,6 +51,7 @@ const allowedOrigins = new Set([...defaultOrigins, ...configuredOrigins]);
 app.use(cors({
     origin(origin, callback) {
         if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+        console.warn("Rejected CORS origin:", JSON.stringify(origin));
         return callback(new Error("Origin is not allowed."));
     },
     credentials: true
