@@ -49,7 +49,7 @@ async function authRequest(path, body) {
                 success: false,
                 error: {
                     code: data?.error?.code || 'AUTH_API_ERROR',
-                    message: data?.error?.message || 'Authentication request failed.'
+                    message: (typeof data?.error === 'string' ? data.error : data?.error?.message) || 'Authentication request failed.'
                 }
             };
         }
