@@ -40,7 +40,8 @@ const PORT =
 const defaultOrigins = [
     "https://ndibeifeanyi609-cmd.github.io",
     "https://chattbm.com",
-    "https://www.chattbm.com"
+    "https://www.chattbm.com",
+    "https://chattbm-backend.onrender.com"
 ];
 const configuredOrigins = (process.env.FRONTEND_ORIGINS || "")
     .split(",")
