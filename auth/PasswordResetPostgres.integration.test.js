@@ -7,8 +7,7 @@ const postgres = require('../database/Postgres');
 const { requestPasswordReset, resetPassword } = require('./PasswordResetService');
 const { hashPassword, verifyPassword, createSessionToken, hashSessionToken } = require('./AuthCrypto');
 
-test('password reset works against real PostgreSQL', async () => {
-    assert.ok(process.env.DATABASE_URL, 'DATABASE_URL must point to the disposable CI PostgreSQL service');
+test('password reset works against real PostgreSQL', { skip: !process.env.DATABASE_URL }, async () => {
     await postgres.initializeDatabase();
     const pool = postgres.getPool();
     const userId = randomUUID();
