@@ -79,6 +79,14 @@ function getCurrentUser() {
     return authRequest('me');
 }
 
+function requestPasswordReset(email) {
+    return authRequest('forgot-password', { email });
+}
+
+function resetPassword(token, password) {
+    return authRequest('reset-password', { token, password });
+}
+
 function logoutAccount() {
     return authRequest('logout', {});
 }
@@ -360,6 +368,8 @@ export {
     registerAccount,
     loginAccount,
     getCurrentUser,
+    requestPasswordReset,
+    resetPassword,
     logoutAccount,
     getConversationHistory,
     saveConversationHistory
