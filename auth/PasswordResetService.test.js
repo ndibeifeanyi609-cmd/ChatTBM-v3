@@ -75,10 +75,16 @@ test('stores only a token digest and allows a reset token once', async () => {
     assert.equal(state.resets.length, 1);
     assert.notEqual(state.resets[0].token_hash, reset.token);
     assert.match(state.resets[0].token_hash, /^[a-f0-9]{64}$/);
+    state.sessions.push(
+        { user_id: 'user-1', revoked_at: null },
+        { user_id: 'another-user', revoked_at: null }
+    );
 
     const changed = await redeemPasswordReset(reset.token, 'new-correct-password-123');
     assert.deepEqual(changed, { success: true });
     assert.equal(await verifyPassword('new-correct-password-123', state.users[0].password_hash), true);
+    assert.ok(state.sessions[0].revoked_at, 'password reset revokes the user\'s existing session');
+    assert.equal(state.sessions[1].revoked_at, null, 'password reset leaves other users\' sessions alone');
 
     const replay = await redeemPasswordReset(reset.token, 'another-correct-password-456');
     assert.deepEqual(replay, { success: false });
