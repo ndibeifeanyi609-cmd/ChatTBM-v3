@@ -90,10 +90,14 @@ async function redeemPasswordReset(token, newPassword) {
             return { success: false };
         }
 
-        await client.query(
-            'UPDATE chattbm_users SET password_hash = $1, updated_at = NOW() WHERE id = $2 AND disabled_at IS NULL',
+        const updatedUser = await client.query(
+            'UPDATE chattbm_users SET password_hash = $1, updated_at = NOW() WHERE id = $2 AND disabled_at IS NULL RETURNING id',
             [passwordHash, reset.user_id]
         );
+        if (!updatedUser.rows.length) {
+            await client.query('ROLLBACK');
+            return { success: false };
+        }
         await client.query(
             'UPDATE chattbm_password_reset_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL',
             [reset.user_id]
