@@ -39,7 +39,7 @@ const fakePool = {
                 if (sql.startsWith('UPDATE chattbm_users SET password_hash')) {
                     const user = state.users.find(u => u.id === values[1] && !u.disabled_at);
                     if (user) user.password_hash = values[0];
-                    return { rows: [], rowCount: user ? 1 : 0 };
+                    return { rows: user ? [{ id: user.id }] : [], rowCount: user ? 1 : 0 };
                 }
                 if (sql.startsWith('UPDATE chattbm_auth_sessions SET revoked_at')) {
                     state.sessions.filter(s => s.user_id === values[0] && !s.revoked_at).forEach(s => { s.revoked_at = new Date(); });
