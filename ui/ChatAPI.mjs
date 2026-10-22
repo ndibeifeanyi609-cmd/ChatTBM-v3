@@ -3,7 +3,11 @@
 const API_BASE_URL = (() => {
     if (typeof window === 'undefined') return '';
     const host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1') return '';
+    if (
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host.endsWith('.onrender.com')
+    ) return '';
     return 'https://chattbm-backend.onrender.com';
 })();
 
