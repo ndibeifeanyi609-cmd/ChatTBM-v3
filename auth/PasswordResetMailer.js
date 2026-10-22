@@ -1,7 +1,5 @@
 'use strict';
 
-const DEFAULT_RESET_URL = 'https://chattbm.com/reset-password';
-
 async function sendPasswordResetEmail({ email, token }) {
     const apiKey = process.env.RESEND_API_KEY;
     const from = process.env.RESEND_FROM_EMAIL;
@@ -13,7 +11,7 @@ async function sendPasswordResetEmail({ email, token }) {
         throw error;
     }
 
-    const base = new URL('/reset-password', appUrl);
+    const base = new URL('/', appUrl);
     base.searchParams.set('token', token);
     const resetUrl = base.toString();
 
