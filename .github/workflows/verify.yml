@@ -6,7 +6,7 @@ on:
     branches: [main, auth-foundation-design]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
@@ -20,8 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install dependencies and apply non-breaking security fixes
-        run: npm audit fix
+      - name: Install dependencies
+        run: npm ci
       - name: Verify dependency audit
         run: npm audit --audit-level=moderate
       - name: Run tests
@@ -29,16 +29,6 @@ jobs:
           CHATTBM_TEST_DATABASE_URL: ${{ secrets.CHATTBM_TEST_DATABASE_URL }}
           CHATTBM_TEST_DATABASE_SSL: 'true'
         run: node --test
-      - name: Commit updated lockfile after successful checks
-        run: |
-          if ! git diff --quiet -- package-lock.json; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add package-lock.json
-            git commit -m "fix: resolve npm dependency vulnerabilities"
-            git push origin HEAD:${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
-          fi
-
   sync-lockfile:
     if: github.event_name == 'push' && github.ref == 'refs/heads/auth-foundation-design'
     runs-on: ubuntu-latest
