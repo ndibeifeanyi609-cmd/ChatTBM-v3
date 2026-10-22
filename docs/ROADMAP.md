@@ -772,3 +772,39 @@ and auditable authorization.
 These are planned release requirements, not claims that implementation is
 already complete. Each item must be verified and documented before store
 submission.
+
+---
+
+## 19. Google Sign-In and Sign-Up (Proposed — Discovery Required)
+
+Before app-store release, evaluate an option for users to create a ChatTBM account or sign in using their existing Google account (often called “Continue with Google”). This does not create a Gmail mailbox; it lets users authenticate to ChatTBM with Google.
+
+### Required behavior and safeguards
+
+- Offer Google sign-in alongside the existing email/password flow, without removing either option.
+- Use Google's supported OpenID Connect / OAuth flow and validate identity tokens server-side.
+- Match accounts only through verified provider identity and verified email; never trust an email or role supplied by the browser.
+- Define safe account-linking behavior when a Google email matches an existing ChatTBM account; prevent account takeover through unverified or ambiguous linking.
+- Keep ChatTBM authorization, founder/developer privileges, subscription entitlements, and account ownership server-authoritative.
+- Request only the minimum Google scopes needed for authentication; do not request Gmail mailbox access unless a separate, explicitly consented feature requires it.
+- Protect OAuth state, nonce, redirect URI validation, CSRF, replay, token handling, and failure paths.
+- Keep client secrets server-side and out of source control, logs, and browser bundles.
+- Provide a clear fallback when Google authentication is unavailable and support secure account recovery.
+- Verify behavior on mobile browsers and planned iOS/Android store builds, including applicable Google and app-store requirements.
+
+### Required sequence
+
+Discovery
+→ Authentication Contract / existing auth-boundary review
+→ OAuth design and account-linking rules
+→ Implementation
+→ Unit, integration, and mobile verification
+→ Failure/security testing
+→ Documentation
+→ Checkpoint
+→ Commit
+→ Push
+→ Repository Confirmation
+
+This is a proposed roadmap item only. It is not implemented or enabled until discovery, design, implementation, and verification are complete.
+
