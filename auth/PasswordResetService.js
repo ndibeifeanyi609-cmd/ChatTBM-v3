@@ -41,6 +41,15 @@ async function createPasswordReset(emailInput) {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
+        // Serialize reset requests for this account so concurrent requests cannot leave multiple live tokens.
+        const lockedUser = await client.query(
+            'SELECT id FROM chattbm_users WHERE id = $1 AND disabled_at IS NULL FOR UPDATE',
+            [user.id]
+        );
+        if (!lockedUser.rows.length) {
+            await client.query('ROLLBACK');
+            return null;
+        }
         await client.query(
             'UPDATE chattbm_password_reset_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL',
             [user.id]
