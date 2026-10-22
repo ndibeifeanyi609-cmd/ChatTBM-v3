@@ -37,6 +37,11 @@ const PORT =
 // =====================================
 // MIDDLEWARE
 // =====================================
+// Prevent URLs containing one-time password-reset tokens from being sent as referrers.
+app.use((req, res, next) => {
+    res.setHeader("Referrer-Policy", "no-referrer");
+    next();
+});
 const defaultOrigins = [
     "https://ndibeifeanyi609-cmd.github.io",
     "https://chattbm.com",
