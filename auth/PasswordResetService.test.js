@@ -19,6 +19,10 @@ const fakePool = {
                 if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') {
                     return { rows: [], rowCount: 0 };
                 }
+                if (sql.startsWith('SELECT id FROM chattbm_users WHERE id')) {
+                    const user = state.users.find(u => u.id === values[0] && !u.disabled_at);
+                    return { rows: user ? [{ id: user.id }] : [], rowCount: user ? 1 : 0 };
+                }
                 if (sql.startsWith('UPDATE chattbm_password_reset_tokens SET used_at = NOW() WHERE user_id')) {
                     state.resets.filter(t => t.user_id === values[0] && !t.used_at).forEach(t => { t.used_at = new Date(); });
                     return { rows: [], rowCount: 1 };
