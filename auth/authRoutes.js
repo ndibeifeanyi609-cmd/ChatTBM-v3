@@ -7,11 +7,15 @@ const {
     authenticateSession,
     revokeSession
 } = require('./AuthService');
+const { createPasswordReset, redeemPasswordReset } = require('./PasswordResetService');
+const { sendPasswordResetEmail } = require('./PasswordResetMailer');
 
 const router = express.Router();
 const { createRateLimiter } = require('./rateLimit');
 const limitRegistration = createRateLimiter({ max: 5 });
 const limitLogin = createRateLimiter({ max: 10 });
+const limitPasswordResetRequest = createRateLimiter({ max: 3 });
+const limitPasswordResetRedeem = createRateLimiter({ max: 5 });
 const COOKIE_NAME = 'chattbm_session';
 const COOKIE_OPTIONS = {
     httpOnly: true,
@@ -82,6 +86,44 @@ router.post('/login', limitLogin, async (req, res, next) => {
             user: result.user,
             token: result.token,
             expiresAt: result.expiresAt
+        });
+    } catch (error) {
+        return next(error);
+    }
+});
+
+router.post('/password-reset/request', limitPasswordResetRequest, async (req, res, next) => {
+    try {
+        const reset = await createPasswordReset(req.body && req.body.email);
+        if (reset) {
+            try {
+                await sendPasswordResetEmail(reset);
+            } catch (error) {
+                // Do not expose whether an account exists or log sensitive reset data.
+                console.error('Password-reset email delivery unavailable:', error.code || 'UNKNOWN');
+            }
+        }
+        return res.json({
+            success: true,
+            message: 'If an account matches that email, a password-reset link will be sent.'
+        });
+    } catch (error) {
+        return next(error);
+    }
+});
+
+router.post('/password-reset/confirm', limitPasswordResetRedeem, async (req, res, next) => {
+    try {
+        const result = await redeemPasswordReset(
+            req.body && req.body.token,
+            req.body && req.body.password
+        );
+        if (!result.success) {
+            return sendFailure(res, 'This reset link is invalid or expired.', 400);
+        }
+        return res.json({
+            success: true,
+            message: 'Password updated. Please sign in again.'
         });
     } catch (error) {
         return next(error);
