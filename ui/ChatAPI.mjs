@@ -75,6 +75,14 @@ function loginAccount(email, password) {
     return authRequest('login', { email, password });
 }
 
+function requestPasswordReset(email) {
+    return authRequest('password-reset/request', { email });
+}
+
+function confirmPasswordReset(token, password) {
+    return authRequest('password-reset/confirm', { token, password });
+}
+
 function getCurrentUser() {
     return authRequest('me');
 }
@@ -359,6 +367,8 @@ export {
     transcribeVoice,
     registerAccount,
     loginAccount,
+    requestPasswordReset,
+    confirmPasswordReset,
     getCurrentUser,
     logoutAccount,
     getConversationHistory,
