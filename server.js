@@ -47,7 +47,16 @@ const configuredOrigins = (process.env.FRONTEND_ORIGINS || "")
     .split(",")
     .map(origin => origin.trim())
     .filter(Boolean);
-const allowedOrigins = new Set([...defaultOrigins, ...configuredOrigins]);
+// Permit the isolated password-reset staging origin only on its staging service.
+const stagingOrigins =
+    process.env.RENDER_SERVICE_NAME === "chattbm-password-reset-staging"
+        ? ["https://chattbm-password-reset-staging.onrender.com"]
+        : [];
+const allowedOrigins = new Set([
+    ...defaultOrigins,
+    ...configuredOrigins,
+    ...stagingOrigins
+]);
 
 app.use(cors({
     origin(origin, callback) {
