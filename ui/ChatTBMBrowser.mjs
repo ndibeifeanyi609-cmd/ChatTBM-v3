@@ -1,7 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
-import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, getConversationHistory } from './ChatAPI.mjs';
+import { transcribeVoice, registerAccount, loginAccount, requestPasswordReset, confirmPasswordReset, getCurrentUser, logoutAccount, getConversationHistory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -27,6 +27,8 @@ class ChatTBMBrowser {
         this.authUser = null;
         this.authMode = 'closed';
         this.authMessage = '';
+        this.resetToken = new URLSearchParams(window.location.search).get('token') || '';
+        if (this.resetToken) this.authMode = 'reset-confirm';
         getCurrentUser().then(async result => {
             if (result.success && result.user) {
                 await this.switchAccount(result.user);
@@ -157,28 +159,56 @@ class ChatTBMBrowser {
             const form = document.createElement('form');
             form.className = 'ui-auth-form';
             form.dataset.role = 'auth-form';
-            const email = document.createElement('input');
-            email.type = 'email';
-            email.name = 'email';
-            email.autocomplete = 'email';
-            email.placeholder = 'Email address';
-            email.required = true;
-            email.maxLength = 254;
-            const password = document.createElement('input');
-            password.type = 'password';
-            password.name = 'password';
-            password.autocomplete = this.authMode === 'register' ? 'new-password' : 'current-password';
-            password.placeholder = this.authMode === 'register' ? 'Password (12+ characters)' : 'Password';
-            password.required = true;
-            password.minLength = this.authMode === 'register' ? 12 : 1;
-            const submit = document.createElement('button');
-            submit.type = 'submit';
-            submit.textContent = this.authMode === 'register' ? 'Create account' : 'Sign in';
-            const switchMode = document.createElement('button');
-            switchMode.type = 'button';
-            switchMode.dataset.action = 'auth-switch';
-            switchMode.textContent = this.authMode === 'register' ? 'I already have an account' : 'Create an account';
-            form.append(email, password, submit, switchMode);
+            if (this.authMode === 'reset-confirm') {
+                const password = document.createElement('input');
+                password.type = 'password';
+                password.name = 'password';
+                password.autocomplete = 'new-password';
+                password.placeholder = 'New password (12+ characters)';
+                password.required = true;
+                password.minLength = 12;
+                const submit = document.createElement('button');
+                submit.type = 'submit';
+                submit.textContent = 'Reset password';
+                form.append(password, submit);
+            } else {
+                const email = document.createElement('input');
+                email.type = 'email';
+                email.name = 'email';
+                email.autocomplete = 'email';
+                email.placeholder = 'Email address';
+                email.required = true;
+                email.maxLength = 254;
+                form.appendChild(email);
+                if (this.authMode !== 'reset-request') {
+                    const password = document.createElement('input');
+                    password.type = 'password';
+                    password.name = 'password';
+                    password.autocomplete = this.authMode === 'register' ? 'new-password' : 'current-password';
+                    password.placeholder = this.authMode === 'register' ? 'Password (12+ characters)' : 'Password';
+                    password.required = true;
+                    password.minLength = this.authMode === 'register' ? 12 : 1;
+                    form.appendChild(password);
+                }
+                const submit = document.createElement('button');
+                submit.type = 'submit';
+                submit.textContent = this.authMode === 'register' ? 'Create account' : this.authMode === 'reset-request' ? 'Send reset link' : 'Sign in';
+                form.appendChild(submit);
+                if (this.authMode === 'login') {
+                    const forgot = document.createElement('button');
+                    forgot.type = 'button';
+                    forgot.dataset.action = 'auth-forgot';
+                    forgot.textContent = 'Forgot password?';
+                    form.appendChild(forgot);
+                }
+                if (this.authMode === 'login' || this.authMode === 'register') {
+                    const switchMode = document.createElement('button');
+                    switchMode.type = 'button';
+                    switchMode.dataset.action = 'auth-switch';
+                    switchMode.textContent = this.authMode === 'register' ? 'I already have an account' : 'Create an account';
+                    form.appendChild(switchMode);
+                }
+            }
             panel.appendChild(form);
         }
         if (this.authMessage) {
@@ -498,7 +528,28 @@ class ChatTBMBrowser {
         if (authForm) {
             authForm.addEventListener('submit', async event => {
                 event.preventDefault();
+                if (this.authMode === 'reset-confirm') {
+                    const result = await confirmPasswordReset(this.resetToken, authForm.elements.password.value);
+                    this.authMessage = result.success
+                        ? 'Password updated. You can now sign in.'
+                        : (result.error?.message || 'This reset link is invalid or expired.');
+                    if (result.success) {
+                        this.authMode = 'login';
+                        this.resetToken = '';
+                        window.history.replaceState({}, '', window.location.pathname);
+                    }
+                    this.render();
+                    return;
+                }
                 const email = authForm.elements.email.value;
+                if (this.authMode === 'reset-request') {
+                    const result = await requestPasswordReset(email);
+                    this.authMessage = result.success
+                        ? result.message
+                        : (result.error?.message || 'Unable to request a reset link. Please try again.');
+                    this.render();
+                    return;
+                }
                 const password = authForm.elements.password.value;
                 const result = this.authMode === 'register'
                     ? await registerAccount(email, password)
@@ -530,6 +581,13 @@ class ChatTBMBrowser {
         root.querySelectorAll('[data-action="auth-toggle"]').forEach(button => {
             button.addEventListener('click', () => {
                 this.authMode = this.authMode === 'closed' ? 'login' : 'closed';
+                this.authMessage = '';
+                this.render();
+            });
+        });
+        root.querySelectorAll('[data-action="auth-forgot"]').forEach(button => {
+            button.addEventListener('click', () => {
+                this.authMode = 'reset-request';
                 this.authMessage = '';
                 this.render();
             });
