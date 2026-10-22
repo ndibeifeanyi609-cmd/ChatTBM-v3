@@ -1,6 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
+import { captureAndClearResetToken } from './resetUrl.mjs';
 import { transcribeVoice, registerAccount, loginAccount, requestPasswordReset, confirmPasswordReset, getCurrentUser, logoutAccount, getConversationHistory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
@@ -27,13 +28,11 @@ class ChatTBMBrowser {
         this.authUser = null;
         this.authMode = 'closed';
         this.authMessage = '';
-        const resetUrl = new URL(window.location.href);
-        this.resetToken = resetUrl.searchParams.get('token') || '';
-        if (this.resetToken) {
-            this.authMode = 'reset-confirm';
-            resetUrl.searchParams.delete('token');
-            window.history.replaceState({}, '', resetUrl.pathname + resetUrl.search + resetUrl.hash);
-        }
+        this.resetToken = captureAndClearResetToken(
+            window.location.href,
+            window.history.replaceState.bind(window.history)
+        );
+        if (this.resetToken) this.authMode = 'reset-confirm';
         getCurrentUser().then(async result => {
             if (result.success && result.user) {
                 await this.switchAccount(result.user);
