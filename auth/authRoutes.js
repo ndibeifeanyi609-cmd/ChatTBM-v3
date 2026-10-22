@@ -96,12 +96,11 @@ router.post('/password-reset/request', limitPasswordResetRequest, async (req, re
     try {
         const reset = await createPasswordReset(req.body && req.body.email);
         if (reset) {
-            try {
-                await sendPasswordResetEmail(reset);
-            } catch (error) {
-                // Do not expose whether an account exists or log sensitive reset data.
+            // Send after initiating the delivery without making the HTTP response
+            // wait on the mail provider. Never log the recipient, token, or URL.
+            void sendPasswordResetEmail(reset).catch(error => {
                 console.error('Password-reset email delivery unavailable:', error.code || 'UNKNOWN');
-            }
+            });
         }
         return res.json({
             success: true,
