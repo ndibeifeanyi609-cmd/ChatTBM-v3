@@ -4,6 +4,7 @@ const API_BASE_URL = (() => {
     if (typeof window === 'undefined') return '';
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') return '';
+    if (host === 'chattbm-backend.onrender.com') return '';
     return 'https://chattbm-backend.onrender.com';
 })();
 
@@ -73,6 +74,14 @@ function registerAccount(email, password) {
 
 function loginAccount(email, password) {
     return authRequest('login', { email, password });
+}
+
+function requestPasswordReset(email) {
+    return authRequest('password-reset/request', { email });
+}
+
+function confirmPasswordReset(token, password) {
+    return authRequest('password-reset/confirm', { token, password });
 }
 
 function getCurrentUser() {
@@ -359,6 +368,8 @@ export {
     transcribeVoice,
     registerAccount,
     loginAccount,
+    requestPasswordReset,
+    confirmPasswordReset,
     getCurrentUser,
     logoutAccount,
     getConversationHistory,
