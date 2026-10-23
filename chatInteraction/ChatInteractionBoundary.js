@@ -275,8 +275,8 @@ async function handleInteraction(data = {}) {
                 provenance: { sourceType: 'explicit-user-request', sourceId: request.interactionId }
             };
             const saved = usePostgresMemory
-                ? await MemoryBoundary.createPersistentMemory(memoryData)
-                : MemoryBoundary.createMemory(memoryData);
+                ? await MemoryBoundary.upsertPersistentMemory(memoryData)
+                : await MemoryBoundary.createMemory(memoryData);
             if (!saved || saved.success !== true || !saved.memory) {
                 return {
                     success: false,
