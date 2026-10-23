@@ -124,6 +124,7 @@ const voiceRoutes =
 // =====================================
 app.use("/api/auth", authRoutes);
 app.use("/api/conversations", requireAuth, conversationHistoryRoutes);
+app.use("/api/memories", requireAuth, require("./routes/memoryRoutes").router);
 
 // REGISTER CHAT ROUTES
 // =====================================
