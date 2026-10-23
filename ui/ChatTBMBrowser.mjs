@@ -642,6 +642,11 @@ class ChatTBMBrowser {
                 this.render();
             });
         });
+        root.querySelectorAll('[data-action="google-link"]').forEach(button => {
+            button.addEventListener('click', () => {
+                window.location.assign('/api/auth/google/link');
+            });
+        });
         root.querySelectorAll('[data-action="memory-open"]').forEach(button => {
             button.addEventListener('click', async () => {
                 this.showMemories = true;
