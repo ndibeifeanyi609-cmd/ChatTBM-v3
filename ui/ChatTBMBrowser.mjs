@@ -202,6 +202,18 @@ class ChatTBMBrowser {
             switchMode.textContent = this.authMode === 'register' ? 'I already have an account' : 'Create an account';
             form.append(email, password, submit, switchMode);
             panel.appendChild(form);
+
+            const divider = document.createElement('div');
+            divider.className = 'ui-auth-divider';
+            divider.textContent = 'or';
+
+            const googleLink = document.createElement('a');
+            googleLink.href = 'https://chattbm-backend.onrender.com/api/auth/google';
+            googleLink.className = 'ui-auth-google';
+            googleLink.textContent = 'Continue with Google';
+            googleLink.setAttribute('aria-label', 'Continue with Google');
+
+            panel.append(divider, googleLink);
         }
         if (this.authMessage) {
             const message = document.createElement('p');
