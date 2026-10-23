@@ -386,5 +386,6 @@ export {
     getConversationHistory,
     saveConversationHistory,
     getSavedMemories,
-    deleteSavedMemory
+    deleteSavedMemory,
+    getGoogleLinkSessionToken: readSessionToken
 };
