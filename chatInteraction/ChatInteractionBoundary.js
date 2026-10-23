@@ -428,7 +428,7 @@ async function handleStreamingInteraction(data = {}, onDelta, signal) {
                 provenance: { sourceType: 'explicit-user-request', sourceId: request.interactionId }
             };
             const saved = usePostgresMemory
-                ? await MemoryBoundary.createPersistentMemory(memoryData)
+                ? await MemoryBoundary.upsertPersistentMemory(memoryData)
                 : MemoryBoundary.createMemory(memoryData);
             if (!saved || saved.success !== true || !saved.memory) {
                 return { success: false, userId: request.userId, interactionId: request.interactionId,
