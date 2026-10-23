@@ -20,7 +20,7 @@ const SESSION_COOKIE = 'chattbm_session';
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
+    sameSite: 'none',
     path: '/api/auth/google',
     maxAge: 10 * 60 * 1000
 };
@@ -75,7 +75,7 @@ router.get('/link', async (req, res, next) => {
         }
         const state = randomBytes(32).toString('base64url');
         res.cookie(COOKIE_STATE, state, COOKIE_OPTIONS);
-        res.cookie(COOKIE_LINK, '1', COOKIE_OPTIONS);
+        res.cookie(COOKIE_LINK, user.id, COOKIE_OPTIONS);
         return res.redirect(client().generateAuthUrl({
             access_type: 'online',
             scope: ['openid', 'email', 'profile'],
@@ -126,10 +126,11 @@ router.get('/callback', async (req, res, next) => {
         }
 
         const stateCookie = req.cookies && req.cookies[COOKIE_STATE];
-        const linkMode = Boolean(req.cookies && req.cookies[COOKIE_LINK] === '1');
-        res.clearCookie(COOKIE_LINK, { httpOnly: true, secure: true, sameSite: 'lax', path: '/api/auth/google' });
+        const linkUserId = req.cookies && req.cookies[COOKIE_LINK];
+        const linkMode = typeof linkUserId === 'string' && linkUserId.length > 0;
+        res.clearCookie(COOKIE_LINK, { httpOnly: true, secure: true, sameSite: 'none', path: '/api/auth/google' });
         res.clearCookie(COOKIE_STATE, {
-            httpOnly: true, secure: true, sameSite: 'lax',
+            httpOnly: true, secure: true, sameSite: 'none',
             path: '/api/auth/google'
         });
         const state = req.query.state;
@@ -179,10 +180,13 @@ router.get('/callback', async (req, res, next) => {
 
         let user = identity.rows[0];
         const signedInUser = linkMode
-            ? await authenticateSession(req.cookies && req.cookies[SESSION_COOKIE])
+            ? await db.query(
+                'SELECT id, email_normalized AS email, disabled_at FROM chattbm_users WHERE id = $1 FOR UPDATE',
+                [linkUserId]
+            ).then(result => result.rows[0] || null)
             : null;
 
-        if (linkMode && (!signedInUser || signedInUser.email !== email)) {
+        if (linkMode && (!signedInUser || signedInUser.disabled_at || signedInUser.email !== email)) {
             await db.query('ROLLBACK');
             transactionOpen = false;
             return res.status(403).send(
