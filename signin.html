@@ -2,71 +2,76 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
 <title>Sign In - ChatTBM</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
-
-<link rel="icon" type="image/png" href="IMG_4397.png">
-<link rel="apple-touch-icon" href="IMG_4397.png">
-
 <style>
-body{
-    background:#000;
-    color:#fff;
-}
+body{background:#000;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.field{width:100%;background:#1f1f1f;border:1px solid #333;border-radius:12px;padding:14px 16px;color:#fff;outline:none}
+.field:focus{border-color:#3b82f6}
 </style>
-
 </head>
-
-<body class="flex items-center justify-center min-h-screen p-6">
-
-<div class="w-full max-w-sm">
-
-<div class="text-center mb-10">
-
-<img src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-class="w-20 h-20 mx-auto mb-4 rounded-full">
-
-<h1 class="text-3xl font-bold">
-Welcome Back
-</h1>
-
-<p class="text-gray-400 mt-2">
-Sign in to ChatTBM
-</p>
-
-</div>
-
-<input
-type="email"
-placeholder="Email"
-class="w-full bg-[#1f1f1f] rounded-xl p-4 mb-4 outline-none">
-
-<input
-type="password"
-placeholder="Password"
-class="w-full bg-[#1f1f1f] rounded-xl p-4 mb-6 outline-none">
-
-<button
-class="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-4 font-semibold">
-Sign In
-</button>
-
-<p class="text-center mt-6 text-gray-400">
-
-Don't have an account?
-
-<a href="signup.html"
-class="text-blue-500">
-
-Create Account
-
-</a>
-
-</p>
-
-</div>
-
+<body class="min-h-screen flex items-center justify-center p-5">
+<main class="w-full max-w-sm">
+<header class="text-center mb-8">
+<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-2xl font-bold">T</div>
+<h1 class="text-3xl font-bold">Welcome back</h1>
+<p class="text-gray-400 mt-2">Sign in to ChatTBM</p>
+</header>
+<form id="signin-form" class="space-y-4" novalidate>
+<label class="block text-sm text-gray-300" for="email">Gmail or email address</label>
+<input id="email" name="email" class="field" type="email" autocomplete="email" placeholder="you@gmail.com" maxlength="254" required>
+<label class="block text-sm text-gray-300" for="password">Password</label>
+<input id="password" name="password" class="field" type="password" autocomplete="current-password" required>
+<button id="submit-button" class="w-full rounded-xl bg-blue-600 py-4 font-semibold hover:bg-blue-700 disabled:opacity-60" type="submit">Sign In</button>
+<p id="status" class="text-sm text-center" role="status" aria-live="polite"></p>
+</form>
+<p class="mt-6 text-center text-gray-400">Don't have an account? <a href="signup.html" class="text-blue-400">Create account</a></p>
+</main>
+<script>
+(() => {
+  const API = "https://chattbm-backend.onrender.com";
+  const form = document.getElementById("signin-form");
+  const status = document.getElementById("status");
+  const button = document.getElementById("submit-button");
+  if (new URLSearchParams(window.location.search).get("registered") === "1") {
+    status.textContent = "Account created. Sign in with your email and password.";
+    status.className = "text-sm text-center text-green-400";
+  }
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    status.textContent = "";
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    if (!email || !password) { status.textContent = "Enter your email and password."; return; }
+    button.disabled = true;
+    button.textContent = "Signing in…";
+    try {
+      const response = await fetch(API + "/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        status.textContent = response.status === 401 ? "Email or password is incorrect." : (result.error || "Sign in failed. Please try again.");
+        status.className = "text-sm text-center text-red-400";
+        return;
+      }
+      status.textContent = "Signed in. Opening ChatTBM…";
+      status.className = "text-sm text-center text-green-400";
+      window.location.assign("index.html");
+    } catch (_) {
+      status.textContent = "Could not reach ChatTBM. Check your connection and try again.";
+      status.className = "text-sm text-center text-red-400";
+    } finally {
+      button.disabled = false;
+      button.textContent = "Sign In";
+    }
+  });
+})();
+</script>
 </body>
 </html>
