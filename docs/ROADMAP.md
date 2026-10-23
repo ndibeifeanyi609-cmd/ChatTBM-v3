@@ -772,3 +772,22 @@ and auditable authorization.
 These are planned release requirements, not claims that implementation is
 already complete. Each item must be verified and documented before store
 submission.
+
+### Live Persistent Memory Update Verification — 2026-10-23
+
+- Saved `test code = 67890` for the signed-in staging account and verified the
+  active PostgreSQL record.
+- A subsequent explicit request to change the same fact to `24680` initially
+  failed because persistent memory creation treated changed values as conflicts.
+- Merged the owner-scoped persistent-memory upsert fix in PR #17
+  (`791409f7cc3cde94dbf3d28ede310419f18038f5`); all three GitHub workflows
+  passed and the production backend deployment became live.
+- Verified the existing PostgreSQL record was updated in place to `24680`
+  with a changed `updated_at` timestamp.
+- In a separate new conversation, ChatTBM correctly recalled `24680`.
+
+This verifies one live owner-scoped update-and-recall path. Cross-account live
+isolation, deletion behavior in the live product, and broader privacy/security
+testing remain outstanding before production memory can be considered fully
+hardened.
+
