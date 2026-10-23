@@ -113,7 +113,9 @@ router.get('/callback', async (req, res, next) => {
                 [email]
             );
             if (existingEmail.rows[0]) {
-                user = existingEmail.rows[0];
+                // Never silently link Google to an existing password account.
+                // Require a separately authenticated account-linking flow.
+                return res.status(409).send('A ChatTBM account already uses this email. Sign in with that account before linking Google.');
             } else {
                 const id = randomUUID();
                 const randomPassword = randomBytes(48).toString('base64url');
