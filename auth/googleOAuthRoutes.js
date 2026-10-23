@@ -105,13 +105,13 @@ router.post('/link', async (req, res, next) => {
         const state = randomBytes(32).toString('base64url');
         res.cookie(COOKIE_STATE, state, COOKIE_OPTIONS);
         res.cookie(COOKIE_LINK, '1', COOKIE_OPTIONS);
-        return res.redirect(303, client().generateAuthUrl({
+        return res.json({ success: true, url: client().generateAuthUrl({
             access_type: 'online',
             scope: ['openid', 'email', 'profile'],
             response_type: 'code',
             state,
             prompt: 'select_account'
-        }));
+        }) });
     } catch (error) {
         return next(error);
     }
