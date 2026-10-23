@@ -5,6 +5,10 @@ const MemoryBoundary = require('../memory/MemoryBoundary');
 
 const router = express.Router();
 
+function usesPostgresMemory() {
+    return Boolean(process.env.DATABASE_URL);
+}
+
 router.get('/', async (req, res) => {
     const userId = req.authUser && req.authUser.id;
     if (!userId) {
@@ -14,8 +18,12 @@ router.get('/', async (req, res) => {
         });
     }
 
-    const result = await MemoryBoundary.getPersistentMemoriesByUser(userId);
-    if (!result || result.success !== true) {
+    // Chat uses the file-backed registry when DATABASE_URL is absent.
+    // The Saved Memories API must read from that same store in that mode.
+    const result = usesPostgresMemory()
+        ? await MemoryBoundary.getPersistentMemoriesByUser(userId)
+        : MemoryBoundary.getMemoriesByUser(userId);
+    if (!result || result.success !== true || !Array.isArray(result.memories)) {
         return res.status(503).json({
             success: false,
             error: { code: 'MEMORY_UNAVAILABLE', message: 'Saved memories are unavailable.' }
@@ -54,7 +62,10 @@ router.delete('/:memoryId', async (req, res) => {
         });
     }
 
-    const result = await MemoryBoundary.deletePersistentMemory(memoryId, userId);
+    // Delete from the same store used to create and retrieve this user's memory.
+    const result = usesPostgresMemory()
+        ? await MemoryBoundary.deletePersistentMemory(memoryId, userId)
+        : MemoryBoundary.deleteMemory(memoryId, userId);
     if (!result || result.success !== true) {
         const ownershipFailure = result?.ownershipFailure === true || result?.error === 'Memory ownership violation.' || result?.error === 'Memory ownership mismatch.';
         const notFound = result?.notFound === true || result?.error === 'Memory not found.';
