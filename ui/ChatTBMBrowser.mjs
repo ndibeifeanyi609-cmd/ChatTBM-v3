@@ -166,6 +166,11 @@ class ChatTBMBrowser {
                 this.render();
             });
             panel.appendChild(memories);
+            const googleLink = document.createElement('button');
+            googleLink.type = 'button';
+            googleLink.textContent = 'Link Google account';
+            googleLink.dataset.action = 'google-link';
+            panel.appendChild(googleLink);
             return panel;
         }
 
