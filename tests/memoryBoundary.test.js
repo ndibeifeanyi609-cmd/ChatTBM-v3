@@ -297,7 +297,28 @@ function runTests() {
     'Memory ownership violation.'
   );
 
-  console.log('✓ Memory ownership');
+  const foreignList = B.getMemoriesByUser('other-memory-user');
+  assert.strictEqual(foreignList.success, true);
+  assert.strictEqual(foreignList.memories.length, 0);
+
+  const foreignDelete = B.deleteMemory(
+    created.memory.id,
+    'other-memory-user'
+  );
+  assert.strictEqual(foreignDelete.success, false);
+  assert.strictEqual(
+    foreignDelete.error,
+    'Memory ownership violation.'
+  );
+
+  const ownerStillHasMemory = B.getMemory(
+    created.memory.id,
+    'boundary-memory-user'
+  );
+  assert.strictEqual(ownerStillHasMemory.success, true);
+  assert.strictEqual(ownerStillHasMemory.memory.value, 'concise');
+
+  console.log('✓ Memory cross-user list and delete isolation');
 
   const saved = P.saveMemory(m);
 
