@@ -22,4 +22,22 @@ assert.strictEqual(
     'Unsupported remember phrasing must not be guessed.'
 );
 
+assert.deepStrictEqual(
+    extractExplicitMemory('Remember this test: 12345.'),
+    { type: 'fact', subject: 'test', value: '12345' },
+    'Explicit key-value memory requests must be recognized.'
+);
+
+assert.deepStrictEqual(
+    extractExplicitMemory('Please remember this project note: use dark mode.'),
+    { type: 'fact', subject: 'project note', value: 'use dark mode' }
+);
+
+assert.strictEqual(
+    extractExplicitMemory('The word remember appears here, but no fact is provided.'),
+    null,
+    'Do not infer a memory without a clear fact.'
+);
+
 console.log('Explicit memory intent tests passed.');
+

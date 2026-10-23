@@ -153,15 +153,26 @@ async function ensureCanonicalConversation(userId, interactionId, contextId) {
 }
 
 function extractExplicitMemory(message) {
-    if (!/\bremember\b/i.test(message)) return null;
-    const match = message.match(/\bmy\s+([a-z][a-z0-9 _-]{1,50}?)\s+is\s+([^.!?\n]{1,120})/i);
+    if (typeof message !== 'string' || !/\bremember\b/i.test(message)) return null;
+
+    // Existing natural-language form: "Remember my project nickname is Blue Falcon."
+    const naturalLanguageMatch = message.match(
+        /\bmy\s+([a-z][a-z0-9 _-]{1,50}?)\s+is\s+([^.!?\n]{1,120})/i
+    );
+
+    // Explicit key-value form: "Remember this test: 12345."
+    const keyValueMatch = message.match(
+        /\bremember\s+this\s+([a-z][a-z0-9 _-]{0,50}?)\s*:\s*([^.!?\n]{1,120})/i
+    );
+
+    const match = naturalLanguageMatch || keyValueMatch;
     if (!match) return null;
+
     const subject = match[1].trim().replace(/\s+/g, ' ');
     const value = match[2].trim().replace(/\s+/g, ' ');
     if (!subject || !value) return null;
     return { type: 'fact', subject, value };
 }
-
 function normalizeAssistantInteractionError(error) {
     const normalized =
         error && typeof error === 'object'
