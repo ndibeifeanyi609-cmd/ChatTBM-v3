@@ -644,7 +644,7 @@ class ChatTBMBrowser {
         });
         root.querySelectorAll('[data-action="google-link"]').forEach(button => {
             button.addEventListener('click', () => {
-                window.location.assign('/api/auth/google/link');
+                window.location.assign('https://chattbm-backend.onrender.com/api/auth/google/link');
             });
         });
         root.querySelectorAll('[data-action="memory-open"]').forEach(button => {
