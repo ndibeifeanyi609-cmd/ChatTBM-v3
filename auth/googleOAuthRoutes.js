@@ -54,6 +54,7 @@ router.get('/', (req, res) => {
     return res.redirect(client().generateAuthUrl({
         access_type: 'online',
         scope: ['openid', 'email', 'profile'],
+        response_type: 'code',
         state,
         prompt: 'select_account'
     }));
