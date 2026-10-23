@@ -88,6 +88,35 @@ router.get('/link', async (req, res, next) => {
     }
 });
 
+router.post('/link', async (req, res, next) => {
+    try {
+        if (!configured()) {
+            return res.status(503).send('Google sign-in is not configured yet.');
+        }
+        const origin = req.get('origin');
+        if (origin && origin !== 'https://chattbm.com' && origin !== 'https://www.chattbm.com') {
+            return res.status(403).send('This request origin is not allowed.');
+        }
+        const token = req.body && req.body.sessionToken;
+        const user = await authenticateSession(token);
+        if (!user) {
+            return res.status(401).send('Your ChatTBM session expired. Sign in again before linking Google.');
+        }
+        const state = randomBytes(32).toString('base64url');
+        res.cookie(COOKIE_STATE, state, COOKIE_OPTIONS);
+        res.cookie(COOKIE_LINK, '1', COOKIE_OPTIONS);
+        return res.json({ success: true, url: client().generateAuthUrl({
+            access_type: 'online',
+            scope: ['openid', 'email', 'profile'],
+            response_type: 'code',
+            state,
+            prompt: 'select_account'
+        }) });
+    } catch (error) {
+        return next(error);
+    }
+});
+
 router.get('/callback', async (req, res, next) => {
     let db;
     let transactionOpen = false;

@@ -643,8 +643,29 @@ class ChatTBMBrowser {
             });
         });
         root.querySelectorAll('[data-action="google-link"]').forEach(button => {
-            button.addEventListener('click', () => {
-                window.location.assign('https://chattbm-backend.onrender.com/api/auth/google/link');
+            button.addEventListener('click', async () => {
+                button.disabled = true;
+                button.textContent = 'Opening Google…';
+                try {
+                    const token = window.sessionStorage.getItem('chattbm_session_token') || '';
+                    const response = await fetch('https://chattbm-backend.onrender.com/api/auth/google/link', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(token ? { Authorization: 'Bearer ' + token } : {})
+                        },
+                        body: JSON.stringify({ sessionToken: token })
+                    });
+                    const data = await response.json();
+                    if (!response.ok || data.success !== true || typeof data.url !== 'string') {
+                        throw new Error(data.message || 'Unable to start Google linking. Please sign in again.');
+                    }
+                    window.location.assign(data.url);
+                } catch (error) {
+                    this.authMessage = error.message || 'Unable to start Google linking.';
+                    this.render();
+                }
             });
         });
         root.querySelectorAll('[data-action="memory-open"]').forEach(button => {
