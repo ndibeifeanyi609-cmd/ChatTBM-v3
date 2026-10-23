@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>Create Account - ChatTBM</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#000;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.field{width:100%;background:#1f1f1f;border:1px solid #333;border-radius:12px;padding:14px 16px;color:#fff;outline:none}
+.field:focus{border-color:#3b82f6}
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-5">
+<main class="w-full max-w-sm">
+<header class="text-center mb-8">
+<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-2xl font-bold">T</div>
+<h1 class="text-3xl font-bold">Create your account</h1>
+<p class="text-gray-400 mt-2">Start using ChatTBM for free</p>
+</header>
+<form id="signup-form" class="space-y-4" novalidate>
+<label class="block text-sm text-gray-300" for="email">Gmail or email address</label>
+<input id="email" name="email" class="field" type="email" autocomplete="email" placeholder="you@gmail.com" maxlength="254" required>
+<label class="block text-sm text-gray-300" for="password">Create password</label>
+<input id="password" name="password" class="field" type="password" autocomplete="new-password" minlength="12" maxlength="1024" placeholder="At least 12 characters" required>
+<p class="text-xs text-gray-400 -mt-2">Use at least 12 characters. Keep your password private.</p>
+<label class="block text-sm text-gray-300" for="confirm-password">Confirm password</label>
+<input id="confirm-password" name="confirmPassword" class="field" type="password" autocomplete="new-password" minlength="12" maxlength="1024" placeholder="Enter the same password" required>
+<button id="submit-button" class="w-full rounded-xl bg-blue-600 py-4 font-semibold hover:bg-blue-700 disabled:opacity-60" type="submit">Create Account</button>
+<p id="status" class="text-sm text-center" role="status" aria-live="polite"></p>
+</form>
+<p class="mt-6 text-center text-gray-400">Already have an account? <a class="text-blue-400" href="signin.html">Sign in</a></p>
+<p class="mt-4 text-center text-xs text-gray-500">Creating an account securely stores your password as a hash, not plain text.</p>
+</main>
+<script>
+(() => {
+  const API = "https://chattbm-backend.onrender.com";
+  const form = document.getElementById("signup-form");
+  const status = document.getElementById("status");
+  const button = document.getElementById("submit-button");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    status.textContent = "";
+    status.className = "text-sm text-center";
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmation = document.getElementById("confirm-password").value;
+    if (!email) { status.textContent = "Enter your email address."; return; }
+    if (password.length < 12) { status.textContent = "Your password must be at least 12 characters."; return; }
+    if (password !== confirmation) { status.textContent = "The passwords do not match."; return; }
+    button.disabled = true;
+    button.textContent = "Creating account…";
+    try {
+      const response = await fetch(API + "/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        const message = result.error || "Account creation failed. Please try again.";
+        status.textContent = response.status === 409
+          ? "An account may already exist for this email. Try signing in."
+          : message;
+        status.className = "text-sm text-center text-red-400";
+        return;
+      }
+      status.textContent = "Account created successfully. Taking you to sign in…";
+      status.className = "text-sm text-center text-green-400";
+      window.location.assign("signin.html?registered=1");
+    } catch (_) {
+      status.textContent = "Could not reach ChatTBM. Check your connection and try again.";
+      status.className = "text-sm text-center text-red-400";
+    } finally {
+      button.disabled = false;
+      button.textContent = "Create Account";
+    }
+  });
+})();
+</script>
+</body>
+</html>
