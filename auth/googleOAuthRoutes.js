@@ -11,6 +11,7 @@ const {
     createSessionToken,
     hashSessionToken
 } = require('./AuthCrypto');
+const { authenticateSession } = require('./AuthService');
 
 const router = express.Router();
 const COOKIE_STATE = 'chattbm_google_oauth_state';
