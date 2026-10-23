@@ -166,6 +166,11 @@ class ChatTBMBrowser {
                 this.render();
             });
             panel.appendChild(memories);
+            const googleLink = document.createElement('button');
+            googleLink.type = 'button';
+            googleLink.textContent = 'Link Google account';
+            googleLink.dataset.action = 'google-link';
+            panel.appendChild(googleLink);
             return panel;
         }
 
@@ -635,6 +640,11 @@ class ChatTBMBrowser {
                 this.app.components.composer.clear();
                 this.authMessage = 'You have signed out.';
                 this.render();
+            });
+        });
+        root.querySelectorAll('[data-action="google-link"]').forEach(button => {
+            button.addEventListener('click', () => {
+                window.location.assign('/api/auth/google/link');
             });
         });
         root.querySelectorAll('[data-action="memory-open"]').forEach(button => {
