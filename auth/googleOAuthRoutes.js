@@ -15,6 +15,8 @@ const { authenticateSession } = require('./AuthService');
 
 const router = express.Router();
 const COOKIE_STATE = 'chattbm_google_oauth_state';
+const COOKIE_LINK = 'chattbm_google_oauth_link';
+const SESSION_COOKIE = 'chattbm_session';
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: true,
@@ -61,6 +63,31 @@ router.get('/', (req, res) => {
     }));
 });
 
+router.get('/link', async (req, res, next) => {
+    try {
+        if (!configured()) {
+            return res.status(503).send('Google sign-in is not configured yet.');
+        }
+        const token = req.cookies && req.cookies[SESSION_COOKIE];
+        const user = await authenticateSession(token);
+        if (!user) {
+            return res.status(401).send('Sign in to your existing ChatTBM account before linking Google.');
+        }
+        const state = randomBytes(32).toString('base64url');
+        res.cookie(COOKIE_STATE, state, COOKIE_OPTIONS);
+        res.cookie(COOKIE_LINK, '1', COOKIE_OPTIONS);
+        return res.redirect(client().generateAuthUrl({
+            access_type: 'online',
+            scope: ['openid', 'email', 'profile'],
+            response_type: 'code',
+            state,
+            prompt: 'select_account'
+        }));
+    } catch (error) {
+        return next(error);
+    }
+});
+
 router.get('/callback', async (req, res, next) => {
     let db;
     let transactionOpen = false;
@@ -70,6 +97,8 @@ router.get('/callback', async (req, res, next) => {
         }
 
         const stateCookie = req.cookies && req.cookies[COOKIE_STATE];
+        const linkMode = Boolean(req.cookies && req.cookies[COOKIE_LINK] === '1');
+        res.clearCookie(COOKIE_LINK, { httpOnly: true, secure: true, sameSite: 'lax', path: '/api/auth/google' });
         res.clearCookie(COOKIE_STATE, {
             httpOnly: true, secure: true, sameSite: 'lax',
             path: '/api/auth/google'
@@ -120,6 +149,34 @@ router.get('/callback', async (req, res, next) => {
         );
 
         let user = identity.rows[0];
+        const signedInUser = linkMode
+            ? await authenticateSession(req.cookies && req.cookies[SESSION_COOKIE])
+            : null;
+
+        if (linkMode && (!signedInUser || signedInUser.email !== email)) {
+            await db.query('ROLLBACK');
+            transactionOpen = false;
+            return res.status(403).send(
+                'To link Google, sign in to the existing ChatTBM account with the same verified email.'
+            );
+        }
+
+        if (linkMode && user && user.id !== signedInUser.id) {
+            await db.query('ROLLBACK');
+            transactionOpen = false;
+            return res.status(409).send(
+                'This Google account is already linked to another ChatTBM account.'
+            );
+        }
+
+        if (linkMode && !user) {
+            user = { id: signedInUser.id, email_normalized: signedInUser.email, disabled_at: null };
+            await db.query(
+                'INSERT INTO chattbm_oauth_identities (id, user_id, provider, provider_subject, created_at) VALUES ($1, $2, $3, $4, NOW())',
+                [randomUUID(), user.id, 'google', googleSub]
+            );
+        }
+
         if (!user) {
             const existingEmail = await db.query(
                 'SELECT id FROM chattbm_users WHERE email_normalized = $1',
@@ -129,7 +186,7 @@ router.get('/callback', async (req, res, next) => {
                 await db.query('ROLLBACK');
                 transactionOpen = false;
                 return res.status(409).send(
-                    'A ChatTBM account already uses this email. Sign in with that account before linking Google.'
+                    'A ChatTBM account already uses this email. Sign in to that account, then use the Google link option.'
                 );
             }
 
