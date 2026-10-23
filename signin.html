@@ -4,69 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign In - ChatTBM</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 <link rel="icon" type="image/png" href="IMG_4397.png">
 <link rel="apple-touch-icon" href="IMG_4397.png">
-
 <style>
-body{
-    background:#000;
-    color:#fff;
-}
+body{background:#000;color:#fff}
 </style>
-
 </head>
-
 <body class="flex items-center justify-center min-h-screen p-6">
-
 <div class="w-full max-w-sm">
-
 <div class="text-center mb-10">
-
-<img src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png"
-class="w-20 h-20 mx-auto mb-4 rounded-full">
-
-<h1 class="text-3xl font-bold">
-Welcome Back
-</h1>
-
-<p class="text-gray-400 mt-2">
-Sign in to ChatTBM
-</p>
-
+<img src="4AEBEE18-6FA9-470F-9C0F-29930C59BCB7.png" class="w-20 h-20 mx-auto mb-4 rounded-full" alt="ChatTBM">
+<h1 class="text-3xl font-bold">Welcome Back</h1>
+<p class="text-gray-400 mt-2">Sign in to ChatTBM</p>
 </div>
 
-<input
-type="email"
-placeholder="Email"
-class="w-full bg-[#1f1f1f] rounded-xl p-4 mb-4 outline-none">
+<p id="google-status" class="hidden text-center rounded-xl p-3 mb-4"></p>
+<input type="email" placeholder="Email" autocomplete="email" class="w-full bg-[#1f1f1f] rounded-xl p-4 mb-4 outline-none">
+<input type="password" placeholder="Password" autocomplete="current-password" class="w-full bg-[#1f1f1f] rounded-xl p-4 mb-6 outline-none">
+<button type="button" class="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-4 font-semibold">Sign In</button>
 
-<input
-type="password"
-placeholder="Password"
-class="w-full bg-[#1f1f1f] rounded-xl p-4 mb-6 outline-none">
-
-<button
-class="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-4 font-semibold">
-Sign In
-</button>
-
-<p class="text-center mt-6 text-gray-400">
-
-Don't have an account?
-
-<a href="signup.html"
-class="text-blue-500">
-
-Create Account
-
+<div class="flex items-center gap-3 my-6 text-gray-500">
+<div class="h-px bg-gray-700 flex-1"></div><span>or</span><div class="h-px bg-gray-700 flex-1"></div>
+</div>
+<a href="https://chattbm-backend.onrender.com/api/auth/google" class="flex items-center justify-center gap-3 w-full bg-white hover:bg-gray-200 text-black rounded-xl py-4 font-semibold">
+<svg aria-hidden="true" viewBox="0 0 48 48" class="w-5 h-5"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.7 0 6.7 5.3 2.8 13l7.9 6.1C12.6 13.2 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.1 5.4-4.6 7.1l7.2 5.6c4.2-3.9 7.1-9.7 7.1-17.2z"/><path fill="#FBBC05" d="M10.7 28.9A14.5 14.5 0 0 1 10 24c0-1.7.3-3.3.8-4.9L2.8 13A23.9 23.9 0 0 0 0 24c0 3.9.9 7.6 2.8 11l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-6.3l-7.2-5.6c-2 1.3-4.6 2.1-8.3 2.1-6.2 0-11.4-3.7-13.3-9.1l-7.9 6.1C6.7 42.7 14.7 48 24 48z"/></svg>
+Continue with Google
 </a>
 
-</p>
-
+<p class="text-center mt-6 text-gray-400">Don't have an account? <a href="signup.html" class="text-blue-500">Create Account</a></p>
 </div>
-
+<script>
+const params = new URLSearchParams(window.location.search);
+const status = document.getElementById('google-status');
+if (params.get('google') === 'success') {
+  status.textContent = 'Google sign-in completed. Your session is ready.';
+  status.className = 'text-center rounded-xl p-3 mb-4 bg-green-900 text-green-100';
+} else if (params.has('google')) {
+  status.textContent = 'Google sign-in could not be completed. Please try again.';
+  status.className = 'text-center rounded-xl p-3 mb-4 bg-red-900 text-red-100';
+}
+</script>
 </body>
 </html>
