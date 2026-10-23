@@ -1,7 +1,9 @@
 'use strict';
 
 const express = require('express');
-const { randomBytes, randomUUID } = require('node:crypto');
+const {
+    randomBytes, randomUUID, timingSafeEqual
+} = require('node:crypto');
 const { OAuth2Client } = require('google-auth-library');
 const { getPool } = require('../database/Postgres');
 const {
@@ -49,30 +51,33 @@ router.get('/', (req, res) => {
     }
     const state = randomBytes(32).toString('base64url');
     res.cookie(COOKIE_STATE, state, COOKIE_OPTIONS);
-    const url = client().generateAuthUrl({
+    return res.redirect(client().generateAuthUrl({
         access_type: 'online',
         scope: ['openid', 'email', 'profile'],
         state,
         prompt: 'select_account'
-    });
-    return res.redirect(url);
+    }));
 });
 
 router.get('/callback', async (req, res, next) => {
+    let db;
+    let transactionOpen = false;
     try {
         if (!configured()) {
             return res.status(503).send('Google sign-in is not configured yet.');
         }
+
         const stateCookie = req.cookies && req.cookies[COOKIE_STATE];
-        res.clearCookie(COOKIE_STATE, { ...COOKIE_OPTIONS, maxAge: undefined });
+        res.clearCookie(COOKIE_STATE, {
+            httpOnly: true, secure: true, sameSite: 'lax',
+            path: '/api/auth/google'
+        });
+        const state = req.query.state;
         if (
-            typeof req.query.state !== 'string' ||
+            typeof state !== 'string' ||
             typeof stateCookie !== 'string' ||
-            req.query.state.length !== stateCookie.length ||
-            !require('node:crypto').timingSafeEqual(
-                Buffer.from(req.query.state),
-                Buffer.from(stateCookie)
-            )
+            state.length !== stateCookie.length ||
+            !timingSafeEqual(Buffer.from(state), Buffer.from(stateCookie))
         ) {
             return res.status(400).send('Google sign-in state validation failed.');
         }
@@ -80,11 +85,12 @@ router.get('/callback', async (req, res, next) => {
             return res.status(401).send('Google sign-in was cancelled or denied.');
         }
 
-        const { tokens } = await client().getToken(req.query.code);
+        const oauthClient = client();
+        const { tokens } = await oauthClient.getToken(req.query.code);
         if (!tokens.id_token) {
             return res.status(401).send('Google did not return a verified identity.');
         }
-        const ticket = await client().verifyIdToken({
+        const ticket = await oauthClient.verifyIdToken({
             idToken: tokens.id_token,
             audience: process.env.GOOGLE_CLIENT_ID
         });
@@ -92,47 +98,57 @@ router.get('/callback', async (req, res, next) => {
         if (
             !profile ||
             typeof profile.sub !== 'string' ||
+            !profile.sub ||
             typeof profile.email !== 'string' ||
+            !profile.email.trim() ||
             profile.email_verified !== true
         ) {
             return res.status(401).send('A verified Google email is required.');
         }
 
-        const db = database();
+        db = await database().connect();
+        await db.query('BEGIN');
+        transactionOpen = true;
+
         const email = profile.email.trim().toLowerCase();
         const googleSub = profile.sub;
-        const existingIdentity = await db.query(
-            'SELECT u.id, u.email_normalized, u.disabled_at FROM chattbm_oauth_identities i JOIN chattbm_users u ON u.id = i.user_id WHERE i.provider = $1 AND i.provider_subject = $2',
+        const identity = await db.query(
+            'SELECT u.id, u.email_normalized, u.disabled_at FROM chattbm_oauth_identities i JOIN chattbm_users u ON u.id = i.user_id WHERE i.provider = $1 AND i.provider_subject = $2 FOR UPDATE OF u',
             ['google', googleSub]
         );
 
-        let user = existingIdentity.rows[0];
+        let user = identity.rows[0];
         if (!user) {
             const existingEmail = await db.query(
-                'SELECT id, email_normalized, disabled_at FROM chattbm_users WHERE email_normalized = $1',
+                'SELECT id FROM chattbm_users WHERE email_normalized = $1',
                 [email]
             );
             if (existingEmail.rows[0]) {
-                // Never silently link Google to an existing password account.
-                // Require a separately authenticated account-linking flow.
-                return res.status(409).send('A ChatTBM account already uses this email. Sign in with that account before linking Google.');
-            } else {
-                const id = randomUUID();
-                const randomPassword = randomBytes(48).toString('base64url');
-                const passwordHash = await hashPassword(randomPassword);
-                const created = await db.query(
-                    'INSERT INTO chattbm_users (id, email_normalized, password_hash, email_verified_at) VALUES ($1, $2, $3, NOW()) RETURNING id, email_normalized, disabled_at',
-                    [id, email, passwordHash]
+                await db.query('ROLLBACK');
+                transactionOpen = false;
+                return res.status(409).send(
+                    'A ChatTBM account already uses this email. Sign in with that account before linking Google.'
                 );
-                user = created.rows[0];
             }
+
+            const passwordHash = await hashPassword(
+                randomBytes(48).toString('base64url')
+            );
+            const created = await db.query(
+                'INSERT INTO chattbm_users (id, email_normalized, password_hash, email_verified_at) VALUES ($1, $2, $3, NOW()) RETURNING id, email_normalized, disabled_at',
+                [randomUUID(), email, passwordHash]
+            );
+            user = created.rows[0];
+
             await db.query(
-                'INSERT INTO chattbm_oauth_identities (id, user_id, provider, provider_subject, created_at) VALUES ($1, $2, $3, $4, NOW()) ON CONFLICT (provider, provider_subject) DO NOTHING',
+                'INSERT INTO chattbm_oauth_identities (id, user_id, provider, provider_subject, created_at) VALUES ($1, $2, $3, $4, NOW())',
                 [randomUUID(), user.id, 'google', googleSub]
             );
         }
 
         if (!user || user.disabled_at) {
+            await db.query('ROLLBACK');
+            transactionOpen = false;
             return res.status(403).send('This ChatTBM account is unavailable.');
         }
 
@@ -142,6 +158,9 @@ router.get('/callback', async (req, res, next) => {
             'INSERT INTO chattbm_auth_sessions (id, user_id, token_hash, expires_at) VALUES ($1, $2, $3, $4)',
             [randomUUID(), user.id, hashSessionToken(token), expiresAt]
         );
+        await db.query('COMMIT');
+        transactionOpen = false;
+
         res.cookie('chattbm_session', token, {
             httpOnly: true,
             secure: true,
@@ -149,9 +168,22 @@ router.get('/callback', async (req, res, next) => {
             path: '/',
             expires: expiresAt
         });
-        return res.redirect(process.env.GOOGLE_LOGIN_SUCCESS_URL || 'https://chattbm.com/signin.html?google=success');
+        return res.redirect(
+            process.env.GOOGLE_LOGIN_SUCCESS_URL ||
+            'https://chattbm.com/signin.html?google=success'
+        );
     } catch (error) {
+        if (transactionOpen && db) {
+            try { await db.query('ROLLBACK'); } catch (_) {}
+        }
+        if (error && error.code === '23505') {
+            return res.status(409).send(
+                'A ChatTBM account already exists for this Google identity or email. Please sign in and try again.'
+            );
+        }
         return next(error);
+    } finally {
+        if (db) db.release();
     }
 });
 
