@@ -280,6 +280,28 @@ async function generateReplyStream({
     }
 }
 
+async function getSavedMemories() {
+    try {
+        const response = await fetch(API_BASE_URL + '/api/memories', {
+            method: 'GET', credentials: 'include', headers: requestHeaders()
+        });
+        const data = await response.json();
+        if (!response.ok || data?.success !== true) return { success: false, error: data?.error?.message || 'Unable to load saved memories.' };
+        return { success: true, memories: Array.isArray(data.memories) ? data.memories : [] };
+    } catch (_) { return { success: false, error: 'Unable to connect to saved memories.' }; }
+}
+
+async function deleteSavedMemory(memoryId) {
+    try {
+        const response = await fetch(API_BASE_URL + '/api/memories/' + encodeURIComponent(memoryId), {
+            method: 'DELETE', credentials: 'include', headers: requestHeaders()
+        });
+        const data = await response.json();
+        if (!response.ok || data?.success !== true) return { success: false, error: data?.error?.message || 'Unable to delete saved memory.' };
+        return { success: true };
+    } catch (_) { return { success: false, error: 'Unable to connect to saved memories.' }; }
+}
+
 async function transcribeVoice({
     audio,
     mimeType = 'audio/webm',
@@ -362,5 +384,7 @@ export {
     getCurrentUser,
     logoutAccount,
     getConversationHistory,
-    saveConversationHistory
+    saveConversationHistory,
+    getSavedMemories,
+    deleteSavedMemory
 };

@@ -1,7 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
-import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, getConversationHistory } from './ChatAPI.mjs';
+import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -27,6 +27,9 @@ class ChatTBMBrowser {
         this.authUser = null;
         this.authMode = 'closed';
         this.authMessage = '';
+        this.showMemories = false;
+        this.savedMemories = [];
+        this.memoryMessage = '';
         getCurrentUser().then(async result => {
             if (result.success && result.user) {
                 await this.switchAccount(result.user);
@@ -77,6 +80,9 @@ class ChatTBMBrowser {
         main.className = 'ui-main';
         main.appendChild(this.renderAuthPanel());
         main.appendChild(this.renderHeader(model.header));
+        if (this.authUser && this.showMemories) {
+            main.appendChild(this.renderMemories());
+        }
 
         const conversation = document.createElement('section');
         conversation.className = 'ui-conversation';
@@ -144,6 +150,11 @@ class ChatTBMBrowser {
             logout.textContent = 'Sign out';
             logout.dataset.action = 'auth-logout';
             panel.appendChild(logout);
+            const memories = document.createElement('button');
+            memories.type = 'button';
+            memories.textContent = 'Saved memories';
+            memories.dataset.action = 'memory-open';
+            panel.appendChild(memories);
             return panel;
         }
 
@@ -287,6 +298,40 @@ class ChatTBMBrowser {
         header.appendChild(title);
 
         return header;
+    }
+
+    renderMemories() {
+        const panel = document.createElement('section');
+        panel.className = 'ui-saved-memories';
+        const heading = document.createElement('h2');
+        heading.textContent = 'Saved memories';
+        panel.appendChild(heading);
+        const intro = document.createElement('p');
+        intro.textContent = 'Review facts ChatTBM has saved for your account.';
+        panel.appendChild(intro);
+        const close = document.createElement('button');
+        close.type = 'button'; close.textContent = 'Back to chat'; close.dataset.action = 'memory-close';
+        panel.appendChild(close);
+        if (this.memoryMessage) {
+            const status = document.createElement('p'); status.textContent = this.memoryMessage; panel.appendChild(status);
+        }
+        if (!this.savedMemories.length && !this.memoryMessage) {
+            const empty = document.createElement('p'); empty.textContent = 'No saved memories found.'; panel.appendChild(empty);
+        }
+        for (const memory of this.savedMemories) {
+            const item = document.createElement('article');
+            item.className = 'ui-memory-item';
+            const title = document.createElement('strong');
+            title.textContent = memory.subject || memory.type || 'Saved fact';
+            item.appendChild(title);
+            const value = document.createElement('p');
+            value.textContent = typeof memory.value === 'string' ? memory.value : JSON.stringify(memory.value ?? '');
+            item.appendChild(value);
+            const remove = document.createElement('button');
+            remove.type = 'button'; remove.textContent = 'Delete'; remove.dataset.action = 'memory-delete'; remove.dataset.memoryId = memory.id;
+            item.appendChild(remove); panel.appendChild(item);
+        }
+        return panel;
     }
 
     renderWelcome(model) {
