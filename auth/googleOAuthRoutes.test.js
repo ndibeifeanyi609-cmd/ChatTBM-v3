@@ -36,7 +36,7 @@ test('OAuth callback requires a verified email from a verified ID token', () => 
 test('Google sign-in does not silently link to an existing email account', () => {
     assert.match(source, /SELECT id FROM chattbm_users WHERE email_normalized = \$1/);
     assert.match(source, /status\(409\)\.send\(/);
-    assert.match(source, /Sign in with that account before linking Google/);
+    assert.match(source, /Sign in to that account, then use the Google link option/);
 });
 
 test('new Google accounts and sessions are created in one database transaction', () => {
@@ -51,4 +51,16 @@ test('session token is stored as a hash and cookie is HTTP-only and secure', () 
     assert.match(source, /httpOnly: true/);
     assert.match(source, /secure: true/);
     assert.match(source, /sameSite: 'none'/);
+});
+
+test('Google account linking requires an existing authenticated ChatTBM session', () => {
+    assert.match(source, /router\.get\('\/link'/);
+    assert.match(source, /authenticateSession\(token\)/);
+    assert.match(source, /Sign in to your existing ChatTBM account before linking Google/);
+});
+
+test('Google account linking requires the same verified email and rejects identities owned by another account', () => {
+    assert.match(source, /linkMode && \(!signedInUser \|\| signedInUser\.email !== email\)/);
+    assert.match(source, /This Google account is already linked to another ChatTBM account/);
+    assert.match(source, /INSERT INTO chattbm_oauth_identities/);
 });
