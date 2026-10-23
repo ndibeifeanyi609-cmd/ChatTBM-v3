@@ -614,6 +614,41 @@ class ChatTBMBrowser {
                 this.render();
             });
         });
+        root.querySelectorAll('[data-action="memory-open"]').forEach(button => {
+            button.addEventListener('click', async () => {
+                this.showMemories = true;
+                this.memoryMessage = 'Loading saved memories…';
+                this.render();
+                const result = await getSavedMemories();
+                this.savedMemories = result.success ? result.memories : [];
+                this.memoryMessage = result.success
+                    ? (this.savedMemories.length ? '' : 'No saved memories found.')
+                    : result.error;
+                this.render();
+            });
+        });
+        root.querySelectorAll('[data-action="memory-close"]').forEach(button => {
+            button.addEventListener('click', () => {
+                this.showMemories = false;
+                this.memoryMessage = '';
+                this.render();
+            });
+        });
+        root.querySelectorAll('[data-action="memory-delete"]').forEach(button => {
+            button.addEventListener('click', async () => {
+                if (!window.confirm('Delete this saved memory? This cannot be undone.')) return;
+                const result = await deleteSavedMemory(button.dataset.memoryId);
+                if (!result.success) {
+                    this.memoryMessage = result.error;
+                    this.render();
+                    return;
+                }
+                this.savedMemories = this.savedMemories.filter(memory => memory.id !== button.dataset.memoryId);
+                this.memoryMessage = this.savedMemories.length ? 'Memory deleted.' : 'No saved memories found.';
+                this.render();
+            });
+        });
+
         const input =
             root.querySelector('[data-role="composer"]');
 
