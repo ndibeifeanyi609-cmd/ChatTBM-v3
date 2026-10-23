@@ -605,6 +605,29 @@ async function createPersistentMemory(data = {}) {
     }
 }
 
+async function upsertPersistentMemory(data = {}) {
+    try {
+        if (!data.userId || !data.type || !data.subject) {
+            return { success: false, memory: null, error: 'User ID, memory type, and subject are required.' };
+        }
+        const listed = await PostgresMemoryPersistence.getByUser(data.userId);
+        const existing = listed.find(memory =>
+            memory && memory.userId === data.userId &&
+            memory.type === data.type && memory.subject === data.subject
+        );
+        if (!existing) return await createPersistentMemory(data);
+        const updated = {
+            ...existing,
+            value: data.value,
+            updatedAt: new Date().toISOString(),
+            provenance: data.provenance || existing.provenance
+        };
+        return await updatePersistentMemory(updated, data.userId);
+    } catch (error) {
+        return { success: false, memory: null, error: error.message || 'Memory update failed.' };
+    }
+}
+
 async function getPersistentMemoriesByUser(userId) {
     try {
         if (!userId) return { success: false, memories: [], error: 'User ID is required.' };
@@ -655,6 +678,7 @@ module.exports = {
     transitionMemoryLifecycle,
     deleteMemory,
     createPersistentMemory,
+    upsertPersistentMemory,
     getPersistentMemoriesByUser,
     updatePersistentMemory,
     deletePersistentMemory
