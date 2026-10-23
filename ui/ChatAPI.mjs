@@ -384,5 +384,7 @@ export {
     getCurrentUser,
     logoutAccount,
     getConversationHistory,
-    saveConversationHistory
+    saveConversationHistory,
+    getSavedMemories,
+    deleteSavedMemory
 };
