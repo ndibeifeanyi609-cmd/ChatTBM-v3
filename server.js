@@ -26,6 +26,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./auth/authRoutes");
+const googleOAuthRoutes = require("./auth/googleOAuthRoutes");
 const conversationHistoryRoutes = require("./routes/conversationHistoryRoutes").router;
 const { requireAuth } = require("./auth/requireAuth");
 const { isTrustedMutationRequest } = require("./auth/requestOrigin");
@@ -123,6 +124,7 @@ const voiceRoutes =
 // REGISTER AUTH ROUTES
 // =====================================
 app.use("/api/auth", authRoutes);
+app.use("/api/auth/google", googleOAuthRoutes);
 app.use("/api/conversations", requireAuth, conversationHistoryRoutes);
 app.use("/api/memories", requireAuth, require("./routes/memoryRoutes").router);
 
