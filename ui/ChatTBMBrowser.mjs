@@ -154,6 +154,17 @@ class ChatTBMBrowser {
             memories.type = 'button';
             memories.textContent = 'Saved memories';
             memories.dataset.action = 'memory-open';
+            memories.addEventListener('click', async () => {
+                this.showMemories = true;
+                this.memoryMessage = 'Loading saved memories…';
+                this.render();
+                const result = await getSavedMemories();
+                this.savedMemories = result.success ? result.memories : [];
+                this.memoryMessage = result.success
+                    ? (this.savedMemories.length ? '' : 'No saved memories found.')
+                    : result.error;
+                this.render();
+            });
             panel.appendChild(memories);
             return panel;
         }
