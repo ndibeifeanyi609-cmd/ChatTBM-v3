@@ -56,8 +56,8 @@ router.delete('/:memoryId', async (req, res) => {
 
     const result = await MemoryBoundary.deletePersistentMemory(memoryId, userId);
     if (!result || result.success !== true) {
-        const ownershipFailure = result?.error === 'Memory ownership violation.';
-        const notFound = result?.error === 'Memory not found.';
+        const ownershipFailure = result?.ownershipFailure === true || result?.error === 'Memory ownership violation.' || result?.error === 'Memory ownership mismatch.';
+        const notFound = result?.notFound === true || result?.error === 'Memory not found.';
         return res.status(ownershipFailure || notFound ? 404 : 503).json({
             success: false,
             error: {
