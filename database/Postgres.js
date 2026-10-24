@@ -128,6 +128,20 @@ async function initializeDatabase() {
     `);
 
     await db.query(`
+        CREATE TABLE IF NOT EXISTS chattbm_google_oauth_handoffs (
+            handoff_hash TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL REFERENCES chattbm_users(id) ON DELETE CASCADE,
+            expires_at TIMESTAMPTZ NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+
+    await db.query(`
+        CREATE INDEX IF NOT EXISTS chattbm_google_oauth_handoffs_expires_at_idx
+        ON chattbm_google_oauth_handoffs (expires_at)
+    `);
+
+    await db.query(`
         CREATE TABLE IF NOT EXISTS chattbm_auth_sessions (
             id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL REFERENCES chattbm_users(id) ON DELETE CASCADE,
