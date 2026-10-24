@@ -9,6 +9,7 @@ const path = require('node:path');
 const { createPostgresRateLimitStore } = require('../auth/PostgresRateLimitStore');
 
 const connectionString = process.env.DATABASE_URL;
+const TEST_HMAC_SECRET = 'test-secret-for-auth-rate-limit-hmac';
 let pool;
 
 function isDisposableTestDatabase(value) {
@@ -58,8 +59,8 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
 
     await pool.query('DELETE FROM chattbm_auth_rate_limits');
 
-    const first = createPostgresRateLimitStore({ query: (...args) => pool.query(...args) });
-    const second = createPostgresRateLimitStore({ query: (...args) => pool.query(...args) });
+    const first = createPostgresRateLimitStore({ hmacSecret: TEST_HMAC_SECRET, query: (...args) => pool.query(...args) });
+    const second = createPostgresRateLimitStore({ hmacSecret: TEST_HMAC_SECRET, query: (...args) => pool.query(...args) });
     const key = 'test:login:integration-client';
     const otherKey = 'test:login:other-client';
 
@@ -73,7 +74,7 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     const anotherClient = await second.consume(otherKey, 60000);
     assert.equal(anotherClient.count, 1);
 
-    const expiredKey = crypto.createHash('sha256').update('test:expired-bucket', 'utf8').digest('hex');
+    const expiredKey = crypto.createHmac('sha256', TEST_HMAC_SECRET).update('test:expired-bucket', 'utf8').digest('hex');
     await pool.query(
         `INSERT INTO chattbm_auth_rate_limits
             (bucket_key, window_started_at, request_count, expires_at, updated_at)
@@ -89,6 +90,6 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     assert.equal(expiredRow.rowCount, 0);
 
     const testKeys = [key, otherKey, 'test:expired-bucket']
-        .map(value => crypto.createHash('sha256').update(value, 'utf8').digest('hex'));
+        .map(value => crypto.createHmac('sha256', TEST_HMAC_SECRET).update(value, 'utf8').digest('hex'));
     await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key = ANY($1::text[])', [testKeys]);
 });
