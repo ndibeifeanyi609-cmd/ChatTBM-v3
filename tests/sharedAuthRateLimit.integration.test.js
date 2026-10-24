@@ -2,6 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const { Pool } = require('pg');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -38,6 +39,7 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     const first = createPostgresRateLimitStore({ query: (...args) => pool.query(...args) });
     const second = createPostgresRateLimitStore({ query: (...args) => pool.query(...args) });
     const key = 'test:login:integration-client';
+    const otherKey = 'test:login:other-client';
 
     const results = await Promise.all(
         Array.from({ length: 40 }, (_, i) => (i % 2 ? first : second).consume(key, 60000))
@@ -46,8 +48,9 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     assert.deepEqual(results.map(item => item.count).sort((a, b) => a - b),
         Array.from({ length: 40 }, (_, i) => i + 1));
 
-    const anotherClient = await second.consume('test:login:other-client', 60000);
+    const anotherClient = await second.consume(otherKey, 60000);
     assert.equal(anotherClient.count, 1);
 
-    await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key LIKE $1', ['test:%']);
+    const testKeys = [key, otherKey].map(value => crypto.createHash('sha256').update(value, 'utf8').digest('hex'));
+    await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key = ANY($1::text[])', [testKeys]);
 });
