@@ -25,6 +25,21 @@ const UPSERT_BUCKET_SQL = `
     RETURNING request_count, window_started_at, expires_at
 `;
 
+const CLEANUP_EXPIRED_SQL = `
+    WITH expired AS (
+        SELECT bucket_key
+        FROM chattbm_auth_rate_limits
+        WHERE expires_at <= NOW()
+        ORDER BY expires_at
+        LIMIT $1
+        FOR UPDATE SKIP LOCKED
+    )
+    DELETE FROM chattbm_auth_rate_limits AS buckets
+    USING expired
+    WHERE buckets.bucket_key = expired.bucket_key
+    RETURNING buckets.bucket_key
+`;
+
 function createPostgresRateLimitStore({ query } = {}) {
     const execute = query || ((...args) => {
         const pool = getPool();
@@ -33,6 +48,13 @@ function createPostgresRateLimitStore({ query } = {}) {
     });
 
     return {
+        async cleanupExpired({ batchSize = 500 } = {}) {
+            if (!Number.isSafeInteger(batchSize) || batchSize < 1 || batchSize > 5000) {
+                throw new TypeError('batchSize must be an integer from 1 to 5000.');
+            }
+            const result = await execute(CLEANUP_EXPIRED_SQL, [batchSize]);
+            return result && Array.isArray(result.rows) ? result.rows.length : 0;
+        },
         async consume(key, windowMs) {
             if (typeof key !== 'string' || !key || key.length > 512) {
                 throw new TypeError('Rate-limit key must be a non-empty string of at most 512 characters.');
@@ -54,4 +76,4 @@ function createPostgresRateLimitStore({ query } = {}) {
     };
 }
 
-module.exports = { createPostgresRateLimitStore, UPSERT_BUCKET_SQL };
+module.exports = { createPostgresRateLimitStore, UPSERT_BUCKET_SQL, CLEANUP_EXPIRED_SQL };
