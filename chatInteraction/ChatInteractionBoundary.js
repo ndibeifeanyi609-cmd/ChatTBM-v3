@@ -72,21 +72,37 @@ function validateInteractionRequest(data) {
             throw new Error('Invalid attachment.');
         }
 
-        if (
-            attachment.type !== 'image' ||
-            typeof attachment.mimeType !== 'string' ||
-            !attachment.mimeType.startsWith('image/') ||
-            typeof attachment.data !== 'string' ||
-            !attachment.data.trim()
-        ) {
-            throw new Error('Invalid image attachment.');
+        const validImage = attachment.type === 'image' &&
+            typeof attachment.mimeType === 'string' &&
+            attachment.mimeType.startsWith('image/') &&
+            typeof attachment.data === 'string' &&
+            Boolean(attachment.data.trim());
+        const validPdf = attachment.type === 'document' &&
+            attachment.mimeType === 'application/pdf' &&
+            typeof attachment.data === 'string' &&
+            Boolean(attachment.data.trim());
+        const validText = attachment.type === 'text' &&
+            attachment.mimeType === 'text/plain' &&
+            typeof attachment.text === 'string' &&
+            attachment.text.length <= 200000;
+
+        if (!validImage && !validPdf && !validText) {
+            throw new Error('Invalid attachment.');
         }
 
-        normalizedAttachment = {
-            type: 'image',
-            mimeType: attachment.mimeType,
-            data: attachment.data
-        };
+        normalizedAttachment = attachment.type === 'text'
+            ? {
+                type: 'text',
+                name: typeof attachment.name === 'string' ? attachment.name : 'document.txt',
+                mimeType: 'text/plain',
+                text: attachment.text
+            }
+            : {
+                type: attachment.type,
+                name: typeof attachment.name === 'string' ? attachment.name : '',
+                mimeType: attachment.mimeType,
+                data: attachment.data
+            };
     }
 
     return {
