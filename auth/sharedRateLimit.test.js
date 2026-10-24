@@ -41,3 +41,14 @@ test('uses the same store key for the same IP and scope', async () => {
     assert.match(keys[0], /^register:[a-f0-9]{64}$/);
     assert.equal(keys[0].includes('192.0.2.1'), false);
 });
+
+
+test('malformed store response fails closed with 503', async () => {
+    let nextCalled = false;
+    const limit = createSharedRateLimiter({ store: { async consume() { return { count: '1', startedAt: Date.now() }; } } });
+    const res = response();
+    await limit({ ip: 'client-a' }, res, () => { nextCalled = true; });
+    assert.equal(res.statusCode, 503);
+    assert.equal(res.body.error.code, 'RATE_LIMIT_STORAGE_UNAVAILABLE');
+    assert.equal(nextCalled, false);
+});
