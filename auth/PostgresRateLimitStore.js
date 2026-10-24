@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('node:crypto');
 const { getPool } = require('../database/Postgres');
 
 const UPSERT_BUCKET_SQL = `
@@ -39,7 +40,9 @@ function createPostgresRateLimitStore({ query } = {}) {
             if (!Number.isSafeInteger(windowMs) || windowMs < 1) {
                 throw new TypeError('windowMs must be a positive safe integer.');
             }
-            const result = await execute(UPSERT_BUCKET_SQL, [key, windowMs]);
+            // Store only a one-way digest, never the caller's raw identifier.
+            const bucketKey = crypto.createHash('sha256').update(key, 'utf8').digest('hex');
+            const result = await execute(UPSERT_BUCKET_SQL, [bucketKey, windowMs]);
             const row = result && result.rows && result.rows[0];
             if (!row) throw new Error('Rate-limit storage returned no bucket.');
             return {
