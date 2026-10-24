@@ -1,6 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
+import { createAttachment } from './AttachmentProcessor.mjs';
 import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
@@ -523,7 +524,7 @@ class ChatTBMBrowser {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.className = 'ui-file-input';
-        fileInput.accept = 'image/*,.pdf,.txt,.md,.doc,.docx';
+        fileInput.accept = 'image/*,.pdf,.txt,.md';
         fileInput.setAttribute('aria-label', 'Choose a file');
         fileInput.dataset.role = 'file-input';
 
@@ -1362,9 +1363,7 @@ class ChatTBMBrowser {
         if (this.selectedFile) {
             try {
                 attachment =
-                    await this.createImageAttachment(
-                        this.selectedFile
-                    );
+                    await createAttachment(this.selectedFile);
             } catch (error) {
                 this.app.state.error.currentError = {
                     code: 'INVALID_ATTACHMENT',
