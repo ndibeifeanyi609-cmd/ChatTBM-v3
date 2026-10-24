@@ -68,3 +68,45 @@ test('expired cleanup rejects unsafe batch sizes without querying storage', asyn
 test('requires a sufficiently long HMAC secret', () => {
     assert.throws(() => createPostgresRateLimitStore({ hmacSecret: 'too-short', query: async () => ({ rows: [] }) }), /at least 32 bytes/);
 });
+
+
+test('runs bounded expired cleanup every 100 consume calls', async () => {
+    let cleanupCalls = 0;
+    let consumeCalls = 0;
+    const store = createPostgresRateLimitStore({
+        hmacSecret: TEST_HMAC_SECRET,
+        query: async (sql) => {
+            if (sql === CLEANUP_EXPIRED_SQL) {
+                cleanupCalls += 1;
+                return { rows: [] };
+            }
+            if (sql === UPSERT_BUCKET_SQL) {
+                consumeCalls += 1;
+                return { rows: [{ request_count: 1, window_started_at: new Date().toISOString(), expires_at: new Date(Date.now() + 60000).toISOString() }] };
+            }
+            throw new Error('Unexpected SQL');
+        }
+    });
+    for (let i = 0; i < 100; i += 1) await store.consume('test:client', 60000);
+    assert.equal(cleanupCalls, 1);
+    assert.equal(consumeCalls, 100);
+});
+
+test('cleanup failure does not block rate-limit consumption', async () => {
+    let consumeCalls = 0;
+    const store = createPostgresRateLimitStore({
+        hmacSecret: TEST_HMAC_SECRET,
+        query: async (sql) => {
+            if (sql === CLEANUP_EXPIRED_SQL) throw new Error('cleanup unavailable');
+            if (sql === UPSERT_BUCKET_SQL) {
+                consumeCalls += 1;
+                return { rows: [{ request_count: 1, window_started_at: new Date().toISOString(), expires_at: new Date(Date.now() + 60000).toISOString() }] };
+            }
+            throw new Error('Unexpected SQL');
+        }
+    });
+    for (let i = 0; i < 100; i += 1) {
+        await store.consume('test:client', 60000);
+    }
+    assert.equal(consumeCalls, 100);
+});
