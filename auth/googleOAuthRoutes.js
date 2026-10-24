@@ -289,7 +289,9 @@ router.get('/callback', async (req, res, next) => {
 
         const frontend = process.env.GOOGLE_LOGIN_SUCCESS_URL || 'https://chattbm.com/auth/google-handoff.html';
         const separator = frontend.includes('?') ? '&' : '?';
-        return res.redirect(frontend + separator + 'code=' + encodeURIComponent(handoffCode));
+        const handoffParams = 'code=' + encodeURIComponent(handoffCode) +
+            (linkMode ? '&flow=link' : '');
+        return res.redirect(frontend + separator + handoffParams);
     } catch (error) {
         if (transactionOpen && db) {
             try { await db.query('ROLLBACK'); } catch (_) {}

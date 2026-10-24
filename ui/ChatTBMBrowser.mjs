@@ -27,6 +27,12 @@ class ChatTBMBrowser {
         this.authUser = null;
         this.authMode = 'closed';
         this.authMessage = '';
+        try {
+            if (window.sessionStorage.getItem('chattbm_google_linked_success') === '1') {
+                window.sessionStorage.removeItem('chattbm_google_linked_success');
+                this.authMessage = 'Google account linked successfully.';
+            }
+        } catch (_) {}
         this.showMemories = false;
         this.savedMemories = [];
         this.memoryMessage = '';
@@ -171,6 +177,12 @@ class ChatTBMBrowser {
             googleLink.textContent = 'Link Google account';
             googleLink.dataset.action = 'google-link';
             panel.appendChild(googleLink);
+            if (this.authMessage) {
+                const message = document.createElement('p');
+                message.setAttribute('role', 'status');
+                message.textContent = this.authMessage;
+                panel.appendChild(message);
+            }
             return panel;
         }
 

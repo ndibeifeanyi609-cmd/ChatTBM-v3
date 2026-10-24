@@ -69,3 +69,20 @@ test('Google account linking requires the same verified email and rejects identi
     assert.match(source, /This Google account is already linked to another ChatTBM account/);
     assert.match(source, /INSERT INTO chattbm_oauth_identities/);
 });
+
+test('Google linking flow is preserved through the session handoff for success feedback', () => {
+    const handoff = fs.readFileSync(
+        path.join(__dirname, 'google-handoff.html'),
+        'utf8'
+    );
+    const browser = fs.readFileSync(
+        path.join(__dirname, '..', 'ui', 'ChatTBMBrowser.mjs'),
+        'utf8'
+    );
+    assert.match(source, /linkMode \? '&flow=link' : ''/);
+    assert.match(handoff, /const flow = params\.get\('flow'\)/);
+    assert.match(handoff, /flow === 'link'/);
+    assert.match(handoff, /chattbm_google_linked_success/);
+    assert.match(browser, /Google account linked successfully\./);
+    assert.match(browser, /message\.setAttribute\('role', 'status'\)/);
+});
