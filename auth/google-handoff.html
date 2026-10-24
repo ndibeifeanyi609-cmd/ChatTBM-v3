@@ -20,6 +20,7 @@ p{color:#aaa;line-height:1.6}
 const status = document.getElementById('status');
 const params = new URLSearchParams(window.location.search);
 const code = params.get('code');
+const flow = params.get('flow');
 history.replaceState(null, '', '/auth/google-handoff.html');
 if (!code) {
   status.textContent = 'This sign-in link is missing or expired. Please return to ChatTBM and try again.';
@@ -38,6 +39,9 @@ if (!code) {
       throw new Error(data?.error?.message || 'Google sign-in could not be completed.');
     }
     sessionStorage.setItem('chattbm_session_token', data.token);
+    if (flow === 'link') {
+      sessionStorage.setItem('chattbm_google_linked_success', '1');
+    }
     window.location.replace('/');
   } catch (_) {
     status.textContent = 'Google sign-in could not be completed. Please return to ChatTBM and try again.';
