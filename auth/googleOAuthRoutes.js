@@ -2,7 +2,7 @@
 
 const express = require('express');
 const {
-    randomBytes, randomUUID, timingSafeEqual
+    createHash, randomBytes, randomUUID
 } = require('node:crypto');
 const { OAuth2Client } = require('google-auth-library');
 const { getPool } = require('../database/Postgres');
@@ -14,16 +14,8 @@ const {
 const { authenticateSession } = require('./AuthService');
 
 const router = express.Router();
-const COOKIE_STATE = 'chattbm_google_oauth_state';
-const COOKIE_LINK = 'chattbm_google_oauth_link';
 const SESSION_COOKIE = 'chattbm_session';
-const COOKIE_OPTIONS = {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'none',
-    path: '/api/auth/google',
-    maxAge: 10 * 60 * 1000
-};
+const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function configured() {
@@ -48,19 +40,36 @@ function database() {
     return pool;
 }
 
-router.get('/', (req, res) => {
+function hashOAuthState(state) {
+    return createHash('sha256').update(state, 'utf8').digest('hex');
+}
+
+async function createOAuthState(linkUserId = null) {
+    const state = randomBytes(32).toString('base64url');
+    const expiresAt = new Date(Date.now() + OAUTH_STATE_TTL_MS);
+    await database().query(
+        'INSERT INTO chattbm_google_oauth_states (state_hash, link_user_id, expires_at) VALUES ($1, $2, $3)',
+        [hashOAuthState(state), linkUserId, expiresAt]
+    );
+    return state;
+}
+
+router.get('/', async (req, res, next) => {
     if (!configured()) {
         return res.status(503).send('Google sign-in is not configured yet.');
     }
-    const state = randomBytes(32).toString('base64url');
-    res.cookie(COOKIE_STATE, state, COOKIE_OPTIONS);
-    return res.redirect(client().generateAuthUrl({
+    try {
+        const state = await createOAuthState();
+        return res.redirect(client().generateAuthUrl({
         access_type: 'online',
         scope: ['openid', 'email', 'profile'],
         response_type: 'code',
         state,
         prompt: 'select_account'
-    }));
+        }));
+    } catch (error) {
+        return next(error);
+    }
 });
 
 router.get('/link', async (req, res, next) => {
@@ -73,9 +82,7 @@ router.get('/link', async (req, res, next) => {
         if (!user) {
             return res.status(401).send('Sign in to your existing ChatTBM account before linking Google.');
         }
-        const state = randomBytes(32).toString('base64url');
-        res.cookie(COOKIE_STATE, state, COOKIE_OPTIONS);
-        res.cookie(COOKIE_LINK, user.id, COOKIE_OPTIONS);
+        const state = await createOAuthState(user.id);
         return res.redirect(client().generateAuthUrl({
             access_type: 'online',
             scope: ['openid', 'email', 'profile'],
@@ -102,9 +109,7 @@ router.post('/link', async (req, res, next) => {
         if (!user) {
             return res.status(401).send('Your ChatTBM session expired. Sign in again before linking Google.');
         }
-        const state = randomBytes(32).toString('base64url');
-        res.cookie(COOKIE_STATE, state, COOKIE_OPTIONS);
-        res.cookie(COOKIE_LINK, '1', COOKIE_OPTIONS);
+        const state = await createOAuthState(user.id);
         return res.json({ success: true, url: client().generateAuthUrl({
             access_type: 'online',
             scope: ['openid', 'email', 'profile'],
@@ -125,23 +130,19 @@ router.get('/callback', async (req, res, next) => {
             return res.status(503).send('Google sign-in is not configured yet.');
         }
 
-        const stateCookie = req.cookies && req.cookies[COOKIE_STATE];
-        const linkUserId = req.cookies && req.cookies[COOKIE_LINK];
-        const linkMode = typeof linkUserId === 'string' && linkUserId.length > 0;
-        res.clearCookie(COOKIE_LINK, { httpOnly: true, secure: true, sameSite: 'none', path: '/api/auth/google' });
-        res.clearCookie(COOKIE_STATE, {
-            httpOnly: true, secure: true, sameSite: 'none',
-            path: '/api/auth/google'
-        });
         const state = req.query.state;
-        if (
-            typeof state !== 'string' ||
-            typeof stateCookie !== 'string' ||
-            state.length !== stateCookie.length ||
-            !timingSafeEqual(Buffer.from(state), Buffer.from(stateCookie))
-        ) {
+        if (typeof state !== 'string' || state.length < 32 || state.length > 256) {
             return res.status(400).send('Google sign-in state validation failed.');
         }
+        const consumedState = await database().query(
+            'DELETE FROM chattbm_google_oauth_states WHERE state_hash = $1 AND expires_at > NOW() RETURNING link_user_id',
+            [hashOAuthState(state)]
+        );
+        if (!consumedState.rows.length) {
+            return res.status(400).send('Google sign-in state validation failed.');
+        }
+        const linkUserId = consumedState.rows[0].link_user_id;
+        const linkMode = typeof linkUserId === 'string' && linkUserId.length > 0;
         if (typeof req.query.code !== 'string') {
             return res.status(401).send('Google sign-in was cancelled or denied.');
         }
