@@ -21,4 +21,4 @@ jobs:
         with:
           node-version: 22
       - name: Test shared rate-limit middleware
-        run: node --test auth/sharedRateLimit.test.js
+        run: node --test auth/sharedRateLimit.test.js auth/createAuthRouter.test.js
