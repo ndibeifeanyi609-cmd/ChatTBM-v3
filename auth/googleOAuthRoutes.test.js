@@ -49,11 +49,13 @@ test('new Google accounts and sessions are created in one database transaction',
     assert.match(source, /finally \{\s*if \(db\) db\.release\(\);\s*\}/);
 });
 
-test('session token is stored as a hash and cookie is HTTP-only and secure', () => {
-    assert.match(source, /hashSessionToken\(token\)/);
-    assert.match(source, /httpOnly: true/);
-    assert.match(source, /secure: true/);
-    assert.match(source, /sameSite: 'none'/);
+test('session token is stored as a hash and handed off once without a session cookie', () => {
+    assert.match(source, /hashSessionToken\\(token\\)/);
+    assert.match(source, /HANDOFF_TTL_MS = 2 \\* 60 \\* 1000/);
+    assert.match(source, /INSERT INTO chattbm_google_oauth_handoffs/);
+    assert.match(source, /DELETE FROM chattbm_google_oauth_handoffs WHERE handoff_hash = \\$1 AND expires_at > NOW\\(\\) RETURNING user_id/);
+    assert.match(source, /router\\.post\\('\\/session-handoff'/);
+    assert.doesNotMatch(source, /res\\.cookie\\(SESSION_COOKIE/);
 });
 
 test('Google account linking requires an existing authenticated ChatTBM session', () => {
