@@ -1,0 +1,24 @@
+name: Shared Rate Limit Middleware Tests
+
+on:
+  pull_request:
+    paths:
+      - 'auth/sharedRateLimit.js'
+      - 'auth/sharedRateLimit.test.js'
+      - '.github/workflows/shared-rate-limit-middleware-tests.yml'
+  push:
+    branches:
+      - security/shared-auth-rate-limit-middleware
+
+jobs:
+  middleware-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test shared rate-limit middleware
+        run: node --test auth/sharedRateLimit.test.js
