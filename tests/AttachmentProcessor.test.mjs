@@ -1,12 +1,6 @@
-'use strict';
-
-const test = require('node:test');
-const assert = require('node:assert/strict');
-let createAttachment;
-let MAX_ATTACHMENT_SIZE;
-test.before(async () => {
-    ({ createAttachment, MAX_ATTACHMENT_SIZE } = await import('../ui/AttachmentProcessor.mjs'));
-});
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createAttachment, MAX_ATTACHMENT_SIZE } from '../ui/AttachmentProcessor.mjs';
 
 function file(name, type, value) {
     const bytes = new TextEncoder().encode(value);
