@@ -1,7 +1,7 @@
 'use strict';
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
-import { captureAndClearResetToken } from './resetUrl.mjs';
+import { captureAndClearResetToken, shouldRestoreSignedInSession } from './resetUrl.mjs';
 import { transcribeVoice, registerAccount, loginAccount, requestPasswordReset, confirmPasswordReset, getCurrentUser, logoutAccount, getConversationHistory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
@@ -34,7 +34,7 @@ class ChatTBMBrowser {
         );
         if (this.resetToken) this.authMode = 'reset-confirm';
         getCurrentUser().then(async result => {
-            if (result.success && result.user && !this.resetToken) {
+            if (shouldRestoreSignedInSession(result.success && result.user ? result.user : null, this.resetToken)) {
                 await this.switchAccount(result.user);
                 this.render();
             }
