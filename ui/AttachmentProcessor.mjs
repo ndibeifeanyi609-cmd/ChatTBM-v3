@@ -59,6 +59,9 @@ async function createAttachment(file) {
     if (mimeType === 'text/plain' || mimeType === 'text/markdown') {
         const buffer = await file.arrayBuffer();
         const text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+        if (text.length > 200000) {
+            throw new Error('Text attachments must contain 200,000 characters or fewer.');
+        }
         return {
             type: 'text',
             name: file.name || 'document.txt',
