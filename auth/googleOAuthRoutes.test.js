@@ -24,7 +24,10 @@ test('OAuth callback validates state before exchanging the authorization code', 
     assert.notEqual(stateCheck, -1);
     assert.notEqual(codeExchange, -1);
     assert.ok(stateCheck < codeExchange);
-    assert.match(source, /timingSafeEqual\(/);
+    assert.match(source, /function hashOAuthState\(state\)/);
+    assert.match(source, /DELETE FROM chattbm_google_oauth_states WHERE state_hash = \$1 AND expires_at > NOW\(\) RETURNING link_user_id/);
+    assert.match(source, /INSERT INTO chattbm_google_oauth_states/);
+    assert.doesNotMatch(source, /COOKIE_STATE|COOKIE_LINK/);
 });
 
 test('OAuth callback requires a verified email from a verified ID token', () => {
