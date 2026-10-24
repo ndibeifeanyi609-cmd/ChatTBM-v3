@@ -21,7 +21,7 @@ function isDisposableTestDatabase(value) {
     }
 }
 
-test('PostgreSQL rate-limit store shares atomic counters across instances', async t => {
+test('PostgreSQL rate-limit store shares atomic counters across instances', { skip: !isDisposableTestDatabase(connectionString) }, async t => {
     if (!isDisposableTestDatabase(connectionString)) {
         throw new Error('Refusing rate-limit integration tests: DATABASE_URL must target local chattbm_test.');
     }
