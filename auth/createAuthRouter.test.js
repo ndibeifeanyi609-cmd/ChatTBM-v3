@@ -114,3 +114,34 @@ test('allowed requests reach their intended authentication handlers', async () =
     }
     assert.deepEqual(calls, { register: 1, login: 1, resetRequest: 1, resetConfirm: 1 });
 });
+
+
+test('429 from any sensitive-route limiter prevents its handler from running', async () => {
+    const routes = new Map();
+    const router = { post(path, ...handlers) { routes.set('POST ' + path, handlers); }, get(path, ...handlers) { routes.set('GET ' + path, handlers); } };
+    const express = { Router: () => router };
+    const calls = { register: 0, login: 0, resetRequest: 0, resetConfirm: 0 };
+    const blocked = async (_req, res) => res.status(429).json({ success: false, error: { code: 'RATE_LIMITED' } });
+    createAuthRouter({
+        express,
+        services: {
+            async register() { calls.register++; return { success: false }; },
+            async login() { calls.login++; return { success: false }; },
+            async authenticateSession() { return null; },
+            async revokeSession() {}
+        },
+        passwordReset: {
+            async createPasswordReset() { calls.resetRequest++; return null; },
+            async redeemPasswordReset() { calls.resetConfirm++; return { success: false }; }
+        },
+        sendPasswordResetEmail: async () => {},
+        limiters: { registration: blocked, login: blocked, passwordResetRequest: blocked, passwordResetRedeem: blocked }
+    });
+    for (const route of ['POST /register', 'POST /login', 'POST /password-reset/request', 'POST /password-reset/confirm']) {
+        const { res, nextError } = await runRoute(routes.get(route));
+        assert.equal(nextError, undefined, route);
+        assert.equal(res.statusCode, 429, route);
+        assert.equal(res.body.error.code, 'RATE_LIMITED', route);
+    }
+    assert.deepEqual(calls, { register: 0, login: 0, resetRequest: 0, resetConfirm: 0 });
+});
