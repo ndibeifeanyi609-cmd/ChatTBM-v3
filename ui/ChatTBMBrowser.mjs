@@ -1369,7 +1369,7 @@ class ChatTBMBrowser {
                     code: 'INVALID_ATTACHMENT',
                     message:
                         error?.message ||
-                        'The selected image could not be attached.'
+                        'The selected attachment could not be prepared.'
                 };
 
                 this.render();
