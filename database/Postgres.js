@@ -163,6 +163,22 @@ async function initializeDatabase() {
         ON chattbm_auth_sessions (expires_at)
     `);
 
+    // Idempotent startup schema for the shared authentication rate limiter.
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS chattbm_auth_rate_limits (
+            bucket_key TEXT PRIMARY KEY,
+            window_started_at TIMESTAMPTZ NOT NULL,
+            request_count INTEGER NOT NULL CHECK (request_count >= 1),
+            expires_at TIMESTAMPTZ NOT NULL,
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+
+    await db.query(`
+        CREATE INDEX IF NOT EXISTS chattbm_auth_rate_limits_expires_at_idx
+        ON chattbm_auth_rate_limits (expires_at)
+    `);
+
     databaseStatus = 'connected';
     return { connected: true, status: databaseStatus };
 }
