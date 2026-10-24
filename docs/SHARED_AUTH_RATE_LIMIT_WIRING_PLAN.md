@@ -1,27 +1,33 @@
 # Shared Authentication Rate-Limit Wiring Plan
 
 ## Current state
-- `auth/authRoutes.js` still uses the process-local `createRateLimiter` middleware.
-- `auth/PostgresRateLimitStore.js` and `auth/sharedRateLimit.js` are not wired into those routes.
-- Migration `005_auth_rate_limits.sql` has not been applied to production.
-- Do not enable the shared middleware until the migration and failure behavior are reviewed.
+- `auth/authRoutes.js` supports an explicit opt-in to the PostgreSQL-backed shared limiter.
+- The default remains the existing process-local limiter unless `AUTH_SHARED_RATE_LIMIT_ENABLED=true` is set.
+- `database/Postgres.js` creates the shared rate-limit table and expiry index idempotently during the existing database initialization routine, consistent with the current schema-initialization pattern. The separate SQL migration remains available for isolated integration testing and controlled schema review.
+- The shared limiter has not been enabled in production. No production environment variables have been changed.
 
-## Required wiring
-Use one shared store instance for all four authentication limits:
-- Registration: 5 attempts per window.
-- Login: 10 attempts per window.
-- Password-reset request: 3 attempts per window.
-- Password-reset confirmation: 5 attempts per window.
+## Limits and storage
+One shared PostgreSQL store is used for four independent scopes:
+- Registration: 5 attempts per 15-minute window.
+- Login: 10 attempts per 15-minute window.
+- Password-reset request: 3 attempts per 15-minute window.
+- Password-reset confirmation: 5 attempts per 15-minute window.
 
-Give each route a distinct scope. Keep the existing in-memory middleware unchanged unless an explicit, tested configuration selects the shared store. Never fall back to the in-memory limiter after a shared-store error; return the shared middleware's 503 response.
+The store requires `AUTH_RATE_LIMIT_HMAC_SECRET` to be at least 32 bytes. It uses HMAC-SHA-256 to protect stored bucket identifiers. Treat this as a stable secret: rotating it resets the effective bucket namespace and temporarily resets existing rate-limit counts.
 
-## Migration and rollout gates
-1. Decide and document the production migration mechanism; do not run DDL automatically at server startup.
-2. Apply the migration through the approved deployment/database procedure and verify the table/index exist.
-3. Wire middleware behind an explicit environment/configuration switch that cannot silently enable itself before the schema is present.
-4. Add route-level tests for all four routes, including database failure, 429 behavior, and ensuring the existing handlers are not called on 503.
-5. Verify cleanup is scheduled with bounded batches and does not overlap unsafely; monitor database latency and error rate.
-6. Deploy only after CI passes and a reviewed rollout/rollback plan is approved.
+## Failure behavior
+- If shared storage fails or returns malformed data, the middleware returns 503 and does not call the authentication handler.
+- It never falls back silently to the process-local limiter in shared mode.
+- Expired rows are cleaned in bounded batches of at most 100 entries opportunistically every 100 consume calls. Cleanup is best-effort and does not block an otherwise valid rate-limit operation.
+- The existing process-local limiter remains the default unless the explicit feature flag is enabled.
+
+## Production rollout gates
+1. Confirm the current branch and full CI checks are green.
+2. Review the schema-initialization change and confirm startup ordering invokes database initialization before accepting traffic.
+3. Set `AUTH_RATE_LIMIT_HMAC_SECRET` in the deployment secret store before enabling the feature flag; never commit the value or send it in chat.
+4. Deploy first with `AUTH_SHARED_RATE_LIMIT_ENABLED` unset or `false`, confirming the default path is unchanged.
+5. Only after explicit approval, enable `AUTH_SHARED_RATE_LIMIT_ENABLED=true` and verify authentication routes, 429 behavior, 503 fail-closed behavior, database latency, and cleanup.
+6. Rollback by unsetting the feature flag; retain the table until separately reviewed before any destructive schema operation.
 
 ## Security note
-The store hashes its supplied key with SHA-256. This is a digest, not keyed anonymization. Consider an HMAC using a dedicated server secret before production rollout, with secret rotation and stable-key implications documented.
+Do not enable the feature in production until the environment secret is configured and the startup schema path is verified. No live database operation is performed by this plan.
