@@ -84,3 +84,33 @@ test('routes use distinct injected limiter functions in the intended order', () 
     assert.equal(routes.get('GET /me').length, 1);
     assert.equal(routes.get('POST /logout').length, 1);
 });
+
+test('allowed requests reach their intended authentication handlers', async () => {
+    const routes = new Map();
+    const router = { post(path, ...handlers) { routes.set('POST ' + path, handlers); }, get(path, ...handlers) { routes.set('GET ' + path, handlers); } };
+    const express = { Router: () => router };
+    const calls = { register: 0, login: 0, resetRequest: 0, resetConfirm: 0 };
+    const allow = () => createSharedRateLimiter({ store: { async consume() { return { count: 1, startedAt: Date.now() }; } } });
+    createAuthRouter({
+        express,
+        services: {
+            async register() { calls.register++; return { success: false, error: 'invalid', code: 'INVALID_REGISTRATION' }; },
+            async login() { calls.login++; return { success: false, error: 'invalid' }; },
+            async authenticateSession() { return null; },
+            async revokeSession() {}
+        },
+        passwordReset: {
+            async createPasswordReset() { calls.resetRequest++; return null; },
+            async redeemPasswordReset() { calls.resetConfirm++; return { success: false }; }
+        },
+        sendPasswordResetEmail: async()=>{},
+        limiters: { registration: allow(), login: allow(), passwordResetRequest: allow(), passwordResetRedeem: allow() },
+        nodeEnv: 'test'
+    });
+    for (const route of ['POST /register','POST /login','POST /password-reset/request','POST /password-reset/confirm']) {
+        const { res, nextError } = await runRoute(routes.get(route));
+        assert.equal(nextError, undefined, route);
+        assert.notEqual(res.statusCode, 503, route);
+    }
+    assert.deepEqual(calls, { register: 1, login: 1, resetRequest: 1, resetConfirm: 1 });
+});
