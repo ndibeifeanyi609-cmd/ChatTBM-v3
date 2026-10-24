@@ -83,6 +83,14 @@ function logoutAccount() {
     return authRequest('logout', {});
 }
 
+function requestPasswordReset(email) {
+    return authRequest('password-reset/request', { email });
+}
+
+function confirmPasswordReset(token, password) {
+    return authRequest('password-reset/confirm', { token, password });
+}
+
 async function conversationHistoryRequest(path, method = 'GET', body) {
     try {
         const response = await fetch(API_BASE_URL + '/api/conversations' + path, {
@@ -383,6 +391,8 @@ export {
     loginAccount,
     getCurrentUser,
     logoutAccount,
+    requestPasswordReset,
+    confirmPasswordReset,
     getConversationHistory,
     saveConversationHistory,
     getSavedMemories,

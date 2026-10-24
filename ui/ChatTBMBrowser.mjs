@@ -2,7 +2,7 @@
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
 import { createAttachment } from './AttachmentProcessor.mjs';
-import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
+import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -26,8 +26,18 @@ class ChatTBMBrowser {
         this.voiceFallbackActive = false;
         this.selectedFile = null;
         this.authUser = null;
+        this.resetToken = '';
         this.authMode = 'closed';
         this.authMessage = '';
+        try {
+            const resetUrl = new URL(window.location.href);
+            this.resetToken = resetUrl.searchParams.get('token') || '';
+            if (this.resetToken) {
+                this.authMode = 'reset-confirm';
+                resetUrl.searchParams.delete('token');
+                window.history.replaceState({}, '', resetUrl.pathname + resetUrl.search + resetUrl.hash);
+            }
+        } catch (_) {}
         try {
             if (window.sessionStorage.getItem('chattbm_google_linked_success') === '1') {
                 window.sessionStorage.removeItem('chattbm_google_linked_success');
@@ -37,12 +47,14 @@ class ChatTBMBrowser {
         this.showMemories = false;
         this.savedMemories = [];
         this.memoryMessage = '';
-        getCurrentUser().then(async result => {
-            if (result.success && result.user) {
-                await this.switchAccount(result.user);
-                this.render();
-            }
-        });
+        if (!this.resetToken) {
+            getCurrentUser().then(async result => {
+                if (result.success && result.user) {
+                    await this.switchAccount(result.user);
+                    this.render();
+                }
+            });
+        }
     }
 
     async switchAccount(user) {
@@ -148,6 +160,52 @@ class ChatTBMBrowser {
     renderAuthPanel() {
         const panel = document.createElement('section');
         panel.className = 'ui-auth-panel';
+
+        if (this.authMode === 'reset-confirm' || this.authMode === 'reset-request') {
+            const heading = document.createElement('h2');
+            heading.textContent = this.authMode === 'reset-confirm' ? 'Choose a new password' : 'Reset your password';
+            panel.appendChild(heading);
+            const form = document.createElement('form');
+            form.className = 'ui-auth-form';
+            form.dataset.role = 'password-reset-form';
+            if (this.authMode === 'reset-request') {
+                const email = document.createElement('input');
+                email.type = 'email';
+                email.name = 'email';
+                email.autocomplete = 'email';
+                email.placeholder = 'Email address';
+                email.required = true;
+                email.maxLength = 254;
+                form.appendChild(email);
+            } else {
+                const password = document.createElement('input');
+                password.type = 'password';
+                password.name = 'password';
+                password.autocomplete = 'new-password';
+                password.placeholder = 'New password (12+ characters)';
+                password.minLength = 12;
+                password.required = true;
+                form.appendChild(password);
+            }
+            const submit = document.createElement('button');
+            submit.type = 'submit';
+            submit.textContent = this.authMode === 'reset-confirm' ? 'Update password' : 'Send reset link';
+            form.appendChild(submit);
+            panel.appendChild(form);
+            const cancel = document.createElement('button');
+            cancel.type = 'button';
+            cancel.textContent = 'Back to sign in';
+            cancel.dataset.action = 'reset-back';
+            panel.appendChild(cancel);
+            if (this.authMessage) {
+                const message = document.createElement('p');
+                message.setAttribute('role', 'status');
+                message.textContent = this.authMessage;
+                panel.appendChild(message);
+            }
+            return panel;
+        }
+
         if (this.authUser) {
             const status = document.createElement('span');
             status.textContent = 'Signed in: ' + this.authUser.email;
@@ -232,6 +290,13 @@ class ChatTBMBrowser {
             googleLink.setAttribute('aria-label', 'Continue with Google');
 
             panel.append(divider, googleLink);
+            if (this.authMode === 'login') {
+                const forgot = document.createElement('button');
+                forgot.type = 'button';
+                forgot.textContent = 'Forgot password?';
+                forgot.dataset.action = 'reset-open';
+                panel.appendChild(forgot);
+            }
         }
         if (this.authMessage) {
             const message = document.createElement('p');
@@ -580,6 +645,46 @@ class ChatTBMBrowser {
     }
 
     bind(root) {
+        const resetForm = root.querySelector('[data-role="password-reset-form"]');
+        if (resetForm) {
+            resetForm.addEventListener('submit', async event => {
+                event.preventDefault();
+                const submit = resetForm.querySelector('button[type="submit"]');
+                submit.disabled = true;
+                if (this.authMode === 'reset-request') {
+                    const result = await requestPasswordReset(resetForm.elements.email.value);
+                    this.authMessage = result.success
+                        ? 'If an account matches that email, a reset link will be sent.'
+                        : (result.error?.message || 'Unable to request a password reset.');
+                    if (result.success) this.authMode = 'reset-request';
+                } else {
+                    const result = await confirmPasswordReset(this.resetToken, resetForm.elements.password.value);
+                    if (result.success) {
+                        this.resetToken = '';
+                        this.authMode = 'login';
+                        this.authMessage = 'Password updated. Please sign in with your new password.';
+                    } else {
+                        this.authMessage = result.error?.message || 'This reset link is invalid or expired.';
+                    }
+                }
+                this.render();
+            });
+        }
+        root.querySelectorAll('[data-action="reset-open"]').forEach(button => {
+            button.addEventListener('click', () => {
+                this.authMode = 'reset-request';
+                this.authMessage = '';
+                this.render();
+            });
+        });
+        root.querySelectorAll('[data-action="reset-back"]').forEach(button => {
+            button.addEventListener('click', () => {
+                this.resetToken = '';
+                this.authMode = 'login';
+                this.authMessage = '';
+                this.render();
+            });
+        });
         const authForm = root.querySelector('[data-role="auth-form"]');
         if (authForm) {
             authForm.addEventListener('submit', async event => {

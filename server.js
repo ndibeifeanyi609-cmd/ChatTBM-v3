@@ -38,6 +38,10 @@ const PORT =
 // =====================================
 // MIDDLEWARE
 // =====================================
+app.use((req, res, next) => {
+    res.setHeader("Referrer-Policy", "no-referrer");
+    next();
+});
 const defaultOrigins = [
     "https://ndibeifeanyi609-cmd.github.io",
     "https://chattbm.com",
