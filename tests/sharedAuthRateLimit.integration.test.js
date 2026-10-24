@@ -60,7 +60,7 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     await pool.query('DELETE FROM chattbm_auth_rate_limits');
 
     const first = createPostgresRateLimitStore({ hmacSecret: TEST_HMAC_SECRET, query: (...args) => pool.query(...args) });
-    const second = createPostgresRateLimitStore({ query: (...args) => pool.query(...args) });
+    const second = createPostgresRateLimitStore({ hmacSecret: TEST_HMAC_SECRET, query: (...args) => pool.query(...args) });
     const key = 'test:login:integration-client';
     const otherKey = 'test:login:other-client';
 
