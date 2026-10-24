@@ -33,7 +33,29 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     });
 
     const migrationPath = path.join(__dirname, '..', 'database', 'migrations', '005_auth_rate_limits.sql');
-    await pool.query(fs.readFileSync(migrationPath, 'utf8'));
+    const migrationSql = fs.readFileSync(migrationPath, 'utf8');
+    await pool.query(migrationSql);
+    // Reapplying the migration must be safe and idempotent.
+    await pool.query(migrationSql);
+
+    const schema = await pool.query(`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'chattbm_auth_rate_limits'
+    `);
+    const columns = new Set(schema.rows.map(row => row.column_name));
+    for (const column of ['bucket_key', 'window_started_at', 'request_count', 'expires_at', 'updated_at']) {
+        assert.ok(columns.has(column), `missing migration column: ${column}`);
+    }
+
+    const index = await pool.query(`
+        SELECT 1 FROM pg_indexes
+        WHERE schemaname = 'public'
+          AND tablename = 'chattbm_auth_rate_limits'
+          AND indexname = 'chattbm_auth_rate_limits_expires_at_idx'
+    `);
+    assert.equal(index.rowCount, 1, 'expiry index should exist after migration');
+
     await pool.query('DELETE FROM chattbm_auth_rate_limits');
 
     const first = createPostgresRateLimitStore({ query: (...args) => pool.query(...args) });
