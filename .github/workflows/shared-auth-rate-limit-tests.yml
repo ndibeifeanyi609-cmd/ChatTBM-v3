@@ -6,10 +6,7 @@ on:
     paths:
       - 'auth/rateLimit.js'
       - 'auth/rateLimit.test.js'
-      - 'auth/**'
-      - 'database/**'
       - 'tests/sharedAuthRateLimit.integration.test.js'
-      - '.github/workflows/shared-auth-rate-limit-tests.yml'
   workflow_dispatch:
 
 jobs:
