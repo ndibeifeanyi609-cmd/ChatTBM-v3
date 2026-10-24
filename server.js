@@ -47,7 +47,6 @@ const defaultOrigins = [
     "https://chattbm.com",
     "https://www.chattbm.com",
     "https://chattbm-backend.onrender.com",
-    "https://chattbm-password-reset-staging.onrender.com"
 ];
 const configuredOrigins = (process.env.FRONTEND_ORIGINS || "")
     .split(",")
