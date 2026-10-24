@@ -21,3 +21,13 @@ test('does not alter URL when no reset token is present', () => {
     assert.equal(token, '');
     assert.equal(called, false);
 });
+
+test('does not restore an existing signed-in session while a reset token is active', async () => {
+    const { shouldRestoreSignedInSession } = await import('./resetUrl.mjs');
+    assert.equal(shouldRestoreSignedInSession({ id: 'user-1' }, 'one-time-secret'), false);
+});
+
+test('restores an existing signed-in session when no reset token is active', async () => {
+    const { shouldRestoreSignedInSession } = await import('./resetUrl.mjs');
+    assert.equal(shouldRestoreSignedInSession({ id: 'user-1' }, ''), true);
+});
