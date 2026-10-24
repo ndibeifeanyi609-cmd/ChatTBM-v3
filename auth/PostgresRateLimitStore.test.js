@@ -2,6 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const { createPostgresRateLimitStore, UPSERT_BUCKET_SQL } = require('./PostgresRateLimitStore');
 
 test('uses one atomic upsert and normalizes returned bucket fields', async () => {
@@ -15,7 +16,8 @@ test('uses one atomic upsert and normalizes returned bucket fields', async () =>
 
     const result = await store.consume('login:ip-hash', 60000);
     assert.equal(captured.sql, UPSERT_BUCKET_SQL);
-    assert.deepEqual(captured.values, ['login:ip-hash', 60000]);
+    assert.deepEqual(captured.values, [crypto.createHash('sha256').update('login:ip-hash').digest('hex'), 60000]);
+    assert.notEqual(captured.values[0], 'login:ip-hash');
     assert.match(captured.sql, /ON CONFLICT \(bucket_key\) DO UPDATE/);
     assert.equal(result.count, 3);
     assert.equal(result.startedAt, Date.parse('2026-01-01T00:00:00.000Z'));
