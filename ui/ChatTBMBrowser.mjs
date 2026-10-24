@@ -34,7 +34,7 @@ class ChatTBMBrowser {
         );
         if (this.resetToken) this.authMode = 'reset-confirm';
         getCurrentUser().then(async result => {
-            if (result.success && result.user) {
+            if (result.success && result.user && !this.resetToken) {
                 await this.switchAccount(result.user);
                 this.render();
             }
