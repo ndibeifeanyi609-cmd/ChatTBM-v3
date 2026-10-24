@@ -55,7 +55,7 @@ test('session token is stored as a hash and handed off once without a session co
     assert.match(source, /INSERT INTO chattbm_google_oauth_handoffs/);
     assert.match(source, /DELETE FROM chattbm_google_oauth_handoffs/);
     assert.ok(source.includes("router.post('/session-handoff'"));
-    assert.doesNotMatch(source, /res\\.cookie\\(SESSION_COOKIE/);
+    assert.equal(source.includes('res.cookie(SESSION_COOKIE'), false);
 });
 
 test('Google account linking requires an existing authenticated ChatTBM session', () => {
