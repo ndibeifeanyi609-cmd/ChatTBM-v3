@@ -104,16 +104,27 @@ function validateAssistantRequest(data) {
 
         if (
             typeof attachment !== "object" ||
-            Array.isArray(attachment) ||
-            attachment.type !== "image" ||
-            typeof attachment.mimeType !== "string" ||
-            !attachment.mimeType.startsWith("image/") ||
-            typeof attachment.data !== "string" ||
-            !attachment.data.trim()
+            Array.isArray(attachment)
         ) {
-            throw new Error(
-                "Invalid image attachment"
-            );
+            throw new Error("Invalid attachment");
+        }
+
+        const validImage = attachment.type === "image" &&
+            typeof attachment.mimeType === "string" &&
+            attachment.mimeType.startsWith("image/") &&
+            typeof attachment.data === "string" &&
+            Boolean(attachment.data.trim());
+        const validPdf = attachment.type === "document" &&
+            attachment.mimeType === "application/pdf" &&
+            typeof attachment.data === "string" &&
+            Boolean(attachment.data.trim());
+        const validText = attachment.type === "text" &&
+            attachment.mimeType === "text/plain" &&
+            typeof attachment.text === "string" &&
+            attachment.text.length <= 200000;
+
+        if (!validImage && !validPdf && !validText) {
+            throw new Error("Invalid attachment");
         }
     }
 
