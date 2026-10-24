@@ -17,6 +17,7 @@ const router = express.Router();
 const SESSION_COOKIE = 'chattbm_session';
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const HANDOFF_TTL_MS = 2 * 60 * 1000;
 
 function configured() {
     return Boolean(
@@ -117,6 +118,38 @@ router.post('/link', async (req, res, next) => {
             state,
             prompt: 'select_account'
         }) });
+    } catch (error) {
+        return next(error);
+    }
+});
+
+router.post('/session-handoff', async (req, res, next) => {
+    try {
+        const code = req.body && req.body.code;
+        if (typeof code !== 'string' || code.length < 32 || code.length > 256) {
+            return res.status(400).json({ success: false, error: { message: 'Invalid or expired Google sign-in handoff.' } });
+        }
+        const consumed = await database().query(
+            'DELETE FROM chattbm_google_oauth_handoffs WHERE handoff_hash = $1 AND expires_at > NOW() RETURNING user_id',
+            [hashOAuthState(code)]
+        );
+        if (!consumed.rows.length) {
+            return res.status(401).json({ success: false, error: { message: 'Google sign-in handoff expired. Please try again.' } });
+        }
+        const user = await database().query(
+            'SELECT id, email_normalized AS email FROM chattbm_users WHERE id = $1 AND disabled_at IS NULL',
+            [consumed.rows[0].user_id]
+        );
+        if (!user.rows.length) {
+            return res.status(401).json({ success: false, error: { message: 'This ChatTBM account is unavailable.' } });
+        }
+        const token = createSessionToken();
+        const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+        await database().query(
+            'INSERT INTO chattbm_auth_sessions (id, user_id, token_hash, expires_at) VALUES ($1, $2, $3, $4)',
+            [randomUUID(), user.rows[0].id, hashSessionToken(token), expiresAt]
+        );
+        return res.json({ success: true, user: user.rows[0], token, expiresAt });
     } catch (error) {
         return next(error);
     }
@@ -245,26 +278,18 @@ router.get('/callback', async (req, res, next) => {
             return res.status(403).send('This ChatTBM account is unavailable.');
         }
 
-        const token = createSessionToken();
-        const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+        const handoffCode = randomBytes(32).toString('base64url');
+        const handoffExpiresAt = new Date(Date.now() + HANDOFF_TTL_MS);
         await db.query(
-            'INSERT INTO chattbm_auth_sessions (id, user_id, token_hash, expires_at) VALUES ($1, $2, $3, $4)',
-            [randomUUID(), user.id, hashSessionToken(token), expiresAt]
+            'INSERT INTO chattbm_google_oauth_handoffs (handoff_hash, user_id, expires_at) VALUES ($1, $2, $3)',
+            [hashOAuthState(handoffCode), user.id, handoffExpiresAt]
         );
         await db.query('COMMIT');
         transactionOpen = false;
 
-        res.cookie('chattbm_session', token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            path: '/',
-            expires: expiresAt
-        });
-        return res.redirect(
-            process.env.GOOGLE_LOGIN_SUCCESS_URL ||
-            'https://chattbm.com/signin.html?google=success'
-        );
+        const frontend = process.env.GOOGLE_LOGIN_SUCCESS_URL || 'https://chattbm.com/auth/google-handoff.html';
+        const separator = frontend.includes('?') ? '&' : '?';
+        return res.redirect(frontend + separator + 'code=' + encodeURIComponent(handoffCode));
     } catch (error) {
         if (transactionOpen && db) {
             try { await db.query('ROLLBACK'); } catch (_) {}
