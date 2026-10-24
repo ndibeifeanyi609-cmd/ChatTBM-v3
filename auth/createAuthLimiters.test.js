@@ -53,3 +53,28 @@ test('does not silently fall back if shared store creation fails', () => {
         createLocalLimiter: () => { throw new Error('fallback forbidden'); }
     }), /missing secret/);
 });
+
+test('defaults to in-memory limiters when the shared feature flag is unset', () => {
+    const originalFlag = process.env.AUTH_SHARED_RATE_LIMIT_ENABLED;
+    delete process.env.AUTH_SHARED_RATE_LIMIT_ENABLED;
+    try {
+        const localCalls = [];
+        let storeCalls = 0;
+        const limiters = createAuthLimiters({
+            createLocalLimiter: options => {
+                localCalls.push(options.max);
+                return () => {};
+            },
+            createStore: () => { storeCalls += 1; throw new Error('shared store must remain disabled'); }
+        });
+        assert.deepEqual(localCalls, [5, 10, 3, 5]);
+        assert.equal(typeof limiters.registration, 'function');
+        assert.equal(typeof limiters.login, 'function');
+        assert.equal(typeof limiters.passwordResetRequest, 'function');
+        assert.equal(typeof limiters.passwordResetRedeem, 'function');
+        assert.equal(storeCalls, 0);
+    } finally {
+        if (originalFlag === undefined) delete process.env.AUTH_SHARED_RATE_LIMIT_ENABLED;
+        else process.env.AUTH_SHARED_RATE_LIMIT_ENABLED = originalFlag;
+    }
+});
