@@ -73,6 +73,22 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     const anotherClient = await second.consume(otherKey, 60000);
     assert.equal(anotherClient.count, 1);
 
-    const testKeys = [key, otherKey].map(value => crypto.createHash('sha256').update(value, 'utf8').digest('hex'));
+    const expiredKey = crypto.createHash('sha256').update('test:expired-bucket', 'utf8').digest('hex');
+    await pool.query(
+        `INSERT INTO chattbm_auth_rate_limits
+            (bucket_key, window_started_at, request_count, expires_at, updated_at)
+         VALUES ($1, NOW() - INTERVAL '2 minutes', 1, NOW() - INTERVAL '1 minute', NOW())`,
+        [expiredKey]
+    );
+    const cleaned = await second.cleanupExpired({ batchSize: 10 });
+    assert.equal(cleaned, 1, 'cleanup should remove the expired test bucket');
+    const expiredRow = await pool.query(
+        'SELECT 1 FROM chattbm_auth_rate_limits WHERE bucket_key = $1',
+        [expiredKey]
+    );
+    assert.equal(expiredRow.rowCount, 0);
+
+    const testKeys = [key, otherKey, 'test:expired-bucket']
+        .map(value => crypto.createHash('sha256').update(value, 'utf8').digest('hex'));
     await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key = ANY($1::text[])', [testKeys]);
 });
