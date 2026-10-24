@@ -40,7 +40,10 @@ const CLEANUP_EXPIRED_SQL = `
     RETURNING buckets.bucket_key
 `;
 
-function createPostgresRateLimitStore({ query } = {}) {
+function createPostgresRateLimitStore({ query, hmacSecret = process.env.AUTH_RATE_LIMIT_HMAC_SECRET } = {}) {
+    if (typeof hmacSecret !== 'string' || Buffer.byteLength(hmacSecret, 'utf8') < 32) {
+        throw new TypeError('AUTH_RATE_LIMIT_HMAC_SECRET must be configured with at least 32 bytes.');
+    }
     const execute = query || ((...args) => {
         const pool = getPool();
         if (!pool) throw new Error('Rate-limit database is not configured.');
@@ -62,8 +65,8 @@ function createPostgresRateLimitStore({ query } = {}) {
             if (!Number.isSafeInteger(windowMs) || windowMs < 1) {
                 throw new TypeError('windowMs must be a positive safe integer.');
             }
-            // Store only a one-way digest, never the caller's raw identifier.
-            const bucketKey = crypto.createHash('sha256').update(key, 'utf8').digest('hex');
+            // A keyed digest prevents offline guessing of low-entropy identifiers if the table leaks.
+            const bucketKey = crypto.createHmac('sha256', hmacSecret).update(key, 'utf8').digest('hex');
             const result = await execute(UPSERT_BUCKET_SQL, [bucketKey, windowMs]);
             const row = result && result.rows && result.rows[0];
             if (!row) throw new Error('Rate-limit storage returned no bucket.');
