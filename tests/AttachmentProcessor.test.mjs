@@ -2,7 +2,11 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createAttachment, MAX_ATTACHMENT_SIZE } = require('../ui/AttachmentProcessor.mjs');
+let createAttachment;
+let MAX_ATTACHMENT_SIZE;
+test.before(async () => {
+    ({ createAttachment, MAX_ATTACHMENT_SIZE } = await import('../ui/AttachmentProcessor.mjs'));
+});
 
 function file(name, type, value) {
     const bytes = new TextEncoder().encode(value);
