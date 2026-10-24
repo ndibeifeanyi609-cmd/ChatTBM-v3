@@ -63,3 +63,24 @@ test('all four sensitive auth routes fail closed when shared storage is unavaila
     }
     assert.deepEqual(calls, { register: 0, login: 0, resetRequest: 0, resetConfirm: 0 });
 });
+
+test('routes use distinct injected limiter functions in the intended order', () => {
+    const routes = new Map();
+    const router = { post(path, ...handlers) { routes.set('POST ' + path, handlers); }, get(path, ...handlers) { routes.set('GET ' + path, handlers); } };
+    const express = { Router: () => router };
+    const noop = () => {};
+    const limiters = { registration: function registerLimit(){}, login: function loginLimit(){}, passwordResetRequest: function resetRequestLimit(){}, passwordResetRedeem: function resetConfirmLimit(){} };
+    createAuthRouter({
+        express,
+        services: { register: async()=>({success:false}), login: async()=>({success:false}), authenticateSession: async()=>null, revokeSession: async()=>{} },
+        passwordReset: { createPasswordReset: async()=>null, redeemPasswordReset: async()=>({success:false}) },
+        sendPasswordResetEmail: async()=>{},
+        limiters
+    });
+    assert.equal(routes.get('POST /register')[0], limiters.registration);
+    assert.equal(routes.get('POST /login')[0], limiters.login);
+    assert.equal(routes.get('POST /password-reset/request')[0], limiters.passwordResetRequest);
+    assert.equal(routes.get('POST /password-reset/confirm')[0], limiters.passwordResetRedeem);
+    assert.equal(routes.get('GET /me').length, 1);
+    assert.equal(routes.get('POST /logout').length, 1);
+});
