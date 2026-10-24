@@ -6,6 +6,9 @@ on:
     paths:
       - 'auth/rateLimit.js'
       - 'auth/rateLimit.test.js'
+      - 'auth/PostgresRateLimitStore.js'
+      - 'auth/PostgresRateLimitStore.test.js'
+      - 'database/migrations/005_auth_rate_limits.sql'
       - 'tests/sharedAuthRateLimit.integration.test.js'
   workflow_dispatch:
 
