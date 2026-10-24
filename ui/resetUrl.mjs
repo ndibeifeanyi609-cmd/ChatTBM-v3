@@ -7,3 +7,7 @@ export function captureAndClearResetToken(href, replaceState) {
     }
     return token;
 }
+
+export function shouldRestoreSignedInSession(user, resetToken) {
+    return Boolean(user && !resetToken);
+}
