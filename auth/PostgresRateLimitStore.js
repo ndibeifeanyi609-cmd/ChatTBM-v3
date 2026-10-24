@@ -51,14 +51,16 @@ function createPostgresRateLimitStore({ query, hmacSecret = process.env.AUTH_RAT
     });
     let consumeCalls = 0;
 
-    return {
-        async cleanupExpired({ batchSize = 500 } = {}) {
+    async function cleanupExpired({ batchSize = 500 } = {}) {
             if (!Number.isSafeInteger(batchSize) || batchSize < 1 || batchSize > 5000) {
                 throw new TypeError('batchSize must be an integer from 1 to 5000.');
             }
             const result = await execute(CLEANUP_EXPIRED_SQL, [batchSize]);
             return result && Array.isArray(result.rows) ? result.rows.length : 0;
-        },
+    }
+
+    return {
+        cleanupExpired,
         async consume(key, windowMs) {
             if (typeof key !== 'string' || !key || key.length > 512) {
                 throw new TypeError('Rate-limit key must be a non-empty string of at most 512 characters.');
@@ -71,7 +73,7 @@ function createPostgresRateLimitStore({ query, hmacSecret = process.env.AUTH_RAT
             // Opportunistically remove a bounded batch; cleanup failure must not block auth.
             consumeCalls += 1;
             if (consumeCalls % 100 === 0) {
-                try { await this.cleanupExpired({ batchSize: 100 }); } catch (_) { /* Best-effort maintenance. */ }
+                try { await cleanupExpired({ batchSize: 100 }); } catch (_) { /* Best-effort maintenance. */ }
             }
             const result = await execute(UPSERT_BUCKET_SQL, [bucketKey, windowMs]);
             const row = result && result.rows && result.rows[0];
