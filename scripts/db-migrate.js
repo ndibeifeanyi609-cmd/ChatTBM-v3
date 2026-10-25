@@ -39,7 +39,7 @@ function discoverMigrations(directory = MIGRATIONS_DIR) {
 }
 
 function assertSafeTarget(row, env = process.env) {
-    if (!row || typeof row.database !== 'string' || typeof row.username !== 'string') {
+    if (!row || typeof row.database !== 'string' || typeof row.username !== 'string' || typeof row.host !== 'string') {
         throw new Error('Unable to verify database identity.');
     }
     // This runner is deliberately test-only until a separately reviewed production
@@ -49,6 +49,10 @@ function assertSafeTarget(row, env = process.env) {
     }
     if (!row.database.endsWith('_test')) {
         throw new Error('Refusing to run migrations outside a *_test database.');
+    }
+    const approvedHosts = (env.CHATTBM_MIGRATION_TEST_HOSTS || '').split(',').map((host) => host.trim()).filter(Boolean);
+    if (approvedHosts.length === 0 || !approvedHosts.includes(row.host)) {
+        throw new Error('Refusing migration: database host is not explicitly approved for disposable testing.');
     }
 }
 
@@ -66,7 +70,8 @@ async function createRunner(options = {}) {
         connected = true;
         try {
             const identity = await client.query(
-                'SELECT current_database() AS database, current_user AS username'
+                'SELECT current_database() AS database, current_user AS username, $1::text AS host',
+                [client.connectionParameters?.host || '']
             );
             assertSafeTarget(identity.rows[0], env);
             await client.query("SELECT set_config('statement_timeout', '15000', false)");
