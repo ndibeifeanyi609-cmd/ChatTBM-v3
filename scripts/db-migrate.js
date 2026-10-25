@@ -63,12 +63,18 @@ async function createRunner(options = {}) {
         if (!env.DATABASE_URL && !options.client) throw new Error('DATABASE_URL is required.');
         await client.connect();
         connected = true;
-        const identity = await client.query(
-            'SELECT current_database() AS database, current_user AS username'
-        );
-        assertSafeTarget(identity.rows[0], env);
-        await client.query("SELECT set_config('statement_timeout', '15000', false)");
-        await client.query("SELECT set_config('lock_timeout', '5000', false)");
+        try {
+            const identity = await client.query(
+                'SELECT current_database() AS database, current_user AS username'
+            );
+            assertSafeTarget(identity.rows[0], env);
+            await client.query("SELECT set_config('statement_timeout', '15000', false)");
+            await client.query("SELECT set_config('lock_timeout', '5000', false)");
+        } catch (error) {
+            try { await client.end(); } catch (_) {}
+            connected = false;
+            throw error;
+        }
     }
 
     async function lock() {
