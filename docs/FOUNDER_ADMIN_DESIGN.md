@@ -140,3 +140,17 @@ Before runtime code is written, complete these checks:
 4. Identify real rate-limit and provider-usage telemetry sources and their retention/window semantics.
 5. Keep the initial admin endpoints read-only and aggregate-only.
 6. Add implementation only on a separate branch after the above decisions are recorded; do not merge or deploy automatically.
+
+
+## 13. Entitlement Gate Inspection Findings (2026-10-25)
+
+- The canonical Payment & Subscription domain is documented in `docs/CONTRACT.md` as owner of payment, subscription, and entitlement state.
+- The current `payment/Entitlement.js` object represents a subscription-linked entitlement with lifecycle states. It does not itself define a founder or lifetime-access policy.
+- `payment/PaymentBoundary.js` coordinates payment creation and provider outcomes; the reviewed portion does not establish a general request-time product access decision.
+- `services/assistantEngine.js` explicitly lists paid subscription entitlements as not verified available product behavior. Repository search did not identify a single established product-wide entitlement gate that can safely be extended without further tracing.
+- Therefore, do not add a founder-only bypass directly inside the assistant engine, and do not manufacture a subscription/payment to simulate founder access. First trace the actual protected feature consumers and approve a canonical access-decision boundary under REG-096.
+- A first implementation can safely add a separately tested admin authorization boundary only after the route/API design and real telemetry sources are identified. Do not expose private user data merely to make a dashboard look complete.
+
+## 14. Next Work Item
+
+Trace the authenticated chat route into its controller and service, plus any existing quota/access checks, to establish where product entitlement would be enforced if paid features are introduced. Document the concrete call path and tests before changing runtime behavior. The current work remains design-only until that trace is complete.
