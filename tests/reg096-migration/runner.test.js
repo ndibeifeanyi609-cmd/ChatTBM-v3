@@ -12,8 +12,8 @@ test('migration runner applies, verifies, repeats, and rolls back harmless probe
     const os = require('node:os');
     const path = require('node:path');
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-runner-probe-'));
-    fs.writeFileSync(path.join(directory, '0001_runner_probe.up.sql'), 'CREATE TABLE chattbm_migration_runner_probe (id INTEGER PRIMARY KEY, note TEXT NOT NULL);\\n');
-    fs.writeFileSync(path.join(directory, '0001_runner_probe.down.sql'), 'DROP TABLE IF EXISTS chattbm_migration_runner_probe;\\n');
+    fs.writeFileSync(path.join(directory, '0001_runner_probe.up.sql'), 'CREATE TABLE chattbm_migration_runner_probe (id INTEGER PRIMARY KEY, note TEXT NOT NULL);\n');
+    fs.writeFileSync(path.join(directory, '0001_runner_probe.down.sql'), 'DROP TABLE IF EXISTS chattbm_migration_runner_probe;\n');
 
     try {
         const initial = await (await createRunner({ directory })).status();
