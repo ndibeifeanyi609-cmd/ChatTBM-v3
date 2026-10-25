@@ -22,7 +22,7 @@ function discoverMigrations(directory = MIGRATIONS_DIR) {
     for (const name of names) {
         if (!name.endsWith('.sql')) continue;
         const match = /^(\d{4}_[a-z0-9_]+)\.(up|down)\.sql$/.exec(name);
-        if (!match) throw new Error('Invalid SQL migration filename: ' + name);
+        if (!match) continue;
         ids.add(match[1]);
     }
 
