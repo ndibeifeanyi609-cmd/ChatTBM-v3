@@ -1,0 +1,50 @@
+name: Founder Admin Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'admin/**'
+      - 'controllers/adminOverviewController.js'
+      - 'routes/adminRoutes.js'
+      - 'tests/founderAdmin.test.js'
+      - 'server.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/founder-admin-tests.yml'
+  push:
+    branches: [feature/founder-admin-design]
+    paths:
+      - 'admin/**'
+      - 'controllers/adminOverviewController.js'
+      - 'routes/adminRoutes.js'
+      - 'tests/founderAdmin.test.js'
+      - 'server.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/founder-admin-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  founder-admin-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run founder admin tests
+        run: node --test tests/founderAdmin.test.js
+      - name: Check syntax
+        run: |
+          node --check admin/founderAuthorization.js
+          node --check controllers/adminOverviewController.js
+          node --check routes/adminRoutes.js
+          node --check server.js
