@@ -66,3 +66,20 @@ Product entitlement must not bypass authentication, resource quotas, abuse prote
 3. Define a durable query interface for REG-096 customer entitlements before paid gates are introduced.
 4. Resolve founder account verification through the normal account process.
 5. Define how policy edits are reviewed/audited; initial version should be read-only and seeded only by reviewed migration.
+
+## Repository verification checkpoint (2026-10-25)
+
+Source inspection confirms these constraints:
+
+- `package.json` defines start/dev and a streaming-test script, but no migration script or migration framework is declared.
+- `database/Postgres.js` currently creates several application tables using `CREATE TABLE IF NOT EXISTS` inside `initializeDatabase()`. That is the existing schema-initialization pattern, not a versioned migration/rollback mechanism.
+- `payment/PaymentPersistence.js` defaults to a local JSON file and keeps records in process-local Maps after loading. `PaymentRegistry.js` also uses in-process Maps. Neither file establishes shared, durable production entitlement queries across instances.
+- `payment/Entitlement.js` requires a `subscriptionId`, and REG-096 states that entitlements must not become active without verified payment/subscription authority. A founder waiver therefore must not be represented as a fabricated active subscription-linked entitlement.
+- The repository has no approved durable entitlement query interface identified by this inspection.
+
+## Implementation gate
+
+Do not add a founder waiver to `PaymentPersistence`, `PaymentRegistry`, or the live route handlers yet. The next implementation proposal must first define a versioned migration/rollback convention, then define how REG-096 will gain durable PostgreSQL persistence for existing payment/subscription/entitlement records without losing canonical IDs, ownership, lifecycle, provider references, or idempotency. The feature policy table alone cannot safely answer customer entitlement queries.
+
+The existing `initializeDatabase()` startup DDL should not be expanded for this feature until the migration approach is reviewed. No production schema or behavior was changed by this checkpoint.
+
