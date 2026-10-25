@@ -53,3 +53,7 @@ jobs:
       - name: Prove the disposable database is isolated and reachable
         run: |
           node -e "const {Client}=require('pg'); (async()=>{const c=new Client({connectionString:process.env.DATABASE_URL}); try { await c.connect(); const r=await c.query('SELECT current_database() AS name, current_user AS username'); if(r.rows[0].name!=='chattbm_test'||r.rows[0].username!=='chattbm_test') throw new Error('Unexpected test database identity'); console.log('Disposable PostgreSQL gate ready:',r.rows[0].name); } finally { await c.end(); } })().catch(e=>{ console.error('Disposable PostgreSQL gate failed'); process.exit(1); });"
+      - name: Check migration runner syntax
+        run: node --check scripts/db-migrate.js
+      - name: Test migration runner against disposable PostgreSQL
+        run: node --test tests/reg096-migration/runner.test.js
