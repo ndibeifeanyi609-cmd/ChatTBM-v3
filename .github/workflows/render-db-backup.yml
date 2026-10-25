@@ -1,0 +1,38 @@
+name: Encrypted Render Database Backup
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check backup secrets exist
+        env:
+          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          test -n "$DATABASE_URL"
+          test -n "$BACKUP_PASSPHRASE"
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg
+      - name: Create encrypted PostgreSQL dump
+        env:
+          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          file="chattbm-db-$(date -u +%Y%m%dT%H%M%SZ).dump.gpg"
+          docker run --rm -e DATABASE_URL postgres:18-alpine sh -c 'pg_dump --no-owner --no-privileges "$DATABASE_URL"' | gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 --output "$file"
+          test -s "$file"
+          echo "BACKUP_FILE=$file" >> "$GITHUB_ENV"
+      - name: Upload encrypted backup for one day
+        uses: actions/upload-artifact@v4
+        with:
+          name: chattbm-encrypted-postgres-backup
+          path: ${{ env.BACKUP_FILE }}
+          if-no-files-found: error
+          retention-days: 1
