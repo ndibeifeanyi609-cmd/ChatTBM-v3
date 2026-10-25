@@ -19,17 +19,27 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gnupg
-      - name: Create encrypted PostgreSQL dump
+      - name: Create encrypted PostgreSQL custom-format dump
         env:
           DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
         run: |
           set -euo pipefail
           file="chattbm-db-$(date -u +%Y%m%dT%H%M%SZ).dump.gpg"
-          docker run --rm -e DATABASE_URL postgres:18-alpine sh -c 'pg_dump --no-owner --no-privileges "$DATABASE_URL"' | gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 --output "$file"
+          docker run --rm -e DATABASE_URL postgres:18-alpine sh -c 'pg_dump --format=custom --no-owner --no-privileges "$DATABASE_URL"' | gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 --output "$file"
           test -s "$file"
           echo "BACKUP_FILE=$file" >> "$GITHUB_ENV"
-      - name: Upload encrypted backup for seven days
+      - name: Verify backup decrypts and PostgreSQL recognizes it
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          plain="/tmp/chattbm-verify.dump"
+          trap 'rm -f "$plain"' EXIT
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --decrypt "$BACKUP_FILE" > "$plain"
+          test -s "$plain"
+          docker run --rm -v "$plain:/backup.dump:ro" postgres:18-alpine pg_restore --list /backup.dump > /dev/null
+      - name: Upload verified encrypted backup for seven days
         uses: actions/upload-artifact@v4
         with:
           name: chattbm-encrypted-postgres-backup
