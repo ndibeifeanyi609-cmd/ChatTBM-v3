@@ -154,3 +154,18 @@ Before runtime code is written, complete these checks:
 ## 14. Next Work Item
 
 Trace the authenticated chat route into its controller and service, plus any existing quota/access checks, to establish where product entitlement would be enforced if paid features are introduced. Document the concrete call path and tests before changing runtime behavior. The current work remains design-only until that trace is complete.
+
+
+## 15. Authenticated Chat Call-Path Trace (2026-10-25)
+
+Verified source path:
+
+1. `server.js` mounts `requireAuth` before `routes/chatRoutes.js` at `/api/chat`.
+2. `auth/requireAuth.js` validates the cookie/bearer session using `authenticateSession` and attaches the verified identity as `req.authUser`.
+3. `routes/chatRoutes.js` registers both `POST /` and `POST /stream`.
+4. `controllers/chatController.js` calls `authenticatedUserId(req)` in both handlers and passes `{ ...body, userId }`, ensuring the verified ID overrides any body-supplied ID.
+5. The handlers delegate to `ChatInteractionBoundary.handleInteraction()` and `handleStreamingInteraction()`.
+
+Finding: the reviewed chat route has a sound authentication identity path, but no general product-plan entitlement/quota check was found in this call path. The existing assistant engine documentation explicitly says paid entitlements are not verified as available product behavior. Do not insert a founder bypass or plan quota into this route until a canonical product access contract exists and all relevant product surfaces are inventoried. Authentication and security rate limits must remain independent of any future founder product entitlement.
+
+Immediate next implementation should focus on an isolated, read-only admin API with authenticated server-side authorization and aggregate-only outputs, after its metric sources and failure behavior are specified. It must not expose conversation content, credentials, or unverified usage estimates.
