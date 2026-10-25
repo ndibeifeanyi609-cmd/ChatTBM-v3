@@ -52,6 +52,18 @@ The following is a design target, not executable SQL:
    - Migration ID, checksum, applied timestamp, and optional runner version.
    - A changed checksum for an already-applied migration must halt and require manual review.
 
+## Constraint decisions for the first migration draft
+
+These decisions narrow the first SQL draft without claiming that a migration has been implemented:
+
+- **Idempotency:** preserve the current globally unique idempotency-key index. Model it as a database unique constraint on `idempotency_key`; the repository must still check the existing owner/provider so reuse across a different payment returns the contract-defined conflict, not another user's transaction.
+- **Provider-reference uniqueness:** use a native composite unique constraint on `(provider, provider_object_type, provider_object_id)`. Do not build a delimiter-concatenated database key; distinct component values must remain distinct.
+- **Entitlement ownership:** give subscriptions a unique key on `(id, user_id)`, then reference that pair from entitlements as `(subscription_id, user_id)`. This allows PostgreSQL to enforce that an entitlement owner matches its subscription owner, provided the chosen user ID column types match the existing user identity contract.
+- **Provider-reference canonical association:** retain the canonical type allowlist from `ProviderReference.js`. Until a typed relational design is approved, enforce canonical target existence and matching owner inside a single repository transaction, and add race/concurrency tests. This application-level validation is a documented interim limitation, not equivalent to a foreign key.
+- **No invented payment fields:** the initial transaction table should contain only confirmed canonical fields. Do not add amount, currency, provider payload, or response columns until the provider boundary contract establishes their exact meaning and retention needs.
+
+These decisions must be verified against actual user-ID types, existing registry behavior, and migration integration tests before SQL is committed.
+
 ## Important unresolved design gaps
 
 - The current `PaymentTransaction` object contains no normalized amount/currency or provider response fields. Inspect provider boundary/adapter contracts before defining storage for any extra data; do not invent fields.
