@@ -7,7 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { createRunner, checksum } = require('../../scripts/db-migrate');
 
-test('verify rejects an applied migration whose source checksum changed', { timeout: 30000 }, async () => {
+test('verify rejects an applied migration whose source checksum changed', { timeout: 30000, skip: !process.env.DATABASE_URL }, async () => {
     assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
     assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
 
