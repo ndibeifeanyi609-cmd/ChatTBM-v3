@@ -176,7 +176,9 @@ async function createRunner(options = {}) {
                     completed.push(migration.id);
                 } catch (error) {
                     await client.query('ROLLBACK');
-                    throw new Error('Migration failed: ' + migration.id);
+                    const failure = new Error('Migration failed: ' + migration.id, { cause: error });
+                    if (error && typeof error.code === 'string') failure.code = error.code;
+                    throw failure;
                 }
             }
             return { applied: completed };
@@ -210,7 +212,9 @@ async function createRunner(options = {}) {
                 return { rolledBack: id };
             } catch (_) {
                 await client.query('ROLLBACK');
-                throw new Error('Rollback failed: ' + id);
+                const failure = new Error('Rollback failed: ' + id, { cause: _ });
+                if (_ && typeof _.code === 'string') failure.code = _.code;
+                throw failure;
             }
         } finally {
             await unlockAndClose();
