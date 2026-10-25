@@ -1,7 +1,7 @@
 # Founder and Administrator Access Design
 
-Status: Discovery and Design
-Implementation status: Not implemented
+Status: Draft implementation under review
+Implementation status: Read-only admin overview and founder authorization implemented on feature/founder-admin-design; founder subscription entitlement remains unimplemented
 Target: ChatTBM-v3
 
 ## 1. Purpose
@@ -112,7 +112,8 @@ Required tests before activation:
 
 ## 10. Known Limitations
 
-- This document is design only. No role, entitlement, dashboard, or database schema has been changed by this design.
+- The current branch contains a draft founder authorization middleware and read-only admin overview endpoint. These changes are not merged or deployed.
+- The founder subscription entitlement, customer quota integration, usage telemetry, payment/subscription reporting, and visible dashboard UI remain unimplemented.
 - The account email verification status observed during discovery was unverified; it must be resolved before granting permanent privileges.
 - Live AI provider costs may not be available unless usage telemetry is configured.
 - Third-party infrastructure and provider charges are not waived by a ChatTBM founder entitlement.
@@ -169,3 +170,20 @@ Verified source path:
 Finding: the reviewed chat route has a sound authentication identity path, but no general product-plan entitlement/quota check was found in this call path. The existing assistant engine documentation explicitly says paid entitlements are not verified as available product behavior. Do not insert a founder bypass or plan quota into this route until a canonical product access contract exists and all relevant product surfaces are inventoried. Authentication and security rate limits must remain independent of any future founder product entitlement.
 
 Immediate next implementation should focus on an isolated, read-only admin API with authenticated server-side authorization and aggregate-only outputs, after its metric sources and failure behavior are specified. It must not expose conversation content, credentials, or unverified usage estimates.
+
+
+## 12. Implementation Checkpoint (2026-10-25)
+
+Implemented on the draft branch only:
+- `GET /api/admin/overview`, mounted behind existing session authentication.
+- Founder authorization requires `CHATTBM_FOUNDER_USER_ID`, matches the authenticated server-side user ID, and checks that the database account is verified and enabled.
+- Overview reports aggregate registered-user count and database/service status; usage and provider-cost metrics explicitly report unavailable.
+- Focused Node.js 20 tests and syntax checks passed in GitHub Actions for commit `0e18facb21dd1e0fa754554b15f4b1a5f8ff3907`.
+
+Not implemented or not yet verified:
+- Founder free subscription entitlement and the canonical product-access decision.
+- Admin dashboard UI, durable AI usage/token/cost telemetry, complete shared rate-limit metrics, and reliable payment/subscription reporting.
+- Production founder activation. The account verification status must be resolved first; no production environment variable should be set before review and approval.
+- Full end-to-end route tests for anonymous requests, ordinary authenticated users, and founder requests through the Express app.
+
+Do not merge or deploy this branch solely because its focused CI tests pass.
