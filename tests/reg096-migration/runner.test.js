@@ -82,3 +82,33 @@ test('migration runner refuses rollback while a later migration remains applied'
         fs.rmSync(directory, { recursive: true, force: true });
     }
 });
+
+
+test('migration runner rejects a changed rollback file after application', { timeout: 30000 }, async () => {
+    assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
+    assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-down-checksum-'));
+    const id = '0001_down_checksum_probe';
+    const upPath = path.join(directory, id + '.up.sql');
+    const downPath = path.join(directory, id + '.down.sql');
+    const downSql = 'CREATE TABLE chattbm_down_checksum_probe (id INTEGER PRIMARY KEY);\\n';
+    fs.writeFileSync(upPath, 'CREATE TABLE chattbm_down_checksum_probe (id INTEGER PRIMARY KEY);\\n');
+    fs.writeFileSync(downPath, downSql);
+
+    try {
+        await (await createRunner({ directory })).up();
+        fs.writeFileSync(downPath, 'SELECT 1;\\n');
+        await assert.rejects(
+            () => createRunner({ directory }).then((runner) => runner.verify()),
+            /Applied migration down checksum mismatch: 0001_down_checksum_probe/
+        );
+    } finally {
+        fs.writeFileSync(downPath, downSql);
+        await (await createRunner({ directory })).down(id);
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});
