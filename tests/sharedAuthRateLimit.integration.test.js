@@ -60,6 +60,8 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     const key = 'test:login:integration-client';
     const otherKey = 'test:login:other-client';
     const expiredKey = crypto.createHmac('sha256', TEST_HMAC_SECRET).update('test:expired-bucket', 'utf8').digest('hex');
+    const testKeys = [key, otherKey, 'test:expired-bucket']
+        .map(value => crypto.createHmac('sha256', TEST_HMAC_SECRET).update(value, 'utf8').digest('hex'));
     await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key = ANY($1::text[])', [testKeys]);
 
     const first = createPostgresRateLimitStore({ hmacSecret: TEST_HMAC_SECRET, query: (...args) => pool.query(...args) });
@@ -89,7 +91,5 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     );
     assert.equal(expiredRow.rowCount, 0);
 
-    const testKeys = [key, otherKey, 'test:expired-bucket']
-        .map(value => crypto.createHmac('sha256', TEST_HMAC_SECRET).update(value, 'utf8').digest('hex'));
     await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key = ANY($1::text[])', [testKeys]);
 });
