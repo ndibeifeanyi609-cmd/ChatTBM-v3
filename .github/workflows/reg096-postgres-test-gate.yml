@@ -57,5 +57,7 @@ jobs:
         run: node --check scripts/db-migrate.js
       - name: Test migration safety gates and discovery
         run: node --test tests/reg096-migration/safety.test.js tests/reg096-migration/discovery.test.js
+      - name: Test migration checksum enforcement
+        run: node --test tests/reg096-migration/checksum.test.js
       - name: Test migration runner against disposable PostgreSQL
         run: node --test tests/reg096-migration/runner.test.js
