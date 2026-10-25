@@ -95,7 +95,7 @@ test('migration runner rejects a changed rollback file after application', { tim
     const id = '0001_down_checksum_probe';
     const upPath = path.join(directory, id + '.up.sql');
     const downPath = path.join(directory, id + '.down.sql');
-    const downSql = 'CREATE TABLE chattbm_down_checksum_probe (id INTEGER PRIMARY KEY);\n';
+    const downSql = 'DROP TABLE chattbm_down_checksum_probe;\n';
     fs.writeFileSync(upPath, 'CREATE TABLE chattbm_down_checksum_probe (id INTEGER PRIMARY KEY);\n');
     fs.writeFileSync(downPath, downSql);
 
