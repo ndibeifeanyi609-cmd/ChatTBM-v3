@@ -20,9 +20,9 @@ function discoverMigrations(directory = MIGRATIONS_DIR) {
     const ids = new Set();
 
     for (const name of names) {
-        if (name === '.gitkeep') continue;
+        if (!name.endsWith('.sql')) continue;
         const match = /^(\d{4}_[a-z0-9_]+)\.(up|down)\.sql$/.exec(name);
-        if (!match) throw new Error('Invalid migration filename: ' + name);
+        if (!match) throw new Error('Invalid SQL migration filename: ' + name);
         ids.add(match[1]);
     }
 
