@@ -6,7 +6,21 @@ permissions:
 jobs:
   backup:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
+    services:
+      restore-postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: restore_test
+          POSTGRES_PASSWORD: restore_test_password
+          POSTGRES_DB: restore_validation
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U restore_test -d restore_validation"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     steps:
       - name: Check backup secrets exist
         env:
@@ -29,17 +43,23 @@ jobs:
           docker run --rm -e DATABASE_URL postgres:18-alpine sh -c 'pg_dump --format=custom --no-owner --no-privileges "$DATABASE_URL"' | gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 --output "$file"
           test -s "$file"
           echo "BACKUP_FILE=$file" >> "$GITHUB_ENV"
-      - name: Verify backup decrypts and PostgreSQL recognizes it
+      - name: Decrypt and restore into disposable PostgreSQL
         env:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
         run: |
           set -euo pipefail
-          plain="/tmp/chattbm-verify.dump"
+          plain="/tmp/chattbm-restore-test.dump"
           trap 'rm -f "$plain"' EXIT
           gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --decrypt "$BACKUP_FILE" > "$plain"
           test -s "$plain"
-          docker run --rm -v "$plain:/backup.dump:ro" postgres:18-alpine pg_restore --list /backup.dump > /dev/null
-      - name: Upload verified encrypted backup for seven days
+          docker run --rm --network host -e PGPASSWORD=restore_test_password -v "$plain:/backup.dump:ro" postgres:18-alpine sh -c '
+            set -eu
+            pg_restore --exit-on-error --host=127.0.0.1 --username=restore_test --dbname=restore_validation --no-owner --no-privileges /backup.dump
+            count=$(psql --host=127.0.0.1 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT count(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_type = chr(66)||chr(65)||chr(83)||chr(69)||chr(32)||chr(84)||chr(65)||chr(66)||chr(76)||chr(69) AND table_name LIKE chr(99)||chr(104)||chr(97)||chr(116)||chr(116)||chr(98)||chr(109)||chr(95)||chr(37)")
+            test "$count" -ge 5
+            echo "RESTORE_VALIDATION_OK: core ChatTBM tables restored in disposable PostgreSQL."
+          '
+      - name: Upload restore-tested encrypted backup for seven days
         uses: actions/upload-artifact@v4
         with:
           name: chattbm-encrypted-postgres-backup
