@@ -64,6 +64,12 @@ These decisions narrow the first SQL draft without claiming that a migration has
 
 These decisions must be verified against actual user-ID types, existing registry behavior, and migration integration tests before SQL is committed.
 
+## Migration-history compatibility blocker
+
+Before adding a REG-096 SQL migration, reconcile the migration runner with the repository's existing files under `database/migrations/`. The directory currently contains legacy single-file migrations such as `001_auth_accounts_sessions.sql`, `002_chat_history.sql`, and other `00N_*.sql` files. The current `scripts/db-migrate.js` discovers only paired `NNNN_name.up.sql` files and requires matching `down.sql` files for applied migrations.
+
+Do not rename, delete, or rewrite existing migration files just to make discovery pass. First document which system has actually been used against the configured test database, inspect the migration ledger in a disposable database, and establish whether the legacy files were applied and how their effects are tracked. Then choose and test a backward-compatible transition strategy. The migration runner's test-only target guard must remain in place; no production database inspection or migration is authorized by this design work.
+
 ## Important unresolved design gaps
 
 - The current `PaymentTransaction` object contains no normalized amount/currency or provider response fields. Inspect provider boundary/adapter contracts before defining storage for any extra data; do not invent fields.
