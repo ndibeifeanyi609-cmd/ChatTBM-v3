@@ -187,3 +187,19 @@ Not implemented or not yet verified:
 - Full end-to-end route tests for anonymous requests, ordinary authenticated users, and founder requests through the Express app.
 
 Do not merge or deploy this branch solely because its focused CI tests pass.
+
+
+## 13. Founder Entitlement Boundary Review (2026-10-25)
+
+The existing payment domain does not yet represent founder/lifetime access:
+- `payment/Entitlement.js` requires a `subscriptionId`; it cannot express a founder entitlement without inventing a subscription.
+- `payment/PaymentLifecycle.js` defines subscription-linked entitlement lifecycle states, but no founder-policy decision.
+- `payment/PaymentPersistence.js` stores records in a local JSON file by default. Its use as the durable production authority for a permanent founder waiver is not established.
+- `services/assistantEngine.js` validates and executes assistant requests but does not enforce subscription entitlement. Do not add an isolated bypass there; first identify the central product-access decision used by every paid feature.
+- The current payment implementation must not be modified to create a fake successful payment or a synthetic subscription.
+
+### Required next design decision
+
+Before implementing the founder waiver, map every user-facing paid-feature entry point to its server-side access decision. If no shared decision exists, design one central ProductAccess/Entitlement boundary with explicit policy results (for example, subscription-required versus founder-exempt), while preserving the canonical payment domain and all security/provider limits. This must include normal and streaming chat paths and any other paid features; it must not treat admin access as product entitlement.
+
+The design must specify durable identity/policy storage, rollout and rollback, and tests proving ordinary-user behavior is unchanged. Do not activate the founder setting or merge/deploy until this contract, persistence, and account verification questions are resolved.
