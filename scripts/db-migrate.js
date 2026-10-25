@@ -206,6 +206,11 @@ async function createRunner(options = {}) {
             await ensureLedger();
             const applied = await validateApplied(migrations);
             if (!applied.has(id)) throw new Error('Migration is not applied.');
+            const targetIndex = migrations.findIndex((item) => item.id === id);
+            const laterApplied = migrations.slice(targetIndex + 1).find((item) => applied.has(item.id));
+            if (laterApplied) {
+                throw new Error('Cannot roll back ' + id + ' while later migration is applied: ' + laterApplied.id);
+            }
             await client.query('BEGIN');
             try {
                 await client.query(sql);
