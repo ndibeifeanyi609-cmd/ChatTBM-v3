@@ -36,7 +36,6 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     const migrationPath = path.join(__dirname, '..', 'database', 'migrations', '005_auth_rate_limits.sql');
     const migrationSql = fs.readFileSync(migrationPath, 'utf8');
     await pool.query(migrationSql);
-    // Reapplying the migration must be safe and idempotent.
     await pool.query(migrationSql);
 
     const schema = await pool.query(`
@@ -59,8 +58,9 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
 
     const key = 'test:login:integration-client';
     const otherKey = 'test:login:other-client';
+    const resetKey = 'test:login:expired-reset-client';
     const expiredKey = crypto.createHmac('sha256', TEST_HMAC_SECRET).update('test:expired-bucket', 'utf8').digest('hex');
-    const testKeys = [key, otherKey, 'test:expired-bucket']
+    const testKeys = [key, otherKey, resetKey, 'test:expired-bucket']
         .map(value => crypto.createHmac('sha256', TEST_HMAC_SECRET).update(value, 'utf8').digest('hex'));
     await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key = ANY($1::text[])', [testKeys]);
 
@@ -76,6 +76,14 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
 
     const anotherClient = await second.consume(otherKey, 60000);
     assert.equal(anotherClient.count, 1);
+
+    await first.consume(resetKey, 60000);
+    await pool.query(
+        "UPDATE chattbm_auth_rate_limits SET expires_at = NOW() - INTERVAL '1 second' WHERE bucket_key = $1",
+        [testKeys[2]]
+    );
+    const reset = await second.consume(resetKey, 60000);
+    assert.equal(reset.count, 1, 'expired bucket should reset its counter');
 
     await pool.query(
         `INSERT INTO chattbm_auth_rate_limits
