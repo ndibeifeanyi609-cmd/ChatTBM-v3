@@ -29,10 +29,10 @@ jobs:
           docker run --rm -e DATABASE_URL postgres:18-alpine sh -c 'pg_dump --no-owner --no-privileges "$DATABASE_URL"' | gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 --output "$file"
           test -s "$file"
           echo "BACKUP_FILE=$file" >> "$GITHUB_ENV"
-      - name: Upload encrypted backup for one day
+      - name: Upload encrypted backup for seven days
         uses: actions/upload-artifact@v4
         with:
           name: chattbm-encrypted-postgres-backup
           path: ${{ env.BACKUP_FILE }}
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 7
