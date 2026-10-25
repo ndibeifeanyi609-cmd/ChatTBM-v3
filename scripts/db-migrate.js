@@ -129,6 +129,7 @@ async function createRunner(options = {}) {
         const migrations = discoverMigrations(directory);
         await connect();
         try {
+            await lock();
             await ensureLedger();
             const applied = await validateApplied(migrations);
             return {
@@ -145,6 +146,7 @@ async function createRunner(options = {}) {
         const migrations = discoverMigrations(directory);
         await connect();
         try {
+            await lock();
             await ensureLedger();
             const applied = await validateApplied(migrations);
             return { valid: true, applied: [...applied].sort(), pending: migrations.filter((m) => !applied.has(m.id)).map((m) => m.id) };
