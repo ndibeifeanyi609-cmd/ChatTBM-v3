@@ -103,15 +103,17 @@ async function createRunner(options = {}) {
             CREATE TABLE IF NOT EXISTS chattbm_schema_migrations (
                 migration_id TEXT PRIMARY KEY,
                 checksum_sha256 TEXT NOT NULL,
+                down_checksum_sha256 TEXT,
                 applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 runner_version TEXT NOT NULL
             )
         `);
+        await client.query('ALTER TABLE chattbm_schema_migrations ADD COLUMN IF NOT EXISTS down_checksum_sha256 TEXT');
     }
 
     async function validateApplied(migrations) {
         const result = await client.query(
-            'SELECT migration_id, checksum_sha256 FROM chattbm_schema_migrations ORDER BY migration_id'
+            'SELECT migration_id, checksum_sha256, down_checksum_sha256 FROM chattbm_schema_migrations ORDER BY migration_id'
         );
         const known = new Map(migrations.map((m) => [m.id, m]));
         for (const row of result.rows) {
@@ -120,6 +122,16 @@ async function createRunner(options = {}) {
             const actual = checksum(fs.readFileSync(migration.upPath, 'utf8'));
             if (actual !== row.checksum_sha256) {
                 throw new Error('Applied migration checksum mismatch: ' + row.migration_id);
+            }
+            if (!migration.downPath) {
+                throw new Error('Applied migration is missing its down file: ' + row.migration_id);
+            }
+            if (!row.down_checksum_sha256) {
+                throw new Error('Applied migration has no recorded down checksum: ' + row.migration_id);
+            }
+            const actualDown = checksum(fs.readFileSync(migration.downPath, 'utf8'));
+            if (actualDown !== row.down_checksum_sha256) {
+                throw new Error('Applied migration down checksum mismatch: ' + row.migration_id);
             }
         }
         return new Set(result.rows.map((row) => row.migration_id));
@@ -171,8 +183,8 @@ async function createRunner(options = {}) {
                 try {
                     await client.query(sql);
                     await client.query(
-                        'INSERT INTO chattbm_schema_migrations (migration_id, checksum_sha256, runner_version) VALUES ($1, $2, $3)',
-                        [migration.id, checksum(sql), RUNNER_VERSION]
+                        'INSERT INTO chattbm_schema_migrations (migration_id, checksum_sha256, down_checksum_sha256, runner_version) VALUES ($1, $2, $3, $4)',
+                        [migration.id, checksum(sql), checksum(fs.readFileSync(migration.downPath, 'utf8')), RUNNER_VERSION]
                     );
                     await client.query('COMMIT');
                     completed.push(migration.id);
