@@ -56,3 +56,29 @@ test('migration failure preserves a safe cause for diagnosis', { timeout: 30000 
         fs.rmSync(directory, { recursive: true, force: true });
     }
 });
+
+test('migration runner refuses rollback while a later migration remains applied', { timeout: 30000 }, async () => {
+    assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
+    assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-rollback-order-'));
+    fs.writeFileSync(path.join(directory, '0001_order_probe.up.sql'), 'CREATE TABLE chattbm_order_probe (id INTEGER PRIMARY KEY);\\n');
+    fs.writeFileSync(path.join(directory, '0001_order_probe.down.sql'), 'DROP TABLE chattbm_order_probe;\\n');
+    fs.writeFileSync(path.join(directory, '0002_order_probe_child.up.sql'), 'CREATE TABLE chattbm_order_probe_child (id INTEGER PRIMARY KEY, parent_id INTEGER NOT NULL REFERENCES chattbm_order_probe(id));\\n');
+    fs.writeFileSync(path.join(directory, '0002_order_probe_child.down.sql'), 'DROP TABLE chattbm_order_probe_child;\\n');
+
+    try {
+        await (await createRunner({ directory })).up();
+        await assert.rejects(
+            () => createRunner({ directory }).then((runner) => runner.down('0001_order_probe')),
+            /Cannot roll back 0001_order_probe while later migration is applied: 0002_order_probe_child/
+        );
+        await (await createRunner({ directory })).down('0002_order_probe_child');
+        await (await createRunner({ directory })).down('0001_order_probe');
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});
