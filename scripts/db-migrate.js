@@ -62,6 +62,7 @@ async function createRunner(options = {}) {
 
     async function connect() {
         if (!env.DATABASE_URL && !options.client) throw new Error('DATABASE_URL is required.');
+        if (connected) return;
         await client.connect();
         connected = true;
         try {
