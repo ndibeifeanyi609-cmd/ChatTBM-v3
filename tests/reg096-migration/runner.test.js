@@ -8,26 +8,37 @@ test('migration runner applies, verifies, repeats, and rolls back harmless probe
     assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
     assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
 
-    const initial = await (await createRunner()).status();
-    assert.ok(Array.isArray(initial.pending));
-    assert.ok(Array.isArray(initial.applied));
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-runner-probe-'));
+    fs.writeFileSync(path.join(directory, '0001_runner_probe.up.sql'), 'CREATE TABLE chattbm_migration_runner_probe (id INTEGER PRIMARY KEY, note TEXT NOT NULL);\\n');
+    fs.writeFileSync(path.join(directory, '0001_runner_probe.down.sql'), 'DROP TABLE IF EXISTS chattbm_migration_runner_probe;\\n');
 
-    const firstUp = await (await createRunner()).up();
-    assert.ok(firstUp.applied.includes('0001_runner_probe'));
+    try {
+        const initial = await (await createRunner({ directory })).status();
+        assert.ok(Array.isArray(initial.pending));
+        assert.ok(Array.isArray(initial.applied));
 
-    const secondUp = await (await createRunner()).up();
-    assert.deepEqual(secondUp.applied, []);
+        const firstUp = await (await createRunner({ directory })).up();
+        assert.ok(firstUp.applied.includes('0001_runner_probe'));
 
-    const verified = await (await createRunner()).verify();
-    assert.equal(verified.valid, true);
-    assert.ok(verified.applied.includes('0001_runner_probe'));
+        const secondUp = await (await createRunner({ directory })).up();
+        assert.deepEqual(secondUp.applied, []);
 
-    const rollback = await (await createRunner()).down('0001_runner_probe');
-    assert.equal(rollback.rolledBack, '0001_runner_probe');
+        const verified = await (await createRunner({ directory })).verify();
+        assert.equal(verified.valid, true);
+        assert.ok(verified.applied.includes('0001_runner_probe'));
 
-    const finalStatus = await (await createRunner()).status();
-    assert.equal(finalStatus.applied.includes('0001_runner_probe'), false);
-    assert.equal(finalStatus.pending.includes('0001_runner_probe'), true);
+        const rollback = await (await createRunner({ directory })).down('0001_runner_probe');
+        assert.equal(rollback.rolledBack, '0001_runner_probe');
+
+        const finalStatus = await (await createRunner({ directory })).status();
+        assert.equal(finalStatus.applied.includes('0001_runner_probe'), false);
+        assert.equal(finalStatus.pending.includes('0001_runner_probe'), true);
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
 });
 
 test('migration failure preserves a safe cause for diagnosis', { timeout: 30000 }, async () => {
