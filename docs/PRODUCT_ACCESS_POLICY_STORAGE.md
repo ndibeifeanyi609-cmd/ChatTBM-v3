@@ -83,3 +83,31 @@ Do not add a founder waiver to `PaymentPersistence`, `PaymentRegistry`, or the l
 
 The existing `initializeDatabase()` startup DDL should not be expanded for this feature until the migration approach is reviewed. No production schema or behavior was changed by this checkpoint.
 
+
+## Proposed durable policy interface (design checkpoint)
+
+This proposal separates three kinds of facts and must not collapse them into one table:
+
+1. **Feature policy** — reviewed product rules, including whether a feature requires a subscription and whether a founder waiver is permitted.
+2. **Canonical customer entitlement** — active customer access derived from REG-096 payment/subscription/entitlement records only. Until a durable PostgreSQL query adapter is implemented and reconciled, paid access decisions remain unavailable rather than being inferred from JSON or process-local Maps.
+3. **Founder eligibility** — the configured founder identity plus a live query against the authoritative user record requiring verified email and enabled account status. No founder ID is seeded by migration.
+
+The first database-backed interface should be read-only for application requests and return a three-way result: `allow`, `deny`, or `unavailable`. Database errors, missing policy rows, ambiguous entitlement records, and unsupported feature keys must not become implicit allows. Free features retain current behavior until a reviewed feature-plan matrix is approved.
+
+### Proposed query boundary
+
+- `getFeaturePolicy(featureKey)` reads a reviewed policy row and returns unavailable if no single valid row exists.
+- `getCustomerEntitlement(userId, featureKey)` reads only canonical REG-096 records after a PostgreSQL persistence adapter and reconciliation migration are approved; it must not read from a policy table as if that were a purchase.
+- `isEligibleFounder(userId)` checks the authoritative user row and configured founder identity.
+- `decideProductAccess(...)` remains a pure function. A future adapter may supply trusted facts, but this proposal does not wire the decision into live routes.
+
+### Required validation before implementation
+
+- Approve the free/paid feature matrix and exact feature keys.
+- Define a versioned, reversible migration sequence for existing payment transactions, subscriptions, entitlements, provider references, and idempotency keys.
+- Dry-run import and reconciliation against a disposable database, including duplicate/orphan detection and row-count checks.
+- Test cross-instance reads, restart persistence, idempotency uniqueness, concurrent lifecycle transitions, checksum verification, and rollback safety.
+- Test all relevant route entry points, including standard chat and streaming, without enabling a gate until policy and entitlement sources are authoritative.
+- Obtain explicit approval before any production backup/restore operation, migration, cutover, founder activation, or deployment.
+
+Status remains proposal only. This checkpoint introduces no schema, runtime authorization, payment, entitlement, or production changes.
