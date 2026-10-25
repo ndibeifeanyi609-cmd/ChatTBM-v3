@@ -57,12 +57,15 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     `);
     assert.equal(index.rowCount, 1, 'expiry index should exist after migration');
 
-    await pool.query('DELETE FROM chattbm_auth_rate_limits');
+    const key = 'test:login:integration-client';
+    const otherKey = 'test:login:other-client';
+    const expiredKey = crypto.createHmac('sha256', TEST_HMAC_SECRET).update('test:expired-bucket', 'utf8').digest('hex');
+    const testKeys = [key, otherKey, 'test:expired-bucket']
+        .map(value => crypto.createHmac('sha256', TEST_HMAC_SECRET).update(value, 'utf8').digest('hex'));
+    await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key = ANY($1::text[])', [testKeys]);
 
     const first = createPostgresRateLimitStore({ hmacSecret: TEST_HMAC_SECRET, query: (...args) => pool.query(...args) });
     const second = createPostgresRateLimitStore({ hmacSecret: TEST_HMAC_SECRET, query: (...args) => pool.query(...args) });
-    const key = 'test:login:integration-client';
-    const otherKey = 'test:login:other-client';
 
     const results = await Promise.all(
         Array.from({ length: 40 }, (_, i) => (i % 2 ? first : second).consume(key, 60000))
@@ -74,7 +77,6 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     const anotherClient = await second.consume(otherKey, 60000);
     assert.equal(anotherClient.count, 1);
 
-    const expiredKey = crypto.createHmac('sha256', TEST_HMAC_SECRET).update('test:expired-bucket', 'utf8').digest('hex');
     await pool.query(
         `INSERT INTO chattbm_auth_rate_limits
             (bucket_key, window_started_at, request_count, expires_at, updated_at)
@@ -89,7 +91,5 @@ test('PostgreSQL rate-limit store shares atomic counters across instances', { sk
     );
     assert.equal(expiredRow.rowCount, 0);
 
-    const testKeys = [key, otherKey, 'test:expired-bucket']
-        .map(value => crypto.createHmac('sha256', TEST_HMAC_SECRET).update(value, 'utf8').digest('hex'));
     await pool.query('DELETE FROM chattbm_auth_rate_limits WHERE bucket_key = ANY($1::text[])', [testKeys]);
 });
