@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { createRunner } = require('../../scripts/db-migrate');
 
-test('migration runner applies, verifies, repeats, and rolls back harmless probe migration', { timeout: 30000 }, async () => {
+test('migration runner applies, verifies, repeats, and rolls back harmless probe migration', { timeout: 30000, skip: !process.env.DATABASE_URL }, async () => {
     assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
     assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
 
@@ -41,7 +41,7 @@ test('migration runner applies, verifies, repeats, and rolls back harmless probe
     }
 });
 
-test('migration failure preserves a safe cause for diagnosis', { timeout: 30000 }, async () => {
+test('migration failure preserves a safe cause for diagnosis', { timeout: 30000, skip: !process.env.DATABASE_URL }, async () => {
     assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
     assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
 
@@ -68,7 +68,7 @@ test('migration failure preserves a safe cause for diagnosis', { timeout: 30000 
     }
 });
 
-test('migration runner refuses rollback while a later migration remains applied', { timeout: 30000 }, async () => {
+test('migration runner refuses rollback while a later migration remains applied', { timeout: 30000, skip: !process.env.DATABASE_URL }, async () => {
     assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
     assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
 
@@ -95,7 +95,7 @@ test('migration runner refuses rollback while a later migration remains applied'
 });
 
 
-test('migration runner rejects a changed rollback file after application', { timeout: 30000 }, async () => {
+test('migration runner rejects a changed rollback file after application', { timeout: 30000, skip: !process.env.DATABASE_URL }, async () => {
     assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
     assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
 
