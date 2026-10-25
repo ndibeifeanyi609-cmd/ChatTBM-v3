@@ -8,12 +8,11 @@ test('migration runner applies, verifies, repeats, and rolls back harmless probe
     assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
     assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
 
-    const runner = await createRunner();
-    const initial = await runner.status();
+    const initial = await (await createRunner()).status();
     assert.ok(Array.isArray(initial.pending));
     assert.ok(Array.isArray(initial.applied));
 
-    const firstUp = await runner.up();
+    const firstUp = await (await createRunner()).up();
     assert.ok(firstUp.applied.includes('0001_runner_probe'));
 
     const secondUp = await (await createRunner()).up();
