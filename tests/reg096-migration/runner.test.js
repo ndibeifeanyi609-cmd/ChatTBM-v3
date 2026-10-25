@@ -39,8 +39,8 @@ test('migration failure preserves a safe cause for diagnosis', { timeout: 30000 
     const path = require('node:path');
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-failed-migration-'));
     const id = '0001_invalid_probe';
-    fs.writeFileSync(path.join(directory, id + '.up.sql'), 'THIS IS NOT VALID SQL;\\n');
-    fs.writeFileSync(path.join(directory, id + '.down.sql'), 'SELECT 1;\\n');
+    fs.writeFileSync(path.join(directory, id + '.up.sql'), 'THIS IS NOT VALID SQL;\n');
+    fs.writeFileSync(path.join(directory, id + '.down.sql'), 'SELECT 1;\n');
 
     try {
         await assert.rejects(
@@ -65,10 +65,10 @@ test('migration runner refuses rollback while a later migration remains applied'
     const os = require('node:os');
     const path = require('node:path');
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-rollback-order-'));
-    fs.writeFileSync(path.join(directory, '0001_order_probe.up.sql'), 'CREATE TABLE chattbm_order_probe (id INTEGER PRIMARY KEY);\\n');
-    fs.writeFileSync(path.join(directory, '0001_order_probe.down.sql'), 'DROP TABLE chattbm_order_probe;\\n');
-    fs.writeFileSync(path.join(directory, '0002_order_probe_child.up.sql'), 'CREATE TABLE chattbm_order_probe_child (id INTEGER PRIMARY KEY, parent_id INTEGER NOT NULL REFERENCES chattbm_order_probe(id));\\n');
-    fs.writeFileSync(path.join(directory, '0002_order_probe_child.down.sql'), 'DROP TABLE chattbm_order_probe_child;\\n');
+    fs.writeFileSync(path.join(directory, '0001_order_probe.up.sql'), 'CREATE TABLE chattbm_order_probe (id INTEGER PRIMARY KEY);\n');
+    fs.writeFileSync(path.join(directory, '0001_order_probe.down.sql'), 'DROP TABLE chattbm_order_probe;\n');
+    fs.writeFileSync(path.join(directory, '0002_order_probe_child.up.sql'), 'CREATE TABLE chattbm_order_probe_child (id INTEGER PRIMARY KEY, parent_id INTEGER NOT NULL REFERENCES chattbm_order_probe(id));\n');
+    fs.writeFileSync(path.join(directory, '0002_order_probe_child.down.sql'), 'DROP TABLE chattbm_order_probe_child;\n');
 
     try {
         await (await createRunner({ directory })).up();
