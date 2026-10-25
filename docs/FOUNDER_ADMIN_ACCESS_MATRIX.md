@@ -45,3 +45,21 @@ The policy record must be server-owned and tied to the stable authenticated acco
 ## Current status
 
 This is documentation only. The founder subscription waiver, central product-access boundary, product plan matrix approval, durable policy storage, and UI dashboard are not implemented. PR #46 remains draft and must not be merged or deployed on the strength of this document alone.
+
+
+## Central access-boundary discovery checkpoint
+
+Repository inspection confirms that the route handlers currently derive identity from the authenticated session, but no central product subscription gate is established. This work must not insert a gate into `assistantEngine.js` alone because that engine is not the product entitlement authority and other feature entry points exist.
+
+A central boundary should initially be implemented as an injectable, isolated policy component with tests, but must not be wired into live feature routes until the product-plan matrix is approved and durable storage is chosen. This avoids accidentally blocking current free access or granting access based on a missing entitlement record.
+
+Observed route surfaces include:
+- `/api/chat` and `/api/chat/stream`
+- `/api/forecast`
+- `/api/software-builder`
+- `/api/voice`
+- `/api/memories`
+- `/api/conversations`
+- `/api/admin/overview`
+
+Authentication is not the same as subscription authorization. Do not treat every route as paid by default. Keep the admin overview read-only and its founder authorization separate from product entitlement.
