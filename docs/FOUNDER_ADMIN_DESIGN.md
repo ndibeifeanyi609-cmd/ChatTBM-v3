@@ -116,3 +116,27 @@ Required tests before activation:
 - The account email verification status observed during discovery was unverified; it must be resolved before granting permanent privileges.
 - Live AI provider costs may not be available unless usage telemetry is configured.
 - Third-party infrastructure and provider charges are not waived by a ChatTBM founder entitlement.
+
+
+## 11. Repository Discovery Findings (2026-10-25)
+
+The following findings must shape implementation:
+
+- `auth/requireAuth.js` attaches `req.authUser` only after the existing session service validates the session. New admin authorization MUST use this server-resolved identity.
+- `auth/AuthService.js` returns the authenticated account ID and email, but the current session lookup does not return `email_verified_at`. Verification status must be checked through an approved server-side account query/service before founder activation; do not infer verification from the email address or a successful login.
+- A read-only query against the configured `chattbm-db` found the founder account enabled but `email_verified_at` is NULL. The stable account ID exists, but must not be committed to source or treated as approval to activate privileges.
+- `payment/PaymentPersistence.js` currently persists payment, subscription, and entitlement records to a JSON file by default, rather than the PostgreSQL users database. Before relying on this persistence for a production founder waiver, determine its deployment durability and whether a canonical durable store is available. Do not introduce a second entitlement registry or assume this file survives service replacement.
+- The repository has PostgreSQL-backed shared authentication rate limiting behind `AUTH_SHARED_RATE_LIMIT_ENABLED`; existing docs say it is not enabled by default and requires separately reviewed configuration and a secret. Founder/admin work must not enable or modify it implicitly.
+- Existing plugin design requires server-side per-account usage limits and resource bounds. Founder access must not disable those controls.
+- The existing health endpoint exposes basic service/database health, but this review did not establish a trusted source for aggregate AI token consumption or provider cost. Such dashboard metrics must remain marked unavailable until actual telemetry is identified.
+
+## 12. Revised Implementation Gate
+
+Before runtime code is written, complete these checks:
+
+1. Inspect the actual access/entitlement decision point used by the application; do not assume PaymentPersistence is already connected to all premium feature gates.
+2. Decide how founder entitlement can be represented durably without weakening REG-096 canonical authority or creating a competing registry.
+3. Establish a safe, verified founder-account activation process. Do not set the production founder ID until the account verification status is resolved.
+4. Identify real rate-limit and provider-usage telemetry sources and their retention/window semantics.
+5. Keep the initial admin endpoints read-only and aggregate-only.
+6. Add implementation only on a separate branch after the above decisions are recorded; do not merge or deploy automatically.
