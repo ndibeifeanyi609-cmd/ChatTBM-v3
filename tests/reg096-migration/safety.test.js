@@ -11,7 +11,7 @@ test('migration target requires explicit test environment by default', () => {
 });
 
 test('migration target rejects non-test database by default', () => {
-    assert.throws(() => assertSafeTarget({ database: 'chattbm', username: 'chattbm_test' }, { NODE_ENV: 'test' }), /outside a \\*_test database/);
+    assert.throws(() => assertSafeTarget({ database: 'chattbm', username: 'chattbm_test' }, { NODE_ENV: 'test' }), /outside a \*_test database/);
 });
 
 test('migration target accepts disposable test database', () => {
@@ -31,5 +31,5 @@ test('test mode cannot target production database even with override flags', () 
         NODE_ENV: 'test',
         CHATTBM_MIGRATION_ALLOW_NONTEST: 'true',
         CHATTBM_MIGRATION_ALLOW_PRODUCTION: 'true'
-    }), /outside a \\*_test database/);
+    }), /outside a \*_test database/);
 });
