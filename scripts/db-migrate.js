@@ -42,14 +42,13 @@ function assertSafeTarget(row, env = process.env) {
     if (!row || typeof row.database !== 'string' || typeof row.username !== 'string') {
         throw new Error('Unable to verify database identity.');
     }
-    if (env.NODE_ENV !== 'test' && env.CHATTBM_MIGRATION_ALLOW_NONTEST !== 'true') {
-        throw new Error('Migration commands require NODE_ENV=test or explicit non-test approval.');
+    // This runner is deliberately test-only until a separately reviewed production
+    // migration procedure exists. Environment flags must never override DB identity.
+    if (env.NODE_ENV !== 'test') {
+        throw new Error('Migration commands are restricted to NODE_ENV=test.');
     }
-    if (!row.database.endsWith('_test') && env.CHATTBM_MIGRATION_ALLOW_NONTEST !== 'true') {
+    if (!row.database.endsWith('_test')) {
         throw new Error('Refusing to run migrations outside a *_test database.');
-    }
-    if (env.NODE_ENV === 'production' && env.CHATTBM_MIGRATION_ALLOW_PRODUCTION !== 'true') {
-        throw new Error('Production migration requires separate explicit approval.');
     }
 }
 
