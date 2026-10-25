@@ -21,6 +21,8 @@ on:
       - 'controllers/adminOverviewController.js'
       - 'routes/adminRoutes.js'
       - 'tests/founderAdmin.test.js'
+      - 'access/**'
+      - 'tests/productAccessPolicy.test.js'
       - 'server.js'
       - 'package.json'
       - 'package-lock.json'
