@@ -55,7 +55,7 @@ jobs:
           docker run --rm --network host -e PGPASSWORD=restore_test_password -v "$plain:/backup.dump:ro" postgres:18-alpine sh -c '
             set -eu
             pg_restore --exit-on-error --host=127.0.0.1 --username=restore_test --dbname=restore_validation --no-owner --no-privileges /backup.dump
-            count=$(psql --host=127.0.0.1 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT count(*) FROM information_schema.tables WHERE table_schema = '''public''' AND table_type = '''BASE TABLE''' AND table_name IN ('''chattbm_users''','''chattbm_conversations''','''chattbm_memories''','''chattbm_chat_history''','''chattbm_contexts''')")
+            count=$(psql --host=127.0.0.1 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT count(*) FROM information_schema.tables WHERE table_schema = $public$ AND table_type = $BASE TABLE$ AND table_name LIKE $chattbm_%$")
             test "$count" -ge 5
             echo "RESTORE_VALIDATION_OK: core ChatTBM tables restored in disposable PostgreSQL."
           '
