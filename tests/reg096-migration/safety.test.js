@@ -12,7 +12,7 @@ test('migration target requires explicit test environment', () => {
 });
 
 test('migration target rejects non-test database', () => {
-    assert.throws(() => assertSafeTarget({ ...identity, database: 'chattbm' }, env), /outside a \\*_test database/);
+    assert.throws(() => assertSafeTarget({ ...identity, database: 'chattbm' }, env), /outside a \*_test database/);
 });
 
 test('migration target rejects missing approved-host configuration', () => {
@@ -41,5 +41,5 @@ test('test mode cannot target production database even with override flags', () 
         ...env,
         CHATTBM_MIGRATION_ALLOW_NONTEST: 'true',
         CHATTBM_MIGRATION_ALLOW_PRODUCTION: 'true'
-    }), /outside a \\*_test database/);
+    }), /outside a \*_test database/);
 });
