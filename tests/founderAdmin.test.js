@@ -64,6 +64,28 @@ test('founder is denied when account is not verified or enabled', async () => {
     }
 });
 
+test('verified enabled founder is authorized', async () => {
+    const previous = process.env.CHATTBM_FOUNDER_USER_ID;
+    process.env.CHATTBM_FOUNDER_USER_ID = 'founder-id';
+    try {
+        const res = responseMock();
+        let calledNext = false;
+        await createFounderAuthorization({
+            getPool: () => ({ query: async (sql, params) => {
+                assert.match(sql, /email_verified_at IS NOT NULL/);
+                assert.match(sql, /disabled_at IS NULL/);
+                assert.deepEqual(params, ['founder-id']);
+                return { rows: [{ id: 'founder-id' }] };
+            } })
+        })({ authUser: { id: 'founder-id', isAdmin: false } }, res, () => { calledNext = true; });
+        assert.equal(calledNext, true);
+        assert.equal(res.statusCode, 200);
+    } finally {
+        if (previous === undefined) delete process.env.CHATTBM_FOUNDER_USER_ID;
+        else process.env.CHATTBM_FOUNDER_USER_ID = previous;
+    }
+});
+
 test('founder authorization returns controlled unavailable on database failure', async () => {
     const previous = process.env.CHATTBM_FOUNDER_USER_ID;
     process.env.CHATTBM_FOUNDER_USER_ID = 'founder-id';
