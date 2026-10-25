@@ -29,3 +29,30 @@ test('migration runner applies, verifies, repeats, and rolls back harmless probe
     assert.equal(finalStatus.applied.includes('0001_runner_probe'), false);
     assert.equal(finalStatus.pending.includes('0001_runner_probe'), true);
 });
+
+test('migration failure preserves a safe cause for diagnosis', { timeout: 30000 }, async () => {
+    assert.equal(process.env.NODE_ENV, 'test', 'test environment must be explicit');
+    assert.match(process.env.DATABASE_URL || '', /chattbm_test/, 'must use disposable test database');
+
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'chattbm-failed-migration-'));
+    const id = '0001_invalid_probe';
+    fs.writeFileSync(path.join(directory, id + '.up.sql'), 'THIS IS NOT VALID SQL;\\n');
+    fs.writeFileSync(path.join(directory, id + '.down.sql'), 'SELECT 1;\\n');
+
+    try {
+        await assert.rejects(
+            () => createRunner({ directory }).then((runner) => runner.up()),
+            (error) => {
+                assert.match(error.message, /Migration failed: 0001_invalid_probe/);
+                assert.ok(error.cause, 'original database error should be retained');
+                assert.equal(error.code, '42601');
+                return true;
+            }
+        );
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});
