@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { Client } = require('pg');
-const { readLiveManifest } = require('../database/schemaDryRunComparator');
+const { readLiveManifest, assertSafeConnectionString } = require('../database/schemaDryRunComparator');
 
 test('captures PostgreSQL 18 disposable catalog in a read-only transaction', async (t) => {
     if (!process.env.DATABASE_URL) {
@@ -11,6 +11,7 @@ test('captures PostgreSQL 18 disposable catalog in a read-only transaction', asy
         return;
     }
 
+    assertSafeConnectionString(process.env.DATABASE_URL);
     const client = new Client({ connectionString: process.env.DATABASE_URL });
     await client.connect();
     try {
