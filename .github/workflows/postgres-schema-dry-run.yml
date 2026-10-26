@@ -11,6 +11,7 @@ on:
       - 'tests/postgresMigrationInventory.integration.test.js'
       - 'tests/schemaDryRunComparator.test.js'
       - 'tests/schemaKnownDifferencePolicy.test.js'
+      - 'tests/fixtures/postgresExpectedSchemaCandidate.v1.json'
       - 'tests/schemaDryRunComparator.integration.test.js'
       - '.github/workflows/postgres-schema-dry-run.yml'
   workflow_dispatch:
