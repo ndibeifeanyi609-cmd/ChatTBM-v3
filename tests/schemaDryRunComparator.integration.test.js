@@ -107,7 +107,8 @@ test('compares the full provisional ChatTBM schema candidate on disposable Postg
         'chattbm_google_oauth_handoffs', 'chattbm_google_oauth_states',
         'chattbm_oauth_identities', 'chattbm_memories', 'chattbm_conversations',
         'chattbm_contexts', 'chattbm_chat_history', 'chattbm_auth_sessions',
-        'chattbm_users'
+        'chattbm_users', 'chattbm_conversations',
+        'chattbm_google_oauth_handoffs', 'chattbm_memories'
     ];
     try {
         await client.connect();
