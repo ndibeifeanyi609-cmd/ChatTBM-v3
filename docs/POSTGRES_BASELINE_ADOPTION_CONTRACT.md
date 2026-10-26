@@ -59,6 +59,22 @@ The bootstrap source does not create `chattbm_password_reset_tokens`, `chattbm_a
 
 These are source-code observations, not proof of historical migration execution. No production write or migration was performed during this inventory.
 
+## Legacy SQL inventory (read-only)
+
+The seven SQL files currently present under `database/migrations/` were inspected without executing them:
+
+- `001_auth_accounts_sessions.sql`: users and auth sessions, plus session indexes.
+- `002_chat_history.sql`: chat-history table and `chattbm_chat_history_updated_at_idx`.
+- `002_google_oauth_identities.sql`: OAuth identity mapping and uniqueness constraints.
+- `003_context_records.sql`: contexts table, checks/uniqueness, and context indexes.
+- `003_google_oauth_states.sql`: OAuth state table and expiry index.
+- `004_password_reset_tokens.sql`: password-reset token table and user/expiry indexes.
+- `005_auth_rate_limits.sql`: shared rate-limit buckets and expiry index.
+
+Duplicate numeric prefixes mean a future runner must not treat the numeric prefix as a globally unique migration identity. These files remain untouched and must not be replayed as part of baseline adoption.
+
+The inspected `memory/MemoryPersistence.js` is file-backed (default path under `storage/memory.json`), not evidence of a PostgreSQL `chattbm_memories` table. The previously observed live table `chattbm_memories` therefore needs its actual owning persistence implementation and schema source located before it is included in a canonical manifest. Do not assume the file-backed store and the live table are interchangeable.
+
 ## Schema authority still required
 
 Before implementation, review and approve:
