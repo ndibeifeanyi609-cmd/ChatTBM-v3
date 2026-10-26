@@ -809,8 +809,650 @@
       ]
     }
   ],
-  "constraints": [],
-  "indexes": [],
+  "constraints": [
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (bucket_key)",
+      "name": "chattbm_auth_rate_limits_pkey",
+      "schema": "public",
+      "table": "chattbm_auth_rate_limits",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((request_count >= 1))",
+      "name": "chattbm_auth_rate_limits_request_count_check",
+      "schema": "public",
+      "table": "chattbm_auth_rate_limits",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_auth_sessions_pkey",
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (token_hash)",
+      "name": "chattbm_auth_sessions_token_hash_key",
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_auth_sessions_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((jsonb_typeof(messages) = 'array'::text))",
+      "name": "chattbm_chat_history_messages_check",
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (user_id, conversation_id)",
+      "name": "chattbm_chat_history_pkey",
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_chat_history_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((jsonb_typeof(payload) = 'object'::text))",
+      "name": "chattbm_contexts_payload_check",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_contexts_pkey",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_contexts_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (user_id, interaction_id)",
+      "name": "chattbm_contexts_user_interaction_unique",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((version >= 1))",
+      "name": "chattbm_contexts_version_check",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_conversations_pkey",
+      "schema": "public",
+      "table": "chattbm_conversations",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (user_id, conversation_key)",
+      "name": "chattbm_conversations_user_id_conversation_key_key",
+      "schema": "public",
+      "table": "chattbm_conversations",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (handoff_hash)",
+      "name": "chattbm_google_oauth_handoffs_pkey",
+      "schema": "public",
+      "table": "chattbm_google_oauth_handoffs",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_google_oauth_handoffs_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_google_oauth_handoffs",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (link_user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_google_oauth_states_link_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_google_oauth_states",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (state_hash)",
+      "name": "chattbm_google_oauth_states_pkey",
+      "schema": "public",
+      "table": "chattbm_google_oauth_states",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((jsonb_typeof(payload) = 'object'::text))",
+      "name": "chattbm_memories_payload_check",
+      "schema": "public",
+      "table": "chattbm_memories",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_memories_pkey",
+      "schema": "public",
+      "table": "chattbm_memories",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (user_id, memory_type, subject)",
+      "name": "chattbm_memories_user_id_memory_type_subject_key",
+      "schema": "public",
+      "table": "chattbm_memories",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_oauth_identities_pkey",
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (provider, provider_subject)",
+      "name": "chattbm_oauth_identities_provider_provider_subject_key",
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_oauth_identities_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (user_id, provider)",
+      "name": "chattbm_oauth_identities_user_id_provider_key",
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_password_reset_tokens_pkey",
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (token_hash)",
+      "name": "chattbm_password_reset_tokens_token_hash_key",
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_password_reset_tokens_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (email_normalized)",
+      "name": "chattbm_users_email_normalized_key",
+      "schema": "public",
+      "table": "chattbm_users",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_users_pkey",
+      "schema": "public",
+      "table": "chattbm_users",
+      "type": "p",
+      "validated": true
+    }
+  ],
+  "indexes": [
+    {
+      "definition": "CREATE INDEX chattbm_auth_rate_limits_expires_at_idx ON public.chattbm_auth_rate_limits USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_auth_rate_limits_expires_at_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_rate_limits",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_auth_rate_limits_pkey ON public.chattbm_auth_rate_limits USING btree (bucket_key)",
+      "live": true,
+      "name": "chattbm_auth_rate_limits_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_rate_limits",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_auth_sessions_expires_at_idx ON public.chattbm_auth_sessions USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_auth_sessions_expires_at_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_auth_sessions_pkey ON public.chattbm_auth_sessions USING btree (id)",
+      "live": true,
+      "name": "chattbm_auth_sessions_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_auth_sessions_token_hash_key ON public.chattbm_auth_sessions USING btree (token_hash)",
+      "live": true,
+      "name": "chattbm_auth_sessions_token_hash_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_auth_sessions_user_id_idx ON public.chattbm_auth_sessions USING btree (user_id)",
+      "live": true,
+      "name": "chattbm_auth_sessions_user_id_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_chat_history_pkey ON public.chattbm_chat_history USING btree (user_id, conversation_id)",
+      "live": true,
+      "name": "chattbm_chat_history_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "name": "chattbm_chat_history_updated_at_idx",
+      "definition": "CREATE INDEX chattbm_chat_history_updated_at_idx ON public.chattbm_chat_history USING btree (user_id, updated_at DESC)",
+      "unique": false,
+      "primary": false,
+      "valid": true,
+      "ready": true,
+      "live": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_contexts_pkey ON public.chattbm_contexts USING btree (id)",
+      "live": true,
+      "name": "chattbm_contexts_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_contexts_user_created_idx ON public.chattbm_contexts USING btree (user_id, created_at DESC)",
+      "live": true,
+      "name": "chattbm_contexts_user_created_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_contexts_user_interaction_unique ON public.chattbm_contexts USING btree (user_id, interaction_id)",
+      "live": true,
+      "name": "chattbm_contexts_user_interaction_unique",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_contexts_user_updated_idx ON public.chattbm_contexts USING btree (user_id, updated_at DESC)",
+      "live": true,
+      "name": "chattbm_contexts_user_updated_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_conversations_pkey ON public.chattbm_conversations USING btree (id)",
+      "live": true,
+      "name": "chattbm_conversations_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_conversations",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_conversations_user_id_conversation_key_key ON public.chattbm_conversations USING btree (user_id, conversation_key)",
+      "live": true,
+      "name": "chattbm_conversations_user_id_conversation_key_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_conversations",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_google_oauth_handoffs_expires_at_idx ON public.chattbm_google_oauth_handoffs USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_google_oauth_handoffs_expires_at_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_google_oauth_handoffs",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_google_oauth_handoffs_pkey ON public.chattbm_google_oauth_handoffs USING btree (handoff_hash)",
+      "live": true,
+      "name": "chattbm_google_oauth_handoffs_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_google_oauth_handoffs",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_google_oauth_states_expires_at_idx ON public.chattbm_google_oauth_states USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_google_oauth_states_expires_at_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_google_oauth_states",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_google_oauth_states_pkey ON public.chattbm_google_oauth_states USING btree (state_hash)",
+      "live": true,
+      "name": "chattbm_google_oauth_states_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_google_oauth_states",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_memories_pkey ON public.chattbm_memories USING btree (id)",
+      "live": true,
+      "name": "chattbm_memories_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_memories",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_memories_user_id_memory_type_subject_key ON public.chattbm_memories USING btree (user_id, memory_type, subject)",
+      "live": true,
+      "name": "chattbm_memories_user_id_memory_type_subject_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_memories",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_memories_user_lifecycle_idx ON public.chattbm_memories USING btree (user_id, lifecycle)",
+      "live": true,
+      "name": "chattbm_memories_user_lifecycle_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_memories",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_oauth_identities_pkey ON public.chattbm_oauth_identities USING btree (id)",
+      "live": true,
+      "name": "chattbm_oauth_identities_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_oauth_identities_provider_provider_subject_key ON public.chattbm_oauth_identities USING btree (provider, provider_subject)",
+      "live": true,
+      "name": "chattbm_oauth_identities_provider_provider_subject_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_oauth_identities_user_id_provider_key ON public.chattbm_oauth_identities USING btree (user_id, provider)",
+      "live": true,
+      "name": "chattbm_oauth_identities_user_id_provider_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_password_reset_tokens_expires_idx ON public.chattbm_password_reset_tokens USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_password_reset_tokens_expires_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_password_reset_tokens_pkey ON public.chattbm_password_reset_tokens USING btree (id)",
+      "live": true,
+      "name": "chattbm_password_reset_tokens_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_password_reset_tokens_token_hash_key ON public.chattbm_password_reset_tokens USING btree (token_hash)",
+      "live": true,
+      "name": "chattbm_password_reset_tokens_token_hash_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_password_reset_tokens_user_created_idx ON public.chattbm_password_reset_tokens USING btree (user_id, created_at DESC)",
+      "live": true,
+      "name": "chattbm_password_reset_tokens_user_created_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_users_email_normalized_key ON public.chattbm_users USING btree (email_normalized)",
+      "live": true,
+      "name": "chattbm_users_email_normalized_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_users",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_users_pkey ON public.chattbm_users USING btree (id)",
+      "live": true,
+      "name": "chattbm_users_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_users",
+      "unique": true,
+      "valid": true
+    }
+  ],
   "knownDifferences": [
     {
       "id": "schema.chat_history.updated_at_index.missing",
@@ -822,9 +1464,11 @@
     }
   ],
   "validationNotes": [
-    "PROVISIONAL ONLY: source-derived column inventory; constraints and indexes are not yet populated, so this file is not a complete expected manifest and must not be used by baseline adoption.",
-    "Source definitions were reviewed from repository commit b8924cd10f37cac024ad62a4c0320cb56322ec33. Reconfirm sourceRevision against the final reviewed source revision before freezing.",
-    "Catalog default expressions, constraint definitions, index definitions and index health flags must be captured and compared in disposable PostgreSQL 18 before this candidate can be frozen.",
-    "The absent chat-history updated_at index is intentionally not synthesized as an actual object."
+    "PROVISIONAL ONLY: catalog definitions have been populated for comparison and must be verified against the repository source SQL/runtime definitions before freeze.",
+    "Column records matched the read-only live catalog in a canonical key-order-independent comparison.",
+    "The 31 constraint records and 29 observed index records originate from a metadata-only live catalog snapshot. The expected chat-history updated_at index is added from the reviewed legacy SQL definition as an EXPECTED object, not claimed to exist live.",
+    "The expected index discrepancy is deliberately represented in knownDifferences and must not be auto-repaired.",
+    "Validate in disposable PostgreSQL 18 and confirm every constraint/index definition against its source owner before treating this candidate as complete.",
+    "No production rows or payloads were read; no production writes or schema changes were performed."
   ]
 }
