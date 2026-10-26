@@ -177,3 +177,15 @@ Compared live metadata for `chattbm_google_oauth_states` against `database/Postg
 
 This was a metadata-only read. It does not prove historical migration execution, and no production writes were performed.
 
+
+## Google OAuth handoffs catalog comparison (read-only, 2026-10-26)
+
+Compared live metadata for `chattbm_google_oauth_handoffs` against its definition in `database/Postgres.js`.
+
+- **Columns match:** `handoff_hash` text NOT NULL, `user_id` text NOT NULL, `expires_at` timestamptz NOT NULL, and `created_at` timestamptz NOT NULL DEFAULT `now()`.
+- **Constraints match:** primary key on `handoff_hash`; foreign key `user_id` → `chattbm_users(id)` with `ON DELETE CASCADE`.
+- **Indexes present:** primary-key index and `chattbm_google_oauth_handoffs_expires_at_idx` on `expires_at`.
+- **Result:** no discrepancy observed in the queried columns, defaults, constraints, and indexes.
+
+This was a metadata-only read. It does not prove historical initialization or migration execution, and no production writes were performed.
+
