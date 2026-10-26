@@ -92,6 +92,24 @@ test('rejects a raw match or missing fingerprints', () => {
     assert.throws(() => classifyKnownDifferences({ matches: false }, expectedManifest(), actualManifest()), /raw mismatch/);
 });
 
+test('rejects missing or non-array required manifest collections', () => {
+    for (const collection of ['tables', 'constraints', 'indexes']) {
+        const expected = expectedManifest();
+        delete expected[collection];
+        assert.throws(
+            () => classifyKnownDifferences(rawMismatch(expected, actualManifest()), expected, actualManifest()),
+            /required expected manifest collection/
+        );
+
+        const actual = actualManifest();
+        actual[collection] = null;
+        assert.throws(
+            () => classifyKnownDifferences(rawMismatch(expectedManifest(), actual), expectedManifest(), actual),
+            /required actual manifest collection/
+        );
+    }
+});
+
 test('rejects unexpected top-level metadata on either manifest', () => {
     const expected = expectedManifest();
     const actual = actualManifest();
