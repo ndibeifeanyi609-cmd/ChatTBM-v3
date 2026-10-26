@@ -80,7 +80,7 @@ test('rejects a changed or unhealthy actual version of the registered index', ()
 test('rejects missing expected index record and unsupported schema versions', () => {
     const expected = expectedManifest();
     expected.indexes = [];
-    assert.throws(() => classifyKnownDifferences(rawMismatch(), expected, actualManifest()), /expected index record/);
+    assert.throws(() => classifyKnownDifferences(rawMismatch(expected, actualManifest()), expected, actualManifest()), /expected index record/);
 
     const unsupported = actualManifest();
     unsupported.postgresMajorVersion = 16;
