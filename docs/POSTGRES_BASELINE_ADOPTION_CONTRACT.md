@@ -85,6 +85,20 @@ This identifies the schema owner in source, but does not by itself prove the liv
 
 Across the inspected bootstrap, legacy SQL, and memory persistence owner, the source-defined tables include users, conversations, contexts, chat history, OAuth identities, Google OAuth states and handoffs, auth sessions, password-reset tokens, auth rate limits, and memories. The live inventory also included these eleven application tables. The expected manifest must still be reconciled object-by-object with the live catalog, including every column/type/default/nullability, primary and unique constraints, foreign keys, checks, and indexes. Source overlap and `CREATE TABLE IF NOT EXISTS` do not prove catalog equivalence.
 
+## Read-only production catalog comparison (2026-10-26)
+
+A read-only query was run against the confirmed Render database `chattbm-db` (`chattbm_db`, PostgreSQL 18). It retrieved public-schema column metadata, index definitions, and constraint definitions for `chattbm_%` application objects. No data rows were selected and no writes were performed.
+
+Observed catalog facts:
+
+- All 11 expected application tables appeared in the column inventory: `chattbm_auth_rate_limits`, `chattbm_auth_sessions`, `chattbm_chat_history`, `chattbm_contexts`, `chattbm_conversations`, `chattbm_google_oauth_handoffs`, `chattbm_google_oauth_states`, `chattbm_memories`, `chattbm_oauth_identities`, `chattbm_password_reset_tokens`, and `chattbm_users`.
+- The live index inventory contains the expected primary-key and unique indexes for these tables, along with the source-defined secondary indexes inspected earlier, with one known exception below.
+- **Confirmed discrepancy:** `chattbm_chat_history_updated_at_idx` is absent from the live index inventory even though `database/migrations/002_chat_history.sql` defines it.
+- The returned columns include expected timestamp defaults such as `now()` on selected `created_at` and `updated_at` fields; most application timestamp fields have no default. The complete raw catalog result should be compared to the reviewed source manifest before claiming exact equivalence.
+- PostgreSQL catalog output includes generated NOT NULL constraints as well as primary/unique, foreign-key, and check constraints. The manifest algorithm must normalize these consistently rather than compare constraint names alone.
+
+This was a metadata-only read. It did not read application row values, establish when any legacy file was executed, or modify the database. The missing index remains unresolved and must be assessed separately; baseline adoption must not create it.
+
 ## Schema authority still required
 
 Before implementation, review and approve:
