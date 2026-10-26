@@ -207,6 +207,13 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
 
+## Read-only live catalog snapshot checkpoint (2026-10-26)
+
+Captured a separate metadata-only production catalog snapshot in `docs/POSTGRES_LIVE_SCHEMA_CATALOG_SNAPSHOT_2026-10-26.json` using Render's read-only query interface against the confirmed `chattbm-db` instance. The snapshot contains 11 application tables, 67 column records, 31 constraints, and 29 indexes. All captured indexes reported valid, ready, and live. The known `chattbm_chat_history_updated_at_idx` remains absent and is documented as a separate unresolved issue. No application rows or payloads were read, and no writes or schema changes occurred.
+
+Compared the provisional candidate's table/column records with the live snapshot: differences remain: missing tables [], extra tables [], column mismatches ["chattbm_users","chattbm_auth_sessions","chattbm_chat_history","chattbm_contexts","chattbm_conversations","chattbm_google_oauth_handoffs","chattbm_google_oauth_states","chattbm_memories","chattbm_oauth_identities","chattbm_password_reset_tokens","chattbm_auth_rate_limits"]. This is only the column-level check; the expected candidate still needs reviewed constraint and index collections populated and compared before it can be considered complete.
+
+
 ## Provisional manifest candidate checkpoint (2026-10-26)
 
 Created `docs/POSTGRES_EXPECTED_SCHEMA_MANIFEST_V1_CANDIDATE.json` as a deliberately non-executable candidate. JSON parsing and structural checks passed: 11 table records and 67 ordered column records are present. Constraints and indexes are intentionally still empty; therefore this candidate is incomplete and must not be used for baseline adoption. The known missing `chattbm_chat_history_updated_at_idx` remains explicitly recorded as `separately_planned` and is not synthesized into the index collection. Next validation must populate reviewed constraint/index records, capture catalog definitions and index health in disposable PostgreSQL 18, and compare the complete candidate to a read-only catalog capture. No production access or writes occurred in this step.
