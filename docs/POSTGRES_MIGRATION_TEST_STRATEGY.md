@@ -32,6 +32,20 @@
 - Assert that the ledger clearly records a reviewed baseline while stating that historical per-file execution is unknown.
 - Verify row counts or synthetic sentinel records remain unchanged where applicable.
 
+### Baseline-adoption test fixture and assertions
+
+The baseline test must not call a production URL or replay legacy SQL files as part of adoption. Until a baseline-adoption API/command is designed and implemented, this scenario is a specification—not a passing test.
+
+1. Create a dedicated PostgreSQL 18 disposable database named `chattbm_test`; verify loopback host and exact database name before any test connection.
+2. Create a production-like schema fixture from reviewed DDL in a dedicated test fixture. Do not populate it by running the legacy migration directory during the adoption phase.
+3. Insert deterministic synthetic rows into user, conversation, chat-history, and memory tables. Capture table counts and exact sentinel values before adoption.
+4. Run only the proposed baseline-adoption operation. It must record one explicit baseline marker with a unique identifier, schema fingerprint, timestamp, and a statement that historical per-file execution is unknown. It must not claim the legacy files were executed.
+5. Assert the sentinel values and table counts are identical; compare schema fingerprints and catalog definitions before/after; assert no legacy SQL was executed and no user-facing data was modified.
+6. Run adoption a second time and assert a safe no-op or explicit already-baselined result. Test an incompatible schema and assert adoption refuses to proceed without changing data.
+7. Preserve test logs containing the PostgreSQL server version and assertions, but never log credentials or real customer data.
+
+Do not implement this as a fake pass-through test. First define the baseline command/API and its transaction/error contract; then write the test to exercise that actual implementation.
+
 ### 3. Future migration behavior
 
 - Apply a new migration with a unique immutable identifier and checksum.
