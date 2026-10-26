@@ -5,6 +5,44 @@ const assert = require('node:assert/strict');
 const { Client } = require('pg');
 const { readLiveManifest, assertSafeConnectionString, compareManifests } = require('../database/schemaDryRunComparator');
 
+test('inspects conventional migration-history tables without writing', async (t) => {
+    if (!process.env.DATABASE_URL) {
+        t.skip('DATABASE_URL is not configured outside the dedicated PostgreSQL 18 workflow.');
+        return;
+    }
+
+    assertSafeConnectionString(process.env.DATABASE_URL);
+    const client = new Client({ connectionString: process.env.DATABASE_URL });
+    await client.connect();
+    try {
+        await client.query('BEGIN READ ONLY');
+        const result = await client.query(`
+            SELECT table_schema, table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+              AND table_type = 'BASE TABLE'
+              AND table_name IN (
+                  'schema_migrations',
+                  'knex_migrations',
+                  'SequelizeMeta',
+                  'flyway_schema_history',
+                  'databasechangelog',
+                  'prisma_migrations',
+                  'typeorm_migrations'
+              )
+            ORDER BY table_name
+        `);
+        await client.query('COMMIT');
+        assert.deepEqual(result.rows, [],
+            'fresh disposable CI database should not claim historical migration execution');
+    } catch (error) {
+        try { await client.query('ROLLBACK'); } catch (_) {}
+        throw error;
+    } finally {
+        await client.end();
+    }
+});
+
 test('captures PostgreSQL 18 disposable catalog in a read-only transaction', async (t) => {
     if (!process.env.DATABASE_URL) {
         t.skip('DATABASE_URL is not configured outside the dedicated PostgreSQL 18 workflow.');
