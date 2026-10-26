@@ -39,4 +39,4 @@ Treat the missing index as a schema difference, not an automatic production repa
 
 ## Current disposition
 
-Inventory and planning only. No production writes, DDL, or migrations were run. PR #48 stays Draft and unmerged. Flutterwave work remains deferred until the schema changeover plan is reviewed.
+Inventory and planning only. No production writes, DDL, or migrations were run. PR #48 is open for review and remains unmerged. Because the repository has a single maintainer, this is a maintainer self-review checkpoint rather than independent approval. Flutterwave work remains deferred until the schema changeover plan is reviewed and the required acceptance gates are completed.
