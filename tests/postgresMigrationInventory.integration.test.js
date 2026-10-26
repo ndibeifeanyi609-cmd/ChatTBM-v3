@@ -52,6 +52,40 @@ async function main() {
         console.log('Tables after existing startup bootstrap:',
             afterBootstrap.rows.map(row => row.tablename).join(', '));
 
+        // Synthetic sentinel records verify legacy SQL replay does not rewrite existing data.
+        // This is compatibility coverage only; it does not simulate or authorize baseline adoption.
+        const sentinelUserId = 'migration-test-sentinel-user';
+        const sentinelConversationId = 'migration-test-sentinel-conversation';
+        const sentinelPayload = { marker: 'preserve-me', source: 'disposable-migration-test' };
+        await pool.query(
+            `INSERT INTO chattbm_users (id, email_normalized, password_hash)
+             VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING`,
+            [sentinelUserId, 'migration-sentinel@example.invalid', 'synthetic-not-a-real-password-hash']
+        );
+        await pool.query(
+            `INSERT INTO chattbm_conversations
+             (id, user_id, conversation_key, version, lifecycle, created_at, updated_at, payload)
+             VALUES ($1, $2, $3, 1, 'active', NOW(), NOW(), $4::jsonb)
+             ON CONFLICT (id) DO NOTHING`,
+            [sentinelConversationId, sentinelUserId, 'migration-sentinel-key', JSON.stringify(sentinelPayload)]
+        );
+        await pool.query(
+            `INSERT INTO chattbm_chat_history (user_id, conversation_id, messages)
+             VALUES ($1, $2, $3::jsonb)
+             ON CONFLICT (user_id, conversation_id) DO NOTHING`,
+            [sentinelUserId, sentinelConversationId, JSON.stringify([{ role: 'user', content: 'synthetic sentinel' }])]
+        );
+        const sentinelBefore = await pool.query(
+            `SELECT u.id, u.email_normalized, c.payload,
+                    h.messages
+             FROM chattbm_users u
+             JOIN chattbm_conversations c ON c.user_id = u.id
+             JOIN chattbm_chat_history h ON h.user_id = u.id AND h.conversation_id = c.id
+             WHERE u.id = $1 AND c.id = $2`,
+            [sentinelUserId, sentinelConversationId]
+        );
+        assert.equal(sentinelBefore.rowCount, 1, 'Synthetic sentinel fixture must exist before SQL replay');
+
         const prefixes = migrationFiles.map(name => name.match(/^([0-9]+)_/)?.[1]).filter(Boolean);
         const duplicatePrefixes = [...new Set(prefixes.filter((prefix, i) => prefixes.indexOf(prefix) !== i))];
         console.log('Numbered SQL files:', migrationFiles.join(', '));
@@ -70,6 +104,21 @@ async function main() {
             await pool.query(sql);
         }
         console.log('All discovered SQL files applied twice.');
+
+        const sentinelAfter = await pool.query(
+            `SELECT u.id, u.email_normalized, c.payload,
+                    h.messages
+             FROM chattbm_users u
+             JOIN chattbm_conversations c ON c.user_id = u.id
+             JOIN chattbm_chat_history h ON h.user_id = u.id AND h.conversation_id = c.id
+             WHERE u.id = $1 AND c.id = $2`,
+            [sentinelUserId, sentinelConversationId]
+        );
+        assert.equal(sentinelAfter.rowCount, 1, 'Synthetic sentinel record must survive SQL replay');
+        assert.deepEqual(sentinelAfter.rows[0], sentinelBefore.rows[0],
+            'Synthetic sentinel values must remain unchanged after SQL replay');
+        console.log('Synthetic sentinel records preserved across repeated legacy SQL application.');
+
 
         const tables = await pool.query(
             "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename"
