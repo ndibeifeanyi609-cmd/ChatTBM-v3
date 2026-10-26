@@ -48,7 +48,7 @@ async function main() {
         console.log('Tables after existing startup bootstrap:',
             afterBootstrap.rows.map(row => row.tablename).join(', '));
 
-        const prefixes = migrationFiles.map(name => name.match(/^(\\d+)_/)?.[1]).filter(Boolean);
+        const prefixes = migrationFiles.map(name => name.match(/^([0-9]+)_/)?.[1]).filter(Boolean);
         const duplicatePrefixes = [...new Set(prefixes.filter((prefix, i) => prefixes.indexOf(prefix) !== i))];
         console.log('Numbered SQL files:', migrationFiles.join(', '));
         console.log('Duplicate numeric prefixes:', duplicatePrefixes.length ? duplicatePrefixes.join(', ') : 'none');
