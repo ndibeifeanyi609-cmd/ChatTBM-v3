@@ -207,6 +207,11 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
 
+## Source review and manifest comparison checkpoint (2026-10-26)
+
+Reviewed the seven legacy SQL files and the four runtime schema owners (`database/Postgres.js`, `memory/PostgresMemoryPersistence.js`, `auth/PasswordResetService.js`, `auth/PostgresRateLimitStore.js`) against the provisional manifest. Recorded the comparison in `docs/POSTGRES_SCHEMA_MANIFEST_SOURCE_REVIEW_2026-10-26.json`: 11/11 tables, 67/67 columns, and 31/31 constraints match the read-only catalog snapshot; all 29 observed indexes match the expected entries, plus the single expected-but-absent `chattbm_chat_history_updated_at_idx`. This comparison does not establish historical migration execution. Manifest remains provisional and must undergo disposable PostgreSQL 18 end-to-end validation and independent review before any baseline-adoption design can be finalized. No production changes occurred.
+
+
 ## Provisional constraints/index comparison checkpoint (2026-10-26)
 
 Populated the provisional candidate with 31 constraint records from the read-only catalog snapshot and 29 observed index records, plus the separately source-defined expected `chattbm_chat_history_updated_at_idx` record. Canonical key-order-independent comparison reports all 31 expected constraints match the observed catalog exactly; all 29 observed indexes match their candidate counterparts; the one additional expected index is `public.chattbm_chat_history.chattbm_chat_history_updated_at_idx`, which remains absent from live state. This is an observed-catalog comparison, not yet an independent source review of every constraint/index definition, and not the disposable PostgreSQL 18 end-to-end validation. Candidate remains `provisional_not_executable`. No production writes or schema changes occurred.
