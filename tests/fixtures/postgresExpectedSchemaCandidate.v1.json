@@ -1459,7 +1459,7 @@
       "category": "missing_index",
       "rationale": "Declared by database/migrations/002_chat_history.sql but absent from the read-only production catalog. Index impact and rollout/rollback must be reviewed separately.",
       "status": "separately_planned",
-      "reviewRef": "docs/POSTGRES_EXPECTED_SCHEMA_MANIFEST_PLAN.md"
+      "reviewRef": "docs/POSTGRES_MIGRATION_REVIEW_DECISION.md"
     }
   ]
 }
