@@ -3,7 +3,7 @@
 // Classification-only policy layered over the raw schema comparator.
 // Never writes to PostgreSQL and never changes the raw comparison result.
 
-const { canonicalJson, canonicalizeManifest } = require('./schemaDryRunComparator');
+const { canonicalJson, canonicalizeManifest, compareManifests } = require('./schemaDryRunComparator');
 
 const ALLOWED_DIFFERENCE = Object.freeze({
     id: 'schema.chat_history.updated_at_index.missing',
@@ -54,6 +54,14 @@ function classifyKnownDifferences(rawResult, expectedManifest, actualManifest) {
         expected.postgresMajorVersion !== 18 || actual.postgresMajorVersion !== 18 ||
         expected.schema !== 'public' || actual.schema !== 'public') {
         throw new Error('Known-difference policy refuses: unsupported manifest/schema version.');
+    }
+    const recomputed = compareManifests(expectedManifest, actualManifest);
+    if (recomputed.matches !== rawResult.matches ||
+        recomputed.expectedFingerprint !== rawResult.expectedFingerprint ||
+        recomputed.actualFingerprint !== rawResult.actualFingerprint ||
+        canonicalJson(recomputed.expectedOnly) !== canonicalJson(rawResult.expectedOnly) ||
+        canonicalJson(recomputed.actualOnly) !== canonicalJson(rawResult.actualOnly)) {
+        throw new Error('Known-difference policy refuses: raw comparison does not match the supplied manifests.');
     }
     validateRegistry(expected.knownDifferences);
 
