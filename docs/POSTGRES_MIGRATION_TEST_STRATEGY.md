@@ -16,6 +16,7 @@
 
 ### 1. Fresh database initialization
 
+- Production Render database inventory reports PostgreSQL **18** (read-only metadata check on 2026-10-26). Use PostgreSQL 18 for the primary disposable test service; record the exact minor version in test output. Re-check the production major version before any rollout because it may change.
 - Start a clean disposable PostgreSQL instance at the same major version used for the target deployment.
 - Initialize schema using the proposed single authoritative path.
 - Assert exact expected tables, columns, defaults, constraints, foreign keys, and indexes.
@@ -25,6 +26,7 @@
 ### 2. Existing-schema baseline adoption
 
 - Build a disposable database fixture from the reviewed schema inventory; do not copy user content, password hashes, OAuth tokens, or session values.
+- Insert synthetic sentinel rows into representative user, conversation, chat-history, and memory tables before baseline adoption; capture their values and counts, then assert exact preservation after adoption.
 - Adopt the proposed baseline without replaying legacy migrations against already-existing objects.
 - Assert that adoption does not drop, rewrite, or silently weaken schema objects.
 - Assert that the ledger clearly records a reviewed baseline while stating that historical per-file execution is unknown.
