@@ -153,3 +153,15 @@ Compared live metadata for `chattbm_chat_history` against `database/Postgres.js`
 
 No row data was read and no production writes were performed. Historical migration execution remains unknown.
 
+
+## OAuth identities catalog comparison (read-only, 2026-10-26)
+
+Compared live metadata for `chattbm_oauth_identities` against `database/Postgres.js` and `database/migrations/002_google_oauth_identities.sql`.
+
+- **Columns match:** `id`, `user_id`, `provider`, `provider_subject`, and `created_at`; all are NOT NULL, and `created_at` defaults to `now()`.
+- **Constraints match:** primary key on `id`; foreign key `user_id` → `chattbm_users(id)` with `ON DELETE CASCADE`; unique `(provider, provider_subject)` and unique `(user_id, provider)`.
+- **Indexes present:** primary-key index and both expected unique indexes.
+- **Result:** no discrepancy observed in the queried columns, defaults, constraints, and indexes.
+
+This metadata-only read does not establish historical migration execution. No production writes were performed.
+
