@@ -112,18 +112,21 @@ SELECT jsonb_build_object(
   ), '[]'::jsonb),
   'constraints', COALESCE((
     SELECT jsonb_agg(jsonb_build_object(
-      'table', conrelid::regclass::text,
-      'name', conname,
-      'type', contype,
-      'definition', pg_get_constraintdef(oid),
-      'deferrable', condeferrable,
-      'deferred', condeferred,
-      'validated', convalidated
-    ) ORDER BY conrelid::regclass::text, conname)
-    FROM pg_constraint
-    WHERE connamespace = 'public'::regnamespace
-      AND conrelid::regclass::text LIKE 'chattbm_%'
-      AND contype <> 'n'
+      'schema', ns.nspname,
+      'table', cls.relname,
+      'name', con.conname,
+      'type', con.contype,
+      'definition', pg_get_constraintdef(con.oid),
+      'deferrable', con.condeferrable,
+      'deferred', con.condeferred,
+      'validated', con.convalidated
+    ) ORDER BY ns.nspname, cls.relname, con.conname)
+    FROM pg_constraint con
+    JOIN pg_class cls ON cls.oid = con.conrelid
+    JOIN pg_namespace ns ON ns.oid = cls.relnamespace
+    WHERE ns.nspname = 'public'
+      AND cls.relname LIKE 'chattbm\\_%' ESCAPE '\\'
+      AND con.contype <> 'n'
   ), '[]'::jsonb),
   'indexes', COALESCE((
     SELECT jsonb_agg(jsonb_build_object(
