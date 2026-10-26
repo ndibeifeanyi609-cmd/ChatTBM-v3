@@ -99,7 +99,11 @@ SELECT jsonb_build_object(
           'name', c2.column_name,
           'type', c2.udt_schema || '.' || c2.udt_name,
           'nullable', c2.is_nullable = 'YES',
-          'default', c2.column_default
+          'default', c2.column_default,
+          'identity', c2.is_identity = 'YES',
+          'identityGeneration', c2.identity_generation,
+          'generated', c2.is_generated = 'ALWAYS',
+          'generationExpression', c2.generation_expression
         ) ORDER BY c2.ordinal_position)
         FROM information_schema.columns c2
         WHERE c2.table_schema = c.table_schema AND c2.table_name = c.table_name
@@ -130,12 +134,21 @@ SELECT jsonb_build_object(
   ), '[]'::jsonb),
   'indexes', COALESCE((
     SELECT jsonb_agg(jsonb_build_object(
-      'table', tablename,
-      'name', indexname,
-      'definition', indexdef
-    ) ORDER BY tablename, indexname)
-    FROM pg_indexes
-    WHERE schemaname = 'public' AND left(tablename, 8) = 'chattbm_'
+      'schema', ns.nspname,
+      'table', tbl.relname,
+      'name', idx.relname,
+      'definition', pg_get_indexdef(idx.oid),
+      'unique', ix.indisunique,
+      'primary', ix.indisprimary,
+      'valid', ix.indisvalid,
+      'ready', ix.indisready,
+      'live', ix.indislive
+    ) ORDER BY ns.nspname, tbl.relname, idx.relname)
+    FROM pg_index ix
+    JOIN pg_class tbl ON tbl.oid = ix.indrelid
+    JOIN pg_class idx ON idx.oid = ix.indexrelid
+    JOIN pg_namespace ns ON ns.oid = tbl.relnamespace
+    WHERE ns.nspname = 'public' AND left(tbl.relname, 8) = 'chattbm_'
   ), '[]'::jsonb)
 ) AS manifest;
 `;
