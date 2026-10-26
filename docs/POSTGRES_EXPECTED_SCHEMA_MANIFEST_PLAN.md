@@ -207,6 +207,11 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
 
+## Manifest contract/comparator alignment checkpoint (2026-10-26)
+
+Aligned `docs/POSTGRES_SCHEMA_MANIFEST_V1_CONTRACT.md` to the tested comparator's actual envelope: `tables`, `constraints`, and `indexes` are top-level arrays alongside `manifestVersion`, `sourceRevision`, `postgresMajorVersion`, `schema`, and `knownDifferences`. The earlier illustrative nested `objects` wrapper is removed. This is a documentation contract alignment only; it does not create or approve an expected manifest, change comparator behavior, or authorize production actions.
+
+
 ## Comparator validation checkpoint (2026-10-26)
 
 The read-only schema comparator branch's CI passed on commit `b8924cd10f37cac024ad62a4c0320cb56322ec33`: Verify ChatTBM, Streaming Tests, Shared Auth Rate Limit Tests, and PostgreSQL Schema Dry-Run Comparator. The PostgreSQL 18 disposable catalog-capture step and comparator unit tests passed. The unit suite covers canonical ordering/fingerprints, differences, safe-target refusal, identity/generated-column metadata, index health fields, extra objects/default drift, deterministic missing-index reporting, and stable ordering of top-level object collections.
