@@ -92,6 +92,23 @@ test('rejects a raw match or missing fingerprints', () => {
     assert.throws(() => classifyKnownDifferences({ matches: false }, expectedManifest(), actualManifest()), /raw mismatch/);
 });
 
+test('rejects unexpected top-level metadata on either manifest', () => {
+    const expected = expectedManifest();
+    const actual = actualManifest();
+    actual.environment = 'production';
+    assert.throws(
+        () => classifyKnownDifferences(rawMismatch(expected, actual), expected, actual),
+        /unexpected actual manifest metadata/
+    );
+
+    const expectedWithUnknown = expectedManifest();
+    expectedWithUnknown.approval = true;
+    assert.throws(
+        () => classifyKnownDifferences(rawMismatch(expectedWithUnknown, actualManifest()), expectedWithUnknown, actualManifest()),
+        /unexpected expected manifest metadata/
+    );
+});
+
 test('rejects fabricated or stale raw comparison output', () => {
     const expected = expectedManifest();
     const actual = actualManifest();
