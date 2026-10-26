@@ -176,22 +176,32 @@ test('compares the full provisional ChatTBM schema candidate on disposable Postg
             actual
         );
         assert.equal(comparison.matches, false, 'known missing index must not be hidden');
-        assert.deepEqual(
-            actual.tables.map(x => x.name).sort(),
-            candidate.tables.map(x => x.name).sort(),
-            'all 11 table identities must match'
-        );
-        assert.deepEqual(
-            actual.constraints.map(x => [x.schema, x.table, x.name]).sort(),
-            candidate.constraints.map(x => [x.schema, x.table, x.name]).sort(),
-            'all constraint identities must match'
-        );
-        const actualIndexKeys = new Set(actual.indexes.map(x => [x.schema, x.table, x.name].join('.')));
-        const candidateIndexKeys = new Set(candidate.indexes.map(x => [x.schema, x.table, x.name].join('.')));
-        const missingExpectedIndexes = [...candidateIndexKeys].filter(key => !actualIndexKeys.has(key));
-        const unexpectedActualIndexes = [...actualIndexKeys].filter(key => !candidateIndexKeys.has(key));
+        const objectKey = x => [x.schema, x.table || x.name, x.table ? x.name : ''].join('.');
+        const tableKey = x => [x.schema, x.name].join('.');
+        const actualTables = new Map(actual.tables.map(x => [tableKey(x), x]));
+        assert.deepEqual([...actualTables.keys()].sort(), candidate.tables.map(tableKey).sort(),
+            'all 11 table identities must match');
+        for (const expectedTable of candidate.tables) {
+            assert.deepEqual(actualTables.get(tableKey(expectedTable)), expectedTable,
+                'all column definitions must match for ' + expectedTable.name);
+        }
+        const actualConstraints = new Map(actual.constraints.map(x => [objectKey(x), x]));
+        assert.deepEqual([...actualConstraints.keys()].sort(), candidate.constraints.map(objectKey).sort(),
+            'all constraint identities must match');
+        for (const expectedConstraint of candidate.constraints) {
+            assert.deepEqual(actualConstraints.get(objectKey(expectedConstraint)), expectedConstraint,
+                'constraint definition and validation flags must match for ' + expectedConstraint.name);
+        }
+        const actualIndexes = new Map(actual.indexes.map(x => [objectKey(x), x]));
+        const candidateIndexes = new Map(candidate.indexes.map(x => [objectKey(x), x]));
+        const missingExpectedIndexes = [...candidateIndexes.keys()].filter(key => !actualIndexes.has(key));
+        const unexpectedActualIndexes = [...actualIndexes.keys()].filter(key => !candidateIndexes.has(key));
         assert.deepEqual(missingExpectedIndexes, ['public.chattbm_chat_history.chattbm_chat_history_updated_at_idx']);
         assert.deepEqual(unexpectedActualIndexes, []);
+        for (const [key, actualIndex] of actualIndexes) {
+            assert.deepEqual(actualIndex, candidateIndexes.get(key),
+                'index definition and health flags must match for ' + key);
+        }
         assert.equal(actual.tables.reduce((sum, table) => sum + table.columns.length, 0), 67);
 
         await client.query('BEGIN READ ONLY');
