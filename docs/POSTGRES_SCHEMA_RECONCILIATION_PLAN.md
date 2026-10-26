@@ -12,7 +12,9 @@
 - No common migration-ledger table name was found in the live public schema.
 - Duplicate numeric prefixes exist among current SQL files: `002_chat_history.sql`, `002_google_oauth_identities.sql`, `003_context_records.sql`, and `003_google_oauth_states.sql`.
 - The live index inventory did not include `chattbm_chat_history_updated_at_idx`, although that index is defined in `002_chat_history.sql` and not created by `database/Postgres.js`.
-- Other inspected indexes/constraints on sessions, contexts, OAuth identity/state, password-reset tokens, rate limits, conversations, OAuth handoffs, and memories were present.
+- Read-only catalog comparison of the migration-defined tables confirmed the inspected primary keys, unique constraints, foreign keys with their expected `ON DELETE CASCADE` behavior, and checks for JSONB array/object payloads and `version >= 1` / `request_count >= 1` are present.
+- The indexes defined by the SQL files were compared against `pg_indexes`: the expected index set is present except `chattbm_chat_history_updated_at_idx`. The core tables also have the expected columns, nullability, and defaults in the inspected column inventory.
+- This is a focused comparison of the listed migration-managed tables and their definitions; it is not yet a complete canonical schema diff for every table created only by startup bootstrap.
 
 ## What the evidence does and does not establish
 
