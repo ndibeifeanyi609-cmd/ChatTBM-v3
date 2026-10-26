@@ -257,3 +257,6 @@ The read-only schema comparator branch's CI passed on commit `b8924cd10f37cac024
 
 This validates comparator mechanics, not yet the complete source-derived 11-table expected manifest or its parity with production. The manifest must still be built from reviewed source definitions; the known absent chat-history index must remain an explicit unresolved difference rather than silently treated as present or repaired.
 
+## Source revision pinning checkpoint (2026-10-26)
+
+Pinned the provisional candidate's `sourceRevision` to `a4753cb26fa2945d65aadac0511eb4b730c1f6af` (the current `main` commit at review time). Verified Git blob identities for all four runtime schema owners (`database/Postgres.js`, `memory/PostgresMemoryPersistence.js`, `auth/PasswordResetService.js`, `auth/PostgresRateLimitStore.js`) and all seven legacy SQL files against both `main` and the prior candidate revision `b8924cd10f37cac024ad62a4c0320cb56322ec33`; all eleven source files matched exactly. This pins provenance to the reviewed source state without asserting historical migration execution. Candidate remains `provisional_not_executable`; disposable PostgreSQL 18 CI passed, but independent review and explicit known-difference policy remain required before adoption work. No production schema/data was changed.
