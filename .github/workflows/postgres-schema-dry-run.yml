@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - 'database/schemaDryRunComparator.js'
+      - 'database/schemaKnownDifferencePolicy.js'
       - 'tests/schemaDryRunComparator.test.js'
+      - 'tests/schemaKnownDifferencePolicy.test.js'
       - 'tests/schemaDryRunComparator.integration.test.js'
       - '.github/workflows/postgres-schema-dry-run.yml'
   workflow_dispatch:
@@ -41,5 +43,7 @@ jobs:
         run: npm install
       - name: Run comparator unit tests
         run: node --test tests/schemaDryRunComparator.test.js
+      - name: Run known-difference policy unit tests
+        run: node --test tests/schemaKnownDifferencePolicy.test.js
       - name: Verify read-only PostgreSQL 18 catalog capture
         run: node --test tests/schemaDryRunComparator.integration.test.js
