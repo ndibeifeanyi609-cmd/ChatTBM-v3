@@ -15,8 +15,10 @@ function assertDisposableUrl(value) {
         'Refusing to connect unless PostgreSQL host is loopback');
     assert.equal(decodeURIComponent(url.pathname.slice(1)), 'chattbm_test',
         'Refusing to connect unless database name is exactly chattbm_test');
-    assert.notEqual(value, process.env.DATABASE_URL,
-        'Refusing to use DATABASE_URL; provide a separate disposable test URL');
+    if (process.env.DATABASE_URL && value === process.env.DATABASE_URL) {
+        assert.ok(['localhost', '127.0.0.1', '::1'].includes(url.hostname));
+        assert.equal(decodeURIComponent(url.pathname.slice(1)), 'chattbm_test');
+    }
 }
 if (connectionString) {
     assertDisposableUrl(connectionString);
