@@ -78,3 +78,16 @@ Compared the live `chattbm_password_reset_tokens` catalog with `database/migrati
 
 This is a metadata-only read. It does not establish historical migration execution and does not imply that the other ten tables have been reconciled. No production writes were performed.
 
+
+## Shared authentication rate-limit catalog comparison (read-only, 2026-10-26)
+
+Compared production metadata for `chattbm_auth_rate_limits` against `database/migrations/005_auth_rate_limits.sql` and runtime use in `auth/PostgresRateLimitStore.js`.
+
+- **Columns match:** `bucket_key` text NOT NULL; `window_started_at` timestamptz NOT NULL; `request_count` integer NOT NULL; `expires_at` timestamptz NOT NULL; `updated_at` timestamptz NOT NULL DEFAULT `now()`.
+- **Constraints match:** primary key on `bucket_key` and check `request_count >= 1`.
+- **Indexes present:** primary-key index on `bucket_key` and `chattbm_auth_rate_limits_expires_at_idx` on `expires_at`.
+- **Runtime alignment:** store upserts buckets, reads/updates `request_count`, timestamps, and expiry, and deletes expired rows in bounded batches. The `updated_at` default exists, though runtime explicitly supplies `NOW()`.
+- **Result:** no discrepancy observed in the queried columns, constraints, and indexes.
+
+This comparison is metadata-only. It does not prove historical migration execution and does not reconcile the other tables. No production writes were performed.
+
