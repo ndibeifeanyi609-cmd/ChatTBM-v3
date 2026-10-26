@@ -14,7 +14,8 @@
 - The live index inventory did not include `chattbm_chat_history_updated_at_idx`, although that index is defined in `002_chat_history.sql` and not created by `database/Postgres.js`.
 - Read-only catalog comparison of the migration-defined tables confirmed the inspected primary keys, unique constraints, foreign keys with their expected `ON DELETE CASCADE` behavior, and checks for JSONB array/object payloads and `version >= 1` / `request_count >= 1` are present.
 - The indexes defined by the SQL files were compared against `pg_indexes`: the expected index set is present except `chattbm_chat_history_updated_at_idx`. The core tables also have the expected columns, nullability, and defaults in the inspected column inventory.
-- This is a focused comparison of the listed migration-managed tables and their definitions; it is not yet a complete canonical schema diff for every table created only by startup bootstrap.
+- The startup-bootstrap-only tables `chattbm_conversations`, `chattbm_google_oauth_handoffs`, and `chattbm_memories` were also checked read-only. Their inspected columns, nullability/defaults, primary/unique constraints, JSON object check on memories, and handoff-to-user cascading foreign key match the visible bootstrap/schema expectations.
+- This completes the catalog comparison of the current `chattbm_%` tables against the available bootstrap and migration definitions at the table/column/constraint/index level. Historical migration execution remains unknown, and this inspection does not assess application-level data validity or workload-specific index performance.
 
 ## What the evidence does and does not establish
 
