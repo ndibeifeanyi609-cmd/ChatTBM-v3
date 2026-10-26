@@ -103,3 +103,16 @@ Compared production metadata for `chattbm_memories` against `memory/PostgresMemo
 
 The comparison was metadata-only and did not inspect memory payloads or prove historical initialization/migration execution. No production writes were performed.
 
+
+## Users and auth-sessions catalog comparison (read-only, 2026-10-26)
+
+Compared live catalog metadata for `chattbm_users` and `chattbm_auth_sessions` against `database/Postgres.js` and `database/migrations/001_auth_accounts_sessions.sql`.
+
+- **Users columns match:** `id`, `email_normalized`, `password_hash`, nullable `email_verified_at`, `created_at` and `updated_at` with `now()` defaults, and nullable `disabled_at`.
+- **Users constraints/indexes match:** primary key on `id` and unique constraint/index on `email_normalized`.
+- **Auth-session columns match:** `id`, `user_id`, `token_hash`, `created_at` with `now()` default, `expires_at`, nullable `revoked_at`, and nullable `last_seen_at`.
+- **Auth-session constraints/indexes match:** primary key on `id`, unique token-hash constraint, foreign key to `chattbm_users(id)` with `ON DELETE CASCADE`, and indexes on `user_id` and `expires_at`.
+- **Result:** no discrepancy observed for these two tables in the queried columns, defaults, constraints, and indexes.
+
+This was a metadata-only read and does not establish historical migration execution. No production writes were performed.
+
