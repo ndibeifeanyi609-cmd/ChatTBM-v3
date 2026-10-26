@@ -51,8 +51,8 @@ function validateRegistry(registry) {
         }
     }
     if (typeof entry.rationale !== 'string' || !entry.rationale.trim() ||
-        typeof entry.reviewRef !== 'string' || !entry.reviewRef.trim()) {
-        throw new Error('Known-difference policy refuses: rationale and review reference are required.');
+        entry.reviewRef !== 'docs/POSTGRES_MIGRATION_REVIEW_DECISION.md') {
+        throw new Error('Known-difference policy refuses: rationale and the canonical review reference are required.');
     }
 }
 
