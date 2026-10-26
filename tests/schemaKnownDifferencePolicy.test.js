@@ -4,7 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { classifyKnownDifferences, ALLOWED_DIFFERENCE } = require('../database/schemaKnownDifferencePolicy');
 
-// Registry fixture intentionally mirrors the exact six-field candidate contract.\nconst registry = [{
+// Registry fixture intentionally mirrors the exact six-field candidate contract.
+const registry = [{
     ...ALLOWED_DIFFERENCE,
     rationale: 'Declared by the legacy chat-history SQL; absent from the observed live catalog and separately planned.',
     reviewRef: 'docs/POSTGRES_EXPECTED_SCHEMA_MANIFEST_PLAN.md'
