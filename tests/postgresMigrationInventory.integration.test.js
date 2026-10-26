@@ -31,6 +31,8 @@ const migrationFiles = fs.readdirSync(migrationDir)
     .filter(name => name.endsWith('.sql'))
     .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
 
+let closeDatabase;
+
 async function main() {
     const pool = new Pool({ connectionString });
     try {
@@ -40,7 +42,9 @@ async function main() {
         assert.equal(identity.rows[0].database, 'chattbm_test');
         console.log('Confirmed disposable database:', JSON.stringify(identity.rows[0]));
 
-        const { initializeDatabase, closeDatabase } = require('../database/Postgres');
+        const database = require('../database/Postgres');
+        closeDatabase = database.closeDatabase;
+        const { initializeDatabase } = database;
         await initializeDatabase();
         const afterBootstrap = await pool.query(
             "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename"
@@ -95,9 +99,12 @@ async function main() {
         console.log('chattbm_users columns after both paths:',
             userColumns.rows.map(row => row.column_name + (row.is_nullable === 'NO' ? ' NOT NULL' : '')).join(', '));
         console.log('PASS: disposable migration inventory and repeat-application check completed.');
-        await closeDatabase();
     } finally {
-        await pool.end();
+        try {
+            if (closeDatabase) await closeDatabase();
+        } finally {
+            await pool.end();
+        }
     }
 }
 
