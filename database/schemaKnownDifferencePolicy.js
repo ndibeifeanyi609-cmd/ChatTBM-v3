@@ -24,6 +24,14 @@ function validateManifestKeys(manifest, allowedKeys, label) {
     }
 }
 
+function validateRequiredCollections(manifest, label) {
+    for (const collection of ['tables', 'constraints', 'indexes']) {
+        if (!Array.isArray(manifest[collection])) {
+            throw new Error('Known-difference policy refuses: required ' + label + ' manifest collection must be an array.');
+        }
+    }
+}
+
 function validateRegistry(registry) {
     if (!Array.isArray(registry) || registry.length !== 1) {
         throw new Error('Known-difference policy refuses: exactly one registered difference is required.');
@@ -78,6 +86,8 @@ function classifyKnownDifferences(rawResult, expectedManifest, actualManifest) {
         'manifestVersion', 'postgresMajorVersion', 'schema',
         'tables', 'constraints', 'indexes'
     ], 'actual');
+    validateRequiredCollections(expected, 'expected');
+    validateRequiredCollections(actual, 'actual');
     validateRegistry(expected.knownDifferences);
 
     const expectedCollections = {};
