@@ -105,7 +105,9 @@ function classifyKnownDifferences(rawResult, expectedManifest, actualManifest) {
     if (target.length !== 1) {
         throw new Error('Known-difference policy refuses: expected index record must exist exactly once.');
     }
-    const reviewedIndex = {
+    // These are the required definition and health flags if the expected index exists.
+    // They describe the intended index, not observed production presence; absence is checked below.
+    const expectedIndexIfPresent = {
         definition: 'CREATE INDEX chattbm_chat_history_updated_at_idx ON public.chattbm_chat_history USING btree (user_id, updated_at DESC)',
         unique: false,
         primary: false,
@@ -113,11 +115,12 @@ function classifyKnownDifferences(rawResult, expectedManifest, actualManifest) {
         ready: true,
         live: true
     };
-    for (const [field, value] of Object.entries(reviewedIndex)) {
+    for (const [field, value] of Object.entries(expectedIndexIfPresent)) {
         if (target[0][field] !== value) {
-            throw new Error('Known-difference policy refuses: expected index definition or health metadata changed.');
+            throw new Error('Known-difference policy refuses: expected index definition or intended health metadata changed.');
         }
     }
+    // This is the observed production/test catalog. It must not contain the registered missing index.
     const actualTarget = actualCollections.indexes.filter(item =>
         item.schema === 'public' &&
         item.table === 'chattbm_chat_history' &&
