@@ -6,6 +6,7 @@ on:
     paths:
       - 'database/schemaDryRunComparator.js'
       - 'tests/schemaDryRunComparator.test.js'
+      - 'tests/schemaDryRunComparator.integration.test.js'
       - '.github/workflows/postgres-schema-dry-run.yml'
   workflow_dispatch:
 
