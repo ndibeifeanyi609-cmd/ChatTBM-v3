@@ -14,11 +14,9 @@ Define a stable, reviewable JSON shape for comparing PostgreSQL catalog metadata
   "sourceRevision": "<reviewed git commit>",
   "postgresMajorVersion": 18,
   "schema": "public",
-  "objects": {
-    "tables": [],
-    "constraints": [],
-    "indexes": []
-  },
+  "tables": [],
+  "constraints": [],
+  "indexes": [],
   "knownDifferences": []
 }
 ```
@@ -46,6 +44,7 @@ Every accepted or unresolved difference must have a stable identifier, object pa
 ## Canonicalization and fingerprint
 
 - Canonicalize object keys lexicographically at every nesting level.
+- Store `tables`, `constraints`, and `indexes` as top-level arrays, matching the tested `database/schemaDryRunComparator.js` interface.
 - Preserve column order by ordinal position.
 - Sort constraints and indexes by their stable identity fields as defined above.
 - Preserve other arrays only where order is semantically meaningful; otherwise sort by stable identity before fingerprinting.
