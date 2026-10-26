@@ -91,3 +91,15 @@ Compared production metadata for `chattbm_auth_rate_limits` against `database/mi
 
 This comparison is metadata-only. It does not prove historical migration execution and does not reconcile the other tables. No production writes were performed.
 
+
+## Memory persistence catalog comparison (read-only, 2026-10-26)
+
+Compared production metadata for `chattbm_memories` against `memory/PostgresMemoryPersistence.js`.
+
+- **All 8 columns match:** `id`, `user_id`, `memory_type`, `subject`, `lifecycle`, `payload` (jsonb), `created_at` (timestamptz), and `updated_at` (timestamptz). All are NOT NULL; no column defaults were observed.
+- **Constraints match:** primary key on `id`; unique constraint on `(user_id, memory_type, subject)`; check that `payload` is a JSON object.
+- **Indexes present:** primary-key index, unique identity index, and `chattbm_memories_user_lifecycle_idx` on `(user_id, lifecycle)`.
+- **Result:** no discrepancy observed in the queried columns, defaults, constraints, and indexes.
+
+The comparison was metadata-only and did not inspect memory payloads or prove historical initialization/migration execution. No production writes were performed.
+
