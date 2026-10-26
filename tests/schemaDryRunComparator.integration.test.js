@@ -28,6 +28,17 @@ test('captures PostgreSQL 18 disposable catalog in a read-only transaction', asy
         assert.ok(Array.isArray(manifest.indexes));
         assert.equal(after.rows[0].count, before.rows[0].count);
         assert.equal(manifest.tables.length, 0, 'CI disposable database should start without application tables');
+
+        await client.query('BEGIN READ ONLY');
+        await assert.rejects(
+            client.query('CREATE TABLE chattbm_comparator_write_guard (id integer)'),
+            /read-only transaction/i
+        );
+        await client.query('ROLLBACK');
+        const guardTable = await client.query(
+            "SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='public' AND table_name='chattbm_comparator_write_guard'"
+        );
+        assert.equal(guardTable.rows[0].count, 0, 'read-only transaction must reject schema writes');
     } finally {
         await client.end();
     }
