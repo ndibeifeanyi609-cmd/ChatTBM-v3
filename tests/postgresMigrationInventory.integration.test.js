@@ -18,9 +18,11 @@ function assertDisposableUrl(value) {
     assert.notEqual(value, process.env.DATABASE_URL,
         'Refusing to use DATABASE_URL; provide a separate disposable test URL');
 }
-assertDisposableUrl(connectionString);
-process.env.DATABASE_URL = connectionString;
-process.env.NODE_ENV = 'test';
+if (connectionString) {
+    assertDisposableUrl(connectionString);
+    process.env.DATABASE_URL = connectionString;
+    process.env.NODE_ENV = 'test';
+}
 
 const migrationDir = path.join(__dirname, '..', 'database', 'migrations');
 const migrationFiles = fs.readdirSync(migrationDir)
@@ -97,7 +99,11 @@ async function main() {
     }
 }
 
-main().catch(error => {
-    console.error('FAIL: disposable migration inventory:', error.message);
-    process.exitCode = 1;
-});
+if (!connectionString) {
+    console.log('SKIP: set CHATTBM_MIGRATION_TEST_URL to a disposable local chattbm_test database.');
+} else {
+    main().catch(error => {
+        console.error('FAIL: disposable migration inventory:', error.message);
+        process.exitCode = 1;
+    });
+}
