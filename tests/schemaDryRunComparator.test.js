@@ -48,3 +48,35 @@ test('preflight rejects remote or non-test URLs before any connection is attempt
     assert.throws(() => assertSafeConnectionString('postgres://u:p@localhost:5432/production'), /chattbm_test/);
     assert.throws(() => assertSafeConnectionString('not-a-url'), /valid URL/);
 });
+
+test('fingerprint includes identity, generated-column, and index health metadata', () => {
+    const base = {
+        tables: [{
+            name: 'chattbm_fixture',
+            columns: [{ name: 'id', identity: false, generated: false, generationExpression: null }]
+        }],
+        constraints: [],
+        indexes: [{
+            name: 'chattbm_fixture_idx',
+            unique: false,
+            primary: false,
+            valid: true,
+            ready: true,
+            live: true
+        }]
+    };
+    const changedIdentity = structuredClone(base);
+    changedIdentity.tables[0].columns[0].identity = true;
+    assert.notEqual(fingerprint(base), fingerprint(changedIdentity));
+
+    const changedGenerated = structuredClone(base);
+    changedGenerated.tables[0].columns[0].generated = true;
+    changedGenerated.tables[0].columns[0].generationExpression = 'id + 1';
+    assert.notEqual(fingerprint(base), fingerprint(changedGenerated));
+
+    for (const field of ['unique', 'primary', 'valid', 'ready', 'live']) {
+        const changed = structuredClone(base);
+        changed.indexes[0][field] = !changed.indexes[0][field];
+        assert.notEqual(fingerprint(base), fingerprint(changed), field + ' must affect the fingerprint');
+    }
+});
