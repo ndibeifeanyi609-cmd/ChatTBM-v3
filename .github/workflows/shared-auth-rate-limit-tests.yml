@@ -10,6 +10,7 @@ on:
       - 'auth/PostgresRateLimitStore.test.js'
       - 'database/migrations/005_auth_rate_limits.sql'
       - 'tests/sharedAuthRateLimit.integration.test.js'
+      - 'tests/postgresMigrationInventory.integration.test.js'
   workflow_dispatch:
 
 jobs:
@@ -45,6 +46,10 @@ jobs:
         run: node --test auth/rateLimit.test.js
       - name: Run PostgreSQL store unit tests
         run: node --test auth/PostgresRateLimitStore.test.js
+      - name: Run disposable PostgreSQL migration inventory
+        run: node tests/postgresMigrationInventory.integration.test.js
+        env:
+          CHATTBM_MIGRATION_TEST_URL: postgres://chattbm_test:test_password@localhost:5432/chattbm_test
       - name: Run shared rate-limit PostgreSQL integration tests
         run: |
           if [ ! -f tests/sharedAuthRateLimit.integration.test.js ]; then
