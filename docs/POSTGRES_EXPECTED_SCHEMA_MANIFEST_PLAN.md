@@ -24,17 +24,17 @@ The source definitions are split across `database/Postgres.js`, `memory/Postgres
 
 | Object | Source definition | Review status |
 |---|---|---|
-| `chattbm_users` | `database/Postgres.js`; `001_auth_accounts_sessions.sql` | Compare all columns/defaults/constraints |
-| `chattbm_auth_sessions` | `database/Postgres.js`; `001_auth_accounts_sessions.sql` | Compare all columns/defaults/constraints/indexes |
-| `chattbm_conversations` | `database/Postgres.js` | No corresponding legacy migration found in current seven-file inventory |
-| `chattbm_contexts` | `database/Postgres.js`; `003_context_records.sql` | Compare checks, unique constraint, indexes |
-| `chattbm_chat_history` | `database/Postgres.js`; `002_chat_history.sql` | Known index discrepancy below |
-| `chattbm_oauth_identities` | `database/Postgres.js`; `002_google_oauth_identities.sql` | Compare both unique constraints |
-| `chattbm_google_oauth_states` | `database/Postgres.js`; `003_google_oauth_states.sql` | Compare nullable FK and expiry index |
-| `chattbm_google_oauth_handoffs` | `database/Postgres.js` | No corresponding legacy migration found in current seven-file inventory |
-| `chattbm_memories` | `memory/PostgresMemoryPersistence.js` | Compare JSON check, uniqueness, index |
-| `chattbm_password_reset_tokens` | `004_password_reset_tokens.sql` | Owning runtime persistence/controller path still needs confirmation |
-| `chattbm_auth_rate_limits` | `005_auth_rate_limits.sql` | Compare check constraint and expiry index |
+| `chattbm_users` | `database/Postgres.js`; `001_auth_accounts_sessions.sql` | Reconciled; no catalog discrepancy observed |
+| `chattbm_auth_sessions` | `database/Postgres.js`; `001_auth_accounts_sessions.sql` | Reconciled; no catalog discrepancy observed |
+| `chattbm_conversations` | `database/Postgres.js` | Reconciled; no legacy migration found in current seven-file inventory |
+| `chattbm_contexts` | `database/Postgres.js`; `003_context_records.sql` | Reconciled; no catalog discrepancy observed |
+| `chattbm_chat_history` | `database/Postgres.js`; `002_chat_history.sql` | Reconciled except known missing `chattbm_chat_history_updated_at_idx` |
+| `chattbm_oauth_identities` | `database/Postgres.js`; `002_google_oauth_identities.sql` | Reconciled; no catalog discrepancy observed |
+| `chattbm_google_oauth_states` | `database/Postgres.js`; `003_google_oauth_states.sql` | Reconciled; no catalog discrepancy observed |
+| `chattbm_google_oauth_handoffs` | `database/Postgres.js` | Reconciled; no legacy migration found in current seven-file inventory |
+| `chattbm_memories` | `memory/PostgresMemoryPersistence.js` | Reconciled; no catalog discrepancy observed |
+| `chattbm_password_reset_tokens` | `004_password_reset_tokens.sql`; `auth/PasswordResetService.js` | Reconciled; no catalog discrepancy observed |
+| `chattbm_auth_rate_limits` | `005_auth_rate_limits.sql`; `auth/PostgresRateLimitStore.js` | Reconciled; no catalog discrepancy observed |
 
 ## Known discrepancies and uncertainties
 
@@ -188,4 +188,21 @@ Compared live metadata for `chattbm_google_oauth_handoffs` against its definitio
 - **Result:** no discrepancy observed in the queried columns, defaults, constraints, and indexes.
 
 This was a metadata-only read. It does not prove historical initialization or migration execution, and no production writes were performed.
+
+
+## Consolidated inventory status (2026-10-26)
+
+All 11 live application tables have now had read-only checks of columns, defaults, constraints, and indexes recorded above. No discrepancy was observed for ten tables in the metadata inspected. The sole known mismatch is the absent `chattbm_chat_history_updated_at_idx`, which remains intentionally unresolved and excluded from any adoption repair.
+
+This is not yet a frozen executable expected manifest: catalog query results were reviewed table-by-table, but the full source-derived canonical object set, index expression/validity details, unexpected-object policy, and deterministic fingerprint still require a single end-to-end validation in disposable PostgreSQL 18. No historical migration execution is inferred. No production data or schema was modified.
+
+## Updated acceptance checklist
+
+- [x] Locate runtime owner of password-reset token storage.
+- [x] Inspect all 11 tables' columns/defaults, constraints, and indexes in the read-only production catalog.
+- [x] Record the missing chat-history index as an unresolved separate issue.
+- [ ] Build and review the complete versioned expected manifest from all source definitions and catalog metadata.
+- [ ] Compare full expected and actual manifests in disposable PostgreSQL 18, covering missing/extra objects, type/default drift, and deterministic ordering.
+- [ ] Review the schema fingerprint format and the handling of the known index mismatch.
+- [ ] Obtain review before considering baseline adoption implementation complete.
 
