@@ -23,8 +23,8 @@ test('captures PostgreSQL 18 disposable catalog in a read-only transaction', asy
                 schema: 'public',
                 name: 'chattbm_fixture',
                 columns: [
-                    { position: 1, name: 'id', type: 'pg_catalog.text', nullable: false, default: null },
-                    { position: 2, name: 'label', type: 'pg_catalog.text', nullable: false, default: null }
+                    { position: 1, name: 'id', type: 'pg_catalog.text', nullable: false, default: null, identity: false, identityGeneration: null, generated: false, generationExpression: null },
+                    { position: 2, name: 'label', type: 'pg_catalog.text', nullable: false, default: null, identity: false, identityGeneration: null, generated: false, generationExpression: null }
                 ]
             }],
             constraints: [{
@@ -38,9 +38,15 @@ test('captures PostgreSQL 18 disposable catalog in a read-only transaction', asy
                 validated: true
             }],
             indexes: [{
+                schema: 'public',
                 table: 'chattbm_fixture',
                 name: 'chattbm_fixture_pkey',
-                definition: 'CREATE UNIQUE INDEX chattbm_fixture_pkey ON public.chattbm_fixture USING btree (id)'
+                definition: 'CREATE UNIQUE INDEX chattbm_fixture_pkey ON public.chattbm_fixture USING btree (id)',
+                unique: true,
+                primary: true,
+                valid: true,
+                ready: true,
+                live: true
             }]
         };
         const expectedComparison = compareManifests(expectedFixture, manifest);
