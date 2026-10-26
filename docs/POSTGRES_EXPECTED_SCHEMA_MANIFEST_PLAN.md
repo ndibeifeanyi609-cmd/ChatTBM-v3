@@ -141,3 +141,15 @@ Compared live metadata for `chattbm_contexts` against `database/Postgres.js` and
 
 This is a metadata-only comparison. It does not prove historical migration execution; no production writes were performed.
 
+
+## Chat-history catalog comparison (read-only, 2026-10-26)
+
+Compared live metadata for `chattbm_chat_history` against `database/Postgres.js` and `database/migrations/002_chat_history.sql`.
+
+- **Columns match:** `user_id` text NOT NULL, `conversation_id` text NOT NULL, `messages` jsonb NOT NULL, and `updated_at` timestamptz NOT NULL DEFAULT `now()`.
+- **Constraints match:** primary key `(user_id, conversation_id)`; foreign key `user_id` → `chattbm_users(id)` with `ON DELETE CASCADE`; and a check requiring `messages` to be a JSON array.
+- **Index discrepancy confirmed:** the live table has only the primary-key index. `database/migrations/002_chat_history.sql` declares `chattbm_chat_history_updated_at_idx` on `(user_id, updated_at DESC)`, but it is absent from production.
+- **Decision:** leave the index absent for now. Assess query patterns, expected performance benefit, index build locking/resource cost, and a separate rollback/roll-forward plan before considering a standalone change. Do not create it during schema comparison or baseline adoption.
+
+No row data was read and no production writes were performed. Historical migration execution remains unknown.
+
