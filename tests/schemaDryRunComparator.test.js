@@ -80,3 +80,32 @@ test('fingerprint includes identity, generated-column, and index health metadata
         assert.notEqual(fingerprint(base), fingerprint(changed), field + ' must affect the fingerprint');
     }
 });
+
+test('manifest comparison detects extra objects and column default drift', () => {
+    const expected = {
+        tables: [{ name: 'chattbm_fixture', columns: [{ name: 'id', type: 'pg_catalog.text', default: null }] }],
+        constraints: [],
+        indexes: []
+    };
+    const extraObject = structuredClone(expected);
+    extraObject.tables.push({ name: 'chattbm_unexpected', columns: [] });
+    const extraResult = compareManifests(expected, extraObject);
+    assert.equal(extraResult.matches, false);
+    assert.ok(extraResult.actualOnly.length > 0, 'unexpected table must be reported on actual side');
+
+    const changedDefault = structuredClone(expected);
+    changedDefault.tables[0].columns[0].default = 'now()';
+    const defaultResult = compareManifests(expected, changedDefault);
+    assert.equal(defaultResult.matches, false);
+    assert.notEqual(defaultResult.expectedFingerprint, defaultResult.actualFingerprint);
+});
+
+test('manifest comparison reports stable object paths for a missing index', () => {
+    const expected = { tables: [], constraints: [], indexes: [{ schema: 'public', table: 'chattbm_fixture', name: 'chattbm_fixture_idx' }] };
+    const actual = { tables: [], constraints: [], indexes: [] };
+    const first = compareManifests(expected, actual);
+    const second = compareManifests(expected, actual);
+    assert.equal(first.matches, false);
+    assert.deepEqual(first.expectedOnly, second.expectedOnly);
+    assert.ok(first.expectedOnly.some(item => item.path.includes('chattbm_fixture_idx')));
+});
