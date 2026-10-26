@@ -207,6 +207,11 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
 
+## Provisional manifest candidate checkpoint (2026-10-26)
+
+Created `docs/POSTGRES_EXPECTED_SCHEMA_MANIFEST_V1_CANDIDATE.json` as a deliberately non-executable candidate. JSON parsing and structural checks passed: 11 table records and 67 ordered column records are present. Constraints and indexes are intentionally still empty; therefore this candidate is incomplete and must not be used for baseline adoption. The known missing `chattbm_chat_history_updated_at_idx` remains explicitly recorded as `separately_planned` and is not synthesized into the index collection. Next validation must populate reviewed constraint/index records, capture catalog definitions and index health in disposable PostgreSQL 18, and compare the complete candidate to a read-only catalog capture. No production access or writes occurred in this step.
+
+
 ## Manifest contract/comparator alignment checkpoint (2026-10-26)
 
 Aligned `docs/POSTGRES_SCHEMA_MANIFEST_V1_CONTRACT.md` to the tested comparator's actual envelope: `tables`, `constraints`, and `indexes` are top-level arrays alongside `manifestVersion`, `sourceRevision`, `postgresMajorVersion`, `schema`, and `knownDifferences`. The earlier illustrative nested `objects` wrapper is removed. This is a documentation contract alignment only; it does not create or approve an expected manifest, change comparator behavior, or authorize production actions.
