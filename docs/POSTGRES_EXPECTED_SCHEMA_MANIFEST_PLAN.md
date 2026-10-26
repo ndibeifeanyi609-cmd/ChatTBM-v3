@@ -66,3 +66,15 @@ Compare this source-derived manifest against a separately captured read-only pro
 - [ ] Obtain review before any baseline adoption implementation is considered complete.
 
 Production remains read-only and untouched by this plan.
+
+## Password-reset catalog comparison (read-only, 2026-10-26)
+
+Compared the live `chattbm_password_reset_tokens` catalog with `database/migrations/004_password_reset_tokens.sql` and runtime use in `auth/PasswordResetService.js`.
+
+- **Columns match the migration:** `id` text NOT NULL; `user_id` text NOT NULL; `token_hash` text NOT NULL; `created_at` timestamptz NOT NULL DEFAULT `now()`; `expires_at` timestamptz NOT NULL; `used_at` nullable timestamptz.
+- **Constraints match the intended definitions:** primary key on `id`, unique constraint on `token_hash`, and foreign key `user_id` → `chattbm_users(id)` with `ON DELETE CASCADE`.
+- **Indexes present:** primary-key index; unique token-hash index; `chattbm_password_reset_tokens_user_created_idx` on `(user_id, created_at DESC)`; and `chattbm_password_reset_tokens_expires_idx` on `(expires_at)`.
+- **Result:** no discrepancy observed for this table in the queried columns, constraints, and indexes.
+
+This is a metadata-only read. It does not establish historical migration execution and does not imply that the other ten tables have been reconciled. No production writes were performed.
+
