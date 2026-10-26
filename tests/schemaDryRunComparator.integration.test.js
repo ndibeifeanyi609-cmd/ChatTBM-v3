@@ -53,6 +53,10 @@ test('captures PostgreSQL 18 disposable catalog in a read-only transaction', asy
     const client = new Client({ connectionString: process.env.DATABASE_URL });
     await client.connect();
     try {
+        // Verify database identity and PostgreSQL major version before creating the fixture.
+        const version = await client.query('SHOW server_version_num');
+        const database = await client.query('SELECT current_database() AS name');
+        assertSafeTarget(process.env.DATABASE_URL, database.rows[0].name, version.rows[0].server_version_num);
         await client.query('CREATE TABLE chattbm_fixture (id TEXT PRIMARY KEY, label TEXT NOT NULL)');
         const manifest = await readLiveManifest(client);
 
