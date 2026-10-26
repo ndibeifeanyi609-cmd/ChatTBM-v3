@@ -206,3 +206,10 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Review the schema fingerprint format and the handling of the known index mismatch.
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
+
+## Comparator validation checkpoint (2026-10-26)
+
+The read-only schema comparator branch's CI passed on commit `efa779970e4abb02fa5fd302fd18705b7342fbd1`: Verify ChatTBM, Streaming Tests, Shared Auth Rate Limit Tests, and PostgreSQL Schema Dry-Run Comparator. The PostgreSQL 18 disposable catalog-capture step and comparator unit tests passed. The unit suite covers canonical ordering/fingerprints, differences, safe-target refusal, identity/generated-column metadata, index health fields, extra objects/default drift, and deterministic missing-index reporting.
+
+This validates comparator mechanics, not yet the complete source-derived 11-table expected manifest or its parity with production. The manifest must still be built from reviewed source definitions; the known absent chat-history index must remain an explicit unresolved difference rather than silently treated as present or repaired.
+
