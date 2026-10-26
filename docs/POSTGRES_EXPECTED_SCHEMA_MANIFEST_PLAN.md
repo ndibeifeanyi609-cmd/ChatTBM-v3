@@ -129,3 +129,15 @@ Compared live metadata for `chattbm_conversations` against the definition in `da
 
 This was a metadata-only read; no production writes were performed and historical migration execution remains unknown.
 
+
+## Contexts catalog comparison (read-only, 2026-10-26)
+
+Compared live metadata for `chattbm_contexts` against `database/Postgres.js` and `database/migrations/003_context_records.sql`.
+
+- **All 9 columns match:** `id`, `user_id`, `interaction_id`, `version`, `schema_version`, `lifecycle`, `created_at`, `updated_at`, and `payload` (jsonb). All are NOT NULL with no defaults.
+- **Constraints match:** primary key on `id`; foreign key `user_id` → `chattbm_users(id)` with `ON DELETE CASCADE`; unique `(user_id, interaction_id)`; `version >= 1`; and JSON-object payload check.
+- **Indexes present:** primary-key index, `chattbm_contexts_user_interaction_unique`, and both expected user/created and user/updated indexes.
+- **Result:** no discrepancy observed in the queried columns, defaults, constraints, and indexes.
+
+This is a metadata-only comparison. It does not prove historical migration execution; no production writes were performed.
+
