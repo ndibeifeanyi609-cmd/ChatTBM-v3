@@ -71,6 +71,19 @@ function classifyKnownDifferences(rawResult, expectedManifest, actualManifest) {
     if (target.length !== 1) {
         throw new Error('Known-difference policy refuses: expected index record must exist exactly once.');
     }
+    const reviewedIndex = {
+        definition: 'CREATE INDEX chattbm_chat_history_updated_at_idx ON public.chattbm_chat_history USING btree (user_id, updated_at DESC)',
+        unique: false,
+        primary: false,
+        valid: true,
+        ready: true,
+        live: true
+    };
+    for (const [field, value] of Object.entries(reviewedIndex)) {
+        if (target[0][field] !== value) {
+            throw new Error('Known-difference policy refuses: expected index definition or health metadata changed.');
+        }
+    }
     const actualTarget = actualCollections.indexes.filter(item =>
         item.schema === 'public' &&
         item.table === 'chattbm_chat_history' &&
