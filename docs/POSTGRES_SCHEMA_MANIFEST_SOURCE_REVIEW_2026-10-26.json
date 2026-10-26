@@ -1,0 +1,60 @@
+{
+  "reportVersion": 1,
+  "createdAt": "2026-10-26",
+  "candidatePath": "docs/POSTGRES_EXPECTED_SCHEMA_MANIFEST_V1_CANDIDATE.json",
+  "observedSnapshotPath": "docs/POSTGRES_LIVE_SCHEMA_CATALOG_SNAPSHOT_2026-10-26.json",
+  "method": "Canonical key-order-independent comparison of JSON records; no production writes and no application rows/payloads read.",
+  "sourceReview": {
+    "legacySqlReviewed": [
+      "database/migrations/001_auth_accounts_sessions.sql",
+      "database/migrations/002_chat_history.sql",
+      "database/migrations/002_google_oauth_identities.sql",
+      "database/migrations/003_context_records.sql",
+      "database/migrations/003_google_oauth_states.sql",
+      "database/migrations/004_password_reset_tokens.sql",
+      "database/migrations/005_auth_rate_limits.sql"
+    ],
+    "runtimeDefinitionsReviewed": [
+      "database/Postgres.js",
+      "memory/PostgresMemoryPersistence.js",
+      "auth/PasswordResetService.js",
+      "auth/PostgresRateLimitStore.js"
+    ],
+    "note": "Constraint/index records originate from a metadata-only live catalog capture and were cross-checked against source definitions; this report does not establish that legacy migration files historically ran."
+  },
+  "results": {
+    "tableCount": {
+      "expected": 11,
+      "observed": 11,
+      "matched": true
+    },
+    "columnCount": {
+      "expected": 67,
+      "observed": 67,
+      "matched": true,
+      "differences": []
+    },
+    "constraints": {
+      "expected": 31,
+      "observed": 31,
+      "missingFromExpected": [],
+      "unexpectedInExpected": [],
+      "changed": [],
+      "matched": true
+    },
+    "indexes": {
+      "expected": 30,
+      "observed": 29,
+      "missingFromExpected": [],
+      "unexpectedInExpected": [
+        "public.chattbm_chat_history.chattbm_chat_history_updated_at_idx"
+      ],
+      "changed": [],
+      "matchedObservedIndexes": true,
+      "knownExpectedButAbsent": [
+        "public.chattbm_chat_history.chattbm_chat_history_updated_at_idx"
+      ]
+    }
+  },
+  "decision": "NOT READY FOR BASELINE ADOPTION. Expected manifest is still provisional; disposable PostgreSQL 18 end-to-end validation and independent review are required. The missing chat-history index remains unresolved and must not be automatically created."
+}
