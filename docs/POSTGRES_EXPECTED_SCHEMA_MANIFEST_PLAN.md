@@ -116,3 +116,16 @@ Compared live catalog metadata for `chattbm_users` and `chattbm_auth_sessions` a
 
 This was a metadata-only read and does not establish historical migration execution. No production writes were performed.
 
+
+## Conversations catalog comparison (read-only, 2026-10-26)
+
+Compared live metadata for `chattbm_conversations` against the definition in `database/Postgres.js`.
+
+- **All 8 columns match:** `id`, `user_id`, `conversation_key`, `version`, `lifecycle`, `created_at`, `updated_at`, and `payload` (jsonb). All are NOT NULL, with no defaults.
+- **Constraints match:** primary key on `id` and unique constraint on `(user_id, conversation_key)`.
+- **Indexes present:** primary-key index and unique `(user_id, conversation_key)` index.
+- **Important nuance:** this source definition has no foreign key from `user_id` to `chattbm_users`; the live catalog also reports none. Do not assume or add one as part of baseline adoption.
+- **Result:** no discrepancy observed in the queried columns, defaults, constraints, and indexes.
+
+This was a metadata-only read; no production writes were performed and historical migration execution remains unknown.
+
