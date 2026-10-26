@@ -165,3 +165,15 @@ Compared live metadata for `chattbm_oauth_identities` against `database/Postgres
 
 This metadata-only read does not establish historical migration execution. No production writes were performed.
 
+
+## Google OAuth states catalog comparison (read-only, 2026-10-26)
+
+Compared live metadata for `chattbm_google_oauth_states` against `database/Postgres.js` and `database/migrations/003_google_oauth_states.sql`.
+
+- **Columns match:** `state_hash` text NOT NULL, nullable `link_user_id` text, `expires_at` timestamptz NOT NULL, and `created_at` timestamptz NOT NULL DEFAULT `now()`.
+- **Constraints match:** primary key on `state_hash`; nullable foreign key `link_user_id` → `chattbm_users(id)` with `ON DELETE CASCADE`.
+- **Indexes present:** primary-key index and `chattbm_google_oauth_states_expires_at_idx` on `expires_at`.
+- **Result:** no discrepancy observed in the queried columns, defaults, constraints, and indexes.
+
+This was a metadata-only read. It does not prove historical migration execution, and no production writes were performed.
+
