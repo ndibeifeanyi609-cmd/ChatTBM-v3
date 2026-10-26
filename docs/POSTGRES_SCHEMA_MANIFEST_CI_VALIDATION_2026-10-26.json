@@ -1,0 +1,41 @@
+{
+  "reportVersion": 1,
+  "createdAt": "2026-10-26",
+  "purpose": "Record CI validation of the full provisional schema-candidate integration test.",
+  "testCommit": "d2ffaa65516f243a487316cc0f445351a1880538",
+  "workflow": {
+    "name": "PostgreSQL Schema Dry-Run Comparator",
+    "runId": 40312499544,
+    "runNumber": 21,
+    "conclusion": "success",
+    "job": "schema-dry-run",
+    "jobId": 121536881522,
+    "stepsVerified": [
+      "Install dependencies",
+      "Run comparator unit tests",
+      "Verify read-only PostgreSQL 18 catalog capture"
+    ],
+    "allStepsSucceeded": true
+  },
+  "otherWorkflows": [
+    {"name": "Streaming Tests", "runId": 40312499528, "conclusion": "success"},
+    {"name": "Verify ChatTBM", "runId": 40312499680, "conclusion": "success"},
+    {"name": "Shared Auth Rate Limit Tests", "runId": 40312499592, "conclusion": "success"}
+  ],
+  "validatedTestAssertions": [
+    "Compare all 11 table records and full column definitions",
+    "Compare all 31 constraint definitions and validation flags",
+    "Compare all 29 observed index definitions and health flags",
+    "Report exactly the expected missing chat-history updated_at index",
+    "Reject writes in a read-only comparator transaction"
+  ],
+  "limitations": [
+    "This CI run validates the disposable PostgreSQL 18 fixture built by the integration test; it does not authorize baseline adoption or production changes.",
+    "The candidate remains provisional_not_executable.",
+    "The candidate sourceRevision still needs to be reviewed and pinned to the intended source-of-truth revision before adoption work.",
+    "The known missing chattbm_chat_history_updated_at_idx remains unresolved and must not be auto-created.",
+    "Historical execution of legacy migration files remains unproven."
+  ],
+  "productionImpact": "None. Production database was not used by this workflow and no production writes or schema changes were performed.",
+  "decision": "CI_GATE_PASSED_CANDIDATE_STILL_PROVISIONAL"
+}
