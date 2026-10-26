@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { Client } = require('pg');
-const { readLiveManifest, assertSafeConnectionString, compareManifests } = require('../database/schemaDryRunComparator');
+const { readLiveManifest, assertSafeConnectionString, assertSafeTarget, compareManifests } = require('../database/schemaDryRunComparator');
 
 test('inspects conventional migration-history tables without writing', async (t) => {
     if (!process.env.DATABASE_URL) {
@@ -150,6 +150,10 @@ test('compares the full provisional ChatTBM schema candidate on disposable Postg
     ];
     try {
         await client.connect();
+        // Verify the connected database and PostgreSQL major version before any destructive test setup.
+        const version = await client.query('SHOW server_version_num');
+        const database = await client.query('SELECT current_database() AS name');
+        assertSafeTarget(process.env.DATABASE_URL, database.rows[0].name, version.rows[0].server_version_num);
         for (const name of tableNames) {
             await client.query('DROP TABLE IF EXISTS public.' + name + ' CASCADE');
         }
