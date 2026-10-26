@@ -108,7 +108,7 @@ SELECT jsonb_build_object(
     FROM information_schema.tables c
     WHERE c.table_schema = 'public'
       AND c.table_type = 'BASE TABLE'
-      AND c.table_name LIKE 'chattbm_%'
+      AND left(c.table_name, 8) = 'chattbm_'
   ), '[]'::jsonb),
   'constraints', COALESCE((
     SELECT jsonb_agg(jsonb_build_object(
@@ -125,7 +125,7 @@ SELECT jsonb_build_object(
     JOIN pg_class cls ON cls.oid = con.conrelid
     JOIN pg_namespace ns ON ns.oid = cls.relnamespace
     WHERE ns.nspname = 'public'
-      AND cls.relname LIKE 'chattbm\\_%' ESCAPE '\\'
+      AND left(cls.relname, 8) = 'chattbm_'
       AND con.contype <> 'n'
   ), '[]'::jsonb),
   'indexes', COALESCE((
@@ -135,7 +135,7 @@ SELECT jsonb_build_object(
       'definition', indexdef
     ) ORDER BY tablename, indexname)
     FROM pg_indexes
-    WHERE schemaname = 'public' AND tablename LIKE 'chattbm_%'
+    WHERE schemaname = 'public' AND left(tablename, 8) = 'chattbm_'
   ), '[]'::jsonb)
 ) AS manifest;
 `;
