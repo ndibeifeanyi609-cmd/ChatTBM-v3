@@ -22,11 +22,12 @@ function validateRegistry(registry) {
         throw new Error('Known-difference policy refuses: exactly one registered difference is required.');
     }
     const entry = registry[0];
-    const allowedKeys = ['id', 'path', 'category', 'status', 'rationale', 'reviewRef'].sort();
+    const allowedKeys = ['id', 'path', 'category', 'status', 'rationale', 'reviewRef'];
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
         throw new Error('Known-difference policy refuses: invalid registry entry.');
     }
-    if (canonicalJson(Object.keys(entry).sort()) !== canonicalJson(allowedKeys)) {
+    const actualKeys = Object.keys(entry);
+    if (actualKeys.length !== allowedKeys.length || actualKeys.some(key => !allowedKeys.includes(key))) {
         throw new Error('Known-difference policy refuses: unknown or missing registry fields.');
     }
     for (const field of Object.keys(ALLOWED_DIFFERENCE)) {
