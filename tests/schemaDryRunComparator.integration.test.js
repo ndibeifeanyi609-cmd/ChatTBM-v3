@@ -79,3 +79,137 @@ test('captures PostgreSQL 18 disposable catalog in a read-only transaction', asy
         }
     }
 });
+
+
+test('compares the full provisional ChatTBM schema candidate on disposable PostgreSQL 18', async (t) => {
+    if (!process.env.DATABASE_URL) {
+        t.skip('DATABASE_URL is not configured outside the dedicated PostgreSQL 18 workflow.');
+        return;
+    }
+
+    const fs = require('node:fs/promises');
+    const path = require('node:path');
+    const { compareManifests } = require('../database/schemaDryRunComparator');
+    const candidate = JSON.parse(await fs.readFile(
+        path.join(__dirname, 'fixtures', 'postgresExpectedSchemaCandidate.v1.json'),
+        'utf8'
+    ));
+    assert.equal(candidate.manifestVersion, 1);
+    assert.equal(candidate.postgresMajorVersion, 18);
+    assert.equal(candidate.tables.length, 11);
+    assert.equal(candidate.constraints.length, 31);
+    assert.equal(candidate.indexes.length, 30);
+
+    assertSafeConnectionString(process.env.DATABASE_URL);
+    const client = new Client({ connectionString: process.env.DATABASE_URL });
+    const tableNames = [
+        'chattbm_auth_rate_limits', 'chattbm_password_reset_tokens',
+        'chattbm_google_oauth_handoffs', 'chattbm_google_oauth_states',
+        'chattbm_oauth_identities', 'chattbm_memories', 'chattbm_conversations',
+        'chattbm_contexts', 'chattbm_chat_history', 'chattbm_auth_sessions',
+        'chattbm_users'
+    ];
+    try {
+        await client.connect();
+        for (const name of tableNames) {
+            await client.query('DROP TABLE IF EXISTS public.' + name + ' CASCADE');
+        }
+
+        const migrationFiles = [
+            '001_auth_accounts_sessions.sql',
+            '002_chat_history.sql',
+            '002_google_oauth_identities.sql',
+            '003_context_records.sql',
+            '003_google_oauth_states.sql',
+            '004_password_reset_tokens.sql',
+            '005_auth_rate_limits.sql'
+        ];
+        for (const file of migrationFiles) {
+            const sql = await fs.readFile(
+                path.join(__dirname, '..', 'database', 'migrations', file),
+                'utf8'
+            );
+            await client.query(sql);
+        }
+
+        await client.query(`
+            CREATE TABLE chattbm_conversations (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                conversation_key TEXT NOT NULL,
+                version INTEGER NOT NULL,
+                lifecycle TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL,
+                updated_at TIMESTAMPTZ NOT NULL,
+                payload JSONB NOT NULL,
+                UNIQUE (user_id, conversation_key)
+            );
+            CREATE TABLE chattbm_google_oauth_handoffs (
+                handoff_hash TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL REFERENCES chattbm_users(id) ON DELETE CASCADE,
+                expires_at TIMESTAMPTZ NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+            CREATE INDEX chattbm_google_oauth_handoffs_expires_at_idx
+                ON chattbm_google_oauth_handoffs (expires_at);
+            CREATE TABLE chattbm_memories (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                memory_type TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                lifecycle TEXT NOT NULL,
+                payload JSONB NOT NULL CHECK (jsonb_typeof(payload) = 'object'),
+                created_at TIMESTAMPTZ NOT NULL,
+                updated_at TIMESTAMPTZ NOT NULL,
+                UNIQUE (user_id, memory_type, subject)
+            );
+            CREATE INDEX chattbm_memories_user_lifecycle_idx
+                ON chattbm_memories (user_id, lifecycle)
+        `);
+
+        // Model the documented live discrepancy in this disposable database only.
+        await client.query('DROP INDEX chattbm_chat_history_updated_at_idx');
+
+        const actual = await readLiveManifest(client);
+        const comparison = compareManifests(
+            { tables: candidate.tables, constraints: candidate.constraints, indexes: candidate.indexes },
+            actual
+        );
+        assert.equal(comparison.matches, false, 'known missing index must not be hidden');
+        assert.deepEqual(
+            actual.tables.map(x => x.name).sort(),
+            candidate.tables.map(x => x.name).sort(),
+            'all 11 table identities must match'
+        );
+        assert.deepEqual(
+            actual.constraints.map(x => [x.schema, x.table, x.name]).sort(),
+            candidate.constraints.map(x => [x.schema, x.table, x.name]).sort(),
+            'all constraint identities must match'
+        );
+        const actualIndexKeys = new Set(actual.indexes.map(x => [x.schema, x.table, x.name].join('.')));
+        const candidateIndexKeys = new Set(candidate.indexes.map(x => [x.schema, x.table, x.name].join('.')));
+        const missingExpectedIndexes = [...candidateIndexKeys].filter(key => !actualIndexKeys.has(key));
+        const unexpectedActualIndexes = [...actualIndexKeys].filter(key => !candidateIndexKeys.has(key));
+        assert.deepEqual(missingExpectedIndexes, ['public.chattbm_chat_history.chattbm_chat_history_updated_at_idx']);
+        assert.deepEqual(unexpectedActualIndexes, []);
+        assert.equal(actual.tables.reduce((sum, table) => sum + table.columns.length, 0), 67);
+
+        await client.query('BEGIN READ ONLY');
+        await assert.rejects(
+            client.query('CREATE TABLE chattbm_full_manifest_write_guard (id integer)'),
+            /read-only transaction/i
+        );
+        await client.query('ROLLBACK');
+        const guard = await client.query(
+            "SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='public' AND table_name='chattbm_full_manifest_write_guard'"
+        );
+        assert.equal(guard.rows[0].count, 0);
+    } finally {
+        if (client._connected) {
+            for (const name of tableNames) {
+                await client.query('DROP TABLE IF EXISTS public.' + name + ' CASCADE');
+            }
+            await client.end();
+        }
+    }
+});
