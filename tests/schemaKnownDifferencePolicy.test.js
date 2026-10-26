@@ -27,7 +27,7 @@ const baseCollections = {
     indexes: []
 };
 function expectedManifest() {
-    return { manifestVersion: 1, postgresMajorVersion: 18, schema: 'public', status: 'provisional_not_executable', knownDifferences: registry, ...structuredClone(baseCollections), indexes: [structuredClone(expectedIndex)] };
+    return { manifestVersion: 1, postgresMajorVersion: 18, schema: 'public', status: 'provisional_not_executable', knownDifferences: structuredClone(registry), ...structuredClone(baseCollections), indexes: [structuredClone(expectedIndex)] };
 }
 function actualManifest() {
     return { manifestVersion: 1, postgresMajorVersion: 18, schema: 'public', ...structuredClone(baseCollections) };
