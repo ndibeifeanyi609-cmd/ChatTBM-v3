@@ -44,6 +44,9 @@ test('classifies only the exact registered absent index and preserves raw mismat
     assert.equal(result.knownDifferences[0].id, ALLOWED_DIFFERENCE.id);
     assert.strictEqual(result.rawComparison, raw);
     assert.equal(result.rawComparison.matches, false);
+    // Expected health flags describe the index if present; actual catalog must confirm absence.
+    assert.equal(expectedManifest().indexes[0].live, true);
+    assert.equal(actualManifest().indexes.some(index => index.name === 'chattbm_chat_history_updated_at_idx'), false);
 });
 
 test('rejects wrong registry identity fields and unknown registry entries', () => {
