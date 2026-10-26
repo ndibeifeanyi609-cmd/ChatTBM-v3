@@ -99,6 +99,39 @@ Observed catalog facts:
 
 This was a metadata-only read. It did not read application row values, establish when any legacy file was executed, or modify the database. The missing index remains unresolved and must be assessed separately; baseline adoption must not create it.
 
+## Proposed deterministic schema fingerprint contract (design only)
+
+Do not hash raw `pg_dump` output or the order returned by catalog queries. A future implementation should build a versioned canonical JSON document from ordered catalog queries, then compute SHA-256 over the UTF-8 bytes of that canonical document.
+
+### Canonical inputs
+
+For the explicitly scoped application schema, include:
+
+1. PostgreSQL server major version and fingerprint-format version.
+2. Each application table's schema/name.
+3. Columns ordered by ordinal position: name, ordinal position, normalized type identity (schema-qualified user-defined types; built-in type identity), nullability, and normalized default/generated/identity expression where applicable.
+4. Constraints by table and semantic definition: primary key, unique, foreign key including referenced columns and delete/update/match actions, check expression, and deferrability/validation state where applicable. Represent NOT NULL from column metadata rather than separately hashing PostgreSQL's generated NOT NULL constraint names.
+5. Indexes by table and semantic definition: access method, uniqueness, key and included columns/expressions in order, sort/null ordering, collation/opclass where relevant, predicate, and validity/readiness. Include the index whose absence is already known as an explicit expected object so it causes a manifest mismatch rather than being silently ignored.
+6. The approved list of application objects. Unexpected application tables/indexes/constraints in the scoped namespace must cause a mismatch unless the manifest explicitly allows them.
+
+### Canonicalization and exclusions
+
+- Use fixed field names, stable lexical ordering for object collections, ordinal order for columns and index keys, UTF-8, and a specified JSON canonicalization with no insignificant whitespace.
+- Normalize catalog expressions consistently on the supported PostgreSQL major version; do not use lossy regex substitutions to remove casts or qualifiers.
+- Exclude rows/data, sequence current values, OIDs, owner/grant/ACL details, statistics, physical storage layout, query plans, and volatile timestamps from the schema fingerprint. If any of those become part of a separate security/operational check, report them separately rather than silently folding them into this fingerprint.
+- Do not compare generated constraint names as the source of semantic truth. Preserve explicit application constraint/index names where those names are part of the reviewed contract.
+- Store the fingerprint-format version with the digest. A format change requires a new version and explicit revalidation, not automatic baseline replacement.
+
+### Validation gates before coding
+
+1. Build the expected manifest from reviewed source definitions and the read-only live catalog—not by running legacy SQL against production.
+2. Run a dry-run comparator against the disposable PostgreSQL 18 fixture and the read-only live catalog export.
+3. Ensure the known missing `chattbm_chat_history_updated_at_idx` is reported as a mismatch. Do not add it during adoption.
+4. Review all extra/missing objects and defaults/constraints; only after the source and live manifests reconcile should the hash implementation be written.
+5. Unit-test deterministic output under shuffled catalog result order, plus changes to each included property, and verify excluded row data does not affect the digest.
+
+This section specifies an approach, not a completed fingerprint implementation or a claim that the live schema matches the expected schema.
+
 ## Schema authority still required
 
 Before implementation, review and approve:
