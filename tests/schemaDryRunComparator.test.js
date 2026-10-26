@@ -107,5 +107,5 @@ test('manifest comparison reports stable object paths for a missing index', () =
     const second = compareManifests(expected, actual);
     assert.equal(first.matches, false);
     assert.deepEqual(first.expectedOnly, second.expectedOnly);
-    assert.ok(first.expectedOnly.some(item => item.path.includes('chattbm_fixture_idx')));
+    assert.ok(first.expectedOnly.some(item => item.path === '$.indexes'), 'missing index should be reported at the indexes collection path');
 });
