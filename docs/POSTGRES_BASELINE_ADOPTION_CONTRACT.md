@@ -44,6 +44,21 @@ Use only a loopback connection to a database named exactly `chattbm_test`; tests
 - **Failure rollback:** injected failure during metadata write leaves no partial baseline.
 - **Unknown history:** persisted metadata explicitly says historical file execution is unknown, never “all migrations applied.”
 
+## Initial source-of-truth inventory (read-only)
+
+The current `main` version of `database/Postgres.js` was inspected for this proposal. Its startup bootstrap creates or ensures these application objects:
+
+- Tables: `chattbm_conversations`, `chattbm_users`, `chattbm_contexts`, `chattbm_chat_history`, `chattbm_oauth_identities`, `chattbm_google_oauth_states`, `chattbm_google_oauth_handoffs`, and `chattbm_auth_sessions`.
+- Explicit secondary indexes: `chattbm_contexts_user_created_idx`, `chattbm_contexts_user_updated_idx`, `chattbm_google_oauth_states_expires_at_idx`, `chattbm_google_oauth_handoffs_expires_at_idx`, `chattbm_auth_sessions_user_id_idx`, and `chattbm_auth_sessions_expires_at_idx`.
+
+This bootstrap inventory is not a complete canonical schema manifest: PostgreSQL creates indexes for primary/unique constraints too, and table definitions include constraints and defaults that must be represented in the manifest.
+
+Known source discrepancy requiring separate review: `database/migrations/002_chat_history.sql` declares `chattbm_chat_history_updated_at_idx`, but `database/Postgres.js` does not create that index. Prior read-only production inventory found it absent in the live database. Baseline adoption must not create it or silently treat this mismatch as resolved.
+
+The bootstrap source does not create `chattbm_password_reset_tokens`, `chattbm_auth_rate_limits`, or `chattbm_memories`. These objects therefore require explicit comparison against their owning persistence code and SQL definitions before selecting the manifest. Their absence from this bootstrap is not evidence that they are absent from production.
+
+These are source-code observations, not proof of historical migration execution. No production write or migration was performed during this inventory.
+
 ## Schema authority still required
 
 Before implementation, review and approve:
