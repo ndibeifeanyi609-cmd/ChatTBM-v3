@@ -75,6 +75,16 @@ Duplicate numeric prefixes mean a future runner must not treat the numeric prefi
 
 The inspected `memory/MemoryPersistence.js` is file-backed (default path under `storage/memory.json`), not evidence of a PostgreSQL `chattbm_memories` table. The previously observed live table `chattbm_memories` therefore needs its actual owning persistence implementation and schema source located before it is included in a canonical manifest. Do not assume the file-backed store and the live table are interchangeable.
 
+## Memory persistence owner identified (read-only)
+
+The PostgreSQL owner is `memory/PostgresMemoryPersistence.js`. Its `initialize()` function defines `chattbm_memories` with columns `id`, `user_id`, `memory_type`, `subject`, `lifecycle`, `payload`, `created_at`, and `updated_at`; it has a JSON-object check, uniqueness on `(user_id, memory_type, subject)`, and index `chattbm_memories_user_lifecycle_idx` on `(user_id, lifecycle)`. The module uses the shared pool from `database/Postgres.js`.
+
+This identifies the schema owner in source, but does not by itself prove the live table matches the source or establish the full manifest. The PostgreSQL memory table must be included in disposable schema comparisons and the read-only production catalog inventory.
+
+## Remaining manifest candidates
+
+Across the inspected bootstrap, legacy SQL, and memory persistence owner, the source-defined tables include users, conversations, contexts, chat history, OAuth identities, Google OAuth states and handoffs, auth sessions, password-reset tokens, auth rate limits, and memories. The live inventory also included these eleven application tables. The expected manifest must still be reconciled object-by-object with the live catalog, including every column/type/default/nullability, primary and unique constraints, foreign keys, checks, and indexes. Source overlap and `CREATE TABLE IF NOT EXISTS` do not prove catalog equivalence.
+
 ## Schema authority still required
 
 Before implementation, review and approve:
