@@ -53,6 +53,22 @@ function findDifferences(left, right, side, path = '$', out = []) {
     return out;
 }
 
+
+function assertSafeConnectionString(connectionString) {
+    let url;
+    try {
+        url = new URL(connectionString);
+    } catch (_) {
+        throw new Error('Refusing schema comparison: DATABASE_URL is not a valid URL.');
+    }
+    const host = url.hostname.toLowerCase();
+    const loopback = host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]';
+    const databaseName = decodeURIComponent(url.pathname.replace(/^\//, ''));
+    if (!loopback || databaseName !== 'chattbm_test') {
+        throw new Error('Refusing schema comparison: target must be loopback database chattbm_test.');
+    }
+}
+
 function assertSafeTarget(connectionString, databaseName, serverVersionNum) {
     let url;
     try {
@@ -122,6 +138,7 @@ SELECT jsonb_build_object(
 `;
 
 async function readLiveManifest(client) {
+    assertSafeConnectionString(process.env.DATABASE_URL);
     await client.query('BEGIN READ ONLY');
     try {
         const version = await client.query('SHOW server_version_num');
@@ -141,6 +158,7 @@ module.exports = {
     canonicalJson,
     fingerprint,
     compareManifests,
+    assertSafeConnectionString,
     assertSafeTarget,
     readLiveManifest,
     CATALOG_SQL
