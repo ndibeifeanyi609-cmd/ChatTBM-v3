@@ -18,13 +18,31 @@ function canonicalJson(value) {
     return JSON.stringify(canonicalize(value));
 }
 
+function canonicalizeManifest(manifest) {
+    const normalized = canonicalize(manifest);
+    if (!normalized || typeof normalized !== 'object' || Array.isArray(normalized)) return normalized;
+
+    for (const collection of ['tables', 'constraints', 'indexes']) {
+        if (Array.isArray(normalized[collection])) {
+            normalized[collection].sort((a, b) => {
+                const key = item => collection === 'tables'
+                    ? [item.schema || '', item.name || ''].join('.')
+                    : [item.schema || '', item.table || '', item.name || ''].join('.');
+                return key(a).localeCompare(key(b));
+            });
+        }
+    }
+    // Column arrays retain ordinal order; only top-level object collections are sorted.
+    return normalized;
+}
+
 function fingerprint(value) {
-    return crypto.createHash('sha256').update(canonicalJson(value), 'utf8').digest('hex');
+    return crypto.createHash('sha256').update(canonicalJson(canonicalizeManifest(value)), 'utf8').digest('hex');
 }
 
 function compareManifests(expected, actual) {
-    const expectedJson = canonicalJson(expected);
-    const actualJson = canonicalJson(actual);
+    const expectedJson = canonicalJson(canonicalizeManifest(expected));
+    const actualJson = canonicalJson(canonicalizeManifest(actual));
     return {
         matches: expectedJson === actualJson,
         expectedFingerprint: fingerprint(expected),
@@ -171,6 +189,7 @@ async function readLiveManifest(client) {
 
 module.exports = {
     canonicalize,
+    canonicalizeManifest,
     canonicalJson,
     fingerprint,
     compareManifests,
