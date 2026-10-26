@@ -207,6 +207,13 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
 
+## Comparator input and known-difference policy gate (2026-10-26)
+
+Before implementing the full-manifest integration test, define the comparison projection explicitly. The candidate envelope includes metadata (`manifestVersion`, `sourceRevision`, `postgresMajorVersion`, `schema`, `status`, `knownDifferences`, and `validationNotes`) while the comparator's live catalog result contains only `tables`, `constraints`, and `indexes`. Comparing the full envelope directly will always report unrelated metadata differences. The test must compare the catalog collections deliberately, while separately validating envelope fields and the known-difference registry.
+
+The current comparator has no allowlist/exemption mechanism: its equality check requires all object collections to match. Do not silently filter away the absent chat-history index or change generic comparator equality to ignore it. Instead, test the raw comparison first and assert it reports the expected index difference; then test any future explicit known-difference policy as a separate, narrow layer that validates the stable difference ID/path/status and does not suppress any unrelated extra/missing/changed object. Keep the current candidate non-executable until this behavior and the disposable PG18 test are implemented and reviewed.
+
+
 ## Disposable PostgreSQL 18 validation gate (2026-10-26)
 
 The existing comparator workflow's integration test validates the comparator with a small `chattbm_fixture`; it does not load or compare the full 11-table candidate. Therefore it must not be counted as end-to-end validation of this candidate. Before freezing the candidate, add a dedicated disposable PostgreSQL 18 test that constructs the intended schema from independently reviewed DDL/source definitions, captures the catalog through the comparator's read-only path, and compares all 11 tables, 67 columns, 31 constraints, and expected indexes. The test must prove the known missing chat-history index is reported as an expected-only difference (unless and until separately reviewed), verify both extra and missing objects, and assert that comparator transactions reject writes. Do not point the comparator at Render or any remote database. Do not simply load the live snapshot as the expected manifest, because that would make the comparison circular. Keep candidate status `provisional_not_executable` until this gate passes and the source revision is pinned.
