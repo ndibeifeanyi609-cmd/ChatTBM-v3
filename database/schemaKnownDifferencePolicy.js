@@ -17,6 +17,13 @@ function objectKey(collection, item) {
     return [item.schema || '', item.table || '', item.name || ''].join('.');
 }
 
+function validateManifestKeys(manifest, allowedKeys, label) {
+    const unknownKeys = Object.keys(manifest).filter(key => !allowedKeys.includes(key));
+    if (unknownKeys.length > 0) {
+        throw new Error('Known-difference policy refuses: unexpected ' + label + ' manifest metadata.');
+    }
+}
+
 function validateRegistry(registry) {
     if (!Array.isArray(registry) || registry.length !== 1) {
         throw new Error('Known-difference policy refuses: exactly one registered difference is required.');
@@ -63,6 +70,14 @@ function classifyKnownDifferences(rawResult, expectedManifest, actualManifest) {
         canonicalJson(recomputed.actualOnly) !== canonicalJson(rawResult.actualOnly)) {
         throw new Error('Known-difference policy refuses: raw comparison does not match the supplied manifests.');
     }
+    validateManifestKeys(expected, [
+        'manifestVersion', 'sourceRevision', 'postgresMajorVersion', 'schema',
+        'status', 'knownDifferences', 'tables', 'constraints', 'indexes'
+    ], 'expected');
+    validateManifestKeys(actual, [
+        'manifestVersion', 'postgresMajorVersion', 'schema',
+        'tables', 'constraints', 'indexes'
+    ], 'actual');
     validateRegistry(expected.knownDifferences);
 
     const expectedCollections = {};
