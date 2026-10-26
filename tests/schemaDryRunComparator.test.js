@@ -6,6 +6,7 @@ const {
     canonicalJson,
     fingerprint,
     compareManifests,
+    assertSafeConnectionString,
     assertSafeTarget
 } = require('../database/schemaDryRunComparator');
 
@@ -39,4 +40,11 @@ test('target guard accepts only loopback chattbm_test on PostgreSQL 18', () => {
     assert.throws(() => assertSafeTarget('postgres://u:p@render.example:5432/chattbm_test', 'chattbm_test', '180000'), /loopback/);
     assert.throws(() => assertSafeTarget('postgres://u:p@localhost:5432/production', 'production', '180000'), /chattbm_test/);
     assert.throws(() => assertSafeTarget('postgres://u:p@localhost:5432/chattbm_test', 'chattbm_test', '160000'), /PostgreSQL 18/);
+});
+
+test('preflight rejects remote or non-test URLs before any connection is attempted', () => {
+    assert.doesNotThrow(() => assertSafeConnectionString('postgres://u:p@localhost:5432/chattbm_test'));
+    assert.throws(() => assertSafeConnectionString('postgres://u:p@render.example:5432/chattbm_test'), /loopback/);
+    assert.throws(() => assertSafeConnectionString('postgres://u:p@localhost:5432/production'), /chattbm_test/);
+    assert.throws(() => assertSafeConnectionString('not-a-url'), /valid URL/);
 });
