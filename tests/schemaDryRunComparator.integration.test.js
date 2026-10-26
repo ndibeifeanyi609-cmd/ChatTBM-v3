@@ -18,17 +18,41 @@ test('captures PostgreSQL 18 disposable catalog in a read-only transaction', asy
         await client.query('CREATE TABLE chattbm_fixture (id TEXT PRIMARY KEY, label TEXT NOT NULL)');
         const manifest = await readLiveManifest(client);
 
-        assert.ok(manifest && Array.isArray(manifest.tables));
-        assert.ok(Array.isArray(manifest.constraints));
-        assert.ok(Array.isArray(manifest.indexes));
-        assert.equal(manifest.tables.length, 1);
-        assert.equal(manifest.tables[0].name, 'chattbm_fixture');
+        const expectedFixture = {
+            tables: [{
+                schema: 'public',
+                name: 'chattbm_fixture',
+                columns: [
+                    { position: 1, name: 'id', type: 'pg_catalog.text', nullable: false, default: null },
+                    { position: 2, name: 'label', type: 'pg_catalog.text', nullable: false, default: null }
+                ]
+            }],
+            constraints: [{
+                schema: 'public',
+                table: 'chattbm_fixture',
+                name: 'chattbm_fixture_pkey',
+                type: 'p',
+                definition: 'PRIMARY KEY (id)',
+                deferrable: false,
+                deferred: false,
+                validated: true
+            }],
+            indexes: [{
+                table: 'chattbm_fixture',
+                name: 'chattbm_fixture_pkey',
+                definition: 'CREATE UNIQUE INDEX chattbm_fixture_pkey ON public.chattbm_fixture USING btree (id)'
+            }]
+        };
+        const expectedComparison = compareManifests(expectedFixture, manifest);
+        assert.equal(
+            expectedComparison.matches,
+            true,
+            'catalog capture must match the independently declared expected fixture manifest'
+        );
 
-        const selfComparison = compareManifests(manifest, JSON.parse(JSON.stringify(manifest)));
-        assert.equal(selfComparison.matches, true, 'captured catalog should match its canonical copy');
-        const mismatched = JSON.parse(JSON.stringify(manifest));
-        mismatched.indexes = mismatched.indexes.filter(index => index.name !== 'chattbm_fixture_pkey');
-        const mismatchComparison = compareManifests(manifest, mismatched);
+        const mismatched = JSON.parse(JSON.stringify(expectedFixture));
+        mismatched.indexes = [];
+        const mismatchComparison = compareManifests(mismatched, manifest);
         assert.equal(mismatchComparison.matches, false, 'missing expected index must be detected');
 
         await client.query('BEGIN READ ONLY');
