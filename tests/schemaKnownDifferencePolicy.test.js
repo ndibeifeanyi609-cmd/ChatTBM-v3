@@ -9,7 +9,7 @@ const { compareManifests } = require('../database/schemaDryRunComparator');
 const registry = [{
     ...ALLOWED_DIFFERENCE,
     rationale: 'Declared by the legacy chat-history SQL; absent from the observed live catalog and separately planned.',
-    reviewRef: 'docs/POSTGRES_EXPECTED_SCHEMA_MANIFEST_PLAN.md'
+    reviewRef: 'docs/POSTGRES_MIGRATION_REVIEW_DECISION.md'
 }];
 const expectedIndex = {
     schema: 'public',
@@ -55,6 +55,15 @@ test('rejects wrong registry identity fields and unknown registry entries', () =
     const expected = expectedManifest();
     expected.knownDifferences[0].extra = true;
     assert.throws(() => classifyKnownDifferences(rawMismatch(expected, actualManifest()), expected, actualManifest()), /unknown or missing/);
+});
+
+test('rejects an unapproved review reference', () => {
+    const expected = expectedManifest();
+    expected.knownDifferences[0].reviewRef = 'docs/unreviewed.md';
+    assert.throws(
+        () => classifyKnownDifferences(rawMismatch(expected, actualManifest()), expected, actualManifest()),
+        /canonical review reference/
+    );
 });
 
 test('rejects an additional unexpected index or changed column/default', () => {
