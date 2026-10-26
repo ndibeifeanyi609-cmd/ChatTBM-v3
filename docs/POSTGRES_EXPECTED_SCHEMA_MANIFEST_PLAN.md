@@ -207,6 +207,11 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
 
+## Full-manifest integration test implementation checkpoint (2026-10-26)
+
+Added `tests/fixtures/postgresExpectedSchemaCandidate.v1.json` and extended `tests/schemaDryRunComparator.integration.test.js` on the comparator test branch. The test loads the provisional 11-table candidate, creates the seven migration-owned tables from the reviewed SQL files, creates the three runtime-owned tables in the disposable PostgreSQL 18 service, drops the expected chat-history index only in that disposable database, and asserts the raw comparator reports exactly that expected-but-absent index. It also checks 11 table identities, 67 columns, 31 constraint identities, and the read-only transaction write guard. This test deliberately does not suppress the mismatch or claim the candidate is ready for adoption. GitHub Actions run #20 was queued at checkpoint time; await its result and fix any failures before counting this as validated. No production database was used or modified.
+
+
 ## Comparator input and known-difference policy gate (2026-10-26)
 
 Before implementing the full-manifest integration test, define the comparison projection explicitly. The candidate envelope includes metadata (`manifestVersion`, `sourceRevision`, `postgresMajorVersion`, `schema`, `status`, `knownDifferences`, and `validationNotes`) while the comparator's live catalog result contains only `tables`, `constraints`, and `indexes`. Comparing the full envelope directly will always report unrelated metadata differences. The test must compare the catalog collections deliberately, while separately validating envelope fields and the known-difference registry.
