@@ -207,6 +207,11 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
 
+## Disposable PostgreSQL 18 validation gate (2026-10-26)
+
+The existing comparator workflow's integration test validates the comparator with a small `chattbm_fixture`; it does not load or compare the full 11-table candidate. Therefore it must not be counted as end-to-end validation of this candidate. Before freezing the candidate, add a dedicated disposable PostgreSQL 18 test that constructs the intended schema from independently reviewed DDL/source definitions, captures the catalog through the comparator's read-only path, and compares all 11 tables, 67 columns, 31 constraints, and expected indexes. The test must prove the known missing chat-history index is reported as an expected-only difference (unless and until separately reviewed), verify both extra and missing objects, and assert that comparator transactions reject writes. Do not point the comparator at Render or any remote database. Do not simply load the live snapshot as the expected manifest, because that would make the comparison circular. Keep candidate status `provisional_not_executable` until this gate passes and the source revision is pinned.
+
+
 ## Source review and manifest comparison checkpoint (2026-10-26)
 
 Reviewed the seven legacy SQL files and the four runtime schema owners (`database/Postgres.js`, `memory/PostgresMemoryPersistence.js`, `auth/PasswordResetService.js`, `auth/PostgresRateLimitStore.js`) against the provisional manifest. Recorded the comparison in `docs/POSTGRES_SCHEMA_MANIFEST_SOURCE_REVIEW_2026-10-26.json`: 11/11 tables, 67/67 columns, and 31/31 constraints match the read-only catalog snapshot; all 29 observed indexes match the expected entries, plus the single expected-but-absent `chattbm_chat_history_updated_at_idx`. This comparison does not establish historical migration execution. Manifest remains provisional and must undergo disposable PostgreSQL 18 end-to-end validation and independent review before any baseline-adoption design can be finalized. No production changes occurred.
