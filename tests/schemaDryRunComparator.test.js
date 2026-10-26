@@ -109,3 +109,29 @@ test('manifest comparison reports stable object paths for a missing index', () =
     assert.deepEqual(first.expectedOnly, second.expectedOnly);
     assert.ok(first.expectedOnly.some(item => item.path === '$.indexes'), 'missing index should be reported at the indexes collection path');
 });
+
+test('manifest canonicalization sorts object collections but preserves column order', () => {
+    const a = {
+        tables: [
+            { schema: 'public', name: 'chattbm_z', columns: [{ position: 1, name: 'id' }, { position: 2, name: 'value' }] },
+            { schema: 'public', name: 'chattbm_a', columns: [{ position: 1, name: 'id' }] }
+        ],
+        constraints: [
+            { schema: 'public', table: 'chattbm_z', name: 'z_pk' },
+            { schema: 'public', table: 'chattbm_a', name: 'a_pk' }
+        ],
+        indexes: [
+            { schema: 'public', table: 'chattbm_z', name: 'z_idx' },
+            { schema: 'public', table: 'chattbm_a', name: 'a_idx' }
+        ]
+    };
+    const b = {
+        indexes: [...a.indexes].reverse(),
+        constraints: [...a.constraints].reverse(),
+        tables: [...a.tables].reverse()
+    };
+    assert.equal(fingerprint(a), fingerprint(b));
+    const reorderedColumns = structuredClone(a);
+    reorderedColumns.tables[0].columns.reverse();
+    assert.notEqual(fingerprint(a), fingerprint(reorderedColumns));
+});
