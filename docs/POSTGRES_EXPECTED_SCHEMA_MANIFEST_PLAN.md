@@ -207,6 +207,11 @@ This is not yet a frozen executable expected manifest: catalog query results wer
 - [ ] Obtain review before considering baseline adoption implementation complete.
 
 
+## Provisional constraints/index comparison checkpoint (2026-10-26)
+
+Populated the provisional candidate with 31 constraint records from the read-only catalog snapshot and 29 observed index records, plus the separately source-defined expected `chattbm_chat_history_updated_at_idx` record. Canonical key-order-independent comparison reports all 31 expected constraints match the observed catalog exactly; all 29 observed indexes match their candidate counterparts; the one additional expected index is `public.chattbm_chat_history.chattbm_chat_history_updated_at_idx`, which remains absent from live state. This is an observed-catalog comparison, not yet an independent source review of every constraint/index definition, and not the disposable PostgreSQL 18 end-to-end validation. Candidate remains `provisional_not_executable`. No production writes or schema changes occurred.
+
+
 ## Read-only live catalog snapshot checkpoint (2026-10-26)
 
 Captured a separate metadata-only production catalog snapshot in `docs/POSTGRES_LIVE_SCHEMA_CATALOG_SNAPSHOT_2026-10-26.json` using Render's read-only query interface against the confirmed `chattbm-db` instance. The snapshot contains 11 application tables, 67 column records, 31 constraints, and 29 indexes. All captured indexes reported valid, ready, and live. The known `chattbm_chat_history_updated_at_idx` remains absent and is documented as a separate unresolved issue. No application rows or payloads were read, and no writes or schema changes occurred.
