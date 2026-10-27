@@ -15,7 +15,9 @@ function createAuthLimiters({
             registration: createLocalLimiter({ max: 5 }),
             login: createLocalLimiter({ max: 10 }),
             passwordResetRequest: createLocalLimiter({ max: 3 }),
-            passwordResetRedeem: createLocalLimiter({ max: 5 })
+            passwordResetRedeem: createLocalLimiter({ max: 5 }),
+            emailVerificationRequest: createLocalLimiter({ max: 3 }),
+            emailVerificationRedeem: createLocalLimiter({ max: 5 })
         };
     }
 
@@ -24,7 +26,9 @@ function createAuthLimiters({
         registration: createSharedLimiter({ store, max: 5, scope: 'register' }),
         login: createSharedLimiter({ store, max: 10, scope: 'login' }),
         passwordResetRequest: createSharedLimiter({ store, max: 3, scope: 'password-reset-request' }),
-        passwordResetRedeem: createSharedLimiter({ store, max: 5, scope: 'password-reset-confirm' })
+        passwordResetRedeem: createSharedLimiter({ store, max: 5, scope: 'password-reset-confirm' }),
+        emailVerificationRequest: createSharedLimiter({ store, max: 3, scope: 'email-verification-request' }),
+        emailVerificationRedeem: createSharedLimiter({ store, max: 5, scope: 'email-verification-redeem' })
     };
 }
 
