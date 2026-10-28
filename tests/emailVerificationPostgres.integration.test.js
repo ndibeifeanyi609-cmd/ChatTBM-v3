@@ -104,6 +104,42 @@ test('email verification migration upgrades a legacy user table and token lifecy
             [userId]
         );
         assert.ok(user.rows[0].email_verified_at);
+
+        const expiredUserId = crypto.randomUUID();
+        const expiredEmail = 'expired-' + expiredUserId + '@example.com';
+        try {
+            await pool.query(
+                'INSERT INTO chattbm_users (id, email_normalized, password_hash) VALUES ($1, $2, $3)',
+                [expiredUserId, expiredEmail, 'integration-test-hash']
+            );
+            const expired = await createEmailVerification(expiredEmail);
+            assert.ok(expired);
+            await pool.query(
+                "UPDATE chattbm_email_verification_tokens SET expires_at = NOW() - INTERVAL '1 minute' WHERE user_id = $1",
+                [expiredUserId]
+            );
+            assert.deepEqual(await redeemEmailVerification(expired.token), { success: false });
+        } finally {
+            await pool.query('DELETE FROM chattbm_users WHERE id = $1', [expiredUserId]);
+        }
+
+        const disabledUserId = crypto.randomUUID();
+        const disabledEmail = 'disabled-' + disabledUserId + '@example.com';
+        try {
+            await pool.query(
+                'INSERT INTO chattbm_users (id, email_normalized, password_hash) VALUES ($1, $2, $3)',
+                [disabledUserId, disabledEmail, 'integration-test-hash']
+            );
+            const disabled = await createEmailVerification(disabledEmail);
+            assert.ok(disabled);
+            await pool.query(
+                'UPDATE chattbm_users SET disabled_at = NOW() WHERE id = $1',
+                [disabledUserId]
+            );
+            assert.deepEqual(await redeemEmailVerification(disabled.token), { success: false });
+        } finally {
+            await pool.query('DELETE FROM chattbm_users WHERE id = $1', [disabledUserId]);
+        }
     } finally {
         await pool.query('DELETE FROM chattbm_users WHERE id = $1', [userId]);
     }
