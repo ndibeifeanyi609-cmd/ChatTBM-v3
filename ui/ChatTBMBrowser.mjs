@@ -28,12 +28,14 @@ class ChatTBMBrowser {
         this.authUser = null;
         this.resetToken = '';
         this.verifyToken = '';
+        this.verificationLinkPending = false;
         this.authMode = 'closed';
         this.authMessage = '';
         try {
             const resetUrl = new URL(window.location.href);
             this.resetToken = resetUrl.searchParams.get('token') || '';
             this.verifyToken = resetUrl.searchParams.get('verify_email_token') || '';
+            this.verificationLinkPending = Boolean(this.verifyToken);
             if (this.verifyToken) {
                 this.authMode = 'verify-confirm';
                 resetUrl.searchParams.delete('verify_email_token');
@@ -65,7 +67,7 @@ class ChatTBMBrowser {
                 this.render();
             });
         }
-        if (!this.resetToken && !this.verifyToken) {
+        if (!this.resetToken && !this.verificationLinkPending) {
             getCurrentUser().then(async result => {
                 if (result.success && result.user) {
                     await this.switchAccount(result.user);
