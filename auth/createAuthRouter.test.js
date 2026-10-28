@@ -218,3 +218,58 @@ test('registration succeeds with honest messaging when verification email delive
         console.error = originalError;
     }
 });
+
+test('verification resend returns the same generic response when delivery fails', async () => {
+    const routes = new Map();
+    const router = { post(path, ...handlers) { routes.set('POST ' + path, handlers); }, get(path, ...handlers) { routes.set('GET ' + path, handlers); } };
+    const pass = async (_req, _res, next) => next();
+    let requestedEmail;
+    let deliveryAttempts = 0;
+    createAuthRouter({
+        express: { Router: () => router },
+        services: {
+            async register() { return { success: false }; },
+            async login() { return { success: false }; },
+            async authenticateSession() { return null; },
+            async revokeSession() {}
+        },
+        passwordReset: { async createPasswordReset() { return null; }, async redeemPasswordReset() { return { success: false }; } },
+        emailVerification: {
+            async createEmailVerification(email) {
+                requestedEmail = email;
+                return { email: 'person@example.com', token: 'opaque-token' };
+            },
+            async redeemEmailVerification() { return { success: false }; }
+        },
+        sendPasswordResetEmail: async () => {},
+        sendEmailVerificationEmail: async () => {
+            deliveryAttempts++;
+            throw new Error('provider failure');
+        },
+        limiters: {
+            registration: pass, login: pass, passwordResetRequest: pass,
+            passwordResetRedeem: pass, emailVerificationRequest: pass, emailVerificationRedeem: pass
+        },
+        nodeEnv: 'test'
+    });
+
+    const originalError = console.error;
+    console.error = () => {};
+    try {
+        const handlers = routes.get('POST /email-verification/request');
+        const req = { ip: '198.51.100.2', body: { email: ' PERSON@example.com ' }, get() { return ''; } };
+        const res = response();
+        let index = 0;
+        const next = () => { index++; };
+        await handlers[0](req, res, next);
+        await handlers[index](req, res, next);
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.body.success, true);
+        assert.match(res.body.message, /if an unverified account matches that email/i);
+        assert.equal(requestedEmail, ' PERSON@example.com ');
+        await new Promise(resolve => setImmediate(resolve));
+        assert.equal(deliveryAttempts, 1);
+    } finally {
+        console.error = originalError;
+    }
+});
