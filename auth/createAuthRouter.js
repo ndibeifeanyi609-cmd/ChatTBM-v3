@@ -65,8 +65,8 @@ function createAuthRouter({
                 success: true,
                 user: { id: result.user.id, email: result.user.email_normalized },
                 message: verificationEmailQueued
-                    ? 'Account created. Check your email for a verification link before signing in.'
-                    : 'Account created. Email verification could not be sent yet. Request a verification link before signing in.'
+                    ? 'Account created. Check your email for a verification link.'
+                    : 'Account created. Email verification could not be sent yet. You can request a verification link later.'
             });
         } catch (error) { return next(error); }
     });
