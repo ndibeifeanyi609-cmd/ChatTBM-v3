@@ -8,6 +8,9 @@ const path = require('node:path');
 const database = require('../database/Postgres');
 
 function isDisposableDatabase(value) {
+    // This test drops and recreates tables; require an explicit opt-in in addition
+    // to the local host and dedicated database-name checks.
+    if (process.env.EMAIL_VERIFICATION_ALLOW_DESTRUCTIVE_TESTS !== 'true') return false;
     if (!value) return false;
     try {
         const url = new URL(value);
