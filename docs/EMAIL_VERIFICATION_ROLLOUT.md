@@ -41,6 +41,45 @@ production email credentials, delivery, or database migrations are configured.
 No production database changes are authorized by this document.
 
 
+
+## Isolated staging checklist (not yet executed)
+
+Before any staging deployment or schema change, obtain explicit approval and
+use an isolated staging database that contains no customer data.
+
+### Required configuration
+
+- Set `AUTH_SHARED_RATE_LIMIT_ENABLED=true` in the staging service.
+- Set `AUTH_RATE_LIMIT_HMAC_SECRET` to a secret with at least 32 bytes; generate
+  it in the secret manager/dashboard, never in source control or chat.
+- Configure `RESEND_API_KEY` and `RESEND_FROM_EMAIL` using staging-approved
+  credentials and a verified sender.
+- Set `CHATTBM_PUBLIC_URL` to the staging web URL so verification links return
+  to the staging application.
+- Confirm the staging service uses only the isolated staging database and that
+  its schema migration and rollback have been reviewed.
+
+### Verification steps
+
+1. Confirm the service reports healthy and uses the intended staging database,
+   without printing credentials or connection strings.
+2. Confirm shared rate limiting starts successfully; missing/invalid HMAC
+   configuration must prevent auth startup or fail closed, not silently fall
+   back to local limits when shared mode is enabled.
+3. Use a controlled test mailbox to register and receive a verification email.
+4. Confirm the link token is in the URL fragment, is cleared from browser history,
+   and is submitted to the confirmation API; verify the token is single-use and
+   expires as designed.
+5. Exercise resend, expired/invalid tokens, provider failure, and rate-limit
+   responses. Confirm no secrets or raw provider responses appear in logs.
+6. Verify registration/login behavior remains compatible with existing accounts;
+   no email-verification enforcement policy is authorized by this PR.
+7. Record results and rollback steps before requesting production approval.
+
+Do not switch the existing Render service from `main`, modify either existing
+Render database, or enable production delivery as part of this checklist without
+separate explicit approval.
+
 ## Migration discovery checkpoint (2026-10-28)
 
 Repository review confirms that `server.js` calls `initializeDatabase()` from
