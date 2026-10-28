@@ -2,7 +2,7 @@
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
 import { createAttachment } from './AttachmentProcessor.mjs';
-import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
+import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, confirmEmailVerification, requestEmailVerification, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -27,11 +27,18 @@ class ChatTBMBrowser {
         this.selectedFile = null;
         this.authUser = null;
         this.resetToken = '';
+        this.verifyToken = '';
         this.authMode = 'closed';
         this.authMessage = '';
         try {
             const resetUrl = new URL(window.location.href);
             this.resetToken = resetUrl.searchParams.get('token') || '';
+            this.verifyToken = resetUrl.searchParams.get('verify_email_token') || '';
+            if (this.verifyToken) {
+                this.authMode = 'verify-confirm';
+                resetUrl.searchParams.delete('verify_email_token');
+                window.history.replaceState({}, '', resetUrl.pathname + resetUrl.search + resetUrl.hash);
+            }
             if (this.resetToken) {
                 this.authMode = 'reset-confirm';
                 resetUrl.searchParams.delete('token');
@@ -47,7 +54,18 @@ class ChatTBMBrowser {
         this.showMemories = false;
         this.savedMemories = [];
         this.memoryMessage = '';
-        if (!this.resetToken) {
+        if (this.verifyToken) {
+            const token = this.verifyToken;
+            this.verifyToken = '';
+            confirmEmailVerification(token).then(result => {
+                this.authMode = 'login';
+                this.authMessage = result.success
+                    ? 'Email verified successfully. You can now sign in.'
+                    : (result.error?.message || 'This verification link is invalid or expired.');
+                this.render();
+            });
+        }
+        if (!this.resetToken && !this.verifyToken) {
             getCurrentUser().then(async result => {
                 if (result.success && result.user) {
                     await this.switchAccount(result.user);
