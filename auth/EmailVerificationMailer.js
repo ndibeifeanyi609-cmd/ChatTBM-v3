@@ -24,7 +24,7 @@ async function sendEmailVerificationEmail({ email, token }) {
                 `Use this one-time link within 30 minutes: ${link.toString()}`,
                 '',
                 'If you did not create this account, you can ignore this email.'
-            ].join('\\n')
+            ].join('\n')
         })
     });
     if (!response.ok) {
