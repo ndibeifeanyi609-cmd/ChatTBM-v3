@@ -51,7 +51,23 @@ function createAuthRouter({
         try {
             const result = await services.register(req.body && req.body.email, req.body && req.body.password);
             if (!result.success) return sendFailure(res, result.error, result.code === 'INVALID_REGISTRATION' ? 400 : 409);
-            return res.status(201).json({ success: true, user: { id: result.user.id, email: result.user.email_normalized }, message: 'Account created. Sign in to start a session.' });
+            let verificationEmailQueued = false;
+            try {
+                const verification = await emailVerification.createEmailVerification(result.user.email_normalized);
+                if (verification) {
+                    await sendEmailVerificationEmail(verification);
+                    verificationEmailQueued = true;
+                }
+            } catch (error) {
+                console.error('Registration verification email delivery unavailable:', error.code || 'UNKNOWN');
+            }
+            return res.status(201).json({
+                success: true,
+                user: { id: result.user.id, email: result.user.email_normalized },
+                message: verificationEmailQueued
+                    ? 'Account created. Check your email for a verification link before signing in.'
+                    : 'Account created. Email verification could not be sent yet. Request a verification link before signing in.'
+            });
         } catch (error) { return next(error); }
     });
 
