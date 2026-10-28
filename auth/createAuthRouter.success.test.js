@@ -32,7 +32,7 @@ test('successful registration keeps the established 201 response shape', async (
   await handlers[0]({}, res, next);
   await handlers[i]({ body: { email: 'user@example.com', password: 'secret' } }, res, next);
   assert.equal(res.statusCode, 201);
-  assert.deepEqual(res.body, { success: true, user: { id: 'u1', email: 'user@example.com' }, message: 'Account created. Check your email for a verification link before signing in.' });
+  assert.deepEqual(res.body, { success: true, user: { id: 'u1', email: 'user@example.com' }, message: 'Account created. Check your email for a verification link.' });
 });
 
 
