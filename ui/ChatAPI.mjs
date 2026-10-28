@@ -91,6 +91,14 @@ function confirmPasswordReset(token, password) {
     return authRequest('password-reset/confirm', { token, password });
 }
 
+function confirmEmailVerification(token) {
+    return authRequest('email-verification/confirm', { token });
+}
+
+function requestEmailVerification(email) {
+    return authRequest('email-verification/request', { email });
+}
+
 async function conversationHistoryRequest(path, method = 'GET', body) {
     try {
         const response = await fetch(API_BASE_URL + '/api/conversations' + path, {
@@ -393,6 +401,8 @@ export {
     logoutAccount,
     requestPasswordReset,
     confirmPasswordReset,
+    confirmEmailVerification,
+    requestEmailVerification,
     getConversationHistory,
     saveConversationHistory,
     getSavedMemories,
