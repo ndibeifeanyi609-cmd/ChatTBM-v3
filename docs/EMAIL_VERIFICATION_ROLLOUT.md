@@ -7,7 +7,7 @@ migration, deployment, or login-policy change.
 
 - Registration creates the account and attempts to issue and send a verification link.
 - Verification links are single-use, expire after 30 minutes, and are stored as token hashes.
-- The browser recognizes the `verify_email_token` query parameter and submits it to the confirmation endpoint.
+- The browser reads `verify_email_token` from the URL fragment, clears the fragment from browser history, and submits the token to the confirmation endpoint. The fragment is not sent in the initial HTTP request.
 - The sign-in screen offers a rate-limited resend-verification action.
 - Login currently does not require `email_verified_at`. Do not describe accounts as blocked pending verification.
 
