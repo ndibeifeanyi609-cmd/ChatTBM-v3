@@ -16,7 +16,7 @@ test('successful registration keeps the established 201 response shape', async (
       revokeSession: async () => {}
     },
     passwordReset: { createPasswordReset: async () => null, redeemPasswordReset: async () => ({ success: false }) },
-    emailVerification: { createEmailVerification: async () => null, redeemEmailVerification: async () => ({ success: false }) },
+    emailVerification: { createEmailVerification: async email => ({ email, token: 'test-verification-token' }), redeemEmailVerification: async () => ({ success: false }) },
     sendPasswordResetEmail: async () => {},
     sendEmailVerificationEmail: async () => {},
     limiters: {
@@ -32,5 +32,5 @@ test('successful registration keeps the established 201 response shape', async (
   await handlers[0]({}, res, next);
   await handlers[i]({ body: { email: 'user@example.com', password: 'secret' } }, res, next);
   assert.equal(res.statusCode, 201);
-  assert.deepEqual(res.body, { success: true, user: { id: 'u1', email: 'user@example.com' }, message: 'Account created. Sign in to start a session.' });
+  assert.deepEqual(res.body, { success: true, user: { id: 'u1', email: 'user@example.com' }, message: 'Account created. Check your email for a verification link before signing in.' });
 });
