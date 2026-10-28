@@ -33,6 +33,7 @@ jobs:
     env:
       DATABASE_URL: postgres://chattbm_test:test_password@localhost:5432/chattbm_test
       NODE_ENV: test
+      EMAIL_VERIFICATION_ALLOW_DESTRUCTIVE_TESTS: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
