@@ -41,6 +41,7 @@ class ChatTBMBrowser {
             if (this.verifyToken) {
                 this.authMode = 'verify-confirm';
                 resetUrl.searchParams.delete('verify_email_token');
+                resetUrl.hash = '';
                 window.history.replaceState({}, '', resetUrl.pathname + resetUrl.search + resetUrl.hash);
             }
             if (this.resetToken) {
