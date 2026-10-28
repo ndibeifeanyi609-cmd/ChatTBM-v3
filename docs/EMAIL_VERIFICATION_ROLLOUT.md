@@ -7,7 +7,7 @@ migration, deployment, or login-policy change.
 
 - Registration creates the account and attempts to issue and send a verification link.
 - Verification links are single-use, expire after 30 minutes, and are stored as token hashes.
-- The browser reads `verify_email_token` from the URL fragment, clears the fragment from browser history, and submits the token to the confirmation endpoint. The fragment is not sent in the initial HTTP request.
+- Verification links open a dedicated `verify-email.html` page with a restrictive Content Security Policy and no third-party scripts. Its inline script reads the token from the URL fragment, immediately clears browser history, and submits the token to the confirmation endpoint. The fragment is not sent in the initial HTTP request.
 - The sign-in screen offers a rate-limited resend-verification action.
 - Login currently does not require `email_verified_at`. Do not describe accounts as blocked pending verification.
 
@@ -70,8 +70,10 @@ use an isolated staging database that contains no customer data.
 4. Confirm the link token is in the URL fragment, is cleared from browser history,
    and is submitted to the confirmation API; verify the token is single-use and
    expires as designed.
-5. Exercise resend, expired/invalid tokens, provider failure, and rate-limit
-   responses. Confirm no secrets or raw provider responses appear in logs.
+5. Confirm the dedicated verification page loads no third-party scripts and
+   clears the fragment before making the API request. Exercise resend,
+   expired/invalid tokens, provider failure, and rate-limit responses. Confirm
+   no secrets or raw provider responses appear in logs.
 6. Verify registration/login behavior remains compatible with existing accounts;
    no email-verification enforcement policy is authorized by this PR.
 7. Record results and rollback steps before requesting production approval.
