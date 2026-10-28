@@ -125,3 +125,54 @@ disposable environment, apply the reviewed migration there, configure Resend
 secrets through the deployment dashboard, and verify delivery using a controlled
 test mailbox. Do not change either existing database or switch the staging service
 branch as part of this discovery step.
+
+
+## Proposed schema application and rollback runbook (review required)
+
+This is a procedure proposal, not permission to run it. Use it first in a newly
+isolated staging database with no customer data. Do not use either existing
+Render database as a test target.
+
+### Preflight
+
+1. Confirm the target service and database mapping through dashboard metadata,
+   without copying connection strings or credentials into chat, logs, or source.
+2. Confirm the target database is isolated, take a provider-supported backup or
+   snapshot, and record who approved the change.
+3. Confirm the target schema is the expected legacy schema and inspect whether
+   `chattbm_email_verification_tokens` already exists. Stop if the target or
+   schema is unexpected.
+4. Review `database/migrations/006_email_verification_tokens.sql` and test it
+   against the same PostgreSQL major version in a disposable database.
+5. Use an authorized database console or secret-safe migration runner to apply
+   only migration `006`. Do not paste database credentials into commands,
+   source control, or chat. Do not run all numbered SQL files as a batch.
+
+### Post-application verification
+
+1. Confirm `chattbm_users.email_verified_at` exists and the
+   `chattbm_email_verification_tokens` table, foreign key, unique token-hash
+   constraint, and expected indexes exist.
+2. Confirm existing user rows and account sign-in behavior were not changed.
+   Do not select or export user email addresses for this check.
+3. Run the application and email-verification tests against staging only, then
+   test email delivery with a controlled mailbox after the feature branch has
+   been separately approved for staging deployment.
+4. Record the result and retain the backup/snapshot reference. Stop on any
+   mismatch; do not improvise schema edits in the live database.
+
+### Rollback and recovery
+
+- Preferred first response is to stop or disable the new verification flow and
+  restore the previously deployed application version while preserving the
+  database schema. The added nullable column and token table are designed to
+  be backward-compatible with the current login policy.
+- Do not automatically drop the token table or column as a rollback. Once tokens
+  or verification timestamps exist, dropping them destroys state and may not be
+  reversible. Any destructive schema rollback requires a separate review,
+  a verified backup, an isolated target, and explicit approval.
+- If migration application fails, stop, capture the sanitized error, verify the
+  database target, and restore from the approved backup only under the database
+  provider's documented recovery procedure. Do not retry blindly.
+- No step in this runbook authorizes changing either existing Render database,
+  changing a service's deployment branch, or applying the migration to production.
