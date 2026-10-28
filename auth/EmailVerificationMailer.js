@@ -10,7 +10,7 @@ async function sendEmailVerificationEmail({ email, token }) {
         throw error;
     }
     const link = new URL('/', appUrl);
-    link.searchParams.set('verify_email_token', token);
+    link.hash = new URLSearchParams({ verify_email_token: token }).toString();
     const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
