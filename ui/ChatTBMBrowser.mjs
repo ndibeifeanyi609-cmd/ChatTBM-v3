@@ -726,7 +726,7 @@ class ChatTBMBrowser {
                 }
                 if (this.authMode === 'register') {
                     this.authMode = 'login';
-                    this.authMessage = 'Account created. Please sign in.';
+                    this.authMessage = result.message || 'Account created. Check your email for a verification link before signing in.';
                     this.render();
                     return;
                 }
