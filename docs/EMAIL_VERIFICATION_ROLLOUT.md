@@ -62,3 +62,25 @@ migration history, choose and document the supported schema-application
 procedure, review backup/rollback, and obtain explicit approval for the
 production schema step. Do not add automatic production migration execution
 as part of this email-verification change.
+
+## Render schema inspection checkpoint (2026-10-28)
+
+A read-only inspection of both Render Postgres instances found that both currently
+have `chattbm_users.email_verified_at`, but neither has the
+`chattbm_email_verification_tokens` table. This means the complete email-verification
+schema is not present in either database at the time of inspection. No rows from
+the users table were read, and no database writes were performed.
+
+The Render staging web service is configured to deploy from `main`; its latest
+observed deployment is commit `a4753cb26fa2945d65aadac0511eb4b730c1f6af`,
+not the email-verification feature branch. Automatic pull-request previews are
+disabled for this service. Therefore this staging service is not yet running the
+PR's verification routes and cannot be used as an end-to-end test of this feature
+without a separately approved staging deployment plan.
+
+Before an end-to-end test, identify which database each service uses without
+revealing connection strings, create an isolated staging database or approved
+disposable environment, apply the reviewed migration there, configure Resend
+secrets through the deployment dashboard, and verify delivery using a controlled
+test mailbox. Do not change either existing database or switch the staging service
+branch as part of this discovery step.
