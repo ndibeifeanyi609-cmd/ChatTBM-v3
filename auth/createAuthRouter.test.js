@@ -130,7 +130,7 @@ test('429 from any sensitive-route limiter prevents its handler from running', a
     const routes = new Map();
     const router = { post(path, ...handlers) { routes.set('POST ' + path, handlers); }, get(path, ...handlers) { routes.set('GET ' + path, handlers); } };
     const express = { Router: () => router };
-    const calls = { register: 0, login: 0, resetRequest: 0, resetConfirm: 0 };
+    const calls = { register: 0, login: 0, resetRequest: 0, resetConfirm: 0, verifyRequest: 0, verifyConfirm: 0 };
     const blocked = async (_req, res) => res.status(429).json({ success: false, error: { code: 'RATE_LIMITED' } });
     createAuthRouter({
         express,
@@ -144,15 +144,26 @@ test('429 from any sensitive-route limiter prevents its handler from running', a
             async createPasswordReset() { calls.resetRequest++; return null; },
             async redeemPasswordReset() { calls.resetConfirm++; return { success: false }; }
         },
-        emailVerification: { async createEmailVerification(){ calls.verifyRequest++; return null; }, async redeemEmailVerification(){ calls.verifyConfirm++; return { success:false }; } },
+        emailVerification: {
+            async createEmailVerification() { calls.verifyRequest++; return null; },
+            async redeemEmailVerification() { calls.verifyConfirm++; return { success: false }; }
+        },
         sendPasswordResetEmail: async () => {}, sendEmailVerificationEmail: async () => {},
         limiters: { registration: blocked, login: blocked, passwordResetRequest: blocked, passwordResetRedeem: blocked, emailVerificationRequest: blocked, emailVerificationRedeem: blocked }
     });
-    for (const route of ['POST /register', 'POST /login', 'POST /password-reset/request', 'POST /password-reset/confirm']) {
+    const routesToCheck = [
+        'POST /register',
+        'POST /login',
+        'POST /password-reset/request',
+        'POST /password-reset/confirm',
+        'POST /email-verification/request',
+        'POST /email-verification/confirm'
+    ];
+    for (const route of routesToCheck) {
         const { res, nextError } = await runRoute(routes.get(route));
         assert.equal(nextError, undefined, route);
         assert.equal(res.statusCode, 429, route);
         assert.equal(res.body.error.code, 'RATE_LIMITED', route);
     }
-    assert.deepEqual(calls, { register: 0, login: 0, resetRequest: 0, resetConfirm: 0 });
+    assert.deepEqual(calls, { register: 0, login: 0, resetRequest: 0, resetConfirm: 0, verifyRequest: 0, verifyConfirm: 0 });
 });
