@@ -34,7 +34,8 @@ test('sends a one-time verification link through Resend', async () => {
         const body = JSON.parse(request.options.body);
         assert.equal(body.to[0], 'person@example.com');
         assert.match(body.text, /verify your email/i);
-        assert.match(body.text, /verify_email_token=opaque-token/);
+        assert.match(body.text, /#verify_email_token=opaque-token/);
+        assert.doesNotMatch(body.text, /\?verify_email_token=/);
     } finally {
         global.fetch = oldFetch;
         if (key === undefined) delete process.env.RESEND_API_KEY; else process.env.RESEND_API_KEY = key;
