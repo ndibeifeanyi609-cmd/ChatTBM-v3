@@ -39,3 +39,26 @@ This PR remains Draft until reviewers inspect the migration strategy, service an
 route behavior, browser flow, and test coverage. Passing CI is not proof that
 production email credentials, delivery, or database migrations are configured.
 No production database changes are authorized by this document.
+
+
+## Migration discovery checkpoint (2026-10-28)
+
+Repository review confirms that `server.js` calls `initializeDatabase()` from
+`database/Postgres.js`, which creates core tables with `CREATE TABLE IF NOT
+EXISTS`. Numbered SQL migrations also exist, but no general migration runner
+or migration-history ledger was confirmed in the reviewed startup path. Existing
+migrations `002` and `003` overlap with bootstrap-created tables, so replaying
+all numbered files as a new startup routine is not a safe assumption.
+
+Migration `006_email_verification_tokens.sql` is therefore still a proposed,
+separately applied schema change. The disposable PostgreSQL test now models a
+legacy `chattbm_users` table without `email_verified_at`, applies migration
+`006` twice, and checks that the column is added before exercising token
+redemption. This validates the SQL upgrade behavior, not production deployment
+history or automatic execution.
+
+Before production rollout, separately confirm the actual deployed schema and
+migration history, choose and document the supported schema-application
+procedure, review backup/rollback, and obtain explicit approval for the
+production schema step. Do not add automatic production migration execution
+as part of this email-verification change.
