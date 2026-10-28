@@ -51,7 +51,7 @@ async function runRoute(handlers) {
     return { res, nextError };
 }
 
-test('all four sensitive auth routes fail closed when shared storage is unavailable', async () => {
+test('all six sensitive auth routes fail closed when shared storage is unavailable', async () => {
     const { routes, calls } = makeHarness();
     const cases = [
         ['POST /register', 'register'],
