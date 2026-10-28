@@ -29,7 +29,7 @@ h1{font-size:1.35rem}p{line-height:1.5;color:#ccc}a{color:#fff}
         status.textContent = 'This verification link is invalid or expired. Request a new link from ChatTBM.';
         return;
     }
-    const apiBase = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    const apiBase = ['localhost', '127.0.0.1', 'chattbm-password-reset-staging.onrender.com'].includes(window.location.hostname)
         ? ''
         : 'https://chattbm-backend.onrender.com';
     try {
