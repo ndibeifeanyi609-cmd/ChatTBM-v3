@@ -42,3 +42,22 @@ test('sends a one-time verification link through Resend', async () => {
         if (url === undefined) delete process.env.CHATTBM_PUBLIC_URL; else process.env.CHATTBM_PUBLIC_URL = url;
     }
 });
+
+test('reports provider rejection without exposing response details', async () => {
+    const key = process.env.RESEND_API_KEY, from = process.env.RESEND_FROM_EMAIL;
+    const oldFetch = global.fetch;
+    process.env.RESEND_API_KEY = 'test-key';
+    process.env.RESEND_FROM_EMAIL = 'ChatTBM <no-reply@chattbm.com>';
+    global.fetch = async () => ({ ok: false, status: 401, text: async () => 'sensitive provider response' });
+    try {
+        await assert.rejects(
+            sendEmailVerificationEmail({ email: 'person@example.com', token: 'opaque-token' }),
+            error => error.code === 'EMAIL_VERIFICATION_EMAIL_FAILED'
+                && !error.message.includes('sensitive provider response')
+        );
+    } finally {
+        global.fetch = oldFetch;
+        if (key === undefined) delete process.env.RESEND_API_KEY; else process.env.RESEND_API_KEY = key;
+        if (from === undefined) delete process.env.RESEND_FROM_EMAIL; else process.env.RESEND_FROM_EMAIL = from;
+    }
+});
