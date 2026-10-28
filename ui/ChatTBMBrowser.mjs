@@ -316,6 +316,11 @@ class ChatTBMBrowser {
                 forgot.textContent = 'Forgot password?';
                 forgot.dataset.action = 'reset-open';
                 panel.appendChild(forgot);
+                const resendVerification = document.createElement('button');
+                resendVerification.type = 'button';
+                resendVerification.textContent = 'Resend verification email';
+                resendVerification.dataset.action = 'verification-resend';
+                panel.appendChild(resendVerification);
             }
         }
         if (this.authMessage) {
@@ -731,6 +736,23 @@ class ChatTBMBrowser {
                 this.render();
             });
         }
+        root.querySelectorAll('[data-action="verification-resend"]').forEach(button => {
+            button.addEventListener('click', async () => {
+                const emailInput = root.querySelector('[data-role="auth-form"] input[name="email"]');
+                const email = emailInput ? emailInput.value.trim() : '';
+                if (!email) {
+                    this.authMessage = 'Enter your email address first.';
+                    this.render();
+                    return;
+                }
+                button.disabled = true;
+                const result = await requestEmailVerification(email);
+                this.authMessage = result.success
+                    ? 'If an unverified account matches that email, a verification link will be sent.'
+                    : (result.error?.message || 'Unable to request a verification email.');
+                this.render();
+            });
+        });
         root.querySelectorAll('[data-action="auth-open"]').forEach(button => {
             button.addEventListener('click', () => {
                 this.authMode = 'login';
