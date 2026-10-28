@@ -167,3 +167,54 @@ test('429 from any sensitive-route limiter prevents its handler from running', a
     }
     assert.deepEqual(calls, { register: 0, login: 0, resetRequest: 0, resetConfirm: 0, verifyRequest: 0, verifyConfirm: 0 });
 });
+
+test('registration succeeds with honest messaging when verification email delivery fails', async () => {
+    const routes = new Map();
+    const router = { post(path, ...handlers) { routes.set('POST ' + path, handlers); }, get(path, ...handlers) { routes.set('GET ' + path, handlers); } };
+    const pass = async (_req, _res, next) => next();
+    const calls = { issued: 0, sent: 0 };
+    createAuthRouter({
+        express: { Router: () => router },
+        services: {
+            async register() {
+                return { success: true, user: { id: 'user-1', email_normalized: 'person@example.com' } };
+            },
+            async login() { return { success: false }; },
+            async authenticateSession() { return null; },
+            async revokeSession() {}
+        },
+        passwordReset: { async createPasswordReset() { return null; }, async redeemPasswordReset() { return { success: false }; } },
+        emailVerification: {
+            async createEmailVerification() {
+                calls.issued++;
+                return { email: 'person@example.com', token: 'opaque-token' };
+            },
+            async redeemEmailVerification() { return { success: false }; }
+        },
+        sendPasswordResetEmail: async () => {},
+        sendEmailVerificationEmail: async () => {
+            calls.sent++;
+            const error = new Error('provider failure');
+            error.code = 'EMAIL_VERIFICATION_EMAIL_FAILED';
+            throw error;
+        },
+        limiters: {
+            registration: pass, login: pass, passwordResetRequest: pass,
+            passwordResetRedeem: pass, emailVerificationRequest: pass, emailVerificationRedeem: pass
+        },
+        nodeEnv: 'test'
+    });
+
+    const originalError = console.error;
+    console.error = () => {};
+    try {
+        const { res, nextError } = await runRoute(routes.get('POST /register'));
+        assert.equal(nextError, undefined);
+        assert.equal(res.statusCode, 201);
+        assert.equal(res.body.success, true);
+        assert.match(res.body.message, /verification could not be sent/i);
+        assert.deepEqual(calls, { issued: 1, sent: 1 });
+    } finally {
+        console.error = originalError;
+    }
+});
