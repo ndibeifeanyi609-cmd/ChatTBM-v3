@@ -16,8 +16,13 @@ test('successful registration keeps the established 201 response shape', async (
       revokeSession: async () => {}
     },
     passwordReset: { createPasswordReset: async () => null, redeemPasswordReset: async () => ({ success: false }) },
+    emailVerification: { createEmailVerification: async () => null, redeemEmailVerification: async () => ({ success: false }) },
     sendPasswordResetEmail: async () => {},
-    limiters: { registration: allow, login: allow, passwordResetRequest: allow, passwordResetRedeem: allow },
+    sendEmailVerificationEmail: async () => {},
+    limiters: {
+      registration: allow, login: allow, passwordResetRequest: allow, passwordResetRedeem: allow,
+      emailVerificationRequest: allow, emailVerificationRedeem: allow
+    },
     nodeEnv: 'test'
   });
   const handlers = routes.get('/register');
