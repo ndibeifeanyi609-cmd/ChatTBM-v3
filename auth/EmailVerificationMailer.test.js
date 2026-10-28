@@ -20,7 +20,7 @@ test('refuses to send when Resend configuration is missing', async () => {
     }
 });
 
-test('sends a one-time verification link through Resend', async () => {
+test('sends a one-time verification link through Resend on the isolated verification page', async () => {
     const key = process.env.RESEND_API_KEY, from = process.env.RESEND_FROM_EMAIL;
     const url = process.env.CHATTBM_PUBLIC_URL, oldFetch = global.fetch;
     let request;
@@ -34,7 +34,7 @@ test('sends a one-time verification link through Resend', async () => {
         const body = JSON.parse(request.options.body);
         assert.equal(body.to[0], 'person@example.com');
         assert.match(body.text, /verify your email/i);
-        assert.match(body.text, /#verify_email_token=opaque-token/);
+        assert.match(body.text, /https:\/\/chattbm\.com\/verify-email\.html#verify_email_token=opaque-token/);
         assert.doesNotMatch(body.text, /\?verify_email_token=/);
     } finally {
         global.fetch = oldFetch;
