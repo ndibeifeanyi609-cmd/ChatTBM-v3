@@ -9,7 +9,7 @@ async function sendEmailVerificationEmail({ email, token }) {
         error.code = 'EMAIL_VERIFICATION_EMAIL_NOT_CONFIGURED';
         throw error;
     }
-    const link = new URL('/', appUrl);
+    const link = new URL('/verify-email.html', appUrl);
     link.hash = new URLSearchParams({ verify_email_token: token }).toString();
     const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -24,7 +24,7 @@ async function sendEmailVerificationEmail({ email, token }) {
                 `Use this one-time link within 30 minutes: ${link.toString()}`,
                 '',
                 'If you did not create this account, you can ignore this email.'
-            ].join('\n')
+            ].join('\\n')
         })
     });
     if (!response.ok) {
