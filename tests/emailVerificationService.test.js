@@ -130,3 +130,13 @@ test('new token invalidates the previous unused token', async () => {
     assert.deepEqual(await redeemEmailVerification(first.token), { success: false });
     assert.deepEqual(await redeemEmailVerification(second.token), { success: true });
 });
+
+test('does not issue or redeem verification tokens for disabled accounts', async () => {
+    const issued = await createEmailVerification('person@example.com');
+    assert.ok(issued);
+
+    state.users[0].disabled_at = now();
+    assert.equal(await createEmailVerification('person@example.com'), null);
+    assert.deepEqual(await redeemEmailVerification(issued.token), { success: false });
+    assert.equal(state.users[0].email_verified_at, null);
+});
