@@ -34,7 +34,9 @@ class ChatTBMBrowser {
         try {
             const resetUrl = new URL(window.location.href);
             this.resetToken = resetUrl.searchParams.get('token') || '';
-            this.verifyToken = resetUrl.searchParams.get('verify_email_token') || '';
+            this.verifyToken = resetUrl.hash.startsWith('#verify_email_token=')
+                ? new URLSearchParams(resetUrl.hash.slice(1)).get('verify_email_token') || ''
+                : '';
             this.verificationLinkPending = Boolean(this.verifyToken);
             if (this.verifyToken) {
                 this.authMode = 'verify-confirm';
