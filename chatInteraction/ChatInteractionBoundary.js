@@ -169,23 +169,30 @@ async function ensureCanonicalConversation(userId, interactionId, contextId) {
 }
 
 function extractExplicitMemory(message) {
-    if (typeof message !== 'string' || !/\bremember\b/i.test(message)) return null;
+    if (typeof message !== 'string' || !/\\b(?:remember|save|store|keep)\\b/i.test(message)) return null;
 
-    // Existing natural-language form: "Remember my project nickname is Blue Falcon."
+    // Explicit first-person identity request, e.g. saving the user's role.
+    const identityRequest = message.match(
+        /\\b(?:remember|save|store|keep)\\s+(?:this|that)(?:\\s+as\\s+(?:a\\s+)?(?:personal\\s+)?memory)?\\s*:\\s*([^.!?\\n]{1,160})/i
+    );
+    if (identityRequest) {
+        const claim = identityRequest[1].trim().replace(/\\s+/g, ' ');
+        const identity = claim.match(/^(?:I am|I'm)\\s+(?:the\\s+)?(.+)$/i);
+        if (identity && identity[1].trim()) {
+            return { type: 'fact', subject: 'role', value: identity[1].trim() };
+        }
+    }
+
     const naturalLanguageMatch = message.match(
-        /\bmy\s+([a-z][a-z0-9 _-]{1,50}?)\s+is\s+([^.!?\n]{1,120})/i
+        /\\bmy\\s+([a-z][a-z0-9 _-]{1,50}?)\\s+is\\s+([^.!?\\n]{1,120})/i
     );
-
-    // Explicit key-value form: "Remember this test: 12345."
     const keyValueMatch = message.match(
-        /\bremember\s+this\s+([a-z][a-z0-9 _-]{0,50}?)\s*:\s*([^.!?\n]{1,120})/i
+        /\\b(?:remember|save|store|keep)\\s+(?:this\\s+)?([a-z][a-z0-9 _-]{0,50}?)\\s*:\\s*([^.!?\\n]{1,120})/i
     );
-
     const match = naturalLanguageMatch || keyValueMatch;
     if (!match) return null;
-
-    const subject = match[1].trim().replace(/\s+/g, ' ');
-    const value = match[2].trim().replace(/\s+/g, ' ');
+    const subject = match[1].trim().replace(/\\s+/g, ' ');
+    const value = match[2].trim().replace(/\\s+/g, ' ');
     if (!subject || !value) return null;
     return { type: 'fact', subject, value };
 }
