@@ -20,11 +20,13 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm install
-      - name: Run tests
+      - name: Run conversation-history isolation test and full suite
         env:
           CHATTBM_TEST_DATABASE_URL: ${{ secrets.CHATTBM_TEST_DATABASE_URL }}
           CHATTBM_TEST_DATABASE_SSL: 'true'
-        run: node --test
+        run: |
+          node --test routes/conversationHistoryRoutes.test.js
+          node --test
 
   sync-lockfile:
     if: github.event_name == 'push' && github.ref == 'refs/heads/auth-foundation-design'
