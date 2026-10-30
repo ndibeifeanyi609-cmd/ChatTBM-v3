@@ -208,7 +208,10 @@ app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
         return res.status(401).json({
             success: false,
             error: "Diagnostic token does not match.",
-            code: "DIAGNOSTIC_TOKEN_MISMATCH"
+            code: "DIAGNOSTIC_TOKEN_MISMATCH",
+            expectedLength: expected.length,
+            suppliedLength: supplied.length,
+            authorizationHeaderPresent: Boolean(authorization)
         });
     }
 
