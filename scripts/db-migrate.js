@@ -24,7 +24,7 @@ function parseArgs(argv) {
 }
 
 function validateMigrationFilename(filename) {
-    if (typeof filename !== 'string' || !/^\\d{3}_[a-z0-9_]+\\.sql$/.test(filename)) {
+    if (typeof filename !== 'string' || !/^\d{3}_[a-z0-9_]+\.sql$/.test(filename)) {
         throw new Error('Migration file must be a simple numbered .sql filename.');
     }
     return filename;
