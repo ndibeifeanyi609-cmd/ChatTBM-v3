@@ -192,7 +192,11 @@ app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
     const suppliedToken = authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : "";
 
     if (!expectedToken) {
-        return res.status(404).json({ success: false, error: "Not found." });
+        return res.status(503).json({
+            success: false,
+            error: "Diagnostic token is not configured.",
+            code: "DIAGNOSTIC_TOKEN_NOT_CONFIGURED"
+        });
     }
 
     const expected = Buffer.from(expectedToken);
@@ -201,7 +205,11 @@ app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
         expected.length !== supplied.length ||
         !crypto.timingSafeEqual(expected, supplied)
     ) {
-        return res.status(404).json({ success: false, error: "Not found." });
+        return res.status(401).json({
+            success: false,
+            error: "Diagnostic token does not match.",
+            code: "DIAGNOSTIC_TOKEN_MISMATCH"
+        });
     }
 
     const db = getPool();
