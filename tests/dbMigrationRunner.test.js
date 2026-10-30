@@ -102,7 +102,7 @@ test('migration refuses pre-existing email-verification schema without a ledger'
     await assert.rejects(runSelectedMigration({
         client, migrationFile: FILE, expectedDatabase: TARGET,
         confirmation: CONFIRM, sql: 'SELECT 1'
-    }), /schema exists without a migration ledger/);
+    }), /schema exists without a matching migration record/);
     assert.equal(client.calls.some(call => call.sql === 'BEGIN'), false);
     assert.equal(client.calls.some(call => call.sql.includes('CREATE TABLE chattbm_schema_migrations')), false);
 });
