@@ -39,5 +39,17 @@ assert.strictEqual(
     'Do not infer a memory without a clear fact.'
 );
 
+
+assert.deepStrictEqual(
+    extractExplicitMemory('Please save this as a personal memory: I am the creator of ChatTBM.'),
+    { type: 'fact', subject: 'role', value: 'creator of ChatTBM' },
+    'Explicit first-person identity memory requests must be recognized.'
+);
+
+assert.deepStrictEqual(
+    extractExplicitMemory('Please save this project note: use dark mode.'),
+    { type: 'fact', subject: 'project note', value: 'use dark mode' }
+);
+
 console.log('Explicit memory intent tests passed.');
 

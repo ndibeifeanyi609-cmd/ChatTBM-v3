@@ -2,7 +2,7 @@
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
 import { createAttachment } from './AttachmentProcessor.mjs';
-import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
+import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, confirmEmailVerification, requestEmailVerification, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -27,11 +27,23 @@ class ChatTBMBrowser {
         this.selectedFile = null;
         this.authUser = null;
         this.resetToken = '';
+        this.verifyToken = '';
+        this.verificationLinkPending = false;
         this.authMode = 'closed';
         this.authMessage = '';
         try {
             const resetUrl = new URL(window.location.href);
             this.resetToken = resetUrl.searchParams.get('token') || '';
+            this.verifyToken = resetUrl.hash.startsWith('#verify_email_token=')
+                ? new URLSearchParams(resetUrl.hash.slice(1)).get('verify_email_token') || ''
+                : '';
+            this.verificationLinkPending = Boolean(this.verifyToken);
+            if (this.verifyToken) {
+                this.authMode = 'verify-confirm';
+                resetUrl.searchParams.delete('verify_email_token');
+                resetUrl.hash = '';
+                window.history.replaceState({}, '', resetUrl.pathname + resetUrl.search + resetUrl.hash);
+            }
             if (this.resetToken) {
                 this.authMode = 'reset-confirm';
                 resetUrl.searchParams.delete('token');
@@ -47,7 +59,18 @@ class ChatTBMBrowser {
         this.showMemories = false;
         this.savedMemories = [];
         this.memoryMessage = '';
-        if (!this.resetToken) {
+        if (this.verifyToken) {
+            const token = this.verifyToken;
+            this.verifyToken = '';
+            confirmEmailVerification(token).then(result => {
+                this.authMode = 'login';
+                this.authMessage = result.success
+                    ? 'Email verified successfully. You can now sign in.'
+                    : (result.error?.message || 'This verification link is invalid or expired.');
+                this.render();
+            });
+        }
+        if (!this.resetToken && !this.verificationLinkPending) {
             getCurrentUser().then(async result => {
                 if (result.success && result.user) {
                     await this.switchAccount(result.user);
@@ -296,6 +319,11 @@ class ChatTBMBrowser {
                 forgot.textContent = 'Forgot password?';
                 forgot.dataset.action = 'reset-open';
                 panel.appendChild(forgot);
+                const resendVerification = document.createElement('button');
+                resendVerification.type = 'button';
+                resendVerification.textContent = 'Resend verification email';
+                resendVerification.dataset.action = 'verification-resend';
+                panel.appendChild(resendVerification);
             }
         }
         if (this.authMessage) {
@@ -701,7 +729,7 @@ class ChatTBMBrowser {
                 }
                 if (this.authMode === 'register') {
                     this.authMode = 'login';
-                    this.authMessage = 'Account created. Please sign in.';
+                    this.authMessage = result.message || 'Account created. Check your email for a verification link.';
                     this.render();
                     return;
                 }
@@ -711,6 +739,23 @@ class ChatTBMBrowser {
                 this.render();
             });
         }
+        root.querySelectorAll('[data-action="verification-resend"]').forEach(button => {
+            button.addEventListener('click', async () => {
+                const emailInput = root.querySelector('[data-role="auth-form"] input[name="email"]');
+                const email = emailInput ? emailInput.value.trim() : '';
+                if (!email) {
+                    this.authMessage = 'Enter your email address first.';
+                    this.render();
+                    return;
+                }
+                button.disabled = true;
+                const result = await requestEmailVerification(email);
+                this.authMessage = result.success
+                    ? 'If an unverified account matches that email, a verification link will be sent.'
+                    : (result.error?.message || 'Unable to request a verification email.');
+                this.render();
+            });
+        });
         root.querySelectorAll('[data-action="auth-open"]').forEach(button => {
             button.addEventListener('click', () => {
                 this.authMode = 'login';

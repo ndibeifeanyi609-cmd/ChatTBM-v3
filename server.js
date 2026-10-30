@@ -20,6 +20,7 @@
 // - Forecast Controller
 // =====================================
 require("dotenv").config();
+const crypto = require("crypto");
 const MemoryRuntime = require("./memory/MemoryRuntime");
 const path = require("path");
 const express = require("express");
@@ -165,7 +166,7 @@ app.use(
 // =====================================
 // HEALTH CHECK
 // =====================================
-const { initializeDatabase, checkDatabase } = require("./database/Postgres");
+const { initializeDatabase, checkDatabase, getPool } = require("./database/Postgres");
 
 app.get(
     "/api/health",
@@ -182,6 +183,86 @@ app.get(
         });
     }
 );
+
+// TEMPORARY STAGING-ONLY READ-ONLY SCHEMA DIAGNOSTIC.
+// Disabled unless STAGING_SCHEMA_DIAGNOSTIC_TOKEN is configured.
+app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
+    const expectedToken = process.env.STAGING_SCHEMA_DIAGNOSTIC_TOKEN || "";
+    const authorization = req.get("authorization") || "";
+    const suppliedToken = authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : "";
+
+    if (!expectedToken) {
+        return res.status(503).json({
+            success: false,
+            error: "Diagnostic token is not configured.",
+            code: "DIAGNOSTIC_TOKEN_NOT_CONFIGURED"
+        });
+    }
+
+    const expected = Buffer.from(expectedToken);
+    const supplied = Buffer.from(suppliedToken);
+    if (
+        expected.length !== supplied.length ||
+        !crypto.timingSafeEqual(expected, supplied)
+    ) {
+        return res.status(401).json({
+            success: false,
+            error: "Diagnostic token does not match.",
+            code: "DIAGNOSTIC_TOKEN_MISMATCH"
+        });
+    }
+
+    const db = getPool();
+    if (!db) {
+        return res.status(503).json({ success: false, error: "Database unavailable." });
+    }
+
+    let client;
+    try {
+        client = await db.connect();
+        await client.query("BEGIN READ ONLY");
+
+        const identity = await client.query(
+            "SELECT current_database() AS database_name, current_schema() AS schema_name"
+        );
+        const tables = await client.query(
+            "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public' ORDER BY tablename"
+        );
+        const columns = await client.query(
+            "SELECT table_name, column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = 'public' ORDER BY table_name, ordinal_position"
+        );
+        const ledger = await client.query(
+            "SELECT to_regclass('public.chattbm_schema_migrations') IS NOT NULL AS ledger_exists"
+        );
+
+        let migrationRecords = [];
+        if (ledger.rows[0].ledger_exists) {
+            const records = await client.query(
+                "SELECT filename, checksum, applied_at FROM public.chattbm_schema_migrations ORDER BY filename"
+            );
+            migrationRecords = records.rows;
+        }
+
+        await client.query("ROLLBACK");
+        return res.json({
+            success: true,
+            database: identity.rows[0],
+            tables: tables.rows.map(row => row.tablename),
+            columns: columns.rows,
+            migrationLedgerExists: ledger.rows[0].ledger_exists,
+            migrationRecords
+        });
+    } catch (error) {
+        if (client) {
+            try { await client.query("ROLLBACK"); } catch (_) {}
+        }
+        console.error("Staging schema diagnostic failed:", error.message);
+        return res.status(500).json({ success: false, error: "Diagnostic query failed." });
+    } finally {
+        if (client) client.release();
+    }
+});
+
 // =====================================
 // API INFORMATION
 // =====================================

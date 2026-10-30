@@ -26,7 +26,10 @@ if (!code) {
   status.textContent = 'This sign-in link is missing or expired. Please return to ChatTBM and try again.';
 } else {
   try {
-    const response = await fetch('https://chattbm-backend.onrender.com/api/auth/google/session-handoff', {
+    const apiBase = window.location.hostname === 'chattbm-password-reset-staging.onrender.com'
+      ? window.location.origin
+      : 'https://chattbm-backend.onrender.com';
+    const response = await fetch(apiBase + '/api/auth/google/session-handoff', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code }),
