@@ -16,7 +16,7 @@ function parseArgs(argv) {
         if (argv[i] === '--file') args.file = argv[++i];
         else if (argv[i] === '--target') args.target = argv[++i];
         else if (argv[i] === '--confirm') args.confirm = argv[++i];
-        else throw new Error(\`Unknown argument: \${argv[i]}\`);
+        else throw new Error(`Unknown argument: ${argv[i]}`);
     }
     if (!args.file || !args.target || !args.confirm) {
         throw new Error('Usage: npm run db:migrate -- --file <migration.sql> --target chattbm_staging_isolated --confirm APPLY:chattbm_staging_isolated:<migration.sql>');
@@ -26,7 +26,7 @@ function parseArgs(argv) {
 
 function validateMigrationFilename(filename) {
     if (filename !== ALLOWED_MIGRATION) {
-        throw new Error(\`Refusing migration: only \${ALLOWED_MIGRATION} is enabled in this initial runner.\`);
+        throw new Error(`Refusing migration: only ${ALLOWED_MIGRATION} is enabled in this initial runner.`);
     }
     return filename;
 }
@@ -34,22 +34,22 @@ function validateMigrationFilename(filename) {
 async function runSelectedMigration({ client, migrationFile, expectedDatabase, confirmation, sql, checksum }) {
     validateMigrationFilename(migrationFile);
     if (expectedDatabase !== ALLOWED_DATABASE) {
-        throw new Error(\`Refusing migration: initial runner is restricted to \${ALLOWED_DATABASE}.\`);
+        throw new Error(`Refusing migration: initial runner is restricted to ${ALLOWED_DATABASE}.`);
     }
-    if (confirmation !== \`APPLY:\${expectedDatabase}:\${migrationFile}\`) {
+    if (confirmation !== `APPLY:${expectedDatabase}:${migrationFile}`) {
         throw new Error('Refusing migration: explicit target confirmation does not match.');
     }
 
     const identity = await client.query('SELECT current_database() AS database_name');
     const actualDatabase = identity.rows[0] && identity.rows[0].database_name;
     if (actualDatabase !== expectedDatabase) {
-        throw new Error(\`Refusing migration: connected database is "\${actualDatabase}", expected "\${expectedDatabase}".\`);
+        throw new Error(`Refusing migration: connected database is "${actualDatabase}", expected "${expectedDatabase}".`);
     }
 
     const digest = checksum || crypto.createHash('sha256').update(sql, 'utf8').digest('hex');
     await client.query('SELECT pg_advisory_lock($1, $2)', [194735, 1]);
     try {
-        const preflight = await client.query(\`
+        const preflight = await client.query(`
             SELECT
                 to_regclass('public.chattbm_users') IS NOT NULL AS users_table_exists,
                 EXISTS (
@@ -61,7 +61,7 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
                 to_regclass('public.chattbm_email_verification_tokens') IS NOT NULL
                     AS verification_tokens_table_exists,
                 to_regclass('public.chattbm_schema_migrations') IS NOT NULL AS migration_ledger_exists
-        \`);
+        `);
         const state = preflight.rows[0] || {};
         if (!state.users_table_exists) {
             throw new Error('Refusing migration: required chattbm_users table is missing.');
@@ -73,12 +73,12 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
 
         if (state.migration_ledger_exists) {
             const prior = await client.query(
-                \`SELECT checksum FROM \${HISTORY_TABLE} WHERE filename = $1\`,
+                `SELECT checksum FROM ${HISTORY_TABLE} WHERE filename = $1`,
                 [migrationFile]
             );
             if (prior.rowCount > 0) {
                 if (prior.rows[0].checksum.trim() !== digest) {
-                    throw new Error(\`Migration checksum mismatch for \${migrationFile}; refusing to continue.\`);
+                    throw new Error(`Migration checksum mismatch for ${migrationFile}; refusing to continue.`);
                 }
                 return { status: 'already-applied', filename: migrationFile, database: actualDatabase };
             }
@@ -87,17 +87,17 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
         await client.query('BEGIN');
         try {
             if (!state.migration_ledger_exists) {
-                await client.query(\`
-                    CREATE TABLE \${HISTORY_TABLE} (
+                await client.query(`
+                    CREATE TABLE ${HISTORY_TABLE} (
                         filename TEXT PRIMARY KEY,
                         checksum CHAR(64) NOT NULL,
                         applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                     )
-                \`);
+                `);
             }
             await client.query(sql);
             await client.query(
-                \`INSERT INTO \${HISTORY_TABLE} (filename, checksum) VALUES ($1, $2)\`,
+                `INSERT INTO ${HISTORY_TABLE} (filename, checksum) VALUES ($1, $2)`,
                 [migrationFile, digest]
             );
             await client.query('COMMIT');
@@ -116,7 +116,7 @@ async function main() {
     if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required.');
     const filename = validateMigrationFilename(args.file);
     if (args.target !== ALLOWED_DATABASE) {
-        throw new Error(\`Refusing migration: initial runner is restricted to \${ALLOWED_DATABASE}.\`);
+        throw new Error(`Refusing migration: initial runner is restricted to ${ALLOWED_DATABASE}.`);
     }
     const filePath = path.join(MIGRATIONS_DIR, filename);
     if (path.dirname(filePath) !== MIGRATIONS_DIR || !fs.existsSync(filePath)) {
@@ -132,7 +132,7 @@ async function main() {
             client, migrationFile: filename, expectedDatabase: args.target,
             confirmation: args.confirm, sql
         });
-        console.log(\`Migration \${result.status}: \${result.filename} on \${result.database}.\`);
+        console.log(`Migration ${result.status}: ${result.filename} on ${result.database}.`);
     } finally {
         await client.end();
     }
