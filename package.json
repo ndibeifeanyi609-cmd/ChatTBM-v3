@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "db:migrate": "node scripts/db-migrate.js",
+    "test:db-migrate": "node --test tests/dbMigrationRunner.test.js",
     "test:stream": "node --test tests/GeminiProviderStreaming.test.js tests/AIProviderBoundaryStreaming.test.js tests/chatStreamRoute.test.js tests/ChatAPIStreaming.test.mjs"
   },
   "dependencies": {
