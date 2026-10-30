@@ -7,7 +7,8 @@ const { Client } = require('pg');
 
 const MIGRATIONS_DIR = path.join(__dirname, '..', 'database', 'migrations');
 const HISTORY_TABLE = 'chattbm_schema_migrations';
-const PROTECTED_DATABASES = new Set(['chattbm_db', 'chattbm_database']);
+const ALLOWED_DATABASE = 'chattbm_staging_isolated';
+const ALLOWED_MIGRATION = '006_email_verification_tokens.sql';
 
 function parseArgs(argv) {
     const args = {};
@@ -18,22 +19,22 @@ function parseArgs(argv) {
         else throw new Error(`Unknown argument: ${argv[i]}`);
     }
     if (!args.file || !args.target || !args.confirm) {
-        throw new Error('Usage: npm run db:migrate -- --file <migration.sql> --target <database_name> --confirm APPLY:<database_name>:<migration.sql>');
+        throw new Error('Usage: npm run db:migrate -- --file <migration.sql> --target chattbm_staging_isolated --confirm APPLY:chattbm_staging_isolated:<migration.sql>');
     }
     return args;
 }
 
 function validateMigrationFilename(filename) {
-    if (typeof filename !== 'string' || !/^\d{3}_[a-z0-9_]+\.sql$/.test(filename)) {
-        throw new Error('Migration file must be a simple numbered .sql filename.');
+    if (filename !== ALLOWED_MIGRATION) {
+        throw new Error(`Refusing migration: only ${ALLOWED_MIGRATION} is enabled in this initial runner.`);
     }
     return filename;
 }
 
 async function runSelectedMigration({ client, migrationFile, expectedDatabase, confirmation, sql, checksum }) {
     validateMigrationFilename(migrationFile);
-    if (!expectedDatabase || PROTECTED_DATABASES.has(expectedDatabase)) {
-        throw new Error('Refusing migration: target database is missing or protected.');
+    if (expectedDatabase !== ALLOWED_DATABASE) {
+        throw new Error(`Refusing migration: initial runner is restricted to ${ALLOWED_DATABASE}.`);
     }
     if (confirmation !== `APPLY:${expectedDatabase}:${migrationFile}`) {
         throw new Error('Refusing migration: explicit target confirmation does not match.');
@@ -89,6 +90,9 @@ async function main() {
     const args = parseArgs(process.argv.slice(2));
     if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required.');
     const filename = validateMigrationFilename(args.file);
+    if (args.target !== ALLOWED_DATABASE) {
+        throw new Error(`Refusing migration: initial runner is restricted to ${ALLOWED_DATABASE}.`);
+    }
     const filePath = path.join(MIGRATIONS_DIR, filename);
     if (path.dirname(filePath) !== MIGRATIONS_DIR || !fs.existsSync(filePath)) {
         throw new Error('Selected migration file does not exist in database/migrations.');
