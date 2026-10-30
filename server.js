@@ -188,7 +188,7 @@ app.get(
 // Disabled unless STAGING_SCHEMA_DIAGNOSTIC_TOKEN is configured.
 app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
     const expectedToken = process.env.STAGING_SCHEMA_DIAGNOSTIC_TOKEN || "";
-    const suppliedToken = (req.get("authorization") || "").replace(/^Bearer\\s+/i, "");
+    const authorization = req.get("authorization") || "";\n    const suppliedToken = authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : "";
 
     if (!expectedToken) {
         return res.status(404).json({ success: false, error: "Not found." });
