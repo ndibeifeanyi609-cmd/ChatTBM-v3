@@ -24,7 +24,7 @@ function parseArgs(argv) {
 }
 
 function validateMigrationFilename(filename) {
-    if (typeof filename !== 'string' || !/^\d{3}_[a-z0-9_]+\.sql$/.test(filename)) {
+    if (typeof filename !== 'string' || !/^\\d{3}_[a-z0-9_]+\\.sql$/.test(filename)) {
         throw new Error('Migration file must be a simple numbered .sql filename.');
     }
     return filename;
@@ -57,7 +57,7 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
     await client.query('SELECT pg_advisory_lock($1, $2)', [194735, 1]);
     try {
         const prior = await client.query(
-            'SELECT checksum FROM ${HISTORY_TABLE} WHERE filename = $1',
+            `SELECT checksum FROM ${HISTORY_TABLE} WHERE filename = $1`,
             [migrationFile]
         );
         if (prior.rowCount > 0) {
@@ -71,7 +71,7 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
         try {
             await client.query(sql);
             await client.query(
-                'INSERT INTO ${HISTORY_TABLE} (filename, checksum) VALUES ($1, $2)',
+                `INSERT INTO ${HISTORY_TABLE} (filename, checksum) VALUES ($1, $2)`,
                 [migrationFile, digest]
             );
             await client.query('COMMIT');
