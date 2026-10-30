@@ -66,11 +66,7 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
         if (!state.users_table_exists) {
             throw new Error('Refusing migration: required chattbm_users table is missing.');
         }
-        if (!state.migration_ledger_exists &&
-            (state.email_verified_at_exists || state.verification_tokens_table_exists)) {
-            throw new Error('Refusing migration: email-verification schema exists without a migration ledger; manual reconciliation is required.');
-        }
-
+        let migrationRecorded = false;
         if (state.migration_ledger_exists) {
             const prior = await client.query(
                 `SELECT checksum FROM ${HISTORY_TABLE} WHERE filename = $1`,
@@ -80,8 +76,14 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
                 if (prior.rows[0].checksum.trim() !== digest) {
                     throw new Error(`Migration checksum mismatch for ${migrationFile}; refusing to continue.`);
                 }
+                migrationRecorded = true;
                 return { status: 'already-applied', filename: migrationFile, database: actualDatabase };
             }
+        }
+
+        if (!migrationRecorded &&
+            (state.email_verified_at_exists || state.verification_tokens_table_exists)) {
+            throw new Error('Refusing migration: email-verification schema exists without a matching migration record; manual reconciliation is required.');
         }
 
         await client.query('BEGIN');
