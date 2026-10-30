@@ -229,7 +229,7 @@ app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
         let migrationRecords = [];
         if (ledger.rows[0].ledger_exists) {
             const records = await client.query(
-                "SELECT migration_name, checksum, applied_at FROM public.chattbm_schema_migrations ORDER BY migration_name"
+                "SELECT filename, checksum, applied_at FROM public.chattbm_schema_migrations ORDER BY filename"
             );
             migrationRecords = records.rows;
         }
