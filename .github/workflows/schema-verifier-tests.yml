@@ -1,0 +1,26 @@
+name: Read-only Schema Verifier Tests
+
+on:
+  push:
+    branches:
+      - feature/read-only-schema-verifier
+    paths:
+      - 'database/migrations/SchemaVerifier.js'
+      - 'database/migrations/SchemaVerifier.test.js'
+      - '.github/workflows/schema-verifier-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  schema-verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout isolated verifier branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run schema verifier unit tests
+        run: node --test database/migrations/SchemaVerifier.test.js
