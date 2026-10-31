@@ -1,6 +1,6 @@
 # Database Migration Manifest Proposal
 
-**Status:** Proposal for review; not executable configuration  
+**Status:** Explicit migration order approved; remaining manifest rules are still proposals  
 **Branch:** `docs/database-migration-baseline-design`  
 **Scope:** Historical migration inventory and deterministic ordering only
 
@@ -8,7 +8,9 @@
 
 The existing migration filenames contain duplicate numeric prefixes. A runner must not infer order by sorting those prefixes. This proposal assigns each existing file a unique manifest order while preserving every historical filename and SQL body.
 
-## Proposed manifest order
+## Approved manifest order
+
+The user approved this explicit order on 2026-10-31:
 
 | Order | Stable migration ID | Existing filename | Schema objects |
 |---:|---|---|---|
@@ -33,7 +35,7 @@ The stable ID is the filename without the `.sql` extension. The manifest's expli
 - Migration 006 alters `chattbm_users` and creates a token table referencing it.
 - The current `database/Postgres.js` bootstrap already creates several of these objects. This is why a clean sequential replay cannot be assumed to describe the state of an existing database.
 
-The proposed order satisfies the dependencies visible in the inspected SQL. It does not establish that migrations were historically executed in this order in any deployed environment.
+The approved order satisfies the dependencies visible in the inspected SQL. It does not establish that migrations were historically executed in this order in any deployed environment.
 
 ## Requirements for a future executable manifest
 
@@ -55,12 +57,12 @@ The manifest is not a record of deployed migration history. For an existing data
 
 In particular, the observed staging presence of `chattbm_users.email_verified_at` does not prove migration 006 is complete; the token table and its indexes must also be verified.
 
-## Review decisions required
+## Review decisions
 
-- [ ] Approve the explicit order above.
-- [ ] Approve filename-derived stable IDs.
-- [ ] Approve dependency declarations as part of the future manifest.
-- [ ] Approve checksum verification as a hard failure on mismatch.
+- [x] Explicit order above approved by the user.
+- [ ] Filename-derived stable IDs approved.
+- [ ] Dependency declarations as part of the future manifest approved.
+- [ ] Checksum verification as a hard failure on mismatch approved.
 
 ## Safety boundary
 
