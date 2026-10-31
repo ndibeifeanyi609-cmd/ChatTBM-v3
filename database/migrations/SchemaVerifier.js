@@ -61,10 +61,14 @@ const QUERIES = [
   `SELECT t.relname AS table_name,x.relname AS index_name,pg_catalog.pg_get_indexdef(i.indexrelid) AS definition,pg_catalog.pg_get_expr(i.indpred,i.indrelid) AS predicate,i.indisunique AS is_unique FROM pg_catalog.pg_index i JOIN pg_catalog.pg_class t ON t.oid=i.indrelid JOIN pg_catalog.pg_namespace n ON n.oid=t.relnamespace JOIN pg_catalog.pg_class x ON x.oid=i.indexrelid WHERE n.nspname=$1 AND t.relname=ANY($2::text[])`
 ];
 
-const norm = value => String(value || '').toLowerCase().replace(/["']/g,'').replace(/\\s+/g,' ').trim();
+const norm = value => String(value || '').toLowerCase().replace(/["']/g,'').replace(/[ ]+/g,' ').trim();
 const normalizeCheck = value => {
   let normalized = norm(value);
-  if (normalized.startsWith('check')) normalized = normalized.replace(/^check\\s*\\(/, '').replace(/\\)$/, '');
+  if (normalized.startsWith('check')) {
+    normalized = normalized.slice(5).trim();
+    if (normalized.startsWith('(')) normalized = normalized.slice(1);
+    if (normalized.endsWith(')')) normalized = normalized.slice(0, -1);
+  }
   normalized = normalized.replace(/::[a-zA-Z_][a-zA-Z0-9_ ]*/g, '').trim();
   while (normalized.startsWith('(') && normalized.endsWith(')')) {
     let depth = 0;
@@ -77,7 +81,7 @@ const normalizeCheck = value => {
     if (!wrapsWholeExpression) break;
     normalized = normalized.slice(1, -1).trim();
   }
-  return normalized.replace(/\\s*([<>=!]+)\\s*/g, '$1').replace(/\\s+/g, ' ');
+  return normalized.replace(/[ ]*([<>=!]+)[ ]*/g, '$1').replace(/[ ]+/g, ' ');
 };
 const schemaValid = value => typeof value === 'string' && value.length > 0 && value.length <= 63 && /^[a-zA-Z_][a-zA-Z0-9_$]*$/.test(value);
 const allTables = [...new Set(SPECS.flatMap(([,tables]) => Object.keys(tables)))];
