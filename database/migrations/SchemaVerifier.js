@@ -90,7 +90,7 @@ function migrationResult(spec, relations, columns, constraints, indexes) {
   const [migrationId, tables, expectedIndexes] = spec;
   const names = Object.keys(tables);
   const present = names.filter(name => relations.has(name));
-  if (migrationId !== '001_auth_accounts_sessions' && names.some(name => name !== 'chattbm_users') && !relations.has('chattbm_users')) {
+  if (migrationId !== '001_auth_accounts_sessions' && Object.values(tables).some(table => table.constraints.some(definition => definition.startsWith('FOREIGN KEY') && definition.includes('chattbm_users'))) && !relations.has('chattbm_users')) {
     return {migrationId,status:STATUSES.BLOCKED,reasons:['PREREQUISITE_USERS_TABLE_MISSING'],objects:[]};
   }
   if (!present.length) {
