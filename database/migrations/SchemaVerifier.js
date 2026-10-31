@@ -62,6 +62,21 @@ const QUERIES = [
 ];
 
 const norm = value => String(value || '').toLowerCase().replace(/["']/g,'').replace(/\\s+/g,' ').trim();
+const normalizeCheck = value => {
+  let normalized = norm(value).replace(/::[a-zA-Z_][a-zA-Z0-9_ ]*/g, '').trim();
+  while (normalized.startsWith('(') && normalized.endsWith(')')) {
+    let depth = 0;
+    let wrapsWholeExpression = true;
+    for (let i = 0; i < normalized.length; i++) {
+      if (normalized[i] === '(') depth++;
+      if (normalized[i] === ')') depth--;
+      if (depth === 0 && i < normalized.length - 1) { wrapsWholeExpression = false; break; }
+    }
+    if (!wrapsWholeExpression) break;
+    normalized = normalized.slice(1, -1).trim();
+  }
+  return normalized.replace(/\\s*([<>=!]+)\\s*/g, '$1').replace(/\\s+/g, ' ');
+};
 const schemaValid = value => typeof value === 'string' && value.length > 0 && value.length <= 63 && /^[a-zA-Z_][a-zA-Z0-9_$]*$/.test(value);
 const allTables = [...new Set(SPECS.flatMap(([,tables]) => Object.keys(tables)))];
 
@@ -97,7 +112,7 @@ function migrationResult(spec, relations, columns, constraints, indexes) {
     const actualDefs = constraints.filter(row=>row.table_name===tableName).map(row=>norm(row.definition));
     for (const definition of expected.constraints) {
       const target = norm(definition);
-      const matched = actualDefs.some(actual=> target.startsWith('check') ? actual.replace(/::text/g,'') === target : target.startsWith('foreign key')
+      const matched = actualDefs.some(actual=> target.startsWith('check') ? normalizeCheck(actual) === normalizeCheck(target) : target.startsWith('foreign key')
         ? actual.includes('foreign key') && actual.includes('references chattbm_users') && actual.includes('on delete cascade') && actual.includes(target.match(/\(([^)]+)\)/)?.[1] || '')
         : actual === target);
       if (!matched) reasons.push('CONSTRAINT_MISSING_OR_MISMATCHED');
