@@ -29,7 +29,7 @@ test('uses a read-only transaction, catalog-only queries, and always rolls back'
   const client = mockClient();
   const result = await verifyMigrationSchema({ client, schema: 'public' });
   assert.equal(result.readOnly, true);
-  assert.equal(client.calls[0].sql, 'BEGIN READ ONLY');
+  assert.equal(client.calls[0].sql, 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
   assert.equal(client.calls.at(-1).sql, 'ROLLBACK');
   assert.equal(client.calls.length, 6);
   for (const call of client.calls.slice(1, -1)) {
