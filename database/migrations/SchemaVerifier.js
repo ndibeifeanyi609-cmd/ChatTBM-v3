@@ -119,7 +119,7 @@ async function verifyMigrationSchema({client,schema}={}) {
   if (!schemaValid(schema)) throw new TypeError('A valid schema name must be supplied explicitly.');
   let begun = false;
   try {
-    await client.query('BEGIN READ ONLY'); begun = true;
+    await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY'); begun = true;
     const results = [];
     for (const sql of QUERIES) results.push(await client.query(sql,[schema,allTables]));
     const relations = new Set(results[0].rows.filter(row=>row.kind==='r'||row.kind==='p').map(row=>row.table_name));
