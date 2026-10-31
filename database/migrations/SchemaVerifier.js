@@ -72,7 +72,10 @@ function migrationResult(spec, relations, columns, constraints, indexes) {
   if (migrationId !== '001_auth_accounts_sessions' && names.some(name => name !== 'chattbm_users') && !relations.has('chattbm_users')) {
     return {migrationId,status:STATUSES.BLOCKED,reasons:['PREREQUISITE_USERS_TABLE_MISSING'],objects:[]};
   }
-  if (!present.length) {\n    if (migrationId === '006_email_verification_tokens' && columns.some(row => row.table_name === 'chattbm_users' && row.column_name === 'email_verified_at')) return {migrationId,status:STATUSES.PARTIAL_OR_CONFLICTING,reasons:['EMAIL_VERIFICATION_COLUMN_PRESENT_BUT_TOKEN_TABLE_ABSENT'],objects:names.map(name=>({name,status:'MISSING'}))};\n    return {migrationId,status:STATUSES.ABSENT,reasons:['MIGRATION_OBJECTS_ABSENT'],objects:names.map(name=>({name,status:'MISSING'}))};\n  }
+  if (!present.length) {
+    if (migrationId === '006_email_verification_tokens' && columns.some(row => row.table_name === 'chattbm_users' && row.column_name === 'email_verified_at')) return {migrationId,status:STATUSES.PARTIAL_OR_CONFLICTING,reasons:['EMAIL_VERIFICATION_COLUMN_PRESENT_BUT_TOKEN_TABLE_ABSENT'],objects:names.map(name=>({name,status:'MISSING'}))};
+    return {migrationId,status:STATUSES.ABSENT,reasons:['MIGRATION_OBJECTS_ABSENT'],objects:names.map(name=>({name,status:'MISSING'}))};
+  }
 
   let conflict = false;
   const objects = [];
