@@ -10,7 +10,7 @@ function mockClient(responses = []) {
     calls,
     async query(sql, params) {
       calls.push({ sql, params });
-      if (sql === 'BEGIN READ ONLY' || sql === 'ROLLBACK') return { rows: [] };
+      if (sql === 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY' || sql === 'ROLLBACK') return { rows: [] };
       const next = responses.shift();
       if (next instanceof Error) throw next;
       return next || { rows: [] };
