@@ -73,3 +73,7 @@ test('uses a repeatable-read snapshot for consistent catalog inspection', async 
   await verifyMigrationSchema({ client, schema: 'public' });
   assert.equal(client.calls[0].sql, 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
 });
+
+test('verifier source remains loadable after syntax corrections', () => {
+  assert.equal(typeof verifyMigrationSchema, 'function');
+});
