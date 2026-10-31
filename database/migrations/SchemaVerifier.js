@@ -58,7 +58,7 @@ const QUERIES = [
   `SELECT c.relname AS table_name,c.relkind AS kind FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname=$1 AND c.relname=ANY($2::text[])`,
   `SELECT c.relname AS table_name,a.attname AS column_name,pg_catalog.format_type(a.atttypid,a.atttypmod) AS data_type,a.attnotnull AS not_null,pg_catalog.pg_get_expr(d.adbin,d.adrelid) AS default_expr FROM pg_catalog.pg_attribute a JOIN pg_catalog.pg_class c ON c.oid=a.attrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_catalog.pg_attrdef d ON d.adrelid=c.oid AND d.adnum=a.attnum WHERE n.nspname=$1 AND c.relname=ANY($2::text[]) AND a.attnum>0 AND NOT a.attisdropped`,
   `SELECT c.relname AS table_name,pg_catalog.pg_get_constraintdef(k.oid,true) AS definition FROM pg_catalog.pg_constraint k JOIN pg_catalog.pg_class c ON c.oid=k.conrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname=$1 AND c.relname=ANY($2::text[])`,
-  `SELECT t.relname AS table_name,x.relname AS index_name,pg_catalog.pg_get_indexdef(i.indexrelid) AS definition,pg_catalog.pg_get_expr(i.indpred,i.indrelid) AS predicate FROM pg_catalog.pg_index i JOIN pg_catalog.pg_class t ON t.oid=i.indrelid JOIN pg_catalog.pg_namespace n ON n.oid=t.relnamespace JOIN pg_catalog.pg_class x ON x.oid=i.indexrelid WHERE n.nspname=$1 AND t.relname=ANY($2::text[])`
+  `SELECT t.relname AS table_name,x.relname AS index_name,pg_catalog.pg_get_indexdef(i.indexrelid) AS definition,pg_catalog.pg_get_expr(i.indpred,i.indrelid) AS predicate,i.indisunique AS is_unique FROM pg_catalog.pg_index i JOIN pg_catalog.pg_class t ON t.oid=i.indrelid JOIN pg_catalog.pg_namespace n ON n.oid=t.relnamespace JOIN pg_catalog.pg_class x ON x.oid=i.indexrelid WHERE n.nspname=$1 AND t.relname=ANY($2::text[])`
 ];
 
 const norm = value => String(value || '').toLowerCase().replace(/["']/g,'').replace(/\\s+/g,' ').trim();
@@ -94,7 +94,7 @@ function migrationResult(spec, relations, columns, constraints, indexes) {
     const actualDefs = constraints.filter(row=>row.table_name===tableName).map(row=>norm(row.definition));
     for (const definition of expected.constraints) {
       const target = norm(definition);
-      const matched = actualDefs.some(actual=> target.startsWith('foreign key')
+      const matched = actualDefs.some(actual=> target.startsWith('check') ? actual.replace(/::text/g,'') === target : target.startsWith('foreign key')
         ? actual.includes('foreign key') && actual.includes('references chattbm_users') && actual.includes('on delete cascade') && actual.includes(target.match(/\(([^)]+)\)/)?.[1] || '')
         : actual === target);
       if (!matched) reasons.push('CONSTRAINT_MISSING_OR_MISMATCHED');
@@ -106,7 +106,7 @@ function migrationResult(spec, relations, columns, constraints, indexes) {
     const actual = indexes.find(row=>row.index_name===name && row.table_name===tableName);
     if (!actual) { conflict=true; objects.push({name,status:'MISSING',reasons:['INDEX_MISSING']}); continue; }
     const def = norm(actual.definition);
-    const keysMatch = def.includes(norm(keyText));
+    const keysMatch = def.includes(norm(keyText)) && def.includes('using btree') && !actual.is_unique;
     const predicateMatch = predicate ? norm(actual.predicate).replace(/[()]/g,'')===norm(predicate).replace(/[()]/g,'') : !actual.predicate;
     if (!keysMatch || !predicateMatch) { conflict=true; objects.push({name,status:'CONFLICTING',reasons:['INDEX_DEFINITION_MISMATCH']}); }
     else objects.push({name,status:'COMPATIBLE',reasons:[]});
