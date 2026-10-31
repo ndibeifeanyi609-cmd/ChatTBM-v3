@@ -5,8 +5,10 @@ on:
     branches:
       - feature/read-only-schema-verifier
     paths:
+      - 'database/migrations/*.sql'
       - 'database/migrations/SchemaVerifier.js'
       - 'database/migrations/SchemaVerifier.test.js'
+      - 'database/migrations/SchemaVerifier.postgres.test.js'
       - '.github/workflows/schema-verifier-tests.yml'
 
 permissions:
@@ -15,6 +17,22 @@ permissions:
 jobs:
   schema-verifier:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: chattbm_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d chattbm_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      SCHEMA_VERIFIER_DATABASE_URL: postgres://postgres:postgres@localhost:5432/chattbm_test
     steps:
       - name: Checkout isolated verifier branch
         uses: actions/checkout@v4
@@ -22,5 +40,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
       - name: Run schema verifier unit tests
         run: node --test database/migrations/SchemaVerifier.test.js
+      - name: Run disposable PostgreSQL 18 integration test
+        run: node --test database/migrations/SchemaVerifier.postgres.test.js
