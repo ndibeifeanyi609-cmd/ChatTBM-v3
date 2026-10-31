@@ -63,7 +63,9 @@ const QUERIES = [
 
 const norm = value => String(value || '').toLowerCase().replace(/["']/g,'').replace(/\\s+/g,' ').trim();
 const normalizeCheck = value => {
-  let normalized = norm(value).replace(/::[a-zA-Z_][a-zA-Z0-9_ ]*/g, '').trim();
+  let normalized = norm(value);
+  if (normalized.startsWith('check')) normalized = normalized.replace(/^check\\s*\\(/, '').replace(/\\)$/, '');
+  normalized = normalized.replace(/::[a-zA-Z_][a-zA-Z0-9_ ]*/g, '').trim();
   while (normalized.startsWith('(') && normalized.endsWith(')')) {
     let depth = 0;
     let wrapsWholeExpression = true;
