@@ -77,3 +77,25 @@ test('uses a repeatable-read snapshot for consistent catalog inspection', async 
 test('verifier source remains loadable after syntax corrections', () => {
   assert.equal(typeof verifyMigrationSchema, 'function');
 });
+
+test('accepts PostgreSQL-wrapped CHECK constraint definitions', async () => {
+  const tables = { rows: [{ table_name: 'chattbm_auth_rate_limits', kind: 'r' }] };
+  const columns = { rows: [
+    {table_name:'chattbm_auth_rate_limits',column_name:'bucket_key',data_type:'text',not_null:true},
+    {table_name:'chattbm_auth_rate_limits',column_name:'window_started_at',data_type:'timestamp with time zone',not_null:true},
+    {table_name:'chattbm_auth_rate_limits',column_name:'request_count',data_type:'integer',not_null:true},
+    {table_name:'chattbm_auth_rate_limits',column_name:'expires_at',data_type:'timestamp with time zone',not_null:true},
+    {table_name:'chattbm_auth_rate_limits',column_name:'updated_at',data_type:'timestamp with time zone',not_null:true,default_expr:'now()'}
+  ]};
+  const constraints = { rows: [
+    {table_name:'chattbm_auth_rate_limits',definition:'PRIMARY KEY (bucket_key)'},
+    {table_name:'chattbm_auth_rate_limits',definition:'CHECK ((request_count >= 1))'}
+  ]};
+  const indexes = { rows: [
+    {table_name:'chattbm_auth_rate_limits',index_name:'chattbm_auth_rate_limits_expires_at_idx',definition:'CREATE INDEX chattbm_auth_rate_limits_expires_at_idx ON public.chattbm_auth_rate_limits USING btree (expires_at)',predicate:null,is_unique:false}
+  ]};
+  const client = mockClient([tables,columns,constraints,indexes]);
+  const result = await verifyMigrationSchema({client,schema:'public'});
+  const migration = result.migrations.find(item=>item.migrationId==='005_auth_rate_limits');
+  assert.equal(migration.status,STATUSES.COMPLETE);
+});
