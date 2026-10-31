@@ -63,9 +63,9 @@ test('never issues DDL, DML, ledger, or application-row queries', async () => {
   const client = mockClient();
   await verifyMigrationSchema({ client, schema: 'public' });
   const statements = client.calls.map(call => call.sql);
-  assert.ok(statements.every(sql => !/\\b(INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE)\\b/i.test(sql)));
+  assert.ok(statements.every(sql => !/\b(INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE)\b/i.test(sql)));
   assert.ok(statements.every(sql => !/chattbm_schema_migrations/i.test(sql)));
-  assert.ok(statements.every(sql => !/^SELECT \\*/i.test(sql)));
+  assert.ok(statements.every(sql => !/^SELECT \*/i.test(sql)));
 });
 
 test('uses a repeatable-read snapshot for consistent catalog inspection', async () => {
