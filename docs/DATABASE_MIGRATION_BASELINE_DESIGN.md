@@ -2,7 +2,7 @@
 
 **Status:** Approved design; implementation not yet authorized  
 **Scope:** Repository migration design and disposable-database verification only  
-**Related:** `database/Postgres.js`, `database/migrations/*.sql`, `docs/SHARED_AUTH_RATE_LIMIT_SCHEMA_PROCEDURE.md`, `docs/PLUGIN_DECISIONS.md`
+**Related:** `database/Postgres.js`, `database/migrations/*.sql`, `docs/SHARED_AUTH_RATE_LIMIT_SCHEMA_PROCEDURE.md`, `docs/PLUGIN_DECISIONS.md`, `docs/DATABASE_MIGRATION_MANIFEST_PROPOSAL.md`, `docs/DATABASE_MIGRATION_SCHEMA_VERIFICATION.md`, `docs/DATABASE_MIGRATION_LEDGER_CONTRACT.md`
 
 ## 1. Purpose
 
@@ -17,14 +17,7 @@ The reviewed repository has two schema mechanisms:
 - `database/Postgres.js` creates core tables during `initializeDatabase()`.
 - `database/migrations/` contains eight SQL files.
 
-The migration directory currently contains duplicate numeric prefixes:
-
-- `002_chat_history.sql`
-- `002_google_oauth_identities.sql`
-- `003_context_records.sql`
-- `003_google_oauth_states.sql`
-
-The SQL files use repeatable `IF NOT EXISTS` statements, but repeatability alone does not prove that a migration has been applied or that its resulting schema is correct.
+The migration directory contains duplicate numeric prefixes: two files each with prefixes 002 and 003. The SQL files use repeatable `IF NOT EXISTS` statements, but repeatability alone does not prove that a migration has been applied or that its resulting schema is correct.
 
 The read-only staging diagnostic observed:
 
@@ -33,7 +26,7 @@ The read-only staging diagnostic observed:
 - `chattbm_schema_migrations` does not exist.
 - No migration records were returned.
 
-Therefore migration 006 is **not verified as fully applied**. The presence of its user column is only partial schema evidence. A future baseline reconciliation must verify the token table, columns, constraints, and indexes before recording migration 006 as applied.
+Therefore migration 006 is **not verified as fully applied**. The presence of its user column is only partial schema evidence. A future baseline reconciliation must verify the token table, columns, constraints, and all three indexes before recording migration 006 as applied.
 
 ## 3. Design principles
 
@@ -48,11 +41,11 @@ Therefore migration 006 is **not verified as fully applied**. The presence of it
 9. Test all behavior against a disposable PostgreSQL database before staging approval.
 10. Keep staging and production writes behind separate, explicit approvals.
 
-## 4. Migration identity and ordering
+## 4. Migration identity and approved ordering
 
 The existing SQL filenames are historical artifacts and must not be silently renamed or rewritten as part of this design.
 
-Before a runner is implemented, introduce a reviewed, explicit migration manifest that lists every existing filename exactly once in a deterministic order. The manifest must resolve the duplicate 002 and 003 prefixes explicitly. The initial proposed ordering is:
+The user approved the following explicit historical order on 2026-10-31. The manifest must use these exact entries and order; numeric filename prefixes are not sufficient:
 
 1. `001_auth_accounts_sessions.sql`
 2. `002_chat_history.sql`
@@ -63,25 +56,24 @@ Before a runner is implemented, introduce a reviewed, explicit migration manifes
 7. `005_auth_rate_limits.sql`
 8. `006_email_verification_tokens.sql`
 
-This is a proposed deterministic ordering, not proof that every migration has been applied in every environment. The runner must use the manifest rather than relying on numeric-prefix sorting. New migrations must receive unique, monotonically increasing identifiers after the historical set has been reconciled.
+The proposed stable ID is each filename without `.sql`. The SQL dependency review found this order satisfies visible foreign-key prerequisites. It does not establish historical execution order in any deployed environment. See `DATABASE_MIGRATION_MANIFEST_PROPOSAL.md` for the complete mapping and manifest requirements.
 
-## 5. Migration ledger
+## 5. Migration ledger contract
 
-Proposed table: `chattbm_schema_migrations`.
+Proposed table: `chattbm_schema_migrations`. The detailed contract is in `DATABASE_MIGRATION_LEDGER_CONTRACT.md`.
 
-Minimum fields:
+The proposed record includes:
 
-| Field | Purpose |
-| --- | --- |
-| `migration_id` | Stable unique identity from the reviewed manifest |
-| `filename` | Exact historical SQL filename |
-| `checksum` | SHA-256 checksum of the exact migration file bytes |
-| `applied_at` | Timestamp recorded by PostgreSQL |
-| `execution_mode` | Distinguishes a verified baseline adoption from runner execution |
+- `migration_id`: stable unique manifest identity; primary key.
+- `filename`: exact relative SQL path; unique.
+- `checksum_sha256`: lowercase SHA-256 digest of exact committed SQL bytes.
+- `manifest_order`: unique positive integer matching the reviewed manifest.
+- `execution_mode`: `runner` or `baseline_adoption`.
+- `applied_at`: database-generated timestamp with time zone.
+- `runner_version`: optional runner version/commit; null for baseline adoption.
+- `evidence_reference` and `adopted_by`: required for baseline adoption.
 
-The implementation may add runner/version metadata if justified by tests. The ledger must have a primary key or unique constraint on `migration_id`, and must prevent duplicate filename registration.
-
-A checksum mismatch for an already-recorded migration is a hard failure. The runner must not silently update the checksum or re-run modified historical SQL.
+Checksum mismatch, unknown migration IDs, schema/ledger disagreement, and malformed metadata are hard failures. Baseline adoption and runner execution are distinct operations and require separate approvals. A baseline adoption records verified existing schema; it does not execute historical SQL.
 
 ## 6. Existing-database baseline reconciliation
 
@@ -89,19 +81,21 @@ A new database and an existing database require different paths.
 
 ### New database
 
-- Establish the required bootstrap prerequisites.
+- Establish and document the required bootstrap prerequisites.
 - Apply the reviewed migration manifest in order.
 - Record each successful migration in the ledger in the same transaction as its schema change, where transaction semantics permit.
-- Verify the final schema against expected objects.
+- Verify the final schema against the schema verification matrix.
+- Resolve the interaction between current `initializeDatabase()` bootstrap DDL and migration execution before implementation; do not assume both can be run in either order without tests.
 
 ### Existing database without a ledger
 
-- Inspect tables, columns, types, nullability, defaults, indexes, constraints, and relevant foreign keys.
-- Compare the observed schema with each migration's complete expected result.
-- Adopt a migration into the ledger only when all required schema objects for that migration are present and compatible.
+- Perform read-only inspection of tables, columns, types, nullability, defaults, indexes, constraints, and relevant foreign keys.
+- Compare the observed schema with each migration's complete expected result using `DATABASE_MIGRATION_SCHEMA_VERIFICATION.md`.
+- Adopt a migration into the ledger only when its verifier outcome is `COMPLETE` and a separate approval identifies the exact database and migration IDs.
 - Do not infer that a migration is complete from one matching table or column.
-- If a migration is partially present, record no successful application for it; stop and require a reviewed reconciliation plan.
+- If a migration is partial or conflicting, record no successful application for it; stop and require a reviewed reconciliation plan.
 - Do not drop, truncate, rewrite, or bulk-update existing application data during baseline adoption.
+- Read-only inspection must not create the ledger as a side effect.
 
 ### Specific migration 006 handling
 
@@ -110,9 +104,9 @@ The observed staging schema already has `chattbm_users.email_verified_at`, but t
 Accordingly:
 
 - Do not mark migration 006 as applied based only on the column.
-- Verify the token table and all three expected indexes plus column definitions and constraints.
-- If they remain absent, the migration remains pending.
-- Its `ADD COLUMN IF NOT EXISTS` statement should safely preserve the existing column when the reviewed migration is later run in a controlled, approved step.
+- Verify the token table, its expected columns and constraints, and all three expected indexes.
+- If any required object is absent or incompatible, migration 006 is not eligible for baseline adoption.
+- Its `ADD COLUMN IF NOT EXISTS` statement should preserve the existing column when the reviewed migration is later run in a controlled, approved step.
 
 ## 7. Bootstrap and runner boundary
 
@@ -122,12 +116,12 @@ The migration runner must not be enabled on production startup until:
 
 - the legacy bootstrap schema is inventoried;
 - all historical migrations have a verified baseline strategy;
-- duplicate numbering is resolved by the explicit manifest;
+- the approved explicit manifest is implemented and validated;
 - clean-database and existing-database paths pass disposable tests;
 - migration failure and restart behavior are verified;
 - backup and rollback procedures are reviewed.
 
-After those gates, a separate implementation decision may determine whether the runner is an explicit deployment command or a controlled startup phase. This design does not choose automatic production startup execution.
+A separate implementation decision must determine whether the runner is an explicit deployment command or a controlled startup phase. This design does not authorize automatic production startup execution.
 
 ## 8. Transaction, locking, and failure behavior
 
@@ -145,7 +139,7 @@ Any migration containing statements that cannot run inside a transaction must be
 
 ## 9. Disposable-database verification matrix
 
-All tests below must use a dedicated disposable PostgreSQL database with explicit safeguards. No shared or Render database may be used for destructive tests.
+All tests must use a dedicated disposable PostgreSQL database with explicit safeguards. No shared or Render database may be used for destructive tests.
 
 | Scenario | Required result |
 | --- | --- |
@@ -160,7 +154,7 @@ All tests below must use a dedicated disposable PostgreSQL database with explici
 | Restart after earlier successful migrations | Completed migrations remain recorded; runner resumes safely |
 | Existing user and conversation records | Counts and representative records remain unchanged |
 
-The tests must also verify expected column types/nullability, indexes, primary/foreign keys, and constraints—not only table existence.
+Tests must verify expected column types/nullability, defaults, indexes, primary/foreign keys, and check/unique constraints—not only table existence. Include the specific partial migration 006 fixture described in the schema verification document.
 
 ## 10. Backup and rollback requirements
 
@@ -177,13 +171,14 @@ Production requires a separate review and approval. A successful staging migrati
 ## 11. Implementation sequence and gates
 
 1. **Inventory:** Complete the schema-object inventory and migration dependency review.
-2. **Manifest:** Add and review the explicit historical migration manifest.
-3. **Ledger design:** Finalize ledger constraints, checksum encoding, and baseline-adoption representation.
-4. **Runner implementation:** Implement only after the manifest and ledger contract are approved.
-5. **Disposable verification:** Pass the full matrix in Section 9.
-6. **Documentation/checkpoint:** Record test evidence, backup/rollback procedure, and exact remaining risks.
-7. **Staging approval:** Request approval for a specific staging database operation.
-8. **Production approval:** Treat production as a separate release gate.
+2. **Manifest:** Review and finalize the approved explicit historical manifest, stable IDs, dependencies, and exact-byte checksums.
+3. **Schema verifier:** Implement and test the read-only schema verification matrix in a disposable database.
+4. **Ledger contract:** Finalize ledger constraints, checksum encoding, and baseline-adoption evidence.
+5. **Runner implementation:** Implement only after separate approval of the implementation scope.
+6. **Disposable verification:** Pass the full matrix in Section 9.
+7. **Documentation/checkpoint:** Record test evidence, backup/rollback procedure, and exact remaining risks.
+8. **Staging approval:** Request approval for a specific staging database operation.
+9. **Production approval:** Treat production as a separate release gate.
 
 ## 12. Explicitly out of scope
 
@@ -197,8 +192,8 @@ Production requires a separate review and approval. A successful staging migrati
 
 ## 13. Current decision
 
-**Approved:** Design the baseline-and-ledger approach and prepare for isolated implementation/testing.
+**Approved:** Documentation and design of the baseline-and-ledger approach, the explicit historical migration order, and the schema/ledger contracts.
 
-**Not approved:** Repository migration-runner implementation, Render database writes, staging rollout, production rollout, or PR #52 merge.
+**Not approved:** Runtime migration manifest, schema-checker implementation, migration-runner implementation, Render database writes, staging rollout, production rollout, or PR #52 merge.
 
-The next implementation proposal must be reviewed against this document before code or database changes are made.
+Any implementation must be separately proposed and approved before code or database changes are made.
