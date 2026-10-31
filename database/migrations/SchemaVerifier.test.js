@@ -67,3 +67,9 @@ test('never issues DDL, DML, ledger, or application-row queries', async () => {
   assert.ok(statements.every(sql => !/chattbm_schema_migrations/i.test(sql)));
   assert.ok(statements.every(sql => !/^SELECT \\*/i.test(sql)));
 });
+
+test('uses a repeatable-read snapshot for consistent catalog inspection', async () => {
+  const client = mockClient();
+  await verifyMigrationSchema({ client, schema: 'public' });
+  assert.equal(client.calls[0].sql, 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+});
