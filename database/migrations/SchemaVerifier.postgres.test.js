@@ -51,3 +51,54 @@ test('verifies all reviewed migrations against disposable PostgreSQL 18 schema',
     await client.end();
   }
 });
+
+
+test('classifies absent, partial, and conflicting schemas in disposable PostgreSQL 18', async () => {
+  const connectionString = process.env.SCHEMA_VERIFIER_DATABASE_URL;
+  assert.ok(connectionString, 'SCHEMA_VERIFIER_DATABASE_URL must point to the disposable CI PostgreSQL service');
+
+  const client = new Client({ connectionString });
+  const schemas = [
+    'chattbm_schema_verifier_empty',
+    'chattbm_schema_verifier_partial',
+    'chattbm_schema_verifier_conflict'
+  ];
+  const created = [];
+  try {
+    await client.connect();
+
+    for (const schemaName of schemas) {
+      await client.query(`CREATE SCHEMA ${schemaName}`);
+      created.push(schemaName);
+    }
+
+    const empty = await verifyMigrationSchema({ client, schema: schemas[0] });
+    const emptyById = new Map(empty.migrations.map(item => [item.migrationId, item]));
+    assert.equal(emptyById.get('001_auth_accounts_sessions').status, STATUSES.ABSENT);
+    assert.equal(emptyById.get('005_auth_rate_limits').status, STATUSES.ABSENT);
+    assert.equal(emptyById.get('002_chat_history').status, STATUSES.BLOCKED);
+
+    await client.query(`CREATE TABLE ${schemas[1]}.chattbm_users (id text PRIMARY KEY, email_verified_at timestamptz)`);
+    const partial = await verifyMigrationSchema({ client, schema: schemas[1] });
+    const emailVerification = partial.migrations.find(item => item.migrationId === '006_email_verification_tokens');
+    assert.equal(emailVerification.status, STATUSES.PARTIAL_OR_CONFLICTING);
+    assert.ok(emailVerification.reasons.includes('EMAIL_VERIFICATION_COLUMN_PRESENT_BUT_TOKEN_TABLE_ABSENT'));
+
+    await client.query(`CREATE TABLE ${schemas[2]}.chattbm_auth_rate_limits (
+      bucket_key text PRIMARY KEY,
+      window_started_at timestamptz NOT NULL,
+      request_count text NOT NULL,
+      expires_at timestamptz NOT NULL,
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`);
+    const conflict = await verifyMigrationSchema({ client, schema: schemas[2] });
+    const rateLimits = conflict.migrations.find(item => item.migrationId === '005_auth_rate_limits');
+    assert.equal(rateLimits.status, STATUSES.PARTIAL_OR_CONFLICTING);
+    assert.ok(rateLimits.objects.some(item => item.name === 'chattbm_auth_rate_limits' && item.status === 'CONFLICTING'));
+  } finally {
+    for (const schemaName of created.reverse()) {
+      await client.query(`DROP SCHEMA IF EXISTS ${schemaName} CASCADE`);
+    }
+    await client.end();
+  }
+});
