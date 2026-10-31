@@ -69,10 +69,10 @@ function migrationResult(spec, relations, columns, constraints, indexes) {
   const [migrationId, tables, expectedIndexes] = spec;
   const names = Object.keys(tables);
   const present = names.filter(name => relations.has(name));
-  if (names.some(name => name !== 'chattbm_users') && !relations.has('chattbm_users')) {
+  if (migrationId !== '001_auth_accounts_sessions' && names.some(name => name !== 'chattbm_users') && !relations.has('chattbm_users')) {
     return {migrationId,status:STATUSES.BLOCKED,reasons:['PREREQUISITE_USERS_TABLE_MISSING'],objects:[]};
   }
-  if (!present.length) return {migrationId,status:STATUSES.ABSENT,reasons:['MIGRATION_OBJECTS_ABSENT'],objects:names.map(name=>({name,status:'MISSING'}))};
+  if (!present.length) {\n    if (migrationId === '006_email_verification_tokens' && columns.some(row => row.table_name === 'chattbm_users' && row.column_name === 'email_verified_at')) return {migrationId,status:STATUSES.PARTIAL_OR_CONFLICTING,reasons:['EMAIL_VERIFICATION_COLUMN_PRESENT_BUT_TOKEN_TABLE_ABSENT'],objects:names.map(name=>({name,status:'MISSING'}))};\n    return {migrationId,status:STATUSES.ABSENT,reasons:['MIGRATION_OBJECTS_ABSENT'],objects:names.map(name=>({name,status:'MISSING'}))};\n  }
 
   let conflict = false;
   const objects = [];
@@ -95,7 +95,7 @@ function migrationResult(spec, relations, columns, constraints, indexes) {
     for (const definition of expected.constraints) {
       const target = norm(definition);
       const matched = actualDefs.some(actual=> target.startsWith('foreign key')
-        ? actual.includes('foreign key') && actual.includes('references chattbm_users') && actual.includes('on delete cascade') && actual.includes(target.match(/\\(([^)]+)\\)/)?.[1] || '')
+        ? actual.includes('foreign key') && actual.includes('references chattbm_users') && actual.includes('on delete cascade') && actual.includes(target.match(/\(([^)]+)\)/)?.[1] || '')
         : actual === target);
       if (!matched) reasons.push('CONSTRAINT_MISSING_OR_MISMATCHED');
     }
@@ -107,7 +107,7 @@ function migrationResult(spec, relations, columns, constraints, indexes) {
     if (!actual) { conflict=true; objects.push({name,status:'MISSING',reasons:['INDEX_MISSING']}); continue; }
     const def = norm(actual.definition);
     const keysMatch = def.includes(norm(keyText));
-    const predicateMatch = predicate ? norm(actual.predicate)===norm(predicate) : !actual.predicate;
+    const predicateMatch = predicate ? norm(actual.predicate).replace(/[()]/g,'')===norm(predicate).replace(/[()]/g,'') : !actual.predicate;
     if (!keysMatch || !predicateMatch) { conflict=true; objects.push({name,status:'CONFLICTING',reasons:['INDEX_DEFINITION_MISMATCH']}); }
     else objects.push({name,status:'COMPATIBLE',reasons:[]});
   }
