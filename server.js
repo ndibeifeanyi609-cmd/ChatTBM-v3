@@ -31,6 +31,7 @@ const googleOAuthRoutes = require("./auth/googleOAuthRoutes");
 const conversationHistoryRoutes = require("./routes/conversationHistoryRoutes").router;
 const { requireAuth } = require("./auth/requireAuth");
 const { isTrustedMutationRequest } = require("./auth/requestOrigin");
+const { createRateLimiter } = require("./auth/rateLimit");
 const app = express();
 // Render runs behind one reverse proxy; preserve client IPs for rate limiting.
 app.set("trust proxy", 1);
@@ -186,7 +187,8 @@ app.get(
 
 // TEMPORARY STAGING-ONLY READ-ONLY SCHEMA DIAGNOSTIC.
 // Disabled unless STAGING_SCHEMA_DIAGNOSTIC_TOKEN is configured.
-app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
+const stagingDiagnosticRateLimit = createRateLimiter({ max: 5 });
+app.get("/api/internal/staging-schema-diagnostic", stagingDiagnosticRateLimit, async (req, res) => {
     const expectedToken = process.env.STAGING_SCHEMA_DIAGNOSTIC_TOKEN || "";
     const authorization = req.get("authorization") || "";
     const suppliedToken = authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : "";
