@@ -5,8 +5,10 @@ on:
     branches: [main]
     paths:
       - 'auth/EmailVerificationService.js'
+      - 'database/migrations/005_auth_rate_limits.sql'
       - 'database/migrations/006_email_verification_tokens.sql'
       - 'tests/emailVerificationPostgres.integration.test.js'
+      - 'tests/sharedAuthRateLimit.integration.test.js'
       - '.github/workflows/email-verification-postgres-tests.yml'
   workflow_dispatch:
 
@@ -40,4 +42,4 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - run: node --test tests/emailVerificationPostgres.integration.test.js
+      - run: node --test tests/sharedAuthRateLimit.integration.test.js tests/emailVerificationPostgres.integration.test.js
