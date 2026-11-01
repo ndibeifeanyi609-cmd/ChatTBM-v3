@@ -1,0 +1,46 @@
+name: Read-only staging database connection check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  connection-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Verify isolated staging connection (read only)
+        env:
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          node -e '
+            const { Client } = require("pg");
+            (async () => {
+              const value = process.env.STAGING_DATABASE_URL;
+              if (!value) throw new Error("STAGING_DATABASE_URL secret is missing");
+              const u = new URL(value);
+              if (decodeURIComponent(u.pathname.slice(1)) !== "chattbm_staging_isolated") throw new Error("Refusing unexpected database name");
+              if (!u.hostname.endsWith(".ohio-postgres.render.com")) throw new Error("Refusing unexpected database host");
+              const client = new Client({
+                connectionString: value,
+                ssl: { rejectUnauthorized: false, servername: u.hostname },
+                connectionTimeoutMillis: 10000
+              });
+              try {
+                await client.connect();
+                const result = await client.query("SELECT current_database() AS db");
+                if (result.rows[0].db !== "chattbm_staging_isolated") throw new Error("Database identity mismatch");
+                console.log("Read-only connection verified for isolated staging database.");
+              } finally {
+                await client.end();
+              }
+            })().catch(e => { console.error("Connection check failed:", e.message); process.exit(1); });
+          '
