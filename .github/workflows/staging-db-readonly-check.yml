@@ -1,0 +1,56 @@
+name: Read-only isolated staging database inspection
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Inspect isolated staging database (read-only)
+        env:
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          PGSSLMODE: require
+          PGCONNECT_TIMEOUT: "15"
+        run: |
+          set -euo pipefail
+          test -n "$STAGING_DATABASE_URL"
+          psql "$STAGING_DATABASE_URL" -X -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN READ ONLY;
+          SELECT current_database() AS database_name,
+                 current_user AS database_user,
+                 current_setting('transaction_read_only') AS read_only;
+
+          SELECT table_name
+          FROM information_schema.tables
+          WHERE table_schema = 'public'
+            AND table_name IN (
+              'chattbm_users',
+              'chattbm_auth_rate_limits',
+              'chattbm_email_verification_tokens'
+            )
+          ORDER BY table_name;
+
+          SELECT table_name, column_name, data_type, is_nullable
+          FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND (
+              (table_name = 'chattbm_users' AND column_name = 'email_verified_at')
+              OR table_name IN (
+                'chattbm_auth_rate_limits',
+                'chattbm_email_verification_tokens'
+              )
+            )
+          ORDER BY table_name, ordinal_position;
+
+          ROLLBACK;
+          SQL
