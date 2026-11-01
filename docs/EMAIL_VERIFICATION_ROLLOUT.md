@@ -133,33 +133,65 @@ This is a procedure proposal, not permission to run it. Use it first in a newly
 isolated staging database with no customer data. Do not use either existing
 Render database as a test target.
 
+### Migration order and purpose
+
+Apply only these two reviewed files, in this order, to the isolated staging
+database:
+
+1. `005_auth_rate_limits.sql` creates the shared authentication rate-limit
+   bucket table and expiry index. It must exist before enabling
+   `AUTH_SHARED_RATE_LIMIT_ENABLED=true`.
+2. `006_email_verification_tokens.sql` adds the nullable
+   `chattbm_users.email_verified_at` column if absent, creates the
+   single-use email-verification token table, and creates its indexes.
+
+The files are additive and use `IF NOT EXISTS` for their schema objects, but
+that does not replace target verification, backups, or review. Neither file
+creates or records a migration-history ledger. Do not infer that a file has
+been applied merely because an object exists; inspect every expected object
+and record the approved manual application outside the database. Do not run
+migrations 001–004 or batch all numbered files: bootstrap already creates
+several overlapping objects and migration prefixes are duplicated.
+
 ### Preflight
 
 1. Confirm the target service and database mapping through dashboard metadata,
    without copying connection strings or credentials into chat, logs, or source.
-2. Confirm the target database is isolated, take a provider-supported backup or
-   snapshot, and record who approved the change.
-3. Confirm the target schema is the expected legacy schema and inspect whether
-   `chattbm_email_verification_tokens` already exists. Stop if the target or
-   schema is unexpected.
-4. Review `database/migrations/006_email_verification_tokens.sql` and test it
-   against the same PostgreSQL major version in a disposable database.
+2. Confirm the target database is newly isolated and contains no customer data.
+   Take a provider-supported backup or snapshot and record who approved the change.
+3. Inspect the schema without selecting account or email data. Check for the
+   expected legacy `chattbm_users` table and note whether each migration's
+   target objects already exist. Stop if the target or schema is unexpected.
+4. Review both SQL files and test both against the same PostgreSQL major version
+   in a disposable database. Confirm repeat application succeeds in that
+   disposable database.
 5. Use an authorized database console or secret-safe migration runner to apply
-   only migration `006`. Do not paste database credentials into commands,
-   source control, or chat. Do not run all numbered SQL files as a batch.
+   `005_auth_rate_limits.sql` first, then `006_email_verification_tokens.sql`
+   as separate, individually reviewed operations. Do not paste database
+   credentials into commands, source control, or chat. Do not run all numbered
+   SQL files as a batch. Stop and investigate if either operation reports an
+   error; do not blindly retry.
 
 ### Post-application verification
 
-1. Confirm `chattbm_users.email_verified_at` exists and the
-   `chattbm_email_verification_tokens` table, foreign key, unique token-hash
-   constraint, and expected indexes exist.
-2. Confirm existing user rows and account sign-in behavior were not changed.
+1. For migration 005, confirm `chattbm_auth_rate_limits` has
+   `bucket_key`, `window_started_at`, `request_count`, `expires_at`, and
+   `updated_at`, plus the `chattbm_auth_rate_limits_expires_at_idx` index.
+2. For migration 006, confirm `chattbm_users.email_verified_at` exists and
+   `chattbm_email_verification_tokens` has its expected columns, foreign key,
+   unique token-hash constraint, and three expected indexes.
+3. Confirm existing user rows and account sign-in behavior were not changed.
    Do not select or export user email addresses for this check.
-3. Run the application and email-verification tests against staging only, then
-   test email delivery with a controlled mailbox after the feature branch has
-   been separately approved for staging deployment.
-4. Record the result and retain the backup/snapshot reference. Stop on any
-   mismatch; do not improvise schema edits in the live database.
+4. Only after 005 is verified, configure the staging HMAC secret and enable
+   shared rate limiting. Confirm storage works and failure remains fail-closed.
+   Only after 006 is verified and the feature branch is separately approved
+   for staging deployment, run email-verification route tests and test delivery
+   with a controlled mailbox.
+5. Record each migration's filename, checksum, target environment, application
+   time, operator, approval, verification outcome, and backup reference in the
+   team's deployment record. This record is operational evidence, not a
+   database migration ledger.
+6. Stop on any mismatch; do not improvise schema edits in the live database.
 
 ### Rollback and recovery
 
