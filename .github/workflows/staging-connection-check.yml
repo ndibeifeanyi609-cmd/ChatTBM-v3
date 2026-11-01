@@ -31,7 +31,7 @@ jobs:
               if (!u.hostname.endsWith(".ohio-postgres.render.com")) throw new Error("Refusing unexpected database host");
               const client = new Client({
                 connectionString: value,
-                ssl: { rejectUnauthorized: false, servername: u.hostname },
+                ssl: { rejectUnauthorized: true, servername: u.hostname },
                 connectionTimeoutMillis: 10000
               });
               try {
