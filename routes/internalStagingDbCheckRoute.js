@@ -31,10 +31,16 @@ router.get('/staging-db-check', async (req, res) => {
     }
 
     const databaseName = decodeURIComponent(parsed.pathname.slice(1));
-    const allowedHost = 'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com';
-    if (databaseName !== 'chattbm_staging_isolated' ||
-        parsed.hostname !== allowedHost) {
-        return res.status(503).json({ success: false, error: 'target_validation_failed' });
+    if (databaseName !== 'chattbm_staging_isolated') {
+        return res.status(503).json({ success: false, error: 'database_target_mismatch' });
+    }
+
+    const allowedHosts = new Set([
+        'dpg-dbicflmc6qcc73d97u60-a',
+        'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com'
+    ]);
+    if (!allowedHosts.has(parsed.hostname)) {
+        return res.status(503).json({ success: false, error: 'host_target_mismatch' });
     }
 
     const client = new Client({
