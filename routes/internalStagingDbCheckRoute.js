@@ -30,9 +30,13 @@ router.get('/staging-db-check', async (req, res) => {
         return res.status(503).json({ success: false, error: 'check_not_configured' });
     }
 
-    const databaseName = decodeURIComponent(parsed.pathname.replace(/^\//, ''));
+    const databaseName = decodeURIComponent(parsed.pathname.replace(/^\\//, ''));
+    const allowedHosts = new Set([
+        'dpg-dbicflmc6qcc73d97u60-a',
+        'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com'
+    ]);
     if (databaseName !== 'chattbm_staging_isolated' ||
-        !parsed.hostname.endsWith('.ohio-postgres.render.com')) {
+        !allowedHosts.has(parsed.hostname)) {
         return res.status(503).json({ success: false, error: 'target_validation_failed' });
     }
 
