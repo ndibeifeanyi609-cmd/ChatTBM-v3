@@ -35,15 +35,17 @@ Before any schema write, the runner:
 3. Connects using the configured `DATABASE_URL` without printing it.
 4. Verifies `current_database()` matches `chattbm_staging_isolated`.
 5. Acquires a PostgreSQL advisory lock.
-6. Inspects whether `chattbm_users` exists, whether
-   `email_verified_at` exists, whether
+6. Inspects whether `chattbm_users` exists, the existence,
+   data type, and nullability of `email_verified_at`, whether
    `chattbm_email_verification_tokens` exists, and whether the migration
    ledger exists.
 
-The runner stops if the required users table is missing. It also stops for
-manual reconciliation when email-verification schema objects already exist
-but migration 006 does not have a matching recorded checksum. It must not
-silently adopt unknown schema state as a successfully applied migration.
+The runner stops if the required users table is missing. If the verification
+column already exists without a ledger record, it proceeds only when the column
+is nullable `TIMESTAMPTZ`, matching migration 006. A pre-existing token table
+without a matching migration record, or a column with a different type or
+nullability, requires manual reconciliation. It must not silently adopt unknown
+schema state as a successfully applied migration.
 
 If a matching ledger record exists, the runner compares the stored SHA-256
 checksum with the selected SQL. A mismatch stops execution. A matching record
@@ -64,7 +66,9 @@ The isolated unit tests cover:
 - Rejection of database targets other than isolated staging
 - Rejection when the connected database identity does not match
 - Rejection when the required users table is absent
-- Rejection when verification schema exists without a matching migration record
+- Rejection when a token table exists without a matching migration record
+- Acceptance of an existing nullable `TIMESTAMPTZ` verification column
+- Rejection of an existing verification column with the wrong type or nullability
 - Preflight occurring before ledger creation
 - Transactional migration and checksum recording
 - Checksum mismatch rejection
