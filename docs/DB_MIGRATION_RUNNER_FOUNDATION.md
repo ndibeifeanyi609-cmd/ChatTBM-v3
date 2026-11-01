@@ -1,125 +1,57 @@
 # REG-097 — Database Migration Runner Foundation
 
-Status: draft implementation and review documentation. This runner is not approved
-for production use and does not run automatically during application startup.
+Status: draft implementation for review. The runner is not invoked during application startup and is not approved for production use.
 
-## Scope of this foundation
+## Scope
 
-The initial runner is deliberately restricted to:
+The initial runner is deliberately restricted to the isolated staging database `chattbm_staging_isolated` and two exact migration filenames:
 
-- Database name: `chattbm_staging_isolated`
-- Migration file: `006_email_verification_tokens.sql`
-- Explicit command confirmation matching the selected database and filename
-- A PostgreSQL migration ledger named `chattbm_schema_migrations`
+1. `005_auth_rate_limits.sql`
+2. `006_email_verification_tokens.sql`
 
-This is not yet a general-purpose migration framework. It does not discover or
-apply every SQL file in `database/migrations`.
+It does not discover or replay every numbered SQL file. Duplicate 002 and 003 prefixes and existing bootstrap-created tables make blanket numeric replay unsafe.
 
-## Why migrations are not batch-applied
+## Required order and ledger
 
-The repository contains duplicate numeric migration prefixes, including two
-`002` files and two `003` files. The existing application bootstrap also
-creates some core tables independently of the numbered SQL files. Therefore,
-sorting by numeric prefix and replaying every file cannot be assumed safe.
+The runner uses `chattbm_schema_migrations`, keyed by the complete filename and storing a SHA-256 checksum.
 
-Any future general migration system must define stable ordering and unique
-migration identity (for example, the complete filename), document dependencies,
-and reconcile existing deployed schemas before adopting a migration ledger.
+- Migration 005 creates the shared authentication rate-limit table and expiry index.
+- Migration 006 is refused unless 005 has a matching ledger record, its checksum matches the repository's 005 SQL, and the rate-limit table exists.
+- Each migration requires an explicit confirmation string matching the exact target and filename.
+- A previously recorded migration is accepted only when its checksum matches and its expected table is still present.
+- A mismatch, unexpected pre-existing object, missing prerequisite, or incompatible verification timestamp stops execution for manual reconciliation.
 
-## Runner safety behavior
-
-Before any schema write, the runner:
-
-1. Validates the exact allowed migration filename and target database name.
-2. Requires the exact explicit confirmation string.
-3. Connects using the configured `DATABASE_URL` without printing it.
-4. Verifies `current_database()` matches `chattbm_staging_isolated`.
-5. Acquires a PostgreSQL advisory lock.
-6. Inspects whether `chattbm_users` exists, the existence,
-   data type, and nullability of `email_verified_at`, whether
-   `chattbm_email_verification_tokens` exists, and whether the migration
-   ledger exists.
-
-The runner stops if the required users table is missing. If the verification
-column already exists without a ledger record, it proceeds only when the column
-is nullable `TIMESTAMPTZ`, matching migration 006. A pre-existing token table
-without a matching migration record, or a column with a different type or
-nullability, requires manual reconciliation. It must not silently adopt unknown
-schema state as a successfully applied migration.
-
-If a matching ledger record exists, the runner compares the stored SHA-256
-checksum with the selected SQL. A mismatch stops execution. A matching record
-returns `already-applied` without rerunning the SQL.
-
-For a clean eligible schema, the runner creates the ledger (if needed), executes
-the selected SQL, and inserts the filename/checksum record in one transaction.
-The advisory lock is released in a `finally` path. A failure rolls back the
-transaction.
-
-The runner is not called by `server.js` or normal application startup.
+Before schema writes, the runner verifies the connected database name, obtains an advisory lock, and performs preflight. Ledger creation, selected SQL, and ledger insertion occur in one transaction. A failure rolls back. The runner does not print the database URL and is not called from normal server startup.
 
 ## Test coverage
 
-The isolated unit tests cover:
+Unit tests cover target and confirmation rejection, migration allowlisting, transactional recording of 005, refusal to run 006 before 005, missing or mismatched 005 ledger/table state, checksum mismatch, existing token-table reconciliation, users-table prerequisite, timestamp type/nullability checks, and already-applied recognition.
 
-- Required CLI arguments and exact migration allowlist
-- Rejection of database targets other than isolated staging
-- Rejection when the connected database identity does not match
-- Rejection when the required users table is absent
-- Rejection when a token table exists without a matching migration record
-- Acceptance of an existing nullable `TIMESTAMPTZ` verification column
-- Rejection of an existing verification column with the wrong type or nullability
-- Preflight occurring before ledger creation
-- Transactional migration and checksum recording
-- Checksum mismatch rejection
-- Recognition of an already-recorded matching migration
+CI tests use a simulated client. Passing them verifies runner logic, not the live Render database or provider connectivity.
 
-GitHub Actions runs `npm run test:db-migrate` on the migration-runner workflow.
-Passing these tests verifies runner behavior against the test doubles; it does
-not verify the live Render database's current schema.
+## Required staging procedure — not authorized or executed
 
-## Required staging procedure — not yet authorized or executed
+Before applying either migration:
 
-Before applying migration 006 to any database:
+1. Confirm the staging Render service points to `chattbm_staging_isolated` using dashboard metadata; do not expose credentials or connection strings.
+2. Obtain a successful read-only schema inventory of that exact database, including users table, rate-limit table, verification column, token table, indexes, and migration ledger. Stop for manual reconciliation if objects exist without matching records.
+3. Confirm the isolated database has no customer data and confirm the provider-supported backup.
+4. Review the exact runner commit and SQL files.
+5. Obtain separate explicit approval for each schema-write operation.
+6. Apply 005 first; verify its table, columns, expiry index, and checksum ledger record.
+7. Only then apply 006; verify the nullable timestamp column, token table, foreign key, unique token hash, expected indexes, and checksum ledger record.
+8. Record the outcome and backup reference. Stop on any unexpected result; do not retry blindly.
 
-1. Confirm the Render staging service is mapped to the isolated staging database
-   using dashboard metadata, without exposing credentials or connection strings.
-2. Obtain a read-only schema inventory of that exact database. Confirm the
-   users table, verification column, token table, indexes, and migration ledger
-   state. If any verification objects exist without a matching migration record,
-   stop for manual reconciliation.
-3. Confirm the isolated database contains no customer data and take a
-   provider-supported backup or snapshot.
-4. Review the exact migration SQL and runner commit. Confirm the database name
-   and the expected migration filename.
-5. Obtain explicit approval for the staging schema write before invoking the
-   runner with its required exact confirmation argument.
-6. After application, verify the column, token table, foreign key, unique
-   token-hash constraint, expected indexes, and ledger checksum using read-only
-   queries. Do not read or export user email addresses.
-7. Record the outcome and backup reference. Stop on any unexpected result;
-   do not retry blindly.
+The isolated staging database schema has not yet been inspected successfully. The earlier read-only Render connector attempt was blocked by the database IP allowlist. Therefore, neither migration may be invoked yet.
 
-The isolated staging database's schema has not yet been inspected successfully.
-An earlier read-only attempt was blocked by the Render database IP allowlist.
-Consequently, the runner must not be invoked yet.
+## Protections
 
-## Production and existing database protections
-
-- Do not point this initial runner at production or either pre-existing Render
-  database. Its hard-coded database allowlist is intentionally limited to the
-  isolated staging database.
-- Do not change production deployment settings, staging branch configuration,
-  or existing database connection settings as part of this foundation.
-- Do not add automatic migrations to application startup.
-- Do not enforce email verification at login as part of REG-097.
-- Do not automatically drop the nullable verification column, token table, or
-  migration ledger during rollback. Prefer application rollback while preserving
-  additive schema; destructive rollback requires a separate review, verified
-  backup, and explicit approval.
+- The runner is hard-coded to the isolated staging database only.
+- Do not use it against production or either existing Render database.
+- Do not change production deployment settings, staging branch configuration, or database allowlists as part of this work.
+- Do not add automatic migrations to application startup or enforce email verification at login.
+- Rollback should prefer application rollback while preserving additive schema. Destructive schema rollback requires separate review, verified backup, and explicit approval.
 
 ## Current decision
 
-PR #53 remains Draft pending final code/documentation review and a successful
-CI run on the latest commit. PR #52 remains separate and unmerged. No database
-migration has been run by this work.
+PR #53 remains Draft pending code review and successful CI on the latest commit. PR #52 remains separate and unmerged. No database migration has been executed.
