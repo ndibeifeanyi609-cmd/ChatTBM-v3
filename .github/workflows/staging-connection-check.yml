@@ -32,7 +32,7 @@ jobs:
             });
             const body = await response.json().catch(() => ({}));
             if (!response.ok || body.success !== true || body.database !== "chattbm_staging_isolated" || body.readOnly !== true) {
-              throw new Error("Protected staging database check failed (HTTP " + response.status + ")");
+              throw new Error("Protected staging database check failed (HTTP " + response.status + ", code " + (body.error || "unknown") + ")");
             }
             console.log("Read-only connection verified for isolated staging database.");
           '
