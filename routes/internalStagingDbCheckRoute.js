@@ -45,7 +45,10 @@ router.get('/staging-db-check', async (req, res) => {
 
     const client = new Client({
         connectionString,
-        ssl: { rejectUnauthorized: true, servername: parsed.hostname },
+        ssl: {
+            rejectUnauthorized: true,
+            servername: 'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com'
+        },
         connectionTimeoutMillis: 8000,
         statement_timeout: 5000
     });
