@@ -1,6 +1,8 @@
 name: Read-only staging database connection check
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
