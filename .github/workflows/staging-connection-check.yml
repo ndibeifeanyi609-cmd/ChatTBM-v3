@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Verify isolated staging connection through protected Render endpoint
+      - name: Verify isolated staging connection and report schema (read only)
         env:
           STAGING_READONLY_CHECK_TOKEN: ${{ secrets.STAGING_READONLY_CHECK_TOKEN }}
         run: |
@@ -31,8 +31,9 @@ jobs:
               signal: AbortSignal.timeout(20000)
             });
             const body = await response.json().catch(() => ({}));
-            if (!response.ok || body.success !== true || body.database !== "chattbm_staging_isolated" || body.readOnly !== true) {
+            if (!response.ok || body.success !== true || body.database !== "chattbm_staging_isolated" || body.readOnly !== true || !body.schema || !Array.isArray(body.schema.tables) || !Array.isArray(body.schema.columns)) {
               throw new Error("Protected staging database check failed (HTTP " + response.status + ", code " + (body.error || "unknown") + ", diagnostic " + (body.diagnostic || "none") + ", category " + (body.category || "none") + ")");
             }
             console.log("Read-only connection verified for isolated staging database.");
+            console.log("Read-only schema inventory: " + JSON.stringify(body.schema));
           '
