@@ -151,7 +151,9 @@ creates or records a migration-history ledger. Do not infer that a file has
 been applied merely because an object exists; inspect every expected object
 and record the approved manual application outside the database. Do not run
 migrations 001–004 or batch all numbered files: bootstrap already creates
-several overlapping objects and migration prefixes are duplicated.
+several overlapping objects. Google OAuth migrations were assigned unique
+sequence numbers 007 and 008 to remove the duplicate 002/003 prefixes; this
+renumbering does not establish that any migration was applied.
 
 ### Preflight
 
@@ -208,3 +210,17 @@ several overlapping objects and migration prefixes are duplicated.
   provider's documented recovery procedure. Do not retry blindly.
 - No step in this runbook authorizes changing either existing Render database,
   changing a service's deployment branch, or applying the migration to production.
+
+
+## Migration filename sequence correction (2026-11-01)
+
+The duplicate migration prefixes were corrected on this feature branch:
+- `002_google_oauth_identities.sql` is now
+  `007_google_oauth_identities.sql`.
+- `003_google_oauth_states.sql` is now
+  `008_google_oauth_states.sql`.
+
+The SQL contents were preserved. This is a repository filename correction only:
+it does not apply, record, or infer execution of either migration in any database.
+No general migration runner or migration-history ledger is introduced by this
+change. The approved staging/production schema procedure remains unchanged.
