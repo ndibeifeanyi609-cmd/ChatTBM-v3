@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'auth/EmailVerificationService.js'
+      - 'auth/PostgresRateLimitStore.js'
+      - 'auth/sharedRateLimit.js'
+      - 'auth/createAuthLimiters.js'
       - 'database/migrations/005_auth_rate_limits.sql'
       - 'database/migrations/006_email_verification_tokens.sql'
       - 'tests/emailVerificationPostgres.integration.test.js'
