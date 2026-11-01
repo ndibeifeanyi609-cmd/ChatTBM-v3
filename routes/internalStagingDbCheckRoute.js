@@ -70,13 +70,22 @@ router.get('/staging-db-check', async (req, res) => {
         });
     } catch (error) {
         const code = typeof error?.code === 'string' &&
-            /^[A-Z0-9_]{1,24}$/.test(error.code)
+            /^[A-Z0-9_]{1,40}$/.test(error.code)
             ? error.code
-            : 'UNCLASSIFIED';
+            : 'NO_ERROR_CODE';
+        const message = String(error?.message || '').toLowerCase();
+        let category = 'other';
+        if (/certificate|cert|hostname|altname|self.signed|issuer/.test(message)) category = 'tls';
+        else if (/password|authentication|pg_hba/.test(message)) category = 'authentication';
+        else if (/timeout|timed out/.test(message)) category = 'timeout';
+        else if (/enotfound|eai_again|getaddrinfo|dns/.test(message)) category = 'dns';
+        else if (/refused|econnrefused/.test(message)) category = 'refused';
+        else if (/socket|eof|terminated|hang up|reset/.test(message)) category = 'socket';
         return res.status(503).json({
             success: false,
             error: 'connection_check_failed',
-            diagnostic: code
+            diagnostic: code,
+            category
         });
     } finally {
         await client.end().catch(() => {});
