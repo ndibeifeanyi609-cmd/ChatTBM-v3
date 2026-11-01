@@ -185,10 +185,9 @@ app.get(
 );
 
 // TEMPORARY STAGING-ONLY READ-ONLY SCHEMA DIAGNOSTIC.
-// Fail closed unless this is the known Render staging service.
-const STAGING_DIAGNOSTIC_SERVICE_ID = "srv-dbd5pddg1s2s73dsm6k0";
+const { isStagingDiagnosticService } = require("./auth/stagingDiagnosticGuard");
 app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
-    if (process.env.RENDER_SERVICE_ID !== STAGING_DIAGNOSTIC_SERVICE_ID) {
+    if (!isStagingDiagnosticService()) {
         return res.status(404).json({ success: false, error: "Not found." });
     }
 
