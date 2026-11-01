@@ -58,6 +58,18 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
                       AND table_name = 'chattbm_users'
                       AND column_name = 'email_verified_at'
                 ) AS email_verified_at_exists,
+                (
+                    SELECT data_type FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'chattbm_users'
+                      AND column_name = 'email_verified_at'
+                ) AS email_verified_at_data_type,
+                (
+                    SELECT is_nullable FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'chattbm_users'
+                      AND column_name = 'email_verified_at'
+                ) AS email_verified_at_is_nullable,
                 to_regclass('public.chattbm_email_verification_tokens') IS NOT NULL
                     AS verification_tokens_table_exists,
                 to_regclass('public.chattbm_schema_migrations') IS NOT NULL AS migration_ledger_exists
@@ -81,9 +93,14 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
             }
         }
 
-        if (!migrationRecorded &&
-            (state.email_verified_at_exists || state.verification_tokens_table_exists)) {
-            throw new Error('Refusing migration: email-verification schema exists without a matching migration record; manual reconciliation is required.');
+        if (!migrationRecorded && state.verification_tokens_table_exists) {
+            throw new Error('Refusing migration: verification-token table exists without a matching migration record; manual reconciliation is required.');
+        }
+
+        if (!migrationRecorded && state.email_verified_at_exists &&
+            (state.email_verified_at_data_type !== 'timestamp with time zone' ||
+             state.email_verified_at_is_nullable !== 'YES')) {
+            throw new Error('Refusing migration: existing email_verified_at column must be nullable TIMESTAMPTZ; manual reconciliation is required.');
         }
 
         await client.query('BEGIN');
