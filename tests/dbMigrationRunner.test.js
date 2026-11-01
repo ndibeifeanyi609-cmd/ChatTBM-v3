@@ -99,12 +99,12 @@ test('migration refuses to proceed when the required users table is absent', asy
     assert.equal(client.calls.some(call => call.sql.includes('CREATE TABLE chattbm_schema_migrations')), false);
 });
 
-test('migration refuses pre-existing email-verification schema without a ledger', async () => {
-    const client = fakeClient(TARGET, { email_verified_at_exists: true });
+test('migration refuses a pre-existing verification-token table without a ledger', async () => {
+    const client = fakeClient(TARGET, { verification_tokens_table_exists: true });
     await assert.rejects(runSelectedMigration({
         client, migrationFile: FILE, expectedDatabase: TARGET,
         confirmation: CONFIRM, sql: 'SELECT 1'
-    }), /schema exists without a matching migration record/);
+    }), /verification-token table exists without a matching migration record/);
     assert.equal(client.calls.some(call => call.sql === 'BEGIN'), false);
     assert.equal(client.calls.some(call => call.sql.includes('CREATE TABLE chattbm_schema_migrations')), false);
 });
