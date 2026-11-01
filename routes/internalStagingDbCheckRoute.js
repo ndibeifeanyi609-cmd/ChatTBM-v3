@@ -65,8 +65,16 @@ router.get('/staging-db-check', async (req, res) => {
             database: result.rows[0].database_name,
             readOnly: true
         });
-    } catch (_) {
-        return res.status(503).json({ success: false, error: 'connection_check_failed' });
+    } catch (error) {
+        const code = typeof error?.code === 'string' &&
+            /^[A-Z0-9_]{1,24}$/.test(error.code)
+            ? error.code
+            : 'UNCLASSIFIED';
+        return res.status(503).json({
+            success: false,
+            error: 'connection_check_failed',
+            diagnostic: code
+        });
     } finally {
         await client.end().catch(() => {});
     }
