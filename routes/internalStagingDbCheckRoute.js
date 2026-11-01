@@ -43,8 +43,6 @@ router.get('/staging-db-check', async (req, res) => {
         return res.status(503).json({ success: false, error: 'host_target_mismatch' });
     }
 
-    // Isolated staging diagnostic only. TLS remains encrypted; certificate
-    // verification is temporarily disabled for Render's internal certificate.
     const client = new Client({
         host: parsed.hostname,
         port: parsed.port ? Number(parsed.port) : 5432,
@@ -58,8 +56,10 @@ router.get('/staging-db-check', async (req, res) => {
 
     try {
         await client.connect();
+        await client.query('BEGIN READ ONLY');
         const identity = await client.query('SELECT current_database() AS database_name');
         if (identity.rows[0]?.database_name !== 'chattbm_staging_isolated') {
+            await client.query('ROLLBACK');
             return res.status(503).json({ success: false, error: 'database_identity_mismatch' });
         }
 
@@ -92,16 +92,58 @@ router.get('/staging-db-check', async (req, res) => {
             ORDER BY table_name, ordinal_position
         `);
 
+        const indexes = await client.query(`
+            SELECT tablename AS table_name, indexname AS index_name, indexdef AS definition
+            FROM pg_indexes
+            WHERE schemaname = 'public'
+              AND tablename IN (
+                'chattbm_users',
+                'chattbm_auth_rate_limits',
+                'chattbm_email_verification_tokens'
+              )
+            ORDER BY tablename, indexname
+        `);
+
+        const constraints = await client.query(`
+            SELECT
+                tc.table_name,
+                tc.constraint_name,
+                tc.constraint_type,
+                kcu.column_name,
+                ccu.table_name AS foreign_table_name,
+                ccu.column_name AS foreign_column_name
+            FROM information_schema.table_constraints tc
+            LEFT JOIN information_schema.key_column_usage kcu
+              ON tc.constraint_name = kcu.constraint_name
+             AND tc.table_schema = kcu.table_schema
+             AND tc.table_name = kcu.table_name
+            LEFT JOIN information_schema.constraint_column_usage ccu
+              ON ccu.constraint_name = tc.constraint_name
+             AND ccu.table_schema = tc.table_schema
+             AND ccu.table_name = tc.table_name
+            WHERE tc.table_schema = 'public'
+              AND tc.table_name IN (
+                'chattbm_users',
+                'chattbm_auth_rate_limits',
+                'chattbm_email_verification_tokens'
+              )
+            ORDER BY tc.table_name, tc.constraint_name, kcu.ordinal_position
+        `);
+
+        await client.query('COMMIT');
         return res.json({
             success: true,
             database: identity.rows[0].database_name,
             readOnly: true,
             schema: {
                 tables: tables.rows.map(row => row.table_name),
-                columns: columns.rows
+                columns: columns.rows,
+                indexes: indexes.rows,
+                constraints: constraints.rows
             }
         });
     } catch (error) {
+        await client.query('ROLLBACK').catch(() => {});
         const code = typeof error?.code === 'string' &&
             /^[A-Z0-9_]{1,40}$/.test(error.code)
             ? error.code
