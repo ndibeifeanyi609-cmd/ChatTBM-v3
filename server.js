@@ -185,8 +185,13 @@ app.get(
 );
 
 // TEMPORARY STAGING-ONLY READ-ONLY SCHEMA DIAGNOSTIC.
-// Disabled unless STAGING_SCHEMA_DIAGNOSTIC_TOKEN is configured.
+// Fail closed unless this is the known Render staging service.
+const STAGING_DIAGNOSTIC_SERVICE_ID = "srv-dbd5pddg1s2s73dsm6k0";
 app.get("/api/internal/staging-schema-diagnostic", async (req, res) => {
+    if (process.env.RENDER_SERVICE_ID !== STAGING_DIAGNOSTIC_SERVICE_ID) {
+        return res.status(404).json({ success: false, error: "Not found." });
+    }
+
     const expectedToken = process.env.STAGING_SCHEMA_DIAGNOSTIC_TOKEN || "";
     const authorization = req.get("authorization") || "";
     const suppliedToken = authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : "";
