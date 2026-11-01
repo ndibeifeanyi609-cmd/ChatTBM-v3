@@ -80,6 +80,9 @@ router.get('/staging-db-check', async (req, res) => {
             ORDER BY table_name
         `);
 
+        const userCountResult = await client.query('SELECT COUNT(*)::text AS row_count FROM public.chattbm_users');
+        const userRowCount = userCountResult.rows[0].row_count;
+
         const columns = await client.query(`
             SELECT table_name, column_name, data_type, is_nullable
             FROM information_schema.columns
@@ -137,6 +140,7 @@ router.get('/staging-db-check', async (req, res) => {
             readOnly: true,
             schema: {
                 tables: tables.rows.map(row => row.table_name),
+                userRowCount,
                 columns: columns.rows,
                 indexes: indexes.rows,
                 constraints: constraints.rows
