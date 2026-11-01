@@ -1,0 +1,68 @@
+'use strict';
+
+const express = require('express');
+const crypto = require('crypto');
+const { Client } = require('pg');
+
+const router = express.Router();
+
+router.get('/staging-db-check', async (req, res) => {
+    const expected = process.env.STAGING_READONLY_CHECK_TOKEN || '';
+    const supplied = req.get('x-staging-check-token') || '';
+    const expectedBuffer = Buffer.from(expected);
+    const suppliedBuffer = Buffer.from(supplied);
+
+    if (!expected ||
+        expectedBuffer.length !== suppliedBuffer.length ||
+        !crypto.timingSafeEqual(expectedBuffer, suppliedBuffer)) {
+        return res.status(404).json({ success: false });
+    }
+
+    const connectionString = process.env.STAGING_READONLY_DATABASE_URL;
+    if (!connectionString) {
+        return res.status(503).json({ success: false, error: 'check_not_configured' });
+    }
+
+    let parsed;
+    try {
+        parsed = new URL(connectionString);
+    } catch (_) {
+        return res.status(503).json({ success: false, error: 'check_not_configured' });
+    }
+
+    const databaseName = decodeURIComponent(parsed.pathname.replace(/^\//, ''));
+    if (databaseName !== 'chattbm_staging_isolated' ||
+        !parsed.hostname.endsWith('.ohio-postgres.render.com')) {
+        return res.status(503).json({ success: false, error: 'target_validation_failed' });
+    }
+
+    const client = new Client({
+        connectionString,
+        ssl: { rejectUnauthorized: true, servername: parsed.hostname },
+        connectionTimeoutMillis: 8000,
+        statement_timeout: 5000
+    });
+
+    try {
+        await client.connect();
+        const result = await client.query(
+            'SELECT current_database() AS database_name'
+        );
+
+        if (result.rows[0]?.database_name !== 'chattbm_staging_isolated') {
+            return res.status(503).json({ success: false, error: 'database_identity_mismatch' });
+        }
+
+        return res.json({
+            success: true,
+            database: result.rows[0].database_name,
+            readOnly: true
+        });
+    } catch (_) {
+        return res.status(503).json({ success: false, error: 'connection_check_failed' });
+    } finally {
+        await client.end().catch(() => {});
+    }
+});
+
+module.exports = router;
