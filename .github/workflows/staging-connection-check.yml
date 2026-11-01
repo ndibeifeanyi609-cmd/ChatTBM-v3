@@ -19,30 +19,20 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Verify isolated staging connection (read only)
+      - name: Verify isolated staging connection through protected Render endpoint
         env:
-          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          STAGING_READONLY_CHECK_TOKEN: ${{ secrets.STAGING_READONLY_CHECK_TOKEN }}
         run: |
-          node -e '
-            const { Client } = require("pg");
-            (async () => {
-              const value = process.env.STAGING_DATABASE_URL;
-              if (!value) throw new Error("STAGING_DATABASE_URL secret is missing");
-              const u = new URL(value);
-              if (decodeURIComponent(u.pathname.slice(1)) !== "chattbm_staging_isolated") throw new Error("Refusing unexpected database name");
-              if (!u.hostname.endsWith(".ohio-postgres.render.com")) throw new Error("Refusing unexpected database host");
-              const client = new Client({
-                connectionString: value,
-                ssl: { rejectUnauthorized: true, servername: u.hostname },
-                connectionTimeoutMillis: 10000
-              });
-              try {
-                await client.connect();
-                const result = await client.query("SELECT current_database() AS db");
-                if (result.rows[0].db !== "chattbm_staging_isolated") throw new Error("Database identity mismatch");
-                console.log("Read-only connection verified for isolated staging database.");
-              } finally {
-                await client.end();
-              }
-            })().catch(e => { console.error("Connection check failed:", e.message); process.exit(1); });
+          node --input-type=module -e '
+            const token = process.env.STAGING_READONLY_CHECK_TOKEN;
+            if (!token) throw new Error("STAGING_READONLY_CHECK_TOKEN secret is missing");
+            const response = await fetch("https://chattbm-staging-db-check.onrender.com/api/internal/staging-db-check", {
+              headers: { "x-staging-check-token": token },
+              signal: AbortSignal.timeout(20000)
+            });
+            const body = await response.json().catch(() => ({}));
+            if (!response.ok || body.success !== true || body.database !== "chattbm_staging_isolated" || body.readOnly !== true) {
+              throw new Error("Protected staging database check failed (HTTP " + response.status + ")");
+            }
+            console.log("Read-only connection verified for isolated staging database.");
           '
