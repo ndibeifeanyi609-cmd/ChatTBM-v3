@@ -18,6 +18,8 @@ function fakeClient(databaseName = TARGET, schema = {}) {
     const state = {
         users_table_exists: true,
         email_verified_at_exists: false,
+        email_verified_at_data_type: 'timestamp with time zone',
+        email_verified_at_is_nullable: 'YES',
         verification_tokens_table_exists: false,
         migration_ledger_exists: false,
         ...schema
@@ -105,6 +107,45 @@ test('migration refuses pre-existing email-verification schema without a ledger'
     }), /schema exists without a matching migration record/);
     assert.equal(client.calls.some(call => call.sql === 'BEGIN'), false);
     assert.equal(client.calls.some(call => call.sql.includes('CREATE TABLE chattbm_schema_migrations')), false);
+});
+
+test('migration accepts an existing nullable TIMESTAMPTZ email verification column', async () => {
+    const client = fakeClient(TARGET, {
+        email_verified_at_exists: true,
+        email_verified_at_data_type: 'timestamp with time zone',
+        email_verified_at_is_nullable: 'YES'
+    });
+    const result = await runSelectedMigration({
+        client, migrationFile: FILE, expectedDatabase: TARGET,
+        confirmation: CONFIRM, sql: 'SELECT 1;'
+    });
+    assert.equal(result.status, 'applied');
+});
+
+test('migration rejects an existing email verification column with the wrong type', async () => {
+    const client = fakeClient(TARGET, {
+        email_verified_at_exists: true,
+        email_verified_at_data_type: 'timestamp without time zone',
+        email_verified_at_is_nullable: 'YES'
+    });
+    await assert.rejects(runSelectedMigration({
+        client, migrationFile: FILE, expectedDatabase: TARGET,
+        confirmation: CONFIRM, sql: 'SELECT 1;'
+    }), /must be nullable TIMESTAMPTZ/);
+    assert.equal(client.calls.some(call => call.sql === 'BEGIN'), false);
+});
+
+test('migration rejects an existing non-nullable email verification column', async () => {
+    const client = fakeClient(TARGET, {
+        email_verified_at_exists: true,
+        email_verified_at_data_type: 'timestamp with time zone',
+        email_verified_at_is_nullable: 'NO'
+    });
+    await assert.rejects(runSelectedMigration({
+        client, migrationFile: FILE, expectedDatabase: TARGET,
+        confirmation: CONFIRM, sql: 'SELECT 1;'
+    }), /must be nullable TIMESTAMPTZ/);
+    assert.equal(client.calls.some(call => call.sql === 'BEGIN'), false);
 });
 
 test('migration applies transactionally and creates its ledger only after preflight', async () => {
