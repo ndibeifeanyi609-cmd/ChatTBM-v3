@@ -45,10 +45,9 @@ router.get('/staging-db-check', async (req, res) => {
 
     const client = new Client({
         connectionString,
-        ssl: {
-            rejectUnauthorized: true,
-            servername: 'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com'
-        },
+        // Temporary isolated-staging diagnostic only: retain TLS encryption,
+        // but accept Render's self-signed certificate for this private connection.
+        ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 8000,
         statement_timeout: 5000
     });
