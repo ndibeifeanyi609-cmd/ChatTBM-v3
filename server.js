@@ -97,6 +97,7 @@ app.use(
 // =====================================
 const chatRoutes =
     require("./routes/chatRoutes");
+const internalStagingDbCheckRoute = require("./routes/internalStagingDbCheckRoute");
 const forecastRoutes =
     require("./routes/forecastRoutes");
 const softwareBuildingRoutes =
@@ -126,6 +127,7 @@ const voiceRoutes =
 // =====================================
 // REGISTER AUTH ROUTES
 // =====================================
+app.use("/api/internal", internalStagingDbCheckRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api/auth/google", googleOAuthRoutes);
 app.use("/api/conversations", requireAuth, conversationHistoryRoutes);
