@@ -2,6 +2,8 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const {
     parseArgs, validateMigrationFilename, runSelectedMigration, checksumOf
 } = require('../scripts/db-migrate');
@@ -10,8 +12,8 @@ const TARGET = 'chattbm_staging_isolated';
 const RATE = '005_auth_rate_limits.sql';
 const VERIFY = '006_email_verification_tokens.sql';
 const confirm = file => `APPLY:${TARGET}:${file}`;
-const rateSql = 'CREATE TABLE chattbm_auth_rate_limits (bucket_key TEXT PRIMARY KEY);';
-const verifySql = 'CREATE TABLE chattbm_email_verification_tokens (id TEXT PRIMARY KEY);';
+const rateSql = fs.readFileSync(path.join(__dirname, '..', 'database', 'migrations', RATE), 'utf8');
+const verifySql = fs.readFileSync(path.join(__dirname, '..', 'database', 'migrations', VERIFY), 'utf8');
 
 function fakeClient(databaseName = TARGET, schema = {}) {
     const calls = [];
