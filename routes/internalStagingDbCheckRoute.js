@@ -43,8 +43,8 @@ router.get('/staging-db-check', async (req, res) => {
         return res.status(503).json({ success: false, error: 'host_target_mismatch' });
     }
 
-    // Build pg config explicitly so URI sslmode parameters cannot override
-    // this temporary, TLS-encrypted isolated-staging certificate policy.
+    // Isolated staging diagnostic only. TLS remains encrypted; certificate
+    // verification is temporarily disabled for Render's internal certificate.
     const client = new Client({
         host: parsed.hostname,
         port: parsed.port ? Number(parsed.port) : 5432,
@@ -58,18 +58,48 @@ router.get('/staging-db-check', async (req, res) => {
 
     try {
         await client.connect();
-        const result = await client.query(
-            'SELECT current_database() AS database_name'
-        );
-
-        if (result.rows[0]?.database_name !== 'chattbm_staging_isolated') {
+        const identity = await client.query('SELECT current_database() AS database_name');
+        if (identity.rows[0]?.database_name !== 'chattbm_staging_isolated') {
             return res.status(503).json({ success: false, error: 'database_identity_mismatch' });
         }
 
+        const tables = await client.query(`
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+              AND table_type = 'BASE TABLE'
+              AND table_name IN (
+                'chattbm_users',
+                'chattbm_auth_rate_limits',
+                'chattbm_email_verification_tokens',
+                'schema_migrations',
+                'migrations',
+                'knex_migrations',
+                'SequelizeMeta'
+              )
+            ORDER BY table_name
+        `);
+
+        const columns = await client.query(`
+            SELECT table_name, column_name, data_type, is_nullable
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name IN (
+                'chattbm_users',
+                'chattbm_auth_rate_limits',
+                'chattbm_email_verification_tokens'
+              )
+            ORDER BY table_name, ordinal_position
+        `);
+
         return res.json({
             success: true,
-            database: result.rows[0].database_name,
-            readOnly: true
+            database: identity.rows[0].database_name,
+            readOnly: true,
+            schema: {
+                tables: tables.rows.map(row => row.table_name),
+                columns: columns.rows
+            }
         });
     } catch (error) {
         const code = typeof error?.code === 'string' &&
