@@ -43,10 +43,14 @@ router.get('/staging-db-check', async (req, res) => {
         return res.status(503).json({ success: false, error: 'host_target_mismatch' });
     }
 
+    // Build pg config explicitly so URI sslmode parameters cannot override
+    // this temporary, TLS-encrypted isolated-staging certificate policy.
     const client = new Client({
-        connectionString,
-        // Temporary isolated-staging diagnostic only: retain TLS encryption,
-        // but accept Render's self-signed certificate for this private connection.
+        host: parsed.hostname,
+        port: parsed.port ? Number(parsed.port) : 5432,
+        user: decodeURIComponent(parsed.username),
+        password: decodeURIComponent(parsed.password),
+        database: databaseName,
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 8000,
         statement_timeout: 5000
