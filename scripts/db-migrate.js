@@ -8,7 +8,11 @@ const { Client } = require('pg');
 const MIGRATIONS_DIR = path.join(__dirname, '..', 'database', 'migrations');
 const HISTORY_TABLE = 'chattbm_schema_migrations';
 const ALLOWED_DATABASE = 'chattbm_staging_isolated';
-const ALLOWED_MIGRATION = '006_email_verification_tokens.sql';
+const MIGRATIONS = [
+    '005_auth_rate_limits.sql',
+    '006_email_verification_tokens.sql'
+];
+const LOCK_KEY = [194735, 1];
 
 function parseArgs(argv) {
     const args = {};
@@ -25,16 +29,41 @@ function parseArgs(argv) {
 }
 
 function validateMigrationFilename(filename) {
-    if (filename !== ALLOWED_MIGRATION) {
-        throw new Error(`Refusing migration: only ${ALLOWED_MIGRATION} is enabled in this initial runner.`);
+    if (!MIGRATIONS.includes(filename)) {
+        throw new Error(`Refusing migration: only ${MIGRATIONS.join(' and ')} are enabled.`);
     }
     return filename;
+}
+
+function checksumOf(sql) {
+    return crypto.createHash('sha256').update(sql, 'utf8').digest('hex');
+}
+
+async function readSchemaState(client) {
+    const result = await client.query(`
+        SELECT
+            to_regclass('public.chattbm_users') IS NOT NULL AS users_table_exists,
+            to_regclass('public.chattbm_auth_rate_limits') IS NOT NULL AS rate_limits_table_exists,
+            to_regclass('public.chattbm_email_verification_tokens') IS NOT NULL AS verification_tokens_table_exists,
+            to_regclass('public.chattbm_schema_migrations') IS NOT NULL AS migration_ledger_exists,
+            (SELECT data_type FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_users' AND column_name='email_verified_at') AS email_verified_at_data_type,
+            (SELECT is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_users' AND column_name='email_verified_at') AS email_verified_at_is_nullable
+    `);
+    return result.rows[0] || {};
+}
+
+async function readRecordedMigration(client, filename) {
+    const result = await client.query(
+        `SELECT checksum FROM ${HISTORY_TABLE} WHERE filename = $1`,
+        [filename]
+    );
+    return result.rowCount ? result.rows[0].checksum.trim() : null;
 }
 
 async function runSelectedMigration({ client, migrationFile, expectedDatabase, confirmation, sql, checksum }) {
     validateMigrationFilename(migrationFile);
     if (expectedDatabase !== ALLOWED_DATABASE) {
-        throw new Error(`Refusing migration: initial runner is restricted to ${ALLOWED_DATABASE}.`);
+        throw new Error(`Refusing migration: runner is restricted to ${ALLOWED_DATABASE}.`);
     }
     if (confirmation !== `APPLY:${expectedDatabase}:${migrationFile}`) {
         throw new Error('Refusing migration: explicit target confirmation does not match.');
@@ -46,61 +75,56 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
         throw new Error(`Refusing migration: connected database is "${actualDatabase}", expected "${expectedDatabase}".`);
     }
 
-    const digest = checksum || crypto.createHash('sha256').update(sql, 'utf8').digest('hex');
-    await client.query('SELECT pg_advisory_lock($1, $2)', [194735, 1]);
+    const digest = checksum || checksumOf(sql);
+    await client.query('SELECT pg_advisory_lock($1, $2)', LOCK_KEY);
     try {
-        const preflight = await client.query(`
-            SELECT
-                to_regclass('public.chattbm_users') IS NOT NULL AS users_table_exists,
-                EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_schema = 'public'
-                      AND table_name = 'chattbm_users'
-                      AND column_name = 'email_verified_at'
-                ) AS email_verified_at_exists,
-                (
-                    SELECT data_type FROM information_schema.columns
-                    WHERE table_schema = 'public'
-                      AND table_name = 'chattbm_users'
-                      AND column_name = 'email_verified_at'
-                ) AS email_verified_at_data_type,
-                (
-                    SELECT is_nullable FROM information_schema.columns
-                    WHERE table_schema = 'public'
-                      AND table_name = 'chattbm_users'
-                      AND column_name = 'email_verified_at'
-                ) AS email_verified_at_is_nullable,
-                to_regclass('public.chattbm_email_verification_tokens') IS NOT NULL
-                    AS verification_tokens_table_exists,
-                to_regclass('public.chattbm_schema_migrations') IS NOT NULL AS migration_ledger_exists
-        `);
-        const state = preflight.rows[0] || {};
-        if (!state.users_table_exists) {
-            throw new Error('Refusing migration: required chattbm_users table is missing.');
-        }
-        let migrationRecorded = false;
-        if (state.migration_ledger_exists) {
-            const prior = await client.query(
-                `SELECT checksum FROM ${HISTORY_TABLE} WHERE filename = $1`,
-                [migrationFile]
-            );
-            if (prior.rowCount > 0) {
-                if (prior.rows[0].checksum.trim() !== digest) {
-                    throw new Error(`Migration checksum mismatch for ${migrationFile}; refusing to continue.`);
-                }
-                migrationRecorded = true;
-                return { status: 'already-applied', filename: migrationFile, database: actualDatabase };
+        let state = await readSchemaState(client);
+        if (migrationFile === MIGRATIONS[0]) {
+            if (!state.migration_ledger_exists && state.rate_limits_table_exists) {
+                throw new Error('Refusing migration 005: rate-limit table exists without a migration record; manual reconciliation is required.');
+            }
+        } else {
+            if (!state.users_table_exists) {
+                throw new Error('Refusing migration 006: required chattbm_users table is missing.');
+            }
+            if (!state.migration_ledger_exists) {
+                throw new Error('Refusing migration 006: migration 005 must be recorded before migration 006.');
+            }
+            const rateLimitChecksum = await readRecordedMigration(client, MIGRATIONS[0]);
+            if (!rateLimitChecksum) {
+                throw new Error('Refusing migration 006: migration 005 is not recorded; apply and verify 005 first.');
+            }
+            if (rateLimitChecksum !== checksumOf(fs.readFileSync(path.join(MIGRATIONS_DIR, MIGRATIONS[0]), 'utf8'))) {
+                throw new Error('Refusing migration 006: migration 005 checksum does not match the repository SQL.');
+            }
+            if (!state.rate_limits_table_exists) {
+                throw new Error('Refusing migration 006: migration 005 is recorded but its rate-limit table is missing.');
+            }
+            if (state.verification_tokens_table_exists && !await readRecordedMigration(client, migrationFile)) {
+                throw new Error('Refusing migration 006: verification-token table exists without a matching migration record; manual reconciliation is required.');
+            }
+            if (state.email_verified_at_data_type &&
+                (state.email_verified_at_data_type !== 'timestamp with time zone' ||
+                 state.email_verified_at_is_nullable !== 'YES')) {
+                throw new Error('Refusing migration 006: existing email_verified_at column must be nullable TIMESTAMPTZ; manual reconciliation is required.');
             }
         }
 
-        if (!migrationRecorded && state.verification_tokens_table_exists) {
-            throw new Error('Refusing migration: verification-token table exists without a matching migration record; manual reconciliation is required.');
-        }
-
-        if (!migrationRecorded && state.email_verified_at_exists &&
-            (state.email_verified_at_data_type !== 'timestamp with time zone' ||
-             state.email_verified_at_is_nullable !== 'YES')) {
-            throw new Error('Refusing migration: existing email_verified_at column must be nullable TIMESTAMPTZ; manual reconciliation is required.');
+        if (state.migration_ledger_exists) {
+            const recorded = await readRecordedMigration(client, migrationFile);
+            if (recorded) {
+                if (recorded !== digest) {
+                    throw new Error(`Migration checksum mismatch for ${migrationFile}; refusing to continue.`);
+                }
+                state = await readSchemaState(client);
+                if (migrationFile === MIGRATIONS[0] && !state.rate_limits_table_exists) {
+                    throw new Error('Migration 005 is recorded but its rate-limit table is missing.');
+                }
+                if (migrationFile === MIGRATIONS[1] && !state.verification_tokens_table_exists) {
+                    throw new Error('Migration 006 is recorded but its verification-token table is missing.');
+                }
+                return { status: 'already-applied', filename: migrationFile, database: actualDatabase };
+            }
         }
 
         await client.query('BEGIN');
@@ -126,7 +150,7 @@ async function runSelectedMigration({ client, migrationFile, expectedDatabase, c
         }
         return { status: 'applied', filename: migrationFile, database: actualDatabase };
     } finally {
-        await client.query('SELECT pg_advisory_unlock($1, $2)', [194735, 1]);
+        await client.query('SELECT pg_advisory_unlock($1, $2)', LOCK_KEY);
     }
 }
 
@@ -135,7 +159,7 @@ async function main() {
     if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required.');
     const filename = validateMigrationFilename(args.file);
     if (args.target !== ALLOWED_DATABASE) {
-        throw new Error(`Refusing migration: initial runner is restricted to ${ALLOWED_DATABASE}.`);
+        throw new Error(`Refusing migration: runner is restricted to ${ALLOWED_DATABASE}.`);
     }
     const filePath = path.join(MIGRATIONS_DIR, filename);
     if (path.dirname(filePath) !== MIGRATIONS_DIR || !fs.existsSync(filePath)) {
@@ -164,4 +188,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { parseArgs, validateMigrationFilename, runSelectedMigration };
+module.exports = { parseArgs, validateMigrationFilename, runSelectedMigration, checksumOf };
