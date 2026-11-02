@@ -1,0 +1,39 @@
+name: Isolated Migration SQL Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'database/migrations/005_auth_rate_limits.sql'
+      - 'database/migrations/006_email_verification_tokens.sql'
+      - 'tests/isolatedMigrationSql.integration.test.js'
+      - '.github/workflows/isolated-migration-sql-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  postgres-migration-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: chattbm_test
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: chattbm_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U chattbm_test -d chattbm_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://chattbm_test:test_password@localhost:5432/chattbm_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: node --check scripts/runIsolatedStagingMigration.js
+      - run: node --test tests/isolatedMigrationSql.integration.test.js
