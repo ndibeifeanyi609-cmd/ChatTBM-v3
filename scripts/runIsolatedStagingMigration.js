@@ -72,6 +72,62 @@ async function run() {
     if (id === '006' && (!state.limits || state.tokens)) {
       throw new Error('Migration 005 is not verified, or migration 006 already exists.');
     }
+    if (id === '006') {
+      const limitColumns = await client.query(
+        'SELECT column_name, data_type, is_nullable, column_default ' +
+        'FROM information_schema.columns WHERE table_schema = $1 AND table_name = $2',
+        ['public', 'chattbm_auth_rate_limits']
+      );
+      const expectedLimitColumns = {
+        bucket_key: ['text', 'NO', null],
+        window_started_at: ['timestamp with time zone', 'NO', null],
+        request_count: ['integer', 'NO', null],
+        expires_at: ['timestamp with time zone', 'NO', null],
+        updated_at: ['timestamp with time zone', 'NO', 'now()']
+      };
+      if (limitColumns.rowCount !== Object.keys(expectedLimitColumns).length) {
+        throw new Error('Migration 005 column preflight failed before migration 006.');
+      }
+      for (const row of limitColumns.rows) {
+        const expected = expectedLimitColumns[row.column_name];
+        if (!expected || row.data_type !== expected[0] || row.is_nullable !== expected[1] ||
+            (expected[2] === null ? row.column_default !== null : !String(row.column_default || '').toLowerCase().includes(expected[2]))) {
+          throw new Error('Migration 005 column definition preflight failed before migration 006.');
+        }
+      }
+      const limitIndexes = await client.query(
+        'SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = $1 AND tablename = $2',
+        ['public', 'chattbm_auth_rate_limits']
+      );
+      const expectedLimitIndexes = {
+        chattbm_auth_rate_limits_pkey: 'USING btree (bucket_key)',
+        chattbm_auth_rate_limits_expires_at_idx: 'USING btree (expires_at)'
+      };
+      if (limitIndexes.rowCount !== 2) {
+        throw new Error('Migration 005 index preflight failed before migration 006.');
+      }
+      for (const row of limitIndexes.rows) {
+        if (!expectedLimitIndexes[row.indexname] || !row.indexdef.includes(expectedLimitIndexes[row.indexname])) {
+          throw new Error('Migration 005 index definition preflight failed before migration 006.');
+        }
+      }
+      const limitConstraints = await client.query(
+        'SELECT constraint_name, constraint_type, check_clause ' +
+        'FROM information_schema.table_constraints tc ' +
+        'LEFT JOIN information_schema.check_constraints cc ' +
+        'ON cc.constraint_name = tc.constraint_name AND cc.constraint_schema = tc.constraint_schema ' +
+        'WHERE tc.table_schema = $1 AND tc.table_name = $2',
+        ['public', 'chattbm_auth_rate_limits']
+      );
+      const limitConstraintMap = new Map(limitConstraints.rows.map(row => [row.constraint_name, row]));
+      const limitPrimary = limitConstraintMap.get('chattbm_auth_rate_limits_pkey');
+      const limitCheck = limitConstraintMap.get('chattbm_auth_rate_limits_request_count_check');
+      if (limitConstraintMap.size !== 2 || !limitPrimary || limitPrimary.constraint_type !== 'PRIMARY KEY' ||
+          !limitCheck || limitCheck.constraint_type !== 'CHECK' ||
+          !/request_count\\s*>=\\s*1/.test(limitCheck.check_clause || '')) {
+        throw new Error('Migration 005 constraint preflight failed before migration 006.');
+      }
+    }
     const count = await client.query('SELECT COUNT(*)::int AS n FROM public.chattbm_users');
     if (count.rows[0].n !== 0) throw new Error('Refusing: isolated users table is not empty.');
 
