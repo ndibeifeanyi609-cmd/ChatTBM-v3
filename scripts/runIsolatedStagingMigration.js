@@ -114,12 +114,11 @@ async function run() {
         }
       }
       const limitConstraints = await client.query(
-        'SELECT tc.constraint_name, tc.constraint_type, cc.check_clause ' +
-        'FROM information_schema.table_constraints tc ' +
-        'LEFT JOIN information_schema.check_constraints cc ' +
-        'ON cc.constraint_name = tc.constraint_name AND cc.constraint_schema = tc.constraint_schema ' +
-        'WHERE tc.table_schema = $1 AND tc.table_name = $2',
-        ['public', 'chattbm_auth_rate_limits']
+        "SELECT conname AS constraint_name, " +
+        "CASE contype WHEN 'p' THEN 'PRIMARY KEY' WHEN 'c' THEN 'CHECK' END AS constraint_type, " +
+        "pg_get_constraintdef(oid) AS check_clause " +
+        "FROM pg_constraint " +
+        "WHERE conrelid = 'public.chattbm_auth_rate_limits'::regclass AND contype IN ('p', 'c')"
       );
       const limitConstraintMap = new Map(limitConstraints.rows.map(row => [row.constraint_name, row]));
       const limitPrimary = limitConstraintMap.get('chattbm_auth_rate_limits_pkey');
