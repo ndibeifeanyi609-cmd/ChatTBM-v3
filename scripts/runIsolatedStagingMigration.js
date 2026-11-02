@@ -76,12 +76,24 @@ async function run() {
 
     await client.query(sql);
 
+    const required = id === '005'
+      ? ['bucket_key', 'window_started_at', 'request_count', 'expires_at', 'updated_at']
+      : ['id', 'user_id', 'token_hash', 'created_at', 'expires_at', 'used_at'];
+    const table = id === '005' ? 'chattbm_auth_rate_limits' : 'chattbm_email_verification_tokens';
     const verified = await client.query(
-      id === '005'
-        ? "SELECT to_regclass('public.chattbm_auth_rate_limits') IS NOT NULL AS ok"
-        : "SELECT to_regclass('public.chattbm_email_verification_tokens') IS NOT NULL AS ok"
+      'SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = $2',
+      ['public', table]
     );
-    if (!verified.rows[0].ok) throw new Error('Post-migration verification failed.');
+    const actual = new Set(verified.rows.map(row => row.column_name));
+    if (!required.every(column => actual.has(column))) {
+      throw new Error('Post-migration column verification failed.');
+    }
+    if (id === '006') {
+      const userColumn = await client.query(
+        "SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'chattbm_users' AND column_name = 'email_verified_at'"
+      );
+      if (userColumn.rowCount !== 1) throw new Error('email_verified_at verification failed.');
+    }
 
     await client.query('COMMIT');
     console.log('Migration ' + id + ' applied and verified. SHA-256: ' + checksum);
