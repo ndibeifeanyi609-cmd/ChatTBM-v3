@@ -49,7 +49,8 @@ router.get('/staging-db-check', async (req, res) => {
         user: decodeURIComponent(parsed.username),
         password: decodeURIComponent(parsed.password),
         database: databaseName,
-        ssl: { rejectUnauthorized: false },
+        // Require Node.js trusted CA roots; fail closed on certificate verification errors.
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 8000,
         statement_timeout: 5000
     });
