@@ -35,4 +35,4 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: node --check scripts/runIsolatedStagingMigration.js
-      - run: node --test scripts/isolatedMigrationSql.integration.js
+      - run: node --test scripts/runIsolatedStagingMigration.test.js scripts/isolatedMigrationSql.integration.js
