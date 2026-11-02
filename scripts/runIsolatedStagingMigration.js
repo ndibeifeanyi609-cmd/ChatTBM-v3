@@ -124,7 +124,7 @@ async function run() {
       const limitCheck = limitConstraintMap.get('chattbm_auth_rate_limits_request_count_check');
       if (limitConstraintMap.size !== 2 || !limitPrimary || limitPrimary.constraint_type !== 'PRIMARY KEY' ||
           !limitCheck || limitCheck.constraint_type !== 'CHECK' ||
-          !/request_count\\s*>=\\s*1/.test(limitCheck.check_clause || '')) {
+          !/request_count\s*>=\s*1/.test(limitCheck.check_clause || '')) {
         throw new Error('Migration 005 constraint preflight failed before migration 006.');
       }
     }
