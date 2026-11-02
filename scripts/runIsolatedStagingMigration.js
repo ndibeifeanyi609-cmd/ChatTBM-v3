@@ -85,12 +85,44 @@ async function run() {
       ['public', table]
     );
     const actual = new Set(verified.rows.map(row => row.column_name));
-    if (!required.every(column => actual.has(column))) {
+    if (!required.every(column => actual.has(column)) || actual.size !== required.length) {
       throw new Error('Post-migration column verification failed.');
     }
-    if (id === '006') {
+    const expectedIndexes = id === '005'
+      ? ['chattbm_auth_rate_limits_pkey', 'chattbm_auth_rate_limits_expires_at_idx']
+      : [
+          'chattbm_email_verification_tokens_pkey',
+          'chattbm_email_verification_tokens_token_hash_key',
+          'chattbm_email_verification_tokens_user_id_idx',
+          'chattbm_email_verification_tokens_expires_at_idx',
+          'chattbm_email_verification_tokens_active_user_idx'
+        ];
+    const indexResult = await client.query(
+      'SELECT indexname FROM pg_indexes WHERE schemaname = $1 AND tablename = $2',
+      ['public', table]
+    );
+    const actualIndexes = new Set(indexResult.rows.map(row => row.indexname));
+    if (!expectedIndexes.every(index => actualIndexes.has(index)) || actualIndexes.size !== expectedIndexes.length) {
+      throw new Error('Post-migration index verification failed.');
+    }
+    const constraintResult = await client.query(
+      'SELECT constraint_name, constraint_type FROM information_schema.table_constraints WHERE table_schema = $1 AND table_name = $2',
+      ['public', table]
+    );
+    const constraints = new Map(constraintResult.rows.map(row => [row.constraint_name, row.constraint_type]));
+    if (id === '005') {
+      if (constraints.get('chattbm_auth_rate_limits_pkey') !== 'PRIMARY KEY' ||
+          constraints.get('chattbm_auth_rate_limits_request_count_check') !== 'CHECK') {
+        throw new Error('Rate-limit primary key/check constraint verification failed.');
+      }
+    } else {
+      if (constraints.get('chattbm_email_verification_tokens_pkey') !== 'PRIMARY KEY' ||
+          constraints.get('chattbm_email_verification_tokens_token_hash_key') !== 'UNIQUE' ||
+          constraints.get('chattbm_email_verification_tokens_user_id_fkey') !== 'FOREIGN KEY') {
+        throw new Error('Email-token key/foreign-key verification failed.');
+      }
       const userColumn = await client.query(
-        "SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'chattbm_users' AND column_name = 'email_verified_at'"
+        "SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'chattbm_users' AND column_name = 'email_verified_at' AND data_type = 'timestamp with time zone' AND is_nullable = 'YES'"
       );
       if (userColumn.rowCount !== 1) throw new Error('email_verified_at verification failed.');
     }
