@@ -58,4 +58,19 @@ test('actual migration runner applies 005 then 006 on disposable PostgreSQL', as
     "SELECT to_regclass('public.chattbm_email_verification_tokens') AS relation"
   );
   assert.equal(tokens.rows[0].relation, 'chattbm_email_verification_tokens');
+
+  // Force a post-DDL verification failure in 006; the runner must roll back
+  // the token table it creates inside its transaction.
+  await client.query('DROP TABLE chattbm_email_verification_tokens');
+  await client.query('ALTER TABLE chattbm_users DROP COLUMN email_verified_at');
+  await client.query('ALTER TABLE chattbm_users ADD COLUMN email_verified_at INTEGER');
+
+  const rejectedSix = invoke('006');
+  assert.notEqual(rejectedSix.status, 0);
+  assert.match(rejectedSix.stderr, /email_verified_at verification failed/);
+
+  const rolledBack = await client.query(
+    "SELECT to_regclass('public.chattbm_email_verification_tokens') AS relation"
+  );
+  assert.equal(rolledBack.rows[0].relation, null);
 });
