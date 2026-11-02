@@ -105,20 +105,52 @@ async function run() {
     if (!expectedIndexes.every(index => actualIndexes.has(index)) || actualIndexes.size !== expectedIndexes.length) {
       throw new Error('Post-migration index verification failed.');
     }
-    const constraintResult = await client.query(
-      'SELECT constraint_name, constraint_type FROM information_schema.table_constraints WHERE table_schema = $1 AND table_name = $2',
+    const indexDefinitions = await client.query(
+      'SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = $1 AND tablename = $2',
       ['public', table]
     );
-    const constraints = new Map(constraintResult.rows.map(row => [row.constraint_name, row.constraint_type]));
+    const definitions = new Map(indexDefinitions.rows.map(row => [row.indexname, row.indexdef]));
+    const expectedIndexFragments = id === '005'
+      ? {
+          chattbm_auth_rate_limits_pkey: 'USING btree (bucket_key)',
+          chattbm_auth_rate_limits_expires_at_idx: 'USING btree (expires_at)'
+        }
+      : {
+          chattbm_email_verification_tokens_pkey: 'USING btree (id)',
+          chattbm_email_verification_tokens_token_hash_key: 'USING btree (token_hash)',
+          chattbm_email_verification_tokens_user_id_idx: 'USING btree (user_id)',
+          chattbm_email_verification_tokens_expires_at_idx: 'USING btree (expires_at)',
+          chattbm_email_verification_tokens_active_user_idx: 'USING btree (user_id) WHERE (used_at IS NULL)'
+        };
+    for (const [name, fragment] of Object.entries(expectedIndexFragments)) {
+      if (!definitions.get(name) || !definitions.get(name).includes(fragment)) {
+        throw new Error('Index definition verification failed.');
+      }
+    }
+    const constraintResult = await client.query(
+      'SELECT tc.constraint_name, tc.constraint_type, cc.check_clause, rc.delete_rule ' +
+      'FROM information_schema.table_constraints tc ' +
+      'LEFT JOIN information_schema.check_constraints cc ON cc.constraint_name = tc.constraint_name AND cc.constraint_schema = tc.constraint_schema ' +
+      'LEFT JOIN information_schema.referential_constraints rc ON rc.constraint_name = tc.constraint_name AND rc.constraint_schema = tc.constraint_schema ' +
+      'WHERE tc.table_schema = $1 AND tc.table_name = $2',
+      ['public', table]
+    );
+    const constraints = new Map(constraintResult.rows.map(row => [row.constraint_name, row]));
     if (id === '005') {
-      if (constraints.get('chattbm_auth_rate_limits_pkey') !== 'PRIMARY KEY' ||
-          constraints.get('chattbm_auth_rate_limits_request_count_check') !== 'CHECK') {
+      const primary = constraints.get('chattbm_auth_rate_limits_pkey');
+      const check = constraints.get('chattbm_auth_rate_limits_request_count_check');
+      if (!primary || primary.constraint_type !== 'PRIMARY KEY' ||
+          !check || check.constraint_type !== 'CHECK' ||
+          !/request_count\s*>=\s*1/.test(check.check_clause || '')) {
         throw new Error('Rate-limit primary key/check constraint verification failed.');
       }
     } else {
-      if (constraints.get('chattbm_email_verification_tokens_pkey') !== 'PRIMARY KEY' ||
-          constraints.get('chattbm_email_verification_tokens_token_hash_key') !== 'UNIQUE' ||
-          constraints.get('chattbm_email_verification_tokens_user_id_fkey') !== 'FOREIGN KEY') {
+      const primary = constraints.get('chattbm_email_verification_tokens_pkey');
+      const unique = constraints.get('chattbm_email_verification_tokens_token_hash_key');
+      const foreign = constraints.get('chattbm_email_verification_tokens_user_id_fkey');
+      if (!primary || primary.constraint_type !== 'PRIMARY KEY' ||
+          !unique || unique.constraint_type !== 'UNIQUE' ||
+          !foreign || foreign.constraint_type !== 'FOREIGN KEY' || foreign.delete_rule !== 'CASCADE') {
         throw new Error('Email-token key/foreign-key verification failed.');
       }
       const userColumn = await client.query(
