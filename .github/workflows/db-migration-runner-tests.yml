@@ -1,0 +1,26 @@
+name: Database Migration Runner Tests
+
+on:
+  pull_request:
+    branches: [main, feature/email-verification]
+    paths:
+      - 'scripts/db-migrate.js'
+      - 'tests/dbMigrationRunner.test.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/db-migration-runner-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migration-runner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run test:db-migrate
