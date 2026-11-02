@@ -16,6 +16,8 @@ const hosts = new Set([
   'dpg-dbicflmc6qcc73d97u60-a',
   'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com'
 ]);
+const localTestTarget = process.env.NODE_ENV === 'test' &&
+  process.env.STAGING_MIGRATION_ALLOW_LOCAL_TEST_TARGET === 'true';
 
 async function run() {
   const id = process.argv[2];
@@ -31,7 +33,7 @@ async function run() {
   const url = new URL(connectionString);
   if (!['postgres:', 'postgresql:'].includes(url.protocol) ||
       decodeURIComponent(url.pathname.slice(1)) !== databaseName ||
-      !hosts.has(url.hostname)) {
+      !(hosts.has(url.hostname) || (localTestTarget && ['localhost', '127.0.0.1'].includes(url.hostname)))) {
     throw new Error('Refusing unexpected database target.');
   }
 
@@ -44,7 +46,7 @@ async function run() {
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
     // Use Node.js trusted CA roots; fail closed if the server certificate cannot be verified.
-    ssl: { rejectUnauthorized: true },
+    ssl: localTestTarget ? false : { rejectUnauthorized: true },
     connectionTimeoutMillis: 8000,
     statement_timeout: 15000
   });
