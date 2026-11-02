@@ -114,7 +114,7 @@ async function run() {
         }
       }
       const limitConstraints = await client.query(
-        'SELECT constraint_name, constraint_type, check_clause ' +
+        'SELECT tc.constraint_name, tc.constraint_type, cc.check_clause ' +
         'FROM information_schema.table_constraints tc ' +
         'LEFT JOIN information_schema.check_constraints cc ' +
         'ON cc.constraint_name = tc.constraint_name AND cc.constraint_schema = tc.constraint_schema ' +
