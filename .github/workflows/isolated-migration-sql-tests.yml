@@ -2,11 +2,10 @@ name: Isolated Migration SQL Tests
 
 on:
   pull_request:
-    branches: [main]
     paths:
       - 'database/migrations/005_auth_rate_limits.sql'
       - 'database/migrations/006_email_verification_tokens.sql'
-      - 'tests/isolatedMigrationSql.integration.test.js'
+      - 'scripts/isolatedMigrationSql.integration.js'
       - '.github/workflows/isolated-migration-sql-tests.yml'
   workflow_dispatch:
 
@@ -36,4 +35,4 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: node --check scripts/runIsolatedStagingMigration.js
-      - run: node --test tests/isolatedMigrationSql.integration.test.js
+      - run: node --test scripts/isolatedMigrationSql.integration.js
