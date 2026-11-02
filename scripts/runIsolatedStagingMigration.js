@@ -43,7 +43,8 @@ async function run() {
     database: databaseName,
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
-    ssl: { rejectUnauthorized: false },
+    // Use Node.js trusted CA roots; fail closed if the server certificate cannot be verified.
+    ssl: { rejectUnauthorized: true },
     connectionTimeoutMillis: 8000,
     statement_timeout: 15000
   });
