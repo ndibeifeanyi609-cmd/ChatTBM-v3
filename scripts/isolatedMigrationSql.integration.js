@@ -17,10 +17,15 @@ test('migrations 005 and 006 apply and verify on disposable PostgreSQL', async t
   await client.query('BEGIN');
   await client.query(migration('005_auth_rate_limits.sql'));
   const rateColumns = await client.query(
-    "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_auth_rate_limits'"
+    "SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_auth_rate_limits' ORDER BY ordinal_position"
   );
-  assert.deepEqual(new Set(rateColumns.rows.map(row => row.column_name)),
-    new Set(['bucket_key', 'window_started_at', 'request_count', 'expires_at', 'updated_at']));
+  assert.deepEqual(rateColumns.rows, [
+    { column_name: 'bucket_key', data_type: 'text', is_nullable: 'NO', column_default: null },
+    { column_name: 'window_started_at', data_type: 'timestamp with time zone', is_nullable: 'NO', column_default: null },
+    { column_name: 'request_count', data_type: 'integer', is_nullable: 'NO', column_default: null },
+    { column_name: 'expires_at', data_type: 'timestamp with time zone', is_nullable: 'NO', column_default: null },
+    { column_name: 'updated_at', data_type: 'timestamp with time zone', is_nullable: 'NO', column_default: 'now()' }
+  ]);
   const rateIndexes = await client.query(
     "SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename='chattbm_auth_rate_limits'"
   );
@@ -34,10 +39,10 @@ test('migrations 005 and 006 apply and verify on disposable PostgreSQL', async t
   // Reapply migration 005 and confirm its schema remains unchanged.
   await client.query(migration('005_auth_rate_limits.sql'));
   const repeatedColumns = await client.query(
-    "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_auth_rate_limits'"
+    "SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_auth_rate_limits' ORDER BY ordinal_position"
   );
-  assert.deepEqual(new Set(repeatedColumns.rows.map(row => row.column_name)),
-    new Set(['bucket_key', 'window_started_at', 'request_count', 'expires_at', 'updated_at']));
+  assert.deepEqual(repeatedColumns.rows, rateColumns.rows,
+    'reapplying migration 005 must preserve every column definition');
   const repeatedIndexes = await client.query(
     "SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename='chattbm_auth_rate_limits'"
   );
