@@ -71,12 +71,42 @@ async function run() {
       'applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW())'
     );
     const historyColumns = await client.query(
-      "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_schema_migrations'"
+      "SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns " +
+      "WHERE table_schema='public' AND table_name='chattbm_schema_migrations'"
     );
-    const historyNames = new Set(historyColumns.rows.map(row => row.column_name));
-    if (historyNames.size !== 3 ||
-        !['migration_id', 'checksum_sha256', 'applied_at'].every(name => historyNames.has(name))) {
+    const historyDefinitions = new Map(historyColumns.rows.map(row => [row.column_name, row]));
+    const expectedHistoryColumns = {
+      migration_id: ['text', 'NO', null],
+      checksum_sha256: ['text', 'NO', null],
+      applied_at: ['timestamp with time zone', 'NO', 'now()']
+    };
+    if (historyDefinitions.size !== 3) {
       throw new Error('Migration history table schema is not recognized.');
+    }
+    for (const [name, expected] of Object.entries(expectedHistoryColumns)) {
+      const actual = historyDefinitions.get(name);
+      if (!actual || actual.data_type !== expected[0] || actual.is_nullable !== expected[1] ||
+          (expected[2] === null ? actual.column_default !== null :
+            !String(actual.column_default || '').toLowerCase().includes(expected[2]))) {
+        throw new Error('Migration history table column definition is not recognized.');
+      }
+    }
+    const historyConstraints = await client.query(
+      "SELECT conname, contype, pg_get_constraintdef(oid) AS definition " +
+      "FROM pg_constraint WHERE conrelid = 'public.chattbm_schema_migrations'::regclass " +
+      "AND contype IN ('p', 'c')"
+    );
+    const historyConstraintMap = new Map(historyConstraints.rows.map(row => [row.conname, row]));
+    const historyPrimary = historyConstraintMap.get('chattbm_schema_migrations_pkey');
+    const migrationIdCheck = historyConstraintMap.get('chattbm_schema_migrations_migration_id_check');
+    const checksumCheck = historyConstraintMap.get('chattbm_schema_migrations_checksum_sha256_check');
+    if (historyConstraintMap.size !== 3 ||
+        !historyPrimary || historyPrimary.contype !== 'p' ||
+        !migrationIdCheck || migrationIdCheck.contype !== 'c' ||
+        !/migration_id.*\^\[0-9\]\{3\}\$/.test(migrationIdCheck.definition || '') ||
+        !checksumCheck || checksumCheck.contype !== 'c' ||
+        !/checksum_sha256.*\^\[a-f0-9\]\{64\}\$/.test(checksumCheck.definition || '')) {
+      throw new Error('Migration history table constraints are not recognized.');
     }
     const prior = await client.query(
       'SELECT checksum_sha256 FROM public.chattbm_schema_migrations WHERE migration_id = $1',
