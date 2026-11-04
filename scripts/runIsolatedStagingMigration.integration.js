@@ -42,11 +42,11 @@ test('actual migration runner applies 005 then 006 on disposable PostgreSQL', as
 
   const five = invoke('005');
   assert.equal(five.status, 0, five.stderr || five.stdout);
-  assert.match(five.stdout, /Migration 005 applied and verified/);
+  assert.match(five.stdout, /Migration 005 applied, verified, and recorded/);
 
   const six = invoke('006');
   assert.equal(six.status, 0, six.stderr || six.stdout);
-  assert.match(six.stdout, /Migration 006 applied and verified/);
+  assert.match(six.stdout, /Migration 006 applied, verified, and recorded/);
 
   const columns = await client.query(
     "SELECT column_name, is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_users' AND column_name='email_verified_at'"
@@ -59,8 +59,22 @@ test('actual migration runner applies 005 then 006 on disposable PostgreSQL', as
   );
   assert.equal(tokens.rows[0].relation, 'chattbm_email_verification_tokens');
 
-  // Force a post-DDL verification failure in 006; the runner must roll back
+  const history = await client.query(
+    'SELECT migration_id, checksum_sha256, applied_at FROM public.chattbm_schema_migrations ORDER BY migration_id'
+  );
+  assert.deepEqual(history.rows.map(row => row.migration_id), ['005', '006']);
+  assert.ok(history.rows.every(row => /^[a-f0-9]{64}$/.test(row.checksum_sha256)));
+  assert.ok(history.rows.every(row => row.applied_at instanceof Date));
+
+  const duplicateFive = invoke('005');
+  assert.notEqual(duplicateFive.status, 0);
+  assert.match(duplicateFive.stderr, /already recorded as applied/);
+
+  // Remove only the disposable test's 006 ledger row to simulate a first
+  // application against a deliberately malformed schema. The runner must roll back
+
   // the token table it creates inside its transaction.
+  await client.query("DELETE FROM public.chattbm_schema_migrations WHERE migration_id = '006'");
   await client.query('DROP TABLE chattbm_email_verification_tokens');
   await client.query('ALTER TABLE chattbm_users DROP COLUMN email_verified_at');
   await client.query('ALTER TABLE chattbm_users ADD COLUMN email_verified_at INTEGER');
@@ -73,4 +87,8 @@ test('actual migration runner applies 005 then 006 on disposable PostgreSQL', as
     "SELECT to_regclass('public.chattbm_email_verification_tokens') AS relation"
   );
   assert.equal(rolledBack.rows[0].relation, null);
+  const failedHistory = await client.query(
+    "SELECT 1 FROM public.chattbm_schema_migrations WHERE migration_id = '006'"
+  );
+  assert.equal(failedHistory.rowCount, 0, 'failed migration must not leave a history record');
 });
