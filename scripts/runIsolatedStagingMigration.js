@@ -61,6 +61,46 @@ async function run() {
       throw new Error('Database identity or write access check failed.');
     }
 
+    // Serialize migration attempts and persist an immutable checksum record in
+    // the same transaction as the schema change.
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('chattbm_schema_migrations'))");
+    await client.query(
+      'CREATE TABLE IF NOT EXISTS public.chattbm_schema_migrations (' +
+      'migration_id TEXT PRIMARY KEY CHECK (migration_id ~ \'^[0-9]{3}$\'), ' +
+      'checksum_sha256 TEXT NOT NULL CHECK (checksum_sha256 ~ \'^[a-f0-9]{64}$\'), ' +
+      'applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW())'
+    );
+    const historyColumns = await client.query(
+      "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_schema_migrations'"
+    );
+    const historyNames = new Set(historyColumns.rows.map(row => row.column_name));
+    if (historyNames.size !== 3 ||
+        !['migration_id', 'checksum_sha256', 'applied_at'].every(name => historyNames.has(name))) {
+      throw new Error('Migration history table schema is not recognized.');
+    }
+    const prior = await client.query(
+      'SELECT checksum_sha256 FROM public.chattbm_schema_migrations WHERE migration_id = $1',
+      [id]
+    );
+    if (prior.rowCount) {
+      if (prior.rows[0].checksum_sha256 !== checksum) {
+        throw new Error('Recorded migration checksum differs from the current SQL file.');
+      }
+      throw new Error('Migration ' + id + ' is already recorded as applied.');
+    }
+    if (id === '006') {
+      const priorSql = fs.readFileSync(
+        path.join(__dirname, '..', 'database', 'migrations', migrations['005']), 'utf8'
+      );
+      const priorChecksum = crypto.createHash('sha256').update(priorSql).digest('hex');
+      const recordedFive = await client.query(
+        "SELECT checksum_sha256 FROM public.chattbm_schema_migrations WHERE migration_id = '005'"
+      );
+      if (recordedFive.rowCount !== 1 || recordedFive.rows[0].checksum_sha256 !== priorChecksum) {
+        throw new Error('Migration 005 is not recorded with the expected checksum.');
+      }
+    }
+
     const stateResult = await client.query(
       "SELECT to_regclass('public.chattbm_users') IS NOT NULL AS users, " +
       "to_regclass('public.chattbm_auth_rate_limits') IS NOT NULL AS limits, " +
@@ -217,8 +257,12 @@ async function run() {
       if (userColumn.rowCount !== 1) throw new Error('email_verified_at verification failed.');
     }
 
+    await client.query(
+      'INSERT INTO public.chattbm_schema_migrations (migration_id, checksum_sha256) VALUES ($1, $2)',
+      [id, checksum]
+    );
     await client.query('COMMIT');
-    console.log('Migration ' + id + ' applied and verified. SHA-256: ' + checksum);
+    console.log('Migration ' + id + ' applied, verified, and recorded. SHA-256: ' + checksum);
   } catch (error) {
     await client.query('ROLLBACK').catch(() => {});
     throw new Error('Migration aborted; transaction rolled back. ' + error.message);
