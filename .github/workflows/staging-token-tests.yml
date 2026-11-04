@@ -1,0 +1,25 @@
+name: Staging diagnostic token tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  token-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Check route syntax
+        run: node --check routes/internalStagingDbCheckRoute.js
+      - name: Test token handling with a mocked PostgreSQL client
+        run: node --test tests/internalStagingDbCheckRoute.test.js
