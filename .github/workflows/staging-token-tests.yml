@@ -23,3 +23,17 @@ jobs:
         run: node --check routes/internalStagingDbCheckRoute.js
       - name: Test token handling with a mocked PostgreSQL client
         run: node --test tests/internalStagingDbCheckRoute.test.js
+      - name: Safely classify deployed token configuration without sending a token
+        run: |
+          node --input-type=module <<'NODE'
+          const response = await fetch('https://chattbm-staging-db-check.onrender.com/api/internal/staging-db-check');
+          const body = await response.json().catch(() => ({}));
+          if (response.status === 503 && body.error === 'check_not_configured') {
+            console.log('STAGING_READONLY_CHECK_TOKEN is not configured.');
+          } else if (response.status === 404 && body.success === false && !body.error) {
+            console.log('STAGING_READONLY_CHECK_TOKEN is configured; no token was supplied, as intended.');
+          } else {
+            console.log('Unexpected safe-probe response:', response.status, body);
+            process.exitCode = 1;
+          }
+          NODE
