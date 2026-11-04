@@ -6,6 +6,8 @@ on:
       - 'database/migrations/005_auth_rate_limits.sql'
       - 'database/migrations/006_email_verification_tokens.sql'
       - 'scripts/isolatedMigrationSql.integration.js'
+      - 'scripts/runIsolatedStagingMigration.integration.js'
+      - 'scripts/runIsolatedStagingMigration.test.js'
       - '.github/workflows/isolated-migration-sql-tests.yml'
   workflow_dispatch:
 
