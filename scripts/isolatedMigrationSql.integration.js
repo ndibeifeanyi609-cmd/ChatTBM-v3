@@ -31,6 +31,23 @@ test('migrations 005 and 006 apply and verify on disposable PostgreSQL', async t
   );
   assert.equal(rateCheck.rowCount, 1);
   assert.match(rateCheck.rows[0].check_clause, /request_count\s*>=\s*1/);
+  // Reapply migration 005 and confirm its schema remains unchanged.
+  await client.query(migration('005_auth_rate_limits.sql'));
+  const repeatedColumns = await client.query(
+    "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_auth_rate_limits'"
+  );
+  assert.deepEqual(new Set(repeatedColumns.rows.map(row => row.column_name)),
+    new Set(['bucket_key', 'window_started_at', 'request_count', 'expires_at', 'updated_at']));
+  const repeatedIndexes = await client.query(
+    "SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename='chattbm_auth_rate_limits'"
+  );
+  assert.deepEqual(new Set(repeatedIndexes.rows.map(row => row.indexname)),
+    new Set(['chattbm_auth_rate_limits_pkey', 'chattbm_auth_rate_limits_expires_at_idx']));
+  const repeatedCheck = await client.query(
+    "SELECT check_clause FROM information_schema.check_constraints WHERE constraint_schema='public' AND constraint_name='chattbm_auth_rate_limits_request_count_check'"
+  );
+  assert.equal(repeatedCheck.rowCount, 1);
+  assert.match(repeatedCheck.rows[0].check_clause, /request_count\\s*>=\\s*1/);
   await client.query('COMMIT');
 
   await client.query('BEGIN');
