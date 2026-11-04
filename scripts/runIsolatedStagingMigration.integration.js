@@ -3,6 +3,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
+const fs = require('node:fs');
+const crypto = require('node:crypto');
 const { Client } = require('pg');
 const path = require('node:path');
 
@@ -91,4 +93,69 @@ test('actual migration runner applies 005 then 006 on disposable PostgreSQL', as
     "SELECT 1 FROM public.chattbm_schema_migrations WHERE migration_id = '006'"
   );
   assert.equal(failedHistory.rowCount, 0, 'failed migration must not leave a history record');
+});
+
+
+test('runner rejects checksum tampering, populated users, and an unrecorded existing schema', async t => {
+  assert.ok(databaseUrl, 'DATABASE_URL must point to disposable CI PostgreSQL');
+  const client = new Client({ connectionString: databaseUrl });
+  await client.connect();
+  t.after(async () => client.end());
+
+  const sql005 = fs.readFileSync(
+    path.join(__dirname, '..', 'database', 'migrations', '005_auth_rate_limits.sql'),
+    'utf8'
+  );
+  const validChecksum = crypto.createHash('sha256').update(sql005).digest('hex');
+
+  // Tampered history must block 006 before any schema change.
+  await client.query(
+    "UPDATE public.chattbm_schema_migrations SET checksum_sha256 = $1 WHERE migration_id = '005'",
+    ['0'.repeat(64)]
+  );
+  const badChecksum = invoke('006');
+  assert.notEqual(badChecksum.status, 0);
+  assert.match(badChecksum.stderr, /Migration 005 is not recorded with the expected checksum/);
+  const noTokensAfterChecksumFailure = await client.query(
+    "SELECT to_regclass('public.chattbm_email_verification_tokens') AS relation"
+  );
+  assert.equal(noTokensAfterChecksumFailure.rows[0].relation, null);
+
+  await client.query(
+    "UPDATE public.chattbm_schema_migrations SET checksum_sha256 = $1 WHERE migration_id = '005'",
+    [validChecksum]
+  );
+
+  // A populated users table must stop migration 006 without deleting user data.
+  await client.query('ALTER TABLE public.chattbm_users DROP COLUMN email_verified_at');
+  await client.query('ALTER TABLE public.chattbm_users ADD COLUMN email_verified_at TIMESTAMPTZ');
+  await client.query(
+    "INSERT INTO public.chattbm_users (id, email) VALUES ('migration-safety-user', 'migration-safety@example.test')"
+  );
+  const populated = invoke('006');
+  assert.notEqual(populated.status, 0);
+  assert.match(populated.stderr, /isolated users table is not empty/);
+  const retainedUser = await client.query(
+    "SELECT COUNT(*)::int AS count FROM public.chattbm_users WHERE id = 'migration-safety-user'"
+  );
+  assert.equal(retainedUser.rows[0].count, 1);
+  const noTokensForPopulatedTarget = await client.query(
+    "SELECT to_regclass('public.chattbm_email_verification_tokens') AS relation"
+  );
+  assert.equal(noTokensForPopulatedTarget.rows[0].relation, null);
+  await client.query("DELETE FROM public.chattbm_users WHERE id = 'migration-safety-user'");
+
+  // Existing schema without a trustworthy history entry must not be adopted.
+  await client.query("DELETE FROM public.chattbm_schema_migrations WHERE migration_id = '005'");
+  const unrecordedExisting = invoke('005');
+  assert.notEqual(unrecordedExisting.status, 0);
+  assert.match(unrecordedExisting.stderr, /Unexpected schema state before migration 005/);
+  const noFabricatedHistory = await client.query(
+    "SELECT 1 FROM public.chattbm_schema_migrations WHERE migration_id = '005'"
+  );
+  assert.equal(noFabricatedHistory.rowCount, 0);
+  const existingRateTable = await client.query(
+    "SELECT to_regclass('public.chattbm_auth_rate_limits') AS relation"
+  );
+  assert.equal(existingRateTable.rows[0].relation, 'chattbm_auth_rate_limits');
 });
