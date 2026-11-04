@@ -47,7 +47,7 @@ test('migrations 005 and 006 apply and verify on disposable PostgreSQL', async t
     "SELECT check_clause FROM information_schema.check_constraints WHERE constraint_schema='public' AND constraint_name='chattbm_auth_rate_limits_request_count_check'"
   );
   assert.equal(repeatedCheck.rowCount, 1);
-  assert.match(repeatedCheck.rows[0].check_clause, /request_count\\s*>=\\s*1/);
+  assert.match(repeatedCheck.rows[0].check_clause, /request_count\s*>=\s*1/);
   await client.query('COMMIT');
 
   await client.query('BEGIN');
