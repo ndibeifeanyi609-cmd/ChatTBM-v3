@@ -12,8 +12,11 @@ router.get('/staging-db-check', async (req, res) => {
     const expectedBuffer = Buffer.from(expected);
     const suppliedBuffer = Buffer.from(supplied);
 
-    if (!expected ||
-        expectedBuffer.length !== suppliedBuffer.length ||
+    if (!expected) {
+        return res.status(503).json({ success: false, error: 'check_not_configured' });
+    }
+
+    if (expectedBuffer.length !== suppliedBuffer.length ||
         !crypto.timingSafeEqual(expectedBuffer, suppliedBuffer)) {
         return res.status(404).json({ success: false });
     }
