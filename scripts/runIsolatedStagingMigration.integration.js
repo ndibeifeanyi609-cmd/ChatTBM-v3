@@ -27,7 +27,7 @@ function invoke(id) {
   });
 }
 
-test('actual migration runner applies 005 then 006 on disposable PostgreSQL', async t => {
+test('actual migration runner applies 004, 005, then 006 on disposable PostgreSQL', async t => {
   assert.ok(databaseUrl, 'DATABASE_URL must point to disposable CI PostgreSQL');
   const url = new URL(databaseUrl);
   assert.equal(url.hostname, 'localhost');
