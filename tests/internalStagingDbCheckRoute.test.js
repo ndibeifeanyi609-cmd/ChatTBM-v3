@@ -19,7 +19,7 @@ class FakeClient {
         if (/SELECT current_database\(\)/i.test(sql)) {
             return { rows: [{ database_name: 'chattbm_staging_isolated' }] };
         }
-        if (/SELECT COUNT\(\*\)/i.test(sql)) {
+        if (/FROM information_schema\.tables/i.test(sql)) {\n            return { rows: [{ table_name: 'chattbm_users' }] };\n        }\n        if (/SELECT COUNT\(\*\)/i.test(sql)) {
             return { rows: [{ row_count: '0' }] };
         }
         return { rows: [] };
@@ -92,6 +92,22 @@ test('staging diagnostic distinguishes missing and incorrect tokens without expo
         assert.equal(valid.body.success, true);
         assert.equal(valid.body.readOnly, true);
         assert.equal(valid.body.database, 'chattbm_staging_isolated');
+        assert.deepEqual(valid.body.schema.expectedMigrationTables, [
+            'chattbm_users',
+            'chattbm_auth_sessions',
+            'chattbm_oauth_identities',
+            'chattbm_google_oauth_states',
+            'chattbm_password_reset_tokens',
+            'chattbm_auth_rate_limits'
+        ]);
+        assert.deepEqual(valid.body.schema.tables, ['chattbm_users']);
+        assert.deepEqual(valid.body.schema.missingExpectedTables, [
+            'chattbm_auth_sessions',
+            'chattbm_oauth_identities',
+            'chattbm_google_oauth_states',
+            'chattbm_password_reset_tokens',
+            'chattbm_auth_rate_limits'
+        ]);
         assert.equal(fakePgState.connectCalls, 1);
         assert.ok(fakePgState.queries.includes('BEGIN READ ONLY'));
         assert.ok(fakePgState.queries.includes('COMMIT'));
