@@ -27,7 +27,7 @@ jobs:
           npm audit fix || echo "Some advisories remain; continuing to test compatible fixes."
       - name: Override vulnerable transitive qs version
         run: |
-          npm pkg set 'overrides.qs=6.16.1'
+          npm pkg set 'overrides.qs=6.16.2'
           npm install
           npm ls body-parser proxy-addr qs
       - name: Run full test suite
