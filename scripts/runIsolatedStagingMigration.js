@@ -72,14 +72,14 @@ async function verifyPasswordResetSchema(client, phase) {
     "AND contype IN ('p', 'u', 'f')"
   );
   const primary = constraints.rows.find(row =>
-    row.constraint_type === 'p' && /PRIMARY KEY (\\(id\\)|\\(id\\))/i.test(row.definition)
+    row.constraint_type === 'p' && row.definition === 'PRIMARY KEY (id)'
   );
   const unique = constraints.rows.find(row =>
-    row.constraint_type === 'u' && /UNIQUE \\(token_hash\\)/i.test(row.definition)
+    row.constraint_type === 'u' && row.definition === 'UNIQUE (token_hash)'
   );
   const foreign = constraints.rows.find(row =>
     row.constraint_type === 'f' &&
-    /FOREIGN KEY \\(user_id\\) REFERENCES chattbm_users\\(id\\) ON DELETE CASCADE/i.test(row.definition)
+    row.definition === 'FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE'
   );
   if (constraints.rowCount !== 3 || !primary || !unique || !foreign) {
     throw new Error('Migration 004 ' + phase + ' key/foreign-key verification failed.');
