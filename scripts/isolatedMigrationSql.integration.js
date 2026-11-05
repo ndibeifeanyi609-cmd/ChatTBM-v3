@@ -9,11 +9,33 @@ const { Client } = require('pg');
 const client = new Client({ connectionString: process.env.DATABASE_URL });
 const migration = name => fs.readFileSync(path.join(__dirname, '..', 'database', 'migrations', name), 'utf8');
 
-test('migrations 005 and 006 apply and verify on disposable PostgreSQL', async t => {
+test('migrations 004, 005, and 006 apply and verify on disposable PostgreSQL', async t => {
   await client.connect();
   t.after(async () => client.end());
 
   await client.query('CREATE TABLE chattbm_users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE)');
+  await client.query('BEGIN');
+  await client.query(migration('004_password_reset_tokens.sql'));
+  const resetColumns = await client.query(
+    "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='chattbm_password_reset_tokens'"
+  );
+  assert.deepEqual(new Set(resetColumns.rows.map(row => row.column_name)),
+    new Set(['id', 'user_id', 'token_hash', 'created_at', 'expires_at', 'used_at']));
+  const resetIndexes = await client.query(
+    "SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename='chattbm_password_reset_tokens'"
+  );
+  assert.deepEqual(new Set(resetIndexes.rows.map(row => row.indexname)), new Set([
+    'chattbm_password_reset_tokens_pkey',
+    'chattbm_password_reset_tokens_token_hash_key',
+    'chattbm_password_reset_tokens_user_created_idx',
+    'chattbm_password_reset_tokens_expires_idx'
+  ]));
+  const resetForeignKey = await client.query(
+    "SELECT rc.delete_rule FROM information_schema.referential_constraints rc WHERE rc.constraint_schema='public' AND rc.constraint_name='chattbm_password_reset_tokens_user_id_fkey'"
+  );
+  assert.equal(resetForeignKey.rows[0]?.delete_rule, 'CASCADE');
+  await client.query('COMMIT');
+
   await client.query('BEGIN');
   await client.query(migration('005_auth_rate_limits.sql'));
   const rateColumns = await client.query(
