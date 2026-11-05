@@ -22,8 +22,11 @@ jobs:
           node-version: 20
       - name: Install locked dependencies
         run: npm ci
-      - name: Apply compatible security fixes
-        run: npm audit fix
+      - name: Override vulnerable transitive qs version
+        run: |
+          npm pkg set 'overrides.qs=6.16.1'
+          npm install
+          npm ls qs
       - name: Run full test suite
         env:
           CHATTBM_TEST_DATABASE_URL: ${{ secrets.CHATTBM_TEST_DATABASE_URL }}
@@ -31,12 +34,12 @@ jobs:
         run: node --test
       - name: Verify security audit
         run: npm audit
-      - name: Commit updated lockfile
+      - name: Commit dependency security update
         run: |
-          if ! git diff --quiet -- package-lock.json; then
+          if ! git diff --quiet -- package.json package-lock.json; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add package-lock.json
-            git commit -m "fix: update vulnerable transitive dependencies"
+            git add package.json package-lock.json
+            git commit -m "fix: override vulnerable qs dependency"
             git push
           fi
