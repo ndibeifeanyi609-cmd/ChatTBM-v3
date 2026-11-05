@@ -1,0 +1,21 @@
+name: Manual read-only staging inventory
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check isolated staging inventory
+        env:
+          STAGING_READONLY_CHECK_TOKEN: ${{ secrets.STAGING_READONLY_CHECK_TOKEN }}
+        run: node --input-type=module -e 'const t=process.env.STAGING_READONLY_CHECK_TOKEN; if(!t) throw Error("missing staging token"); const r=await fetch("https://chattbm-staging-db-check.onrender.com/api/internal/staging-db-check",{headers:{"x-staging-check-token":t},signal:AbortSignal.timeout(20000)}); const b=await r.json().catch(()=>({})); if(!r.ok||b.success!==true||b.database!=="chattbm_staging_isolated"||b.readOnly!==true||!b.schema) throw Error("read-only staging inventory failed: HTTP "+r.status); console.log(JSON.stringify(b.schema,null,2));'
