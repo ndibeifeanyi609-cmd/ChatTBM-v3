@@ -66,21 +66,22 @@ async function verifyPasswordResetSchema(client, phase) {
     }
   }
   const constraints = await client.query(
-    "SELECT conname AS constraint_name, " +
-    "CASE contype WHEN 'p' THEN 'PRIMARY KEY' WHEN 'u' THEN 'UNIQUE' " +
-    "WHEN 'f' THEN 'FOREIGN KEY' END AS constraint_type, " +
-    "CASE confdeltype WHEN 'c' THEN 'CASCADE' END AS delete_rule " +
+    "SELECT conname AS constraint_name, contype AS constraint_type, " +
+    "pg_get_constraintdef(oid) AS definition " +
     "FROM pg_constraint WHERE conrelid = 'public.chattbm_password_reset_tokens'::regclass " +
     "AND contype IN ('p', 'u', 'f')"
   );
-  const byName = new Map(constraints.rows.map(row => [row.constraint_name, row]));
-  const primary = byName.get('chattbm_password_reset_tokens_pkey');
-  const unique = byName.get('chattbm_password_reset_tokens_token_hash_key');
-  const foreign = byName.get('chattbm_password_reset_tokens_user_id_fkey');
-  if (constraints.rowCount !== 3 ||
-      !primary || primary.constraint_type !== 'PRIMARY KEY' ||
-      !unique || unique.constraint_type !== 'UNIQUE' ||
-      !foreign || foreign.constraint_type !== 'FOREIGN KEY' || foreign.delete_rule !== 'CASCADE') {
+  const primary = constraints.rows.find(row =>
+    row.constraint_type === 'p' && /PRIMARY KEY (\\(id\\)|\\(id\\))/i.test(row.definition)
+  );
+  const unique = constraints.rows.find(row =>
+    row.constraint_type === 'u' && /UNIQUE \\(token_hash\\)/i.test(row.definition)
+  );
+  const foreign = constraints.rows.find(row =>
+    row.constraint_type === 'f' &&
+    /FOREIGN KEY \\(user_id\\) REFERENCES chattbm_users\\(id\\) ON DELETE CASCADE/i.test(row.definition)
+  );
+  if (constraints.rowCount !== 3 || !primary || !unique || !foreign) {
     throw new Error('Migration 004 ' + phase + ' key/foreign-key verification failed.');
   }
 }
