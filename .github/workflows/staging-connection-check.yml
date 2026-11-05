@@ -29,9 +29,14 @@ jobs:
               signal: AbortSignal.timeout(20000)
             });
             const body = await response.json().catch(() => ({}));
-            if (!response.ok || body.success !== true || body.database !== "chattbm_staging_isolated" || body.readOnly !== true || !body.schema || !Array.isArray(body.schema.tables) || !Array.isArray(body.schema.columns)) {
+            if (!response.ok || body.success !== true || body.database !== "chattbm_staging_isolated" || body.readOnly !== true || !body.schema || !Array.isArray(body.schema.expectedApplicationTables) || !Array.isArray(body.schema.tables) || !Array.isArray(body.schema.columns) || !Array.isArray(body.schema.indexes) || !Array.isArray(body.schema.constraints)) {
               throw new Error("Protected staging database check failed (HTTP " + response.status + ", code " + (body.error || "unknown") + ", diagnostic " + (body.diagnostic || "none") + ", category " + (body.category || "none") + ")");
             }
             console.log("Read-only connection verified for isolated staging database.");
+            console.log("Expected application tables: " + JSON.stringify(body.schema.expectedApplicationTables));
+            console.log("Present application tables: " + JSON.stringify(body.schema.tables));
+            console.log("Missing expected application tables: " + JSON.stringify(body.schema.missingExpectedApplicationTables));
+            console.log("Unexpected application tables: " + JSON.stringify(body.schema.unexpectedApplicationTables));
+            console.log("User row count: " + body.schema.userRowCount);
             console.log("Read-only schema inventory: " + JSON.stringify(body.schema));
           '
