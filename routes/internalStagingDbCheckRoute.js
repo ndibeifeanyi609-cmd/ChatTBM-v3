@@ -66,23 +66,19 @@ router.get('/staging-db-check', async (req, res) => {
             return res.status(503).json({ success: false, error: 'database_identity_mismatch' });
         }
 
-        const tables = await client.query(`
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-              AND table_type = 'BASE TABLE'
-              AND table_name IN (
-                'chattbm_users',
-                'chattbm_auth_sessions',
-                'chattbm_oauth_identities',
-                'chattbm_google_oauth_states',
-                'chattbm_password_reset_tokens',
-                'chattbm_auth_rate_limits'
-              )
-            ORDER BY table_name
-        `);
-
-        const presentTables = tables.rows.map(row => row.table_name);
+        const expectedApplicationTables = [
+            'chattbm_auth_rate_limits',
+            'chattbm_auth_sessions',
+            'chattbm_chat_history',
+            'chattbm_contexts',
+            'chattbm_conversations',
+            'chattbm_google_oauth_handoffs',
+            'chattbm_google_oauth_states',
+            'chattbm_memories',
+            'chattbm_oauth_identities',
+            'chattbm_password_reset_tokens',
+            'chattbm_users'
+        ];
         const expectedMigrationTables = [
             'chattbm_users',
             'chattbm_auth_sessions',
@@ -91,25 +87,37 @@ router.get('/staging-db-check', async (req, res) => {
             'chattbm_password_reset_tokens',
             'chattbm_auth_rate_limits'
         ];
+
+        const tables = await client.query(`
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+              AND table_type = 'BASE TABLE'
+              AND left(table_name, 8) = 'chattbm_'
+            ORDER BY table_name
+        `);
+
+        const presentTables = tables.rows.map(row => row.table_name);
         const missingExpectedTables = expectedMigrationTables.filter(
             tableName => !presentTables.includes(tableName)
         );
+        const missingExpectedApplicationTables = expectedApplicationTables.filter(
+            tableName => !presentTables.includes(tableName)
+        );
+        const unexpectedApplicationTables = presentTables.filter(
+            tableName => !expectedApplicationTables.includes(tableName)
+        );
 
-        const userCountResult = await client.query('SELECT COUNT(*)::text AS row_count FROM public.chattbm_users');
-        const userRowCount = userCountResult.rows[0].row_count;
+        const userCountResult = presentTables.includes('chattbm_users')
+            ? await client.query('SELECT COUNT(*)::text AS row_count FROM public.chattbm_users')
+            : null;
+        const userRowCount = userCountResult?.rows[0]?.row_count ?? null;
 
         const columns = await client.query(`
             SELECT table_name, column_name, data_type, is_nullable
             FROM information_schema.columns
             WHERE table_schema = 'public'
-              AND table_name IN (
-                'chattbm_users',
-                'chattbm_auth_sessions',
-                'chattbm_oauth_identities',
-                'chattbm_google_oauth_states',
-                'chattbm_password_reset_tokens',
-                'chattbm_auth_rate_limits'
-              )
+              AND left(table_name, 8) = 'chattbm_'
             ORDER BY table_name, ordinal_position
         `);
 
@@ -117,14 +125,7 @@ router.get('/staging-db-check', async (req, res) => {
             SELECT tablename AS table_name, indexname AS index_name, indexdef AS definition
             FROM pg_indexes
             WHERE schemaname = 'public'
-              AND tablename IN (
-                'chattbm_users',
-                'chattbm_auth_sessions',
-                'chattbm_oauth_identities',
-                'chattbm_google_oauth_states',
-                'chattbm_password_reset_tokens',
-                'chattbm_auth_rate_limits'
-              )
+              AND left(tablename, 8) = 'chattbm_'
             ORDER BY tablename, indexname
         `);
 
@@ -163,8 +164,11 @@ router.get('/staging-db-check', async (req, res) => {
             database: identity.rows[0].database_name,
             readOnly: true,
             schema: {
+                expectedApplicationTables,
                 expectedMigrationTables,
                 tables: presentTables,
+                missingExpectedApplicationTables,
+                unexpectedApplicationTables,
                 missingExpectedTables,
                 userRowCount,
                 columns: columns.rows,
