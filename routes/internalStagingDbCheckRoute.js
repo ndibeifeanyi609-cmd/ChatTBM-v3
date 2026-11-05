@@ -46,13 +46,22 @@ router.get('/staging-db-check', async (req, res) => {
         return res.status(503).json({ success: false, error: 'host_target_mismatch' });
     }
 
+    const databaseCa = process.env.STAGING_READONLY_DATABASE_CA || '';
+    if (!databaseCa.trim()) {
+        return res.status(503).json({ success: false, error: 'tls_ca_not_configured' });
+    }
+
     const client = new Client({
         host: parsed.hostname,
         port: parsed.port ? Number(parsed.port) : 5432,
         user: decodeURIComponent(parsed.username),
         password: decodeURIComponent(parsed.password),
         database: databaseName,
-        ssl: { rejectUnauthorized: false },
+        ssl: {
+            ca: databaseCa,
+            rejectUnauthorized: true,
+            servername: parsed.hostname
+        },
         connectionTimeoutMillis: 8000,
         statement_timeout: 5000
     });
