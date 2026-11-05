@@ -22,11 +22,14 @@ jobs:
           node-version: 20
       - name: Install locked dependencies
         run: npm ci
+      - name: Apply non-breaking dependency fixes
+        run: |
+          npm audit fix || echo "Some advisories remain; continuing to test compatible fixes."
       - name: Override vulnerable transitive qs version
         run: |
           npm pkg set 'overrides.qs=6.16.1'
           npm install
-          npm ls qs
+          npm ls body-parser proxy-addr qs
       - name: Run full test suite
         env:
           CHATTBM_TEST_DATABASE_URL: ${{ secrets.CHATTBM_TEST_DATABASE_URL }}
@@ -40,6 +43,6 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add package.json package-lock.json
-            git commit -m "fix: override vulnerable qs dependency"
+            git commit -m "fix: update vulnerable transitive dependencies"
             git push
           fi
