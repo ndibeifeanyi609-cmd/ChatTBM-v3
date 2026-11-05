@@ -66,12 +66,12 @@ async function verifyPasswordResetSchema(client, phase) {
     }
   }
   const constraints = await client.query(
-    'SELECT tc.constraint_name, tc.constraint_type, rc.delete_rule ' +
-    'FROM information_schema.table_constraints tc ' +
-    'LEFT JOIN information_schema.referential_constraints rc ' +
-    'ON rc.constraint_name = tc.constraint_name AND rc.constraint_schema = tc.constraint_schema ' +
-    'WHERE tc.table_schema = $1 AND tc.table_name = $2',
-    ['public', table]
+    "SELECT conname AS constraint_name, " +
+    "CASE contype WHEN 'p' THEN 'PRIMARY KEY' WHEN 'u' THEN 'UNIQUE' " +
+    "WHEN 'f' THEN 'FOREIGN KEY' END AS constraint_type, " +
+    "CASE confdeltype WHEN 'c' THEN 'CASCADE' END AS delete_rule " +
+    "FROM pg_constraint WHERE conrelid = 'public.chattbm_password_reset_tokens'::regclass " +
+    "AND contype IN ('p', 'u', 'f')"
   );
   const byName = new Map(constraints.rows.map(row => [row.constraint_name, row]));
   const primary = byName.get('chattbm_password_reset_tokens_pkey');
