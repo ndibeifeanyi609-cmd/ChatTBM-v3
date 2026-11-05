@@ -147,14 +147,7 @@ router.get('/staging-db-check', async (req, res) => {
              AND ccu.table_schema = tc.table_schema
              AND ccu.table_name = tc.table_name
             WHERE tc.table_schema = 'public'
-              AND tc.table_name IN (
-                'chattbm_users',
-                'chattbm_auth_sessions',
-                'chattbm_oauth_identities',
-                'chattbm_google_oauth_states',
-                'chattbm_password_reset_tokens',
-                'chattbm_auth_rate_limits'
-              )
+              AND left(tc.table_name, 8) = 'chattbm_'
             ORDER BY tc.table_name, tc.constraint_name, kcu.ordinal_position
         `);
 
