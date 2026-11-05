@@ -4,6 +4,7 @@ const API_BASE_URL = (() => {
     if (typeof window === 'undefined') return '';
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') return '';
+    if (host === 'chattbm-password-reset-staging.onrender.com') return '';
     return 'https://chattbm-backend.onrender.com';
 })();
 
@@ -89,6 +90,14 @@ function requestPasswordReset(email) {
 
 function confirmPasswordReset(token, password) {
     return authRequest('password-reset/confirm', { token, password });
+}
+
+function confirmEmailVerification(token) {
+    return authRequest('email-verification/confirm', { token });
+}
+
+function requestEmailVerification(email) {
+    return authRequest('email-verification/request', { email });
 }
 
 async function conversationHistoryRequest(path, method = 'GET', body) {
@@ -393,6 +402,8 @@ export {
     logoutAccount,
     requestPasswordReset,
     confirmPasswordReset,
+    confirmEmailVerification,
+    requestEmailVerification,
     getConversationHistory,
     saveConversationHistory,
     getSavedMemories,

@@ -47,6 +47,8 @@ jobs:
         run: node tests/explicitMemoryIntent.test.js
       - name: Test memory persistence
         run: node tests/memoryPersistence.test.js
+      - name: Test memory boundary ownership and isolation
+        run: node tests/memoryBoundary.test.js
       - name: Test memory boundary reload and ownership
         run: node tests/memoryBoundary.integration.test.js
       - name: Test PostgreSQL memory adapter
