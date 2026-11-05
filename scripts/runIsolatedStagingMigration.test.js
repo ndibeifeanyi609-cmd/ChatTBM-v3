@@ -20,7 +20,7 @@ test('migration runner refuses unsupported migration before connecting', () => {
     STAGING_MIGRATION_DATABASE_URL: 'postgres://user:pass@localhost:5432/chattbm_staging_isolated'
   });
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /Specify exactly migration 005 or 006/);
+  assert.match(result.stderr, /Specify exactly migration 004, 005, or 006/);
 });
 
 test('migration runner requires explicit confirmation', () => {
