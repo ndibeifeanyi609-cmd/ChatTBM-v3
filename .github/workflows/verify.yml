@@ -64,3 +64,40 @@ jobs:
             git commit -m "build: synchronize npm lockfile"
             git push
           fi
+
+  staging-readonly-diagnostic:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Run read-only isolated staging schema diagnostic
+        env:
+          STAGING_READONLY_CHECK_TOKEN: ${{ secrets.STAGING_READONLY_CHECK_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const token = process.env.STAGING_READONLY_CHECK_TOKEN;
+          if (!token) throw new Error("STAGING_READONLY_CHECK_TOKEN secret is missing");
+          const response = await fetch("https://chattbm-staging-db-check.onrender.com/api/internal/staging-db-check", {
+            headers: { "x-staging-check-token": token },
+            signal: AbortSignal.timeout(25000)
+          });
+          const body = await response.json().catch(() => ({}));
+          if (!response.ok || body.success !== true ||
+              body.database !== "chattbm_staging_isolated" ||
+              body.readOnly !== true || !body.schema ||
+              !Array.isArray(body.schema.expectedMigrationTables) ||
+              !Array.isArray(body.schema.tables) ||
+              !Array.isArray(body.schema.missingExpectedTables)) {
+            throw new Error("Read-only staging diagnostic failed: HTTP " + response.status +
+              ", error " + (body.error || "unknown") +
+              ", category " + (body.category || "none"));
+          }
+          console.log("Database: " + body.database + " (read-only)");
+          console.log("Expected tables: " + JSON.stringify(body.schema.expectedMigrationTables));
+          console.log("Present tables: " + JSON.stringify(body.schema.tables));
+          console.log("Missing tables: " + JSON.stringify(body.schema.missingExpectedTables));
+          console.log("User row count: " + body.schema.userRowCount);
+          if (body.schema.missingExpectedTables.length > 0) {
+            throw new Error("Staging schema is incomplete; missing expected tables are listed above. No migration was run.");
+          }
+          NODE
