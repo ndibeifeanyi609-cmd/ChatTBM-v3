@@ -3,6 +3,7 @@ name: Isolated Migration SQL Tests
 on:
   pull_request:
     paths:
+      - 'database/migrations/004_password_reset_tokens.sql'
       - 'database/migrations/005_auth_rate_limits.sql'
       - 'database/migrations/006_email_verification_tokens.sql'
       - 'scripts/isolatedMigrationSql.integration.js'
