@@ -18,4 +18,61 @@ jobs:
       - name: Check isolated staging inventory
         env:
           STAGING_READONLY_CHECK_TOKEN: ${{ secrets.STAGING_READONLY_CHECK_TOKEN }}
-        run: node --input-type=module -e 'const t=process.env.STAGING_READONLY_CHECK_TOKEN; if(!t) throw Error("missing staging token"); const r=await fetch("https://chattbm-staging-db-check.onrender.com/api/internal/staging-db-check",{headers:{"x-staging-check-token":t},signal:AbortSignal.timeout(20000)}); const b=await r.json().catch(()=>({})); if(!r.ok||b.success!==true||b.database!=="chattbm_staging_isolated"||b.readOnly!==true||!b.schema) throw Error("read-only staging inventory failed: HTTP "+r.status); console.log(JSON.stringify(b.schema,null,2));'
+        run: |
+          node --input-type=module <<'NODE'
+          const token = process.env.STAGING_READONLY_CHECK_TOKEN;
+          if (!token) throw new Error("STAGING_READONLY_CHECK_TOKEN secret is missing");
+
+          const response = await fetch(
+            "https://chattbm-staging-db-check.onrender.com/api/internal/staging-db-check",
+            {
+              headers: { "x-staging-check-token": token },
+              signal: AbortSignal.timeout(20000)
+            }
+          );
+          const body = await response.json().catch(() => ({}));
+          const schema = body.schema;
+
+          if (!response.ok || body.success !== true ||
+              body.database !== "chattbm_staging_isolated" ||
+              body.readOnly !== true || !schema ||
+              !Array.isArray(schema.expectedApplicationTables) ||
+              !Array.isArray(schema.expectedMigrationTables) ||
+              !Array.isArray(schema.tables) ||
+              !Array.isArray(schema.missingExpectedApplicationTables) ||
+              !Array.isArray(schema.missingExpectedTables) ||
+              !Array.isArray(schema.unexpectedApplicationTables) ||
+              !Array.isArray(schema.columns) ||
+              !Array.isArray(schema.indexes) ||
+              !Array.isArray(schema.constraints)) {
+            throw new Error(
+              "Read-only staging inventory failed validation (HTTP " +
+              response.status + ", error " + (body.error || "unknown") + ")"
+            );
+          }
+
+          console.log("Database: " + body.database + " (read-only)");
+          console.log("Expected application tables: " + JSON.stringify(schema.expectedApplicationTables));
+          console.log("Present application tables: " + JSON.stringify(schema.tables));
+          console.log("Missing expected application tables: " + JSON.stringify(schema.missingExpectedApplicationTables));
+          console.log("Expected migration tables: " + JSON.stringify(schema.expectedMigrationTables));
+          console.log("Missing expected migration tables: " + JSON.stringify(schema.missingExpectedTables));
+          console.log("Unexpected application tables: " + JSON.stringify(schema.unexpectedApplicationTables));
+          console.log("User row count: " + schema.userRowCount);
+          console.log("Columns: " + schema.columns.length);
+          console.log("Indexes: " + schema.indexes.length);
+          console.log("Constraints: " + schema.constraints.length);
+
+          if (schema.missingExpectedApplicationTables.length > 0 ||
+              schema.missingExpectedTables.length > 0) {
+            throw new Error(
+              "Staging schema is incomplete. Missing application tables: " +
+              JSON.stringify(schema.missingExpectedApplicationTables) +
+              "; missing migration tables: " +
+              JSON.stringify(schema.missingExpectedTables) +
+              ". No migration was run."
+            );
+          }
+
+          console.log("Staging schema inventory is complete.");
+          NODE
