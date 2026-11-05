@@ -26,6 +26,18 @@ jobs:
           CHATTBM_TEST_DATABASE_SSL: 'true'
         run: node --test
 
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Audit dependencies
+        run: npm audit
+
   sync-lockfile:
     if: github.event_name == 'push' && github.ref == 'refs/heads/auth-foundation-design'
     runs-on: ubuntu-latest
