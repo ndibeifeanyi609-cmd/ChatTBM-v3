@@ -58,9 +58,10 @@ test('actual migration runner applies 005 then 006 on disposable PostgreSQL', as
   assert.notEqual(unrecordedFour.status, 0);
   assert.match(unrecordedFour.stderr, /Unexpected schema state before migration 004/);
   const noFourHistory = await client.query(
-    "SELECT 1 FROM public.chattbm_schema_migrations WHERE migration_id = '004'"
+    "SELECT to_regclass('public.chattbm_schema_migrations') AS relation"
   );
-  assert.equal(noFourHistory.rowCount, 0);
+  assert.equal(noFourHistory.rows[0].relation, null,
+    'failed first migration must roll back creation of the history table');
   await client.query('DROP TABLE chattbm_password_reset_tokens CASCADE');
 
   const four = invoke('004');
