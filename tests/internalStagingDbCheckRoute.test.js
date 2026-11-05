@@ -95,6 +95,19 @@ test('staging diagnostic distinguishes missing and incorrect tokens without expo
         assert.equal(valid.body.success, true);
         assert.equal(valid.body.readOnly, true);
         assert.equal(valid.body.database, 'chattbm_staging_isolated');
+        assert.deepEqual(valid.body.schema.expectedApplicationTables, [
+            'chattbm_auth_rate_limits',
+            'chattbm_auth_sessions',
+            'chattbm_chat_history',
+            'chattbm_contexts',
+            'chattbm_conversations',
+            'chattbm_google_oauth_handoffs',
+            'chattbm_google_oauth_states',
+            'chattbm_memories',
+            'chattbm_oauth_identities',
+            'chattbm_password_reset_tokens',
+            'chattbm_users'
+        ]);
         assert.deepEqual(valid.body.schema.expectedMigrationTables, [
             'chattbm_users',
             'chattbm_auth_sessions',
@@ -104,6 +117,19 @@ test('staging diagnostic distinguishes missing and incorrect tokens without expo
             'chattbm_auth_rate_limits'
         ]);
         assert.deepEqual(valid.body.schema.tables, ['chattbm_users']);
+        assert.deepEqual(valid.body.schema.missingExpectedApplicationTables, [
+            'chattbm_auth_rate_limits',
+            'chattbm_auth_sessions',
+            'chattbm_chat_history',
+            'chattbm_contexts',
+            'chattbm_conversations',
+            'chattbm_google_oauth_handoffs',
+            'chattbm_google_oauth_states',
+            'chattbm_memories',
+            'chattbm_oauth_identities',
+            'chattbm_password_reset_tokens'
+        ]);
+        assert.deepEqual(valid.body.schema.unexpectedApplicationTables, []);
         assert.deepEqual(valid.body.schema.missingExpectedTables, [
             'chattbm_auth_sessions',
             'chattbm_oauth_identities',
@@ -111,6 +137,12 @@ test('staging diagnostic distinguishes missing and incorrect tokens without expo
             'chattbm_password_reset_tokens',
             'chattbm_auth_rate_limits'
         ]);
+        assert.ok(fakePgState.queries.some(sql =>
+            /left\(table_name, 8\) = 'chattbm_'/i.test(sql)
+        ));
+        assert.ok(fakePgState.queries.some(sql =>
+            /left\(tablename, 8\) = 'chattbm_'/i.test(sql)
+        ));
         assert.equal(fakePgState.connectCalls, 1);
         assert.ok(fakePgState.queries.includes('BEGIN READ ONLY'));
         assert.ok(fakePgState.queries.includes('COMMIT'));
