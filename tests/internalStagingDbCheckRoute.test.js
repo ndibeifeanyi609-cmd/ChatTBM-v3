@@ -155,6 +155,15 @@ test('staging diagnostic distinguishes missing and incorrect tokens without expo
         assert.equal(fakePgState.connectCalls, 1);
         assert.ok(fakePgState.queries.includes('BEGIN READ ONLY'));
         assert.ok(fakePgState.queries.includes('COMMIT'));
+
+        // Same-region Render internal URLs must not require a CA or TLS.
+        process.env.STAGING_READONLY_DATABASE_URL =
+            'postgres://test:test@dpg-dbicflmc6qcc73d97u60-a:5432/chattbm_staging_isolated';
+        delete process.env.STAGING_READONLY_DATABASE_CA;
+        const internal = await requestWithToken(configuredToken);
+        assert.equal(internal.status, 200);
+        assert.equal(internal.body.success, true);
+        assert.equal(fakePgState.config.ssl, false);
     } finally {
         if (originalToken === undefined) delete process.env.STAGING_READONLY_CHECK_TOKEN;
         else process.env.STAGING_READONLY_CHECK_TOKEN = originalToken;
