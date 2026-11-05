@@ -19,7 +19,10 @@ class FakeClient {
         if (/SELECT current_database\(\)/i.test(sql)) {
             return { rows: [{ database_name: 'chattbm_staging_isolated' }] };
         }
-        if (/FROM information_schema\.tables/i.test(sql)) {\n            return { rows: [{ table_name: 'chattbm_users' }] };\n        }\n        if (/SELECT COUNT\(\*\)/i.test(sql)) {
+        if (/FROM information_schema\.tables/i.test(sql)) {
+            return { rows: [{ table_name: 'chattbm_users' }] };
+        }
+        if (/SELECT COUNT\(\*\)/i.test(sql)) {
             return { rows: [{ row_count: '0' }] };
         }
         return { rows: [] };
