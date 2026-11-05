@@ -73,15 +73,27 @@ router.get('/staging-db-check', async (req, res) => {
               AND table_type = 'BASE TABLE'
               AND table_name IN (
                 'chattbm_users',
-                'chattbm_auth_rate_limits',
-                'chattbm_email_verification_tokens',
-                'schema_migrations',
-                'migrations',
-                'knex_migrations',
-                'SequelizeMeta'
+                'chattbm_auth_sessions',
+                'chattbm_oauth_identities',
+                'chattbm_google_oauth_states',
+                'chattbm_password_reset_tokens',
+                'chattbm_auth_rate_limits'
               )
             ORDER BY table_name
         `);
+
+        const presentTables = tables.rows.map(row => row.table_name);
+        const expectedMigrationTables = [
+            'chattbm_users',
+            'chattbm_auth_sessions',
+            'chattbm_oauth_identities',
+            'chattbm_google_oauth_states',
+            'chattbm_password_reset_tokens',
+            'chattbm_auth_rate_limits'
+        ];
+        const missingExpectedTables = expectedMigrationTables.filter(
+            tableName => !presentTables.includes(tableName)
+        );
 
         const userCountResult = await client.query('SELECT COUNT(*)::text AS row_count FROM public.chattbm_users');
         const userRowCount = userCountResult.rows[0].row_count;
@@ -92,8 +104,11 @@ router.get('/staging-db-check', async (req, res) => {
             WHERE table_schema = 'public'
               AND table_name IN (
                 'chattbm_users',
-                'chattbm_auth_rate_limits',
-                'chattbm_email_verification_tokens'
+                'chattbm_auth_sessions',
+                'chattbm_oauth_identities',
+                'chattbm_google_oauth_states',
+                'chattbm_password_reset_tokens',
+                'chattbm_auth_rate_limits'
               )
             ORDER BY table_name, ordinal_position
         `);
@@ -104,8 +119,11 @@ router.get('/staging-db-check', async (req, res) => {
             WHERE schemaname = 'public'
               AND tablename IN (
                 'chattbm_users',
-                'chattbm_auth_rate_limits',
-                'chattbm_email_verification_tokens'
+                'chattbm_auth_sessions',
+                'chattbm_oauth_identities',
+                'chattbm_google_oauth_states',
+                'chattbm_password_reset_tokens',
+                'chattbm_auth_rate_limits'
               )
             ORDER BY tablename, indexname
         `);
@@ -130,8 +148,11 @@ router.get('/staging-db-check', async (req, res) => {
             WHERE tc.table_schema = 'public'
               AND tc.table_name IN (
                 'chattbm_users',
-                'chattbm_auth_rate_limits',
-                'chattbm_email_verification_tokens'
+                'chattbm_auth_sessions',
+                'chattbm_oauth_identities',
+                'chattbm_google_oauth_states',
+                'chattbm_password_reset_tokens',
+                'chattbm_auth_rate_limits'
               )
             ORDER BY tc.table_name, tc.constraint_name, kcu.ordinal_position
         `);
@@ -142,7 +163,9 @@ router.get('/staging-db-check', async (req, res) => {
             database: identity.rows[0].database_name,
             readOnly: true,
             schema: {
-                tables: tables.rows.map(row => row.table_name),
+                expectedMigrationTables,
+                tables: presentTables,
+                missingExpectedTables,
                 userRowCount,
                 columns: columns.rows,
                 indexes: indexes.rows,
