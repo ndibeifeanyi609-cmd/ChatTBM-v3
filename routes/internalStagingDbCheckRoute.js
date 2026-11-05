@@ -38,16 +38,17 @@ router.get('/staging-db-check', async (req, res) => {
         return res.status(503).json({ success: false, error: 'database_target_mismatch' });
     }
 
-    const allowedHosts = new Set([
-        'dpg-dbicflmc6qcc73d97u60-a',
-        'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com'
-    ]);
-    if (!allowedHosts.has(parsed.hostname)) {
+    const internalHost = 'dpg-dbicflmc6qcc73d97u60-a';
+    const externalHost = 'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com';
+    if (parsed.hostname !== internalHost && parsed.hostname !== externalHost) {
         return res.status(503).json({ success: false, error: 'host_target_mismatch' });
     }
 
+    // Same-region Render services use the private internal URL, which does not
+    // require TLS. External connections retain strict certificate verification.
+    const isInternalConnection = parsed.hostname === internalHost;
     const databaseCa = process.env.STAGING_READONLY_DATABASE_CA || '';
-    if (!databaseCa.trim()) {
+    if (!isInternalConnection && !databaseCa.trim()) {
         return res.status(503).json({ success: false, error: 'tls_ca_not_configured' });
     }
 
@@ -57,7 +58,7 @@ router.get('/staging-db-check', async (req, res) => {
         user: decodeURIComponent(parsed.username),
         password: decodeURIComponent(parsed.password),
         database: databaseName,
-        ssl: {
+        ssl: isInternalConnection ? false : {
             ca: databaseCa,
             rejectUnauthorized: true,
             servername: parsed.hostname
