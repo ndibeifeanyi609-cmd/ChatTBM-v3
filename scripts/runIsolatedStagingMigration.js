@@ -8,6 +8,7 @@ const crypto = require('node:crypto');
 const { Client } = require('pg');
 
 const migrations = {
+  '004': '004_password_reset_tokens.sql',
   '005': '005_auth_rate_limits.sql',
   '006': '006_email_verification_tokens.sql'
 };
@@ -19,10 +20,76 @@ const hosts = new Set([
 const localTestTarget = process.env.NODE_ENV === 'test' &&
   process.env.STAGING_MIGRATION_ALLOW_LOCAL_TEST_TARGET === 'true';
 
+
+async function verifyPasswordResetSchema(client, phase) {
+  const table = 'chattbm_password_reset_tokens';
+  const columns = await client.query(
+    'SELECT column_name, data_type, is_nullable, column_default ' +
+    'FROM information_schema.columns WHERE table_schema = $1 AND table_name = $2',
+    ['public', table]
+  );
+  const expectedColumns = {
+    id: ['text', 'NO', null],
+    user_id: ['text', 'NO', null],
+    token_hash: ['text', 'NO', null],
+    created_at: ['timestamp with time zone', 'NO', 'now()'],
+    expires_at: ['timestamp with time zone', 'NO', null],
+    used_at: ['timestamp with time zone', 'YES', null]
+  };
+  if (columns.rowCount !== Object.keys(expectedColumns).length) {
+    throw new Error('Migration 004 ' + phase + ' column verification failed.');
+  }
+  for (const row of columns.rows) {
+    const expected = expectedColumns[row.column_name];
+    if (!expected || row.data_type !== expected[0] || row.is_nullable !== expected[1] ||
+        (expected[2] === null ? row.column_default !== null :
+          !String(row.column_default || '').toLowerCase().includes(expected[2]))) {
+      throw new Error('Migration 004 ' + phase + ' column definition verification failed.');
+    }
+  }
+  const indexes = await client.query(
+    'SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = $1 AND tablename = $2',
+    ['public', table]
+  );
+  const expectedIndexes = {
+    chattbm_password_reset_tokens_pkey: 'USING btree (id)',
+    chattbm_password_reset_tokens_token_hash_key: 'USING btree (token_hash)',
+    chattbm_password_reset_tokens_user_created_idx: 'USING btree (user_id, created_at DESC)',
+    chattbm_password_reset_tokens_expires_idx: 'USING btree (expires_at)'
+  };
+  if (indexes.rowCount !== Object.keys(expectedIndexes).length) {
+    throw new Error('Migration 004 ' + phase + ' index verification failed.');
+  }
+  for (const row of indexes.rows) {
+    if (!expectedIndexes[row.indexname] || !row.indexdef.includes(expectedIndexes[row.indexname])) {
+      throw new Error('Migration 004 ' + phase + ' index definition verification failed.');
+    }
+  }
+  const constraints = await client.query(
+    "SELECT conname AS constraint_name, contype AS constraint_type, " +
+    "pg_get_constraintdef(oid) AS definition " +
+    "FROM pg_constraint WHERE conrelid = 'public.chattbm_password_reset_tokens'::regclass " +
+    "AND contype IN ('p', 'u', 'f')"
+  );
+  const primary = constraints.rows.find(row =>
+    row.constraint_type === 'p' && row.definition === 'PRIMARY KEY (id)'
+  );
+  const unique = constraints.rows.find(row =>
+    row.constraint_type === 'u' && row.definition === 'UNIQUE (token_hash)'
+  );
+  const foreign = constraints.rows.find(row =>
+    row.constraint_type === 'f' &&
+    row.definition === 'FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE'
+  );
+  if (constraints.rowCount !== 3 || !primary || !unique || !foreign) {
+    throw new Error('Migration 004 ' + phase + ' key/foreign-key verification failed.');
+  }
+}
+
 async function run() {
   const id = process.argv[2];
   if (!Object.prototype.hasOwnProperty.call(migrations, id) || process.argv.length !== 3) {
-    throw new Error('Specify exactly migration 005 or 006.');
+    throw new Error('Specify exactly migration 004, 005, or 006.');
   }
   if (process.env.STAGING_MIGRATION_CONFIRM !== databaseName + ':' + id) {
     throw new Error('Explicit migration confirmation is missing.');
@@ -118,32 +185,40 @@ async function run() {
       }
       throw new Error('Migration ' + id + ' is already recorded as applied.');
     }
-    if (id === '006') {
+
+    const requiredPrior = id === '005' ? ['004'] : id === '006' ? ['004', '005'] : [];
+    for (const priorId of requiredPrior) {
       const priorSql = fs.readFileSync(
-        path.join(__dirname, '..', 'database', 'migrations', migrations['005']), 'utf8'
+        path.join(__dirname, '..', 'database', 'migrations', migrations[priorId]), 'utf8'
       );
-      const priorChecksum = crypto.createHash('sha256').update(priorSql).digest('hex');
-      const recordedFive = await client.query(
-        "SELECT checksum_sha256 FROM public.chattbm_schema_migrations WHERE migration_id = '005'"
+      const expectedChecksum = crypto.createHash('sha256').update(priorSql).digest('hex');
+      const recorded = await client.query(
+        'SELECT checksum_sha256 FROM public.chattbm_schema_migrations WHERE migration_id = $1',
+        [priorId]
       );
-      if (recordedFive.rowCount !== 1 || recordedFive.rows[0].checksum_sha256 !== priorChecksum) {
-        throw new Error('Migration 005 is not recorded with the expected checksum.');
+      if (recorded.rowCount !== 1 || recorded.rows[0].checksum_sha256 !== expectedChecksum) {
+        throw new Error('Migration ' + priorId + ' is not recorded with the expected checksum.');
       }
     }
 
     const stateResult = await client.query(
       "SELECT to_regclass('public.chattbm_users') IS NOT NULL AS users, " +
+      "to_regclass('public.chattbm_password_reset_tokens') IS NOT NULL AS password_resets, " +
       "to_regclass('public.chattbm_auth_rate_limits') IS NOT NULL AS limits, " +
       "to_regclass('public.chattbm_email_verification_tokens') IS NOT NULL AS tokens"
     );
     const state = stateResult.rows[0];
     if (!state.users) throw new Error('Required users table is missing.');
-    if (id === '005' && (state.limits || state.tokens)) {
+    if (id === '004' && (state.password_resets || state.limits || state.tokens)) {
+      throw new Error('Unexpected schema state before migration 004.');
+    }
+    if (id === '005' && (!state.password_resets || state.limits || state.tokens)) {
       throw new Error('Unexpected schema state before migration 005.');
     }
-    if (id === '006' && (!state.limits || state.tokens)) {
-      throw new Error('Migration 005 is not verified, or migration 006 already exists.');
+    if (id === '006' && (!state.password_resets || !state.limits || state.tokens)) {
+      throw new Error('Migration 004/005 is not verified, or migration 006 already exists.');
     }
+    if (id !== '004') await verifyPasswordResetSchema(client, 'preflight');
     if (id === '006') {
       const limitColumns = await client.query(
         'SELECT column_name, data_type, is_nullable, column_default ' +
@@ -204,10 +279,13 @@ async function run() {
 
     await client.query(sql);
 
-    const required = id === '005'
-      ? ['bucket_key', 'window_started_at', 'request_count', 'expires_at', 'updated_at']
-      : ['id', 'user_id', 'token_hash', 'created_at', 'expires_at', 'used_at'];
-    const table = id === '005' ? 'chattbm_auth_rate_limits' : 'chattbm_email_verification_tokens';
+    const required = id === '004'
+      ? ['id', 'user_id', 'token_hash', 'created_at', 'expires_at', 'used_at']
+      : id === '005'
+        ? ['bucket_key', 'window_started_at', 'request_count', 'expires_at', 'updated_at']
+        : ['id', 'user_id', 'token_hash', 'created_at', 'expires_at', 'used_at'];
+    const table = id === '004' ? 'chattbm_password_reset_tokens'
+      : id === '005' ? 'chattbm_auth_rate_limits' : 'chattbm_email_verification_tokens';
     const verified = await client.query(
       'SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = $2',
       ['public', table]
@@ -216,9 +294,11 @@ async function run() {
     if (!required.every(column => actual.has(column)) || actual.size !== required.length) {
       throw new Error('Post-migration column verification failed.');
     }
-    const expectedIndexes = id === '005'
-      ? ['chattbm_auth_rate_limits_pkey', 'chattbm_auth_rate_limits_expires_at_idx']
-      : [
+    const expectedIndexes = id === '004'
+      ? ['chattbm_password_reset_tokens_pkey', 'chattbm_password_reset_tokens_token_hash_key', 'chattbm_password_reset_tokens_user_created_idx', 'chattbm_password_reset_tokens_expires_idx']
+      : id === '005'
+        ? ['chattbm_auth_rate_limits_pkey', 'chattbm_auth_rate_limits_expires_at_idx']
+        : [
           'chattbm_email_verification_tokens_pkey',
           'chattbm_email_verification_tokens_token_hash_key',
           'chattbm_email_verification_tokens_user_id_idx',
@@ -238,8 +318,15 @@ async function run() {
       ['public', table]
     );
     const definitions = new Map(indexDefinitions.rows.map(row => [row.indexname, row.indexdef]));
-    const expectedIndexFragments = id === '005'
+    const expectedIndexFragments = id === '004'
       ? {
+          chattbm_password_reset_tokens_pkey: 'USING btree (id)',
+          chattbm_password_reset_tokens_token_hash_key: 'USING btree (token_hash)',
+          chattbm_password_reset_tokens_user_created_idx: 'USING btree (user_id, created_at DESC)',
+          chattbm_password_reset_tokens_expires_idx: 'USING btree (expires_at)'
+        }
+      : id === '005'
+        ? {
           chattbm_auth_rate_limits_pkey: 'USING btree (bucket_key)',
           chattbm_auth_rate_limits_expires_at_idx: 'USING btree (expires_at)'
         }
@@ -264,7 +351,9 @@ async function run() {
       ['public', table]
     );
     const constraints = new Map(constraintResult.rows.map(row => [row.constraint_name, row]));
-    if (id === '005') {
+    if (id === '004') {
+      await verifyPasswordResetSchema(client, 'post-migration');
+    } else if (id === '005') {
       const primary = constraints.get('chattbm_auth_rate_limits_pkey');
       const check = constraints.get('chattbm_auth_rate_limits_request_count_check');
       if (!primary || primary.constraint_type !== 'PRIMARY KEY' ||

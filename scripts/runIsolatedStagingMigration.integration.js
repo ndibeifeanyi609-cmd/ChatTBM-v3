@@ -27,7 +27,7 @@ function invoke(id) {
   });
 }
 
-test('actual migration runner applies 005 then 006 on disposable PostgreSQL', async t => {
+test('actual migration runner applies 004, 005, then 006 on disposable PostgreSQL', async t => {
   assert.ok(databaseUrl, 'DATABASE_URL must point to disposable CI PostgreSQL');
   const url = new URL(databaseUrl);
   assert.equal(url.hostname, 'localhost');
@@ -38,9 +38,35 @@ test('actual migration runner applies 005 then 006 on disposable PostgreSQL', as
   t.after(async () => client.end());
 
   await client.query('DROP TABLE IF EXISTS chattbm_email_verification_tokens CASCADE');
+  await client.query('DROP TABLE IF EXISTS chattbm_password_reset_tokens CASCADE');
   await client.query('DROP TABLE IF EXISTS chattbm_auth_rate_limits CASCADE');
   await client.query('DROP TABLE IF EXISTS chattbm_users CASCADE');
   await client.query('CREATE TABLE chattbm_users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE)');
+
+  const fiveBeforeFour = invoke('005');
+  assert.notEqual(fiveBeforeFour.status, 0);
+  assert.match(fiveBeforeFour.stderr, /Migration 004 is not recorded with the expected checksum/);
+
+  // An existing password-reset table without history must not be adopted.
+  const sql004 = fs.readFileSync(
+    path.join(__dirname, '..', 'database', 'migrations', '004_password_reset_tokens.sql'),
+    'utf8'
+  );
+  const checksum004 = crypto.createHash('sha256').update(sql004).digest('hex');
+  await client.query(sql004);
+  const unrecordedFour = invoke('004');
+  assert.notEqual(unrecordedFour.status, 0);
+  assert.match(unrecordedFour.stderr, /Unexpected schema state before migration 004/);
+  const noFourHistory = await client.query(
+    "SELECT to_regclass('public.chattbm_schema_migrations') AS relation"
+  );
+  assert.equal(noFourHistory.rows[0].relation, null,
+    'failed first migration must roll back creation of the history table');
+  await client.query('DROP TABLE chattbm_password_reset_tokens CASCADE');
+
+  const four = invoke('004');
+  assert.equal(four.status, 0, four.stderr || four.stdout);
+  assert.match(four.stdout, /Migration 004 applied, verified, and recorded/);
 
   const five = invoke('005');
   assert.equal(five.status, 0, five.stderr || five.stdout);
@@ -64,7 +90,7 @@ test('actual migration runner applies 005 then 006 on disposable PostgreSQL', as
   const history = await client.query(
     'SELECT migration_id, checksum_sha256, applied_at FROM public.chattbm_schema_migrations ORDER BY migration_id'
   );
-  assert.deepEqual(history.rows.map(row => row.migration_id), ['005', '006']);
+  assert.deepEqual(history.rows.map(row => row.migration_id), ['004', '005', '006']);
   assert.ok(history.rows.every(row => /^[a-f0-9]{64}$/.test(row.checksum_sha256)));
   assert.ok(history.rows.every(row => row.applied_at instanceof Date));
 
@@ -107,6 +133,23 @@ test('runner rejects checksum tampering, populated users, and an unrecorded exis
     'utf8'
   );
   const validChecksum = crypto.createHash('sha256').update(sql005).digest('hex');
+
+  const sql004 = fs.readFileSync(
+    path.join(__dirname, '..', 'database', 'migrations', '004_password_reset_tokens.sql'),
+    'utf8'
+  );
+  const validFourChecksum = crypto.createHash('sha256').update(sql004).digest('hex');
+  await client.query(
+    "UPDATE public.chattbm_schema_migrations SET checksum_sha256 = $1 WHERE migration_id = '004'",
+    ['0'.repeat(64)]
+  );
+  const badFourChecksum = invoke('006');
+  assert.notEqual(badFourChecksum.status, 0);
+  assert.match(badFourChecksum.stderr, /Migration 004 is not recorded with the expected checksum/);
+  await client.query(
+    "UPDATE public.chattbm_schema_migrations SET checksum_sha256 = $1 WHERE migration_id = '004'",
+    [validFourChecksum]
+  );
 
   // Tampered history must block 006 before any schema change.
   await client.query(
