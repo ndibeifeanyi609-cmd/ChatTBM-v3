@@ -7,9 +7,13 @@ const express = require('express');
 const http = require('node:http');
 
 const originalLoad = Module._load;
-const fakePgState = { connectCalls: 0, queries: [] };
+const fakePgState = { connectCalls: 0, queries: [], config: null };
 
 class FakeClient {
+    constructor(config) {
+        fakePgState.config = config;
+    }
+
     async connect() {
         fakePgState.connectCalls += 1;
     }
@@ -66,6 +70,7 @@ async function requestWithToken(token) {
 test('staging diagnostic distinguishes missing and incorrect tokens without exposing secrets', async () => {
     const originalToken = process.env.STAGING_READONLY_CHECK_TOKEN;
     const originalDatabaseUrl = process.env.STAGING_READONLY_DATABASE_URL;
+    const originalDatabaseCa = process.env.STAGING_READONLY_DATABASE_CA;
     const configuredToken = 'unit-test-configured-secret';
     const incorrectToken = 'unit-test-wrong-secret';
 
@@ -73,6 +78,7 @@ test('staging diagnostic distinguishes missing and incorrect tokens without expo
     fakePgState.queries = [];
     process.env.STAGING_READONLY_DATABASE_URL =
         'postgres://test:test@dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com:5432/chattbm_staging_isolated';
+    process.env.STAGING_READONLY_DATABASE_CA = '-----BEGIN CERTIFICATE-----\\nunit-test-ca\\n-----END CERTIFICATE-----';
 
     try {
         delete process.env.STAGING_READONLY_CHECK_TOKEN;
@@ -95,6 +101,9 @@ test('staging diagnostic distinguishes missing and incorrect tokens without expo
         assert.equal(valid.body.success, true);
         assert.equal(valid.body.readOnly, true);
         assert.equal(valid.body.database, 'chattbm_staging_isolated');
+        assert.equal(fakePgState.config.ssl.rejectUnauthorized, true);
+        assert.equal(fakePgState.config.ssl.servername, 'dpg-dbicflmc6qcc73d97u60-a.ohio-postgres.render.com');
+        assert.equal(fakePgState.config.ssl.ca, process.env.STAGING_READONLY_DATABASE_CA);
         assert.deepEqual(valid.body.schema.expectedApplicationTables, [
             'chattbm_auth_rate_limits',
             'chattbm_auth_sessions',
@@ -151,5 +160,7 @@ test('staging diagnostic distinguishes missing and incorrect tokens without expo
         else process.env.STAGING_READONLY_CHECK_TOKEN = originalToken;
         if (originalDatabaseUrl === undefined) delete process.env.STAGING_READONLY_DATABASE_URL;
         else process.env.STAGING_READONLY_DATABASE_URL = originalDatabaseUrl;
+        if (originalDatabaseCa === undefined) delete process.env.STAGING_READONLY_DATABASE_CA;
+        else process.env.STAGING_READONLY_DATABASE_CA = originalDatabaseCa;
     }
 });
