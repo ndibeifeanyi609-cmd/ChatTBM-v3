@@ -61,9 +61,14 @@ jobs:
             pg_restore --no-owner --no-privileges --exit-on-error \
               --dbname=postgresql://postgres:temporary_restore_only@localhost:5432/restore_verification \
               "$dump_dir"
-            psql -X -v ON_ERROR_STOP=1 \
+            table_count="$(psql -X -v ON_ERROR_STOP=1 -At \
               postgresql://postgres:temporary_restore_only@localhost:5432/restore_verification \
-              -c "\\dt"
+              -c "SELECT count(*) FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog','information_schema') AND table_type = 'BASE TABLE';")"
+            echo "Restored user tables: $table_count"
+            if [ "$table_count" -lt 1 ]; then
+              echo "Restore verification failed: no user tables were restored."
+              exit 1
+            fi
             echo "Restore completed successfully in the disposable PostgreSQL container."
           '
 
