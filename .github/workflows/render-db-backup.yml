@@ -33,6 +33,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gnupg
+      - name: Verify backup database is isolated staging
+        env:
+          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          database_name=$(docker run --rm -e DATABASE_URL postgres:18-alpine sh -c 'psql "$DATABASE_URL" -X -A -t -v ON_ERROR_STOP=1 -c "SELECT current_database()"')
+          if [ "$database_name" != "chattbm_staging_isolated" ]; then
+            echo "::error::Backup stopped: RENDER_DATABASE_URL is not the isolated staging database."
+            exit 1
+          fi
+          echo "Confirmed isolated staging database target."
       - name: Create encrypted PostgreSQL custom-format dump
         env:
           DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
