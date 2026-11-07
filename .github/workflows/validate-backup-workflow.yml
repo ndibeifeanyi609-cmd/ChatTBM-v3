@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Check database target in read-only mode
         env:
-          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.STAGING_BACKUP_DATABASE_URL }}
         run: |
           set -euo pipefail
           test -n "$DATABASE_URL"
