@@ -63,7 +63,7 @@ jobs:
               "$dump_dir"
             psql -X -v ON_ERROR_STOP=1 \
               postgresql://postgres:temporary_restore_only@localhost:5432/restore_verification \
-              -c "SELECT current_database() AS restored_database, count(*) AS restored_tables FROM information_schema.tables WHERE table_schema NOT IN (''pg_catalog'',''information_schema'');"
+              -c "\\dt"
             echo "Restore completed successfully in the disposable PostgreSQL container."
           '
 
