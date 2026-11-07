@@ -15,3 +15,19 @@ jobs:
       - name: Validate backup workflow syntax
         run: |
           docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 .github/workflows/render-db-backup.yml
+
+  read_only_target_check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check database target in read-only mode
+        env:
+          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          test -n "$DATABASE_URL"
+          result=$(docker run --rm -e DATABASE_URL -e PGOPTIONS='-c default_transaction_read_only=on' postgres:18-alpine sh -c "psql \"\$DATABASE_URL\" -X -A -t -F '|' -v ON_ERROR_STOP=1 -c \"SELECT current_database(), current_setting('transaction_read_only')\"")
+          printf 'Read-only connection result (database|read_only): %s\\n' "$result"
+          case "$result" in
+            *'|on') echo "Read-only connection confirmed." ;;
+            *) echo "::error::Connection did not confirm read-only mode."; exit 1 ;;
+          esac
