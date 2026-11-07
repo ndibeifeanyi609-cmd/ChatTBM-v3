@@ -63,7 +63,7 @@ jobs:
               "$dump_dir"
             table_count="$(psql -X -v ON_ERROR_STOP=1 -At \
               postgresql://postgres:temporary_restore_only@localhost:5432/restore_verification \
-              -c "SELECT count(*) FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog','information_schema') AND table_type = 'BASE TABLE';")"
+              -c "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = chr(114) AND n.oid >= 16384;")"
             echo "Restored user tables: $table_count"
             if [ "$table_count" -lt 1 ]; then
               echo "Restore verification failed: no user tables were restored."
