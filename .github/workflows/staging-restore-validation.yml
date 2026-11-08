@@ -189,12 +189,12 @@ jobs:
             printf '%s\\n' "$missing_indexes" >&2
             exit 1
           fi
-          missing_checks=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name || ':' || required.definition FROM (VALUES
-            ('chattbm_contexts','check (version >= 1)'),
-            ('chattbm_contexts','check (jsonb_typeof(payload) = ''object'')'),
-            ('chattbm_chat_history','check (jsonb_typeof(messages) = ''array'')'),
-            ('chattbm_memories','check (jsonb_typeof(payload) = ''object'')')
-          ) AS required(table_name, definition)
+          missing_checks=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name || ':' || required.expression_fragment FROM (VALUES
+            ('chattbm_contexts','version >= 1'),
+            ('chattbm_contexts','jsonb_typeof(payload) = ''object'''),
+            ('chattbm_chat_history','jsonb_typeof(messages) = ''array'''),
+            ('chattbm_memories','jsonb_typeof(payload) = ''object''')
+          ) AS required(table_name, expression_fragment)
           WHERE NOT EXISTS (
             SELECT 1 FROM pg_constraint actual
             JOIN pg_class relation ON relation.oid = actual.conrelid
@@ -202,9 +202,9 @@ jobs:
             WHERE schema.nspname = 'public'
               AND relation.relname = required.table_name
               AND actual.contype = 'c'
-              AND lower(regexp_replace(pg_get_constraintdef(actual.oid), '[[:space:]]+', ' ', 'g')) LIKE '%' || required.definition || '%'
+              AND lower(regexp_replace(pg_get_expr(actual.conbin, actual.conrelid), '[[:space:]]+', ' ', 'g')) LIKE '%' || required.expression_fragment || '%'
           )
-          ORDER BY required.table_name, required.definition")
+          ORDER BY required.table_name, required.expression_fragment")
           if [[ -n "$missing_checks" ]]; then
             echo "ERROR: Restore is missing required ChatTBM data checks:" >&2
             printf '%s\\n' "$missing_checks" >&2
