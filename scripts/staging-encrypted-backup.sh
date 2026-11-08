@@ -15,12 +15,43 @@ if [[ "$R2_BUCKET_NAME" != "chattbm-staging-backups" ]]; then
   exit 1
 fi
 
-for command_name in psql pg_dump gpg aws; do
+for command_name in python3 psql pg_dump gpg aws; do
   command -v "$command_name" >/dev/null || {
     echo "ERROR: Required command not found: $command_name" >&2
     exit 1
   }
 done
+
+# Validate the connection target locally before opening any database connection.
+# Read the URL from the environment so credentials never appear in process arguments.
+python3 - <<'PY'
+import os
+import sys
+from urllib.parse import urlsplit
+
+expected_host = "dpg-dbicflmc6qcc73d97u60-a"
+expected_database = "chattbm_staging_isolated"
+raw_url = os.environ.get("STAGING_BACKUP_DATABASE_URL", "")
+
+try:
+    parsed = urlsplit(raw_url)
+    valid = (
+        parsed.scheme in ("postgres", "postgresql")
+        and parsed.hostname == expected_host
+        and parsed.port in (None, 5432)
+        and parsed.path == "/" + expected_database
+        and bool(parsed.username)
+        and bool(parsed.password)
+        and not parsed.query
+        and not parsed.fragment
+    )
+except (ValueError, TypeError):
+    valid = False
+
+if not valid:
+    print("ERROR: Refusing backup: connection URL is not the approved isolated staging target.", file=sys.stderr)
+    sys.exit(1)
+PY
 
 export PGOPTIONS="-c default_transaction_read_only=on"
 database_name=$(psql "$STAGING_BACKUP_DATABASE_URL" -X -A -t -v ON_ERROR_STOP=1 -c 'SELECT current_database()')
