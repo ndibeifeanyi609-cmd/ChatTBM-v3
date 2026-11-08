@@ -178,6 +178,18 @@ class StagingBackupTargetTests(unittest.TestCase):
         self.assertEqual(lines["BACKUP_SHA256"], hashlib.sha256(expected).hexdigest())
         self.assertEqual(int(lines["BACKUP_SIZE_BYTES"]), len(expected))
 
+    def test_invalid_r2_account_ids_are_rejected_before_database_access(self):
+        invalid_ids = ["", "not-an-account-id", "a" * 31, "a" * 33, "g" * 32]
+        for account_id in invalid_ids:
+            with self.subTest(account_id=account_id):
+                self.marker.unlink(missing_ok=True)
+                self.env["R2_ACCOUNT_ID"] = account_id
+                result = self.run_backup(VALID_URL)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Cloudflare R2 account ID", result.stderr)
+                self.assertFalse(self.marker.exists(), "Invalid R2 account ID must be rejected before database access.")
+        self.env["R2_ACCOUNT_ID"] = "00000000000000000000000000000000"
+
     def test_rejected_urls_never_reach_psql(self):
         invalid_urls = {
             "external Render hostname": f"postgresql://user:pass@dpg-external.example.com/{DATABASE}",
