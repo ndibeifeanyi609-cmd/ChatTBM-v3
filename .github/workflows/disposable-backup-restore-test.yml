@@ -1,0 +1,81 @@
+name: Disposable Backup Restore Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  restore-test:
+    name: Restore into temporary PostgreSQL 18
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BACKUP_B64: ${{ secrets.RESTORE_TEST_BACKUP_BASE64 }}
+    steps:
+      - name: Require private backup secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$BACKUP_B64" ]; then
+            echo "::error::Add the repository Actions secret RESTORE_TEST_BACKUP_BASE64 before running this workflow."
+            exit 1
+          fi
+
+      - name: Start disposable PostgreSQL 18
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name restore-test-postgres \
+            -e POSTGRES_PASSWORD=temporary_restore_only \
+            -e POSTGRES_DB=restore_verification \
+            -p 5432:5432 postgres:18
+          for attempt in $(seq 1 30); do
+            if docker exec restore-test-postgres pg_isready -U postgres; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Temporary PostgreSQL did not become ready."
+          exit 1
+
+      - name: Restore and verify backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/restore-backup.tar.gz"
+          printf '%s' "$BACKUP_B64" | base64 --decode > "$archive"
+          test -s "$archive"
+          docker cp "$archive" restore-test-postgres:/tmp/restore-backup.tar.gz
+          docker exec restore-test-postgres bash -euc '
+            mkdir -p /tmp/restore-source
+            tar -xzf /tmp/restore-backup.tar.gz -C /tmp/restore-source
+            toc="$(find /tmp/restore-source -type f -name toc.dat -print -quit)"
+            if [ -z "$toc" ]; then
+              echo "No PostgreSQL directory-format TOC found in archive."
+              exit 1
+            fi
+            dump_dir="$(dirname "$toc")"
+            pg_restore --list "$dump_dir" >/tmp/restore-list.txt
+            pg_restore --no-owner --no-privileges --exit-on-error \
+              --dbname=postgresql://postgres:temporary_restore_only@localhost:5432/restore_verification \
+              "$dump_dir"
+            table_count="$(psql -X -v ON_ERROR_STOP=1 -At \
+              postgresql://postgres:temporary_restore_only@localhost:5432/restore_verification \
+              -c "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = chr(114) AND c.oid >= 16384;")"
+            echo "Restored user tables: $table_count"
+            if [ "$table_count" -lt 1 ]; then
+              echo "Restore verification failed: no user tables were restored."
+              exit 1
+            fi
+            echo "Restore completed successfully in the disposable PostgreSQL container."
+          '
+
+      - name: Destroy disposable database
+        if: always()
+        shell: bash
+        run: docker rm -f restore-test-postgres 2>/dev/null || true
