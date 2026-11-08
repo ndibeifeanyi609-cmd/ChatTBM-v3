@@ -119,7 +119,7 @@ export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
 export AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
 export AWS_DEFAULT_REGION="auto"
 endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-aws s3 cp "$output" "s3://${R2_BUCKET_NAME}/${filename}" \\
+aws s3 cp "$output" "s3://${R2_BUCKET_NAME}/${filename}" \
   --endpoint-url "$endpoint" --only-show-errors
 
 echo "Encrypted isolated staging backup uploaded to private R2 bucket: $R2_BUCKET_NAME/$filename"
