@@ -110,8 +110,14 @@ if [[ -e "$output" ]]; then
   exit 1
 fi
 
+# Store the passphrase only in the private credential directory (mode 700).
+# GPG reads the mode-600 file; the secret is not placed in its argument list.
+passphrase_file="$credential_dir/gpg-passphrase"
+printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" > "$passphrase_file"
+chmod 600 "$passphrase_file"
+
 pg_dump --dbname="$safe_database_url" --format=custom --no-owner --no-privileges |
-  gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-fd 3 -o "$output" 3<<<"$BACKUP_ENCRYPTION_PASSPHRASE"
+  gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-file "$passphrase_file" -o "$output"
 test -s "$output"
 backup_sha256=$(sha256sum "$output" | awk '{print $1}')
 backup_size_bytes=$(wc -c < "$output" | tr -d '[:space:]')
