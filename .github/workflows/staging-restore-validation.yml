@@ -168,4 +168,45 @@ jobs:
             printf '%s\\n' "$missing_constraints" >&2
             exit 1
           fi
+          missing_indexes=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.index_name FROM (VALUES
+            ('chattbm_contexts_user_created_idx'),
+            ('chattbm_contexts_user_updated_idx'),
+            ('chattbm_google_oauth_states_expires_at_idx'),
+            ('chattbm_google_oauth_handoffs_expires_at_idx'),
+            ('chattbm_auth_sessions_user_id_idx'),
+            ('chattbm_auth_sessions_expires_at_idx'),
+            ('chattbm_memories_user_lifecycle_idx')
+          ) AS required(index_name)
+          WHERE NOT EXISTS (
+            SELECT 1 FROM pg_indexes actual
+            WHERE actual.schemaname = 'public'
+              AND actual.indexname = required.index_name
+          )
+          ORDER BY required.index_name")
+          if [[ -n "$missing_indexes" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM indexes:" >&2
+            printf '%s\\n' "$missing_indexes" >&2
+            exit 1
+          fi
+          missing_checks=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name || ':' || required.definition FROM (VALUES
+            ('chattbm_contexts','check (version >= 1)'),
+            ('chattbm_contexts','check (jsonb_typeof(payload) = ''object'')'),
+            ('chattbm_chat_history','check (jsonb_typeof(messages) = ''array'')'),
+            ('chattbm_memories','check (jsonb_typeof(payload) = ''object'')')
+          ) AS required(table_name, definition)
+          WHERE NOT EXISTS (
+            SELECT 1 FROM pg_constraint actual
+            JOIN pg_class relation ON relation.oid = actual.conrelid
+            JOIN pg_namespace schema ON schema.oid = relation.relnamespace
+            WHERE schema.nspname = 'public'
+              AND relation.relname = required.table_name
+              AND actual.contype = 'c'
+              AND lower(regexp_replace(pg_get_constraintdef(actual.oid), '[[:space:]]+', ' ', 'g')) LIKE '%' || required.definition || '%'
+          )
+          ORDER BY required.table_name, required.definition")
+          if [[ -n "$missing_checks" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM data checks:" >&2
+            printf '%s\\n' "$missing_checks" >&2
+            exit 1
+          fi
           echo "RESTORE_VALIDATION_OK: all nine required ChatTBM account, conversation, context, transcript, memory, and OAuth tables restored in disposable PostgreSQL 18."
