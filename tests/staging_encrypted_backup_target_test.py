@@ -49,7 +49,7 @@ class StagingBackupTargetTests(unittest.TestCase):
                 '#!/bin/sh\n'
                 'if [ "$1" = "s3" ] && [ "$2" = "cp" ]; then\n'
                 '  size=$(wc -c < "$3" | tr -d "[:space:]")\n'
-                '  printf "%s\\\n" "$size" > "$AWS_SIZE_FILE"\n'
+                '  echo "$size" > "$AWS_SIZE_FILE"\n'
                 '  exit 0\n'
                 'fi\n'
                 'if [ "$1" = "s3api" ] && [ "$2" = "head-object" ]; then\n'
