@@ -29,6 +29,7 @@ const authRoutes = require("./auth/authRoutes");
 const googleOAuthRoutes = require("./auth/googleOAuthRoutes");
 const conversationHistoryRoutes = require("./routes/conversationHistoryRoutes").router;
 const { requireAuth } = require("./auth/requireAuth");
+const adminRoutes = require("./routes/adminRoutes");
 const { isTrustedMutationRequest } = require("./auth/requestOrigin");
 const app = express();
 // Render runs behind one reverse proxy; preserve client IPs for rate limiting.
@@ -130,6 +131,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/auth/google", googleOAuthRoutes);
 app.use("/api/conversations", requireAuth, conversationHistoryRoutes);
 app.use("/api/memories", requireAuth, require("./routes/memoryRoutes").router);
+app.use("/api/admin", requireAuth, adminRoutes);
 
 // REGISTER CHAT ROUTES
 // =====================================
