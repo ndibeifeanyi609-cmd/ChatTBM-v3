@@ -67,11 +67,11 @@ if not valid:
     sys.exit(1)
 
 def pgpass_escape(value):
-    return value.replace("\\\\", "\\\\\\\\").replace(":", "\\\\:")
+    return value.replace("\\", "\\\\").replace(":", "\\:")
 
 pgpass = ":".join(map(pgpass_escape, [
     expected_host, str(port), expected_database, username, password
-])) + "\\n"
+])) + "\n"
 path = Path(sys.argv[1])
 path.write_text(pgpass, encoding="utf-8")
 path.chmod(0o600)
@@ -111,8 +111,8 @@ pg_dump --dbname="$safe_database_url" --format=custom --no-owner --no-privileges
 test -s "$output"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  printf 'backup_file=%s\\n' "$output" >> "$GITHUB_OUTPUT"
-  printf 'backup_object_key=%s\\n' "$filename" >> "$GITHUB_OUTPUT"
+  printf 'backup_file=%s\n' "$output" >> "$GITHUB_OUTPUT"
+  printf 'backup_object_key=%s\n' "$filename" >> "$GITHUB_OUTPUT"
 fi
 
 export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
