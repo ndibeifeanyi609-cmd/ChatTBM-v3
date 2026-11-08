@@ -1,0 +1,23 @@
+name: Validate Database Backup Workflow
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/render-db-backup.yml"
+      - ".github/workflows/validate-backup-workflow.yml"
+      - "scripts/staging-encrypted-backup.sh"
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Validate backup workflow syntax
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 .github/workflows/render-db-backup.yml .github/workflows/validate-backup-workflow.yml
+      - name: Validate backup script syntax
+        run: bash -n scripts/staging-encrypted-backup.sh
+      - name: Lint backup script
+        run: |
+          docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable scripts/staging-encrypted-backup.sh

@@ -22,47 +22,83 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - name: Check backup secrets exist
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check all staging backup and R2 secrets exist
         env:
-          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
-          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+          STAGING_BACKUP_DATABASE_URL: ${{ secrets.STAGING_BACKUP_DATABASE_URL }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
-          test -n "$DATABASE_URL"
-          test -n "$BACKUP_PASSPHRASE"
-      - name: Install tools
+          set -euo pipefail
+          test -n "$STAGING_BACKUP_DATABASE_URL"
+          test -n "$BACKUP_ENCRYPTION_PASSPHRASE"
+          test -n "$R2_ACCESS_KEY_ID"
+          test -n "$R2_SECRET_ACCESS_KEY"
+          test -n "$R2_ACCOUNT_ID"
+          test -n "$R2_BUCKET_NAME"
+
+      - name: Install backup and restore tools
         run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y gnupg
-      - name: Create encrypted PostgreSQL custom-format dump
+          sudo apt-get install -y awscli gnupg ca-certificates curl
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          psql --version
+          pg_dump --version
+
+      - name: Create encrypted staging backup and upload to private R2
+        id: backup
         env:
-          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
-          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+          STAGING_BACKUP_DATABASE_URL: ${{ secrets.STAGING_BACKUP_DATABASE_URL }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          BACKUP_KEEP_LOCAL: "true"
         run: |
           set -euo pipefail
-          file="chattbm-db-$(date -u +%Y%m%dT%H%M%SZ).dump.gpg"
-          docker run --rm -e DATABASE_URL postgres:18-alpine sh -c 'pg_dump --format=custom --no-owner --no-privileges "$DATABASE_URL"' | gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 --output "$file"
-          test -s "$file"
-          echo "BACKUP_FILE=$file" >> "$GITHUB_ENV"
-      - name: Decrypt and restore into disposable PostgreSQL
+          bash scripts/staging-encrypted-backup.sh
+
+      - name: Download encrypted backup from R2 and restore-test it
         env:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          AWS_DEFAULT_REGION: auto
+          BACKUP_OBJECT_KEY: ${{ steps.backup.outputs.backup_object_key }}
+          BACKUP_FILE: ${{ steps.backup.outputs.backup_file }}
         run: |
           set -euo pipefail
-          plain="/tmp/chattbm-restore-test.dump"
-          trap 'rm -f "$plain"' EXIT
-          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --decrypt "$BACKUP_FILE" > "$plain"
+          endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          downloaded="/tmp/chattbm-r2-restore-test.dump.gpg"
+          plain="/tmp/chattbm-r2-restore-test.dump"
+          trap 'rm -f "$downloaded" "$plain" "$BACKUP_FILE"' EXIT
+          aws s3 cp "s3://${R2_BUCKET_NAME}/${BACKUP_OBJECT_KEY}" "$downloaded" \
+            --endpoint-url "$endpoint" --only-show-errors
+          test -s "$downloaded"
+          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 \
+            --decrypt "$downloaded" 3<<<"$BACKUP_PASSPHRASE" > "$plain"
           test -s "$plain"
-          docker run --rm --network host -e PGPASSWORD=restore_test_password -v "$plain:/backup.dump:ro" postgres:18-alpine sh -c '
-            set -eu
-            pg_restore --exit-on-error --host=127.0.0.1 --username=restore_test --dbname=restore_validation --no-owner --no-privileges /backup.dump
-            count=$(psql --host=127.0.0.1 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT count(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_type = chr(66)||chr(65)||chr(83)||chr(69)||chr(32)||chr(84)||chr(65)||chr(66)||chr(76)||chr(69) AND table_name LIKE chr(99)||chr(104)||chr(97)||chr(116)||chr(116)||chr(98)||chr(109)||chr(95)||chr(37)")
-            test "$count" -ge 5
-            echo "RESTORE_VALIDATION_OK: core ChatTBM tables restored in disposable PostgreSQL."
-          '
-      - name: Upload restore-tested encrypted backup for seven days
-        uses: actions/upload-artifact@v4
-        with:
-          name: chattbm-encrypted-postgres-backup
-          path: ${{ env.BACKUP_FILE }}
-          if-no-files-found: error
-          retention-days: 7
+          docker run --rm --network host -e PGPASSWORD=restore_test_password \
+            -v "$plain:/backup.dump:ro" postgres:18-alpine sh -c '
+              set -eu
+              pg_restore --exit-on-error --host=127.0.0.1 --username=restore_test \
+                --dbname=restore_validation --no-owner --no-privileges /backup.dump
+              count=$(psql --host=127.0.0.1 --username=restore_test \
+                --dbname=restore_validation --tuples-only --no-align \
+                --command "SELECT count(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_type = chr(66)||chr(65)||chr(83)||chr(69)||chr(32)||chr(84)||chr(65)||chr(66)||chr(76)||chr(69) AND table_name LIKE chr(99)||chr(104)||chr(97)||chr(116)||chr(116)||chr(98)||chr(109)||chr(95)||chr(37)")
+              test "$count" -ge 5
+              echo "RESTORE_VALIDATION_OK: encrypted backup downloaded from R2 and core ChatTBM tables restored."
+            '
