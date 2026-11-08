@@ -33,11 +33,16 @@ if [[ -e "$output" ]]; then
   echo "ERROR: Backup file already exists." >&2
   exit 1
 fi
-trap 'rm -f "$output"' EXIT
+trap 'if [[ "${BACKUP_KEEP_LOCAL:-false}" != "true" ]]; then rm -f "$output"; fi' EXIT
 
 pg_dump --dbname="$STAGING_BACKUP_DATABASE_URL" --format=custom --no-owner --no-privileges |
   gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-fd 3 -o "$output" 3<<<"$BACKUP_ENCRYPTION_PASSPHRASE"
 test -s "$output"
+
+if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+  printf 'backup_file=%s\\n' "$output" >> "$GITHUB_OUTPUT"
+  printf 'backup_object_key=%s\\n' "$filename" >> "$GITHUB_OUTPUT"
+fi
 
 export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
 export AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
