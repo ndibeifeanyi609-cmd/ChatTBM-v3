@@ -169,18 +169,19 @@ jobs:
             exit 1
           fi
           missing_indexes=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.index_name FROM (VALUES
-            ('chattbm_contexts_user_created_idx'),
-            ('chattbm_contexts_user_updated_idx'),
-            ('chattbm_google_oauth_states_expires_at_idx'),
-            ('chattbm_google_oauth_handoffs_expires_at_idx'),
-            ('chattbm_auth_sessions_user_id_idx'),
-            ('chattbm_auth_sessions_expires_at_idx'),
-            ('chattbm_memories_user_lifecycle_idx')
-          ) AS required(index_name)
+            ('chattbm_contexts_user_created_idx','on public.chattbm_contexts using btree (user_id, created_at desc)'),
+            ('chattbm_contexts_user_updated_idx','on public.chattbm_contexts using btree (user_id, updated_at desc)'),
+            ('chattbm_google_oauth_states_expires_at_idx','on public.chattbm_google_oauth_states using btree (expires_at)'),
+            ('chattbm_google_oauth_handoffs_expires_at_idx','on public.chattbm_google_oauth_handoffs using btree (expires_at)'),
+            ('chattbm_auth_sessions_user_id_idx','on public.chattbm_auth_sessions using btree (user_id)'),
+            ('chattbm_auth_sessions_expires_at_idx','on public.chattbm_auth_sessions using btree (expires_at)'),
+            ('chattbm_memories_user_lifecycle_idx','on public.chattbm_memories using btree (user_id, lifecycle)')
+          ) AS required(index_name, expected_definition)
           WHERE NOT EXISTS (
             SELECT 1 FROM pg_indexes actual
             WHERE actual.schemaname = 'public'
               AND actual.indexname = required.index_name
+              AND lower(regexp_replace(actual.indexdef, '[[:space:]]+', ' ', 'g')) LIKE '%' || required.expected_definition || '%'
           )
           ORDER BY required.index_name")
           if [[ -n "$missing_indexes" ]]; then
