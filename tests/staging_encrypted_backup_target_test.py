@@ -21,7 +21,7 @@ class StagingBackupTargetTests(unittest.TestCase):
         commands = {
             "psql": '#!/bin/sh\nprintf called >> "$PSQL_MARKER"\nprintf "chattbm_staging_isolated\\n"\n',
             "pg_dump": "#!/bin/sh\nexit 0\n",
-            "gpg": '#!/bin/sh\nwhile [ "$#" -gt 0 ]; do if [ "$1" = "-o" ]; then shift; : > "$1"; exit 0; fi; shift; done\nexit 1\n',
+            "gpg": '#!/bin/sh\nwhile [ "$#" -gt 0 ]; do if [ "$1" = "-o" ]; then shift; printf "fake encrypted test dump" > "$1"; exit 0; fi; shift; done\nexit 1\n',
             "aws": "#!/bin/sh\nexit 0\n",
         }
         for name, body in commands.items():
