@@ -1,0 +1,1465 @@
+{
+  "manifestVersion": 1,
+  "sourceRevision": "a4753cb26fa2945d65aadac0511eb4b730c1f6af",
+  "postgresMajorVersion": 18,
+  "schema": "public",
+  "tables": [
+    {
+      "schema": "public",
+      "name": "chattbm_users",
+      "columns": [
+        {
+          "position": 1,
+          "name": "id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "email_normalized",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "password_hash",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "email_verified_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": true,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 5,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 6,
+          "name": "updated_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 7,
+          "name": "disabled_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": true,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_auth_sessions",
+      "columns": [
+        {
+          "position": 1,
+          "name": "id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "user_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "token_hash",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 5,
+          "name": "expires_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 6,
+          "name": "revoked_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": true,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 7,
+          "name": "last_seen_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": true,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_chat_history",
+      "columns": [
+        {
+          "position": 1,
+          "name": "user_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "conversation_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "messages",
+          "type": "pg_catalog.jsonb",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "updated_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_contexts",
+      "columns": [
+        {
+          "position": 1,
+          "name": "id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "user_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "interaction_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "version",
+          "type": "pg_catalog.int4",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 5,
+          "name": "schema_version",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 6,
+          "name": "lifecycle",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 7,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 8,
+          "name": "updated_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 9,
+          "name": "payload",
+          "type": "pg_catalog.jsonb",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_conversations",
+      "columns": [
+        {
+          "position": 1,
+          "name": "id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "user_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "conversation_key",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "version",
+          "type": "pg_catalog.int4",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 5,
+          "name": "lifecycle",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 6,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 7,
+          "name": "updated_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 8,
+          "name": "payload",
+          "type": "pg_catalog.jsonb",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_google_oauth_handoffs",
+      "columns": [
+        {
+          "position": 1,
+          "name": "handoff_hash",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "user_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "expires_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_google_oauth_states",
+      "columns": [
+        {
+          "position": 1,
+          "name": "state_hash",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "link_user_id",
+          "type": "pg_catalog.text",
+          "nullable": true,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "expires_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_memories",
+      "columns": [
+        {
+          "position": 1,
+          "name": "id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "user_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "memory_type",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "subject",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 5,
+          "name": "lifecycle",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 6,
+          "name": "payload",
+          "type": "pg_catalog.jsonb",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 7,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 8,
+          "name": "updated_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_oauth_identities",
+      "columns": [
+        {
+          "position": 1,
+          "name": "id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "user_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "provider",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "provider_subject",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 5,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_password_reset_tokens",
+      "columns": [
+        {
+          "position": 1,
+          "name": "id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "user_id",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "token_hash",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "created_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 5,
+          "name": "expires_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 6,
+          "name": "used_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": true,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    },
+    {
+      "schema": "public",
+      "name": "chattbm_auth_rate_limits",
+      "columns": [
+        {
+          "position": 1,
+          "name": "bucket_key",
+          "type": "pg_catalog.text",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 2,
+          "name": "window_started_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 3,
+          "name": "request_count",
+          "type": "pg_catalog.int4",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 4,
+          "name": "expires_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": null,
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        },
+        {
+          "position": 5,
+          "name": "updated_at",
+          "type": "pg_catalog.timestamptz",
+          "nullable": false,
+          "default": "now()",
+          "identity": false,
+          "identityGeneration": null,
+          "generated": false,
+          "generationExpression": null
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (bucket_key)",
+      "name": "chattbm_auth_rate_limits_pkey",
+      "schema": "public",
+      "table": "chattbm_auth_rate_limits",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((request_count >= 1))",
+      "name": "chattbm_auth_rate_limits_request_count_check",
+      "schema": "public",
+      "table": "chattbm_auth_rate_limits",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_auth_sessions_pkey",
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (token_hash)",
+      "name": "chattbm_auth_sessions_token_hash_key",
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_auth_sessions_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((jsonb_typeof(messages) = 'array'::text))",
+      "name": "chattbm_chat_history_messages_check",
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (user_id, conversation_id)",
+      "name": "chattbm_chat_history_pkey",
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_chat_history_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((jsonb_typeof(payload) = 'object'::text))",
+      "name": "chattbm_contexts_payload_check",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_contexts_pkey",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_contexts_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (user_id, interaction_id)",
+      "name": "chattbm_contexts_user_interaction_unique",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((version >= 1))",
+      "name": "chattbm_contexts_version_check",
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_conversations_pkey",
+      "schema": "public",
+      "table": "chattbm_conversations",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (user_id, conversation_key)",
+      "name": "chattbm_conversations_user_id_conversation_key_key",
+      "schema": "public",
+      "table": "chattbm_conversations",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (handoff_hash)",
+      "name": "chattbm_google_oauth_handoffs_pkey",
+      "schema": "public",
+      "table": "chattbm_google_oauth_handoffs",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_google_oauth_handoffs_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_google_oauth_handoffs",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (link_user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_google_oauth_states_link_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_google_oauth_states",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (state_hash)",
+      "name": "chattbm_google_oauth_states_pkey",
+      "schema": "public",
+      "table": "chattbm_google_oauth_states",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "CHECK ((jsonb_typeof(payload) = 'object'::text))",
+      "name": "chattbm_memories_payload_check",
+      "schema": "public",
+      "table": "chattbm_memories",
+      "type": "c",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_memories_pkey",
+      "schema": "public",
+      "table": "chattbm_memories",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (user_id, memory_type, subject)",
+      "name": "chattbm_memories_user_id_memory_type_subject_key",
+      "schema": "public",
+      "table": "chattbm_memories",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_oauth_identities_pkey",
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (provider, provider_subject)",
+      "name": "chattbm_oauth_identities_provider_provider_subject_key",
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_oauth_identities_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (user_id, provider)",
+      "name": "chattbm_oauth_identities_user_id_provider_key",
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_password_reset_tokens_pkey",
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "type": "p",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (token_hash)",
+      "name": "chattbm_password_reset_tokens_token_hash_key",
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "FOREIGN KEY (user_id) REFERENCES chattbm_users(id) ON DELETE CASCADE",
+      "name": "chattbm_password_reset_tokens_user_id_fkey",
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "type": "f",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "UNIQUE (email_normalized)",
+      "name": "chattbm_users_email_normalized_key",
+      "schema": "public",
+      "table": "chattbm_users",
+      "type": "u",
+      "validated": true
+    },
+    {
+      "deferrable": false,
+      "deferred": false,
+      "definition": "PRIMARY KEY (id)",
+      "name": "chattbm_users_pkey",
+      "schema": "public",
+      "table": "chattbm_users",
+      "type": "p",
+      "validated": true
+    }
+  ],
+  "indexes": [
+    {
+      "definition": "CREATE INDEX chattbm_auth_rate_limits_expires_at_idx ON public.chattbm_auth_rate_limits USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_auth_rate_limits_expires_at_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_rate_limits",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_auth_rate_limits_pkey ON public.chattbm_auth_rate_limits USING btree (bucket_key)",
+      "live": true,
+      "name": "chattbm_auth_rate_limits_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_rate_limits",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_auth_sessions_expires_at_idx ON public.chattbm_auth_sessions USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_auth_sessions_expires_at_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_auth_sessions_pkey ON public.chattbm_auth_sessions USING btree (id)",
+      "live": true,
+      "name": "chattbm_auth_sessions_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_auth_sessions_token_hash_key ON public.chattbm_auth_sessions USING btree (token_hash)",
+      "live": true,
+      "name": "chattbm_auth_sessions_token_hash_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_auth_sessions_user_id_idx ON public.chattbm_auth_sessions USING btree (user_id)",
+      "live": true,
+      "name": "chattbm_auth_sessions_user_id_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_auth_sessions",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_chat_history_pkey ON public.chattbm_chat_history USING btree (user_id, conversation_id)",
+      "live": true,
+      "name": "chattbm_chat_history_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "schema": "public",
+      "table": "chattbm_chat_history",
+      "name": "chattbm_chat_history_updated_at_idx",
+      "definition": "CREATE INDEX chattbm_chat_history_updated_at_idx ON public.chattbm_chat_history USING btree (user_id, updated_at DESC)",
+      "unique": false,
+      "primary": false,
+      "valid": true,
+      "ready": true,
+      "live": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_contexts_pkey ON public.chattbm_contexts USING btree (id)",
+      "live": true,
+      "name": "chattbm_contexts_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_contexts_user_created_idx ON public.chattbm_contexts USING btree (user_id, created_at DESC)",
+      "live": true,
+      "name": "chattbm_contexts_user_created_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_contexts_user_interaction_unique ON public.chattbm_contexts USING btree (user_id, interaction_id)",
+      "live": true,
+      "name": "chattbm_contexts_user_interaction_unique",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_contexts_user_updated_idx ON public.chattbm_contexts USING btree (user_id, updated_at DESC)",
+      "live": true,
+      "name": "chattbm_contexts_user_updated_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_contexts",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_conversations_pkey ON public.chattbm_conversations USING btree (id)",
+      "live": true,
+      "name": "chattbm_conversations_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_conversations",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_conversations_user_id_conversation_key_key ON public.chattbm_conversations USING btree (user_id, conversation_key)",
+      "live": true,
+      "name": "chattbm_conversations_user_id_conversation_key_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_conversations",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_google_oauth_handoffs_expires_at_idx ON public.chattbm_google_oauth_handoffs USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_google_oauth_handoffs_expires_at_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_google_oauth_handoffs",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_google_oauth_handoffs_pkey ON public.chattbm_google_oauth_handoffs USING btree (handoff_hash)",
+      "live": true,
+      "name": "chattbm_google_oauth_handoffs_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_google_oauth_handoffs",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_google_oauth_states_expires_at_idx ON public.chattbm_google_oauth_states USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_google_oauth_states_expires_at_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_google_oauth_states",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_google_oauth_states_pkey ON public.chattbm_google_oauth_states USING btree (state_hash)",
+      "live": true,
+      "name": "chattbm_google_oauth_states_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_google_oauth_states",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_memories_pkey ON public.chattbm_memories USING btree (id)",
+      "live": true,
+      "name": "chattbm_memories_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_memories",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_memories_user_id_memory_type_subject_key ON public.chattbm_memories USING btree (user_id, memory_type, subject)",
+      "live": true,
+      "name": "chattbm_memories_user_id_memory_type_subject_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_memories",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_memories_user_lifecycle_idx ON public.chattbm_memories USING btree (user_id, lifecycle)",
+      "live": true,
+      "name": "chattbm_memories_user_lifecycle_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_memories",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_oauth_identities_pkey ON public.chattbm_oauth_identities USING btree (id)",
+      "live": true,
+      "name": "chattbm_oauth_identities_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_oauth_identities_provider_provider_subject_key ON public.chattbm_oauth_identities USING btree (provider, provider_subject)",
+      "live": true,
+      "name": "chattbm_oauth_identities_provider_provider_subject_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_oauth_identities_user_id_provider_key ON public.chattbm_oauth_identities USING btree (user_id, provider)",
+      "live": true,
+      "name": "chattbm_oauth_identities_user_id_provider_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_oauth_identities",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_password_reset_tokens_expires_idx ON public.chattbm_password_reset_tokens USING btree (expires_at)",
+      "live": true,
+      "name": "chattbm_password_reset_tokens_expires_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_password_reset_tokens_pkey ON public.chattbm_password_reset_tokens USING btree (id)",
+      "live": true,
+      "name": "chattbm_password_reset_tokens_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_password_reset_tokens_token_hash_key ON public.chattbm_password_reset_tokens USING btree (token_hash)",
+      "live": true,
+      "name": "chattbm_password_reset_tokens_token_hash_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE INDEX chattbm_password_reset_tokens_user_created_idx ON public.chattbm_password_reset_tokens USING btree (user_id, created_at DESC)",
+      "live": true,
+      "name": "chattbm_password_reset_tokens_user_created_idx",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_password_reset_tokens",
+      "unique": false,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_users_email_normalized_key ON public.chattbm_users USING btree (email_normalized)",
+      "live": true,
+      "name": "chattbm_users_email_normalized_key",
+      "primary": false,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_users",
+      "unique": true,
+      "valid": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX chattbm_users_pkey ON public.chattbm_users USING btree (id)",
+      "live": true,
+      "name": "chattbm_users_pkey",
+      "primary": true,
+      "ready": true,
+      "schema": "public",
+      "table": "chattbm_users",
+      "unique": true,
+      "valid": true
+    }
+  ],
+  "knownDifferences": [
+    {
+      "id": "schema.chat_history.updated_at_index.missing",
+      "path": "$.indexes.public.chattbm_chat_history.chattbm_chat_history_updated_at_idx",
+      "category": "missing_index",
+      "rationale": "Declared by database/migrations/002_chat_history.sql but absent from the read-only production catalog. Index impact and rollout/rollback must be reviewed separately.",
+      "status": "separately_planned",
+      "reviewRef": "docs/POSTGRES_MIGRATION_REVIEW_DECISION.md"
+    }
+  ]
+}
