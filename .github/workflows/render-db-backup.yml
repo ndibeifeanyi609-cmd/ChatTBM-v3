@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Verify required secrets and approved bucket
         env:
-          STAGING_DATABASE_URL: ${{ secrets.STAGING_BACKUP_DATABASE_URL }}
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -55,7 +55,7 @@ jobs:
       - name: Create encrypted staging backup and upload to R2
         id: backup
         env:
-          STAGING_BACKUP_DATABASE_URL: ${{ secrets.STAGING_BACKUP_DATABASE_URL }}
+          STAGING_BACKUP_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
           BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
