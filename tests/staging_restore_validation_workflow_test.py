@@ -53,10 +53,15 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
             "chattbm_contexts",
             "chattbm_chat_history",
             "chattbm_memories",
+            "chattbm_oauth_identities",
+            "chattbm_google_oauth_states",
+            "chattbm_google_oauth_handoffs",
         ):
             self.assertIn(table, self.text)
         self.assertIn("to_regclass(", self.text)
         self.assertIn('if [[ -n "$missing_tables" ]]', self.text)
+        self.assertIn('echo "ERROR: Restore is missing required ChatTBM tables:"', self.text)
+        self.assertIn("exit 1", self.text)
         self.assertNotIn("count(*) FROM information_schema.tables", self.text)
 
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
