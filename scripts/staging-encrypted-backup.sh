@@ -22,12 +22,23 @@ for command_name in python3 psql pg_dump gpg aws; do
   }
 done
 
-# Validate the connection target locally before opening any database connection.
-# Read the URL from the environment so credentials never appear in process arguments.
-python3 - <<'PY'
+# Keep the database password in a mode-600 libpq password file.
+# Only a password-free URI is passed to psql/pg_dump.
+credential_dir=$(mktemp -d)
+chmod 700 "$credential_dir"
+cleanup() {
+  rm -rf "$credential_dir"
+  if [[ -n "${output:-}" && "${BACKUP_KEEP_LOCAL:-false}" != "true" ]]; then
+    rm -f "$output"
+  fi
+}
+trap cleanup EXIT
+
+safe_database_url=$(python3 - "$credential_dir/pgpass" <<'PY'
 import os
 import sys
-from urllib.parse import urlsplit
+from pathlib import Path
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 expected_host = "dpg-dbicflmc6qcc73d97u60-a"
 expected_database = "chattbm_staging_isolated"
@@ -35,13 +46,16 @@ raw_url = os.environ.get("STAGING_BACKUP_DATABASE_URL", "")
 
 try:
     parsed = urlsplit(raw_url)
+    username = unquote(parsed.username or "")
+    password = unquote(parsed.password or "")
+    port = parsed.port or 5432
     valid = (
         parsed.scheme in ("postgres", "postgresql")
         and parsed.hostname == expected_host
-        and parsed.port in (None, 5432)
+        and port == 5432
         and parsed.path == "/" + expected_database
-        and bool(parsed.username)
-        and bool(parsed.password)
+        and bool(username)
+        and bool(password)
         and not parsed.query
         and not parsed.fragment
     )
@@ -51,10 +65,27 @@ except (ValueError, TypeError):
 if not valid:
     print("ERROR: Refusing backup: connection URL is not the approved isolated staging target.", file=sys.stderr)
     sys.exit(1)
-PY
 
+def pgpass_escape(value):
+    return value.replace("\\\\", "\\\\\\\\").replace(":", "\\\\:")
+
+pgpass = ":".join(map(pgpass_escape, [
+    expected_host, str(port), expected_database, username, password
+])) + "\\n"
+path = Path(sys.argv[1])
+path.write_text(pgpass, encoding="utf-8")
+path.chmod(0o600)
+
+netloc = quote(username, safe="") + "@" + expected_host
+if parsed.port is not None:
+    netloc += ":" + str(port)
+print(urlunsplit((parsed.scheme, netloc, parsed.path, "", "")))
+PY
+)
+
+export PGPASSFILE="$credential_dir/pgpass"
 export PGOPTIONS="-c default_transaction_read_only=on"
-database_name=$(psql "$STAGING_BACKUP_DATABASE_URL" -X -A -t -v ON_ERROR_STOP=1 -c 'SELECT current_database()')
+database_name=$(psql "$safe_database_url" -X -A -t -v ON_ERROR_STOP=1 -c 'SELECT current_database()')
 if [[ "$database_name" != "chattbm_staging_isolated" ]]; then
   echo "ERROR: Refusing backup: target is not isolated staging." >&2
   exit 1
@@ -74,22 +105,21 @@ if [[ -e "$output" ]]; then
   echo "ERROR: Backup file already exists." >&2
   exit 1
 fi
-trap 'if [[ "${BACKUP_KEEP_LOCAL:-false}" != "true" ]]; then rm -f "$output"; fi' EXIT
 
-pg_dump --dbname="$STAGING_BACKUP_DATABASE_URL" --format=custom --no-owner --no-privileges |
+pg_dump --dbname="$safe_database_url" --format=custom --no-owner --no-privileges |
   gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-fd 3 -o "$output" 3<<<"$BACKUP_ENCRYPTION_PASSPHRASE"
 test -s "$output"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  printf 'backup_file=%s\n' "$output" >> "$GITHUB_OUTPUT"
-  printf 'backup_object_key=%s\n' "$filename" >> "$GITHUB_OUTPUT"
+  printf 'backup_file=%s\\n' "$output" >> "$GITHUB_OUTPUT"
+  printf 'backup_object_key=%s\\n' "$filename" >> "$GITHUB_OUTPUT"
 fi
 
 export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
 export AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
 export AWS_DEFAULT_REGION="auto"
 endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-aws s3 cp "$output" "s3://${R2_BUCKET_NAME}/${filename}" \
+aws s3 cp "$output" "s3://${R2_BUCKET_NAME}/${filename}" \\
   --endpoint-url "$endpoint" --only-show-errors
 
 echo "Encrypted isolated staging backup uploaded to private R2 bucket: $R2_BUCKET_NAME/$filename"
