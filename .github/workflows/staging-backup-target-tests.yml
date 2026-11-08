@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/staging-encrypted-backup.sh"
+      - "scripts/staging-backup.Dockerfile"
       - "tests/staging_encrypted_backup_target_test.py"
       - "tests/staging_restore_validation_workflow_test.py"
       - ".github/workflows/staging-backup-target-tests.yml"
@@ -13,6 +14,7 @@ on:
       - docs/render-staging-backup-architecture-review
     paths:
       - "scripts/staging-encrypted-backup.sh"
+      - "scripts/staging-backup.Dockerfile"
       - "tests/staging_encrypted_backup_target_test.py"
       - ".github/workflows/staging-backup-target-tests.yml"
 
@@ -36,3 +38,6 @@ jobs:
 
       - name: Run staging restore workflow safety tests
         run: python3 tests/staging_restore_validation_workflow_test.py
+
+      - name: Build isolated staging backup image
+        run: docker build --pull --file scripts/staging-backup.Dockerfile --tag chattbm-staging-backup:test .
