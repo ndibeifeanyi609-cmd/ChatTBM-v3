@@ -21,6 +21,7 @@ class StagingBackupTargetTests(unittest.TestCase):
         self.args_log = root / "database-tool-args"
         self.passfile_log = root / "passfile-copy"
         self.mode_log = root / "passfile-mode"
+        self.github_output = root / "github-output"
         commands = {
             "psql": (
                 '#!/bin/sh\n'
@@ -65,6 +66,7 @@ class StagingBackupTargetTests(unittest.TestCase):
             "BACKUP_OUTPUT_DIR": str(root / "output"),
             "GITHUB_RUN_ID": "unit-test",
             "GITHUB_RUN_ATTEMPT": "1",
+            "GITHUB_OUTPUT": str(self.github_output),
         })
 
     def run_backup(self, url):
@@ -84,6 +86,26 @@ class StagingBackupTargetTests(unittest.TestCase):
         self.assertEqual(self.mode_log.read_text().strip(), "600")
         self.assertIn("dummy-password", self.passfile_log.read_text(encoding="utf-8"))
         self.assertFalse(self.env.get("PGPASSWORD"))
+
+    def test_object_keys_use_128_bit_random_suffixes(self):
+        first = self.run_backup(VALID_URL)
+        self.assertEqual(first.returncode, 0, first.stderr)
+        first_output = self.github_output.read_text(encoding="utf-8")
+        first_key = next(line.split("=", 1)[1] for line in first_output.splitlines()
+                         if line.startswith("backup_object_key="))
+
+        self.github_output.unlink()
+        second = self.run_backup(VALID_URL)
+        self.assertEqual(second.returncode, 0, second.stderr)
+        second_output = self.github_output.read_text(encoding="utf-8")
+        second_key = next(line.split("=", 1)[1] for line in second_output.splitlines()
+                          if line.startswith("backup_object_key="))
+
+        import re
+        pattern = r"^chattbm-staging-\\d{8}T\\d{6}Z-[0-9a-f]{32}\\.dump\\.gpg$"
+        self.assertRegex(first_key, pattern)
+        self.assertRegex(second_key, pattern)
+        self.assertNotEqual(first_key, second_key)
 
     def test_rejected_urls_never_reach_psql(self):
         invalid_urls = {
