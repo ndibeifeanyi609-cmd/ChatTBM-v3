@@ -36,7 +36,7 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
 
     def test_object_key_is_strictly_validated(self):
         self.assertRegex(self.text, re.compile(r"BACKUP_OBJECT_KEY.*"))
-        self.assertIn(r"\\.dump\\.gpg$", self.text)
+        self.assertIn(r"\.dump\.gpg$", self.text)
         self.assertIn("chattbm-staging-", self.text)
 
     def test_restore_target_is_disposable_postgres_18(self):
