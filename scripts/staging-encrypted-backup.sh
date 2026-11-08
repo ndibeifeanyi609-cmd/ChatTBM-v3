@@ -15,7 +15,7 @@ if [[ "$R2_BUCKET_NAME" != "chattbm-staging-backups" ]]; then
   exit 1
 fi
 
-for command_name in python3 psql pg_dump gpg aws; do
+for command_name in python3 psql pg_dump gpg aws sha256sum wc; do
   command -v "$command_name" >/dev/null || {
     echo "ERROR: Required command not found: $command_name" >&2
     exit 1
