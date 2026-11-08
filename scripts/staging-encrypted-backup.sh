@@ -115,15 +115,6 @@ if [[ ! "$backup_sha256" =~ ^[0-9a-f]{64}$ || ! "$backup_size_bytes" =~ ^[0-9]+$
 fi
 
 
-if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  {
-    printf 'backup_file=%s\n' "$output"
-    printf 'backup_object_key=%s\n' "$filename"
-    printf 'backup_sha256=%s\n' "$backup_sha256"
-    printf 'backup_size_bytes=%s\n' "$backup_size_bytes"
-  } >> "$GITHUB_OUTPUT"
-fi
-
 export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
 export AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
 export AWS_DEFAULT_REGION="auto"
@@ -139,4 +130,19 @@ if [[ ! "$remote_size" =~ ^[0-9]+$ || "$remote_size" != "$backup_size_bytes" ]];
 fi
 
 upload_verified=true
+
+# Publish handoff metadata only after the remote object has been size-verified.
+if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+  {
+    printf 'backup_file=%s\n' "$output"
+    printf 'backup_object_key=%s\n' "$filename"
+    printf 'backup_sha256=%s\n' "$backup_sha256"
+    printf 'backup_size_bytes=%s\n' "$backup_size_bytes"
+  } >> "$GITHUB_OUTPUT"
+fi
+
+# Non-secret values for the operator to enter in restore validation.
+printf 'BACKUP_OBJECT_KEY=%s\n' "$filename"
+printf 'BACKUP_SHA256=%s\n' "$backup_sha256"
+printf 'BACKUP_SIZE_BYTES=%s\n' "$backup_size_bytes"
 echo "Encrypted isolated staging backup uploaded and size-verified in private R2 bucket: $R2_BUCKET_NAME/$filename"
