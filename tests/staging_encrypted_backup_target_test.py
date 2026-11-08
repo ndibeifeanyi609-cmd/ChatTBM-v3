@@ -157,11 +157,24 @@ class StagingBackupTargetTests(unittest.TestCase):
                 self.env.update(overrides)
                 result = self.run_backup(VALID_URL)
                 self.assertNotEqual(result.returncode, 0, label)
-                values = dict(
-                    line.split("=", 1)
-                    for line in self.github_output.read_text(encoding="utf-8").splitlines()
-                )
-                self.assertTrue(Path(values["backup_file"]).is_file(), label)
+                output_files = list((Path(self.temp.name) / "output").glob("*.dump.gpg"))
+                self.assertEqual(len(output_files), 1, label)
+                self.assertTrue(output_files[0].is_file(), label)
+                self.assertFalse(self.github_output.exists(), "Failed upload must not publish handoff metadata.")
+
+    def test_success_prints_operator_handoff_only_after_verified_upload(self):
+        result = self.run_backup(VALID_URL)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import hashlib
+        expected = b"fake encrypted test dump"
+        lines = dict(
+            line.split("=", 1)
+            for line in result.stdout.splitlines()
+            if line.startswith(("BACKUP_OBJECT_KEY=", "BACKUP_SHA256=", "BACKUP_SIZE_BYTES="))
+        )
+        self.assertRegex(lines["BACKUP_OBJECT_KEY"], r"^chattbm-staging-\\d{8}T\\d{6}Z-[0-9a-f]{32}\\.dump\\.gpg$")
+        self.assertEqual(lines["BACKUP_SHA256"], hashlib.sha256(expected).hexdigest())
+        self.assertEqual(int(lines["BACKUP_SIZE_BYTES"]), len(expected))
 
     def test_rejected_urls_never_reach_psql(self):
         invalid_urls = {
