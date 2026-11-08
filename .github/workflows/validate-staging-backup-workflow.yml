@@ -1,0 +1,32 @@
+name: Validate Staging Backup Workflow
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/render-db-backup.yml"
+      - ".github/workflows/validate-staging-backup-workflow.yml"
+      - "scripts/staging-encrypted-backup.sh"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-workflow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate GitHub Actions workflow syntax
+        uses: reviewdog/action-actionlint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-check
+          actionlint_flags: "-color"
+      - name: Install ShellCheck
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+      - name: Validate staging backup shell script
+        run: shellcheck --severity=style scripts/staging-encrypted-backup.sh
