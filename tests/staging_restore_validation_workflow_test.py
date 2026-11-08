@@ -18,7 +18,7 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("required: true", self.text)
 
     def test_only_approved_bucket_and_read_only_named_credentials(self):
-        self.assertIn('R2_BUCKET_NAME == "chattbm-staging-backups"', self.text)
+        self.assertIn('[[ "$R2_BUCKET_NAME" == "chattbm-staging-backups" ]]', self.text)
         self.assertIn("R2_READ_ACCESS_KEY_ID", self.text)
         self.assertIn("R2_READ_SECRET_ACCESS_KEY", self.text)
         self.assertNotIn("secrets.R2_ACCESS_KEY_ID", self.text)
@@ -46,8 +46,8 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertNotIn("dpg-dbicflmc6qcc73d97u60-a", self.text)
 
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
-        self.assertIn("if: always()", self.text)
-        self.assertIn("rm -f", self.text)
+        self.assertIn("trap 'rm -f /tmp/staging-backup.dump.gpg' EXIT", self.text)
+        self.assertIn("trap 'rm -f \"$plain\" /tmp/staging-backup.dump.gpg' EXIT", self.text)
 
 
 if __name__ == "__main__":
