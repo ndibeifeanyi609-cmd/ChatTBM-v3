@@ -67,6 +67,14 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("required.column_name", self.text)
         self.assertIn('if [[ -n "$missing_columns" ]]', self.text)
         self.assertIn('echo "ERROR: Restore is missing required ChatTBM columns:"', self.text)
+        self.assertIn("missing_constraints=$(psql", self.text)
+        self.assertIn("pg_constraint actual", self.text)
+        self.assertIn("pg_get_constraintdef(actual.oid)", self.text)
+        self.assertIn("'p','primary key", self.text)
+        self.assertIn("'u','unique", self.text)
+        self.assertIn("'f','foreign key", self.text)
+        self.assertIn('if [[ -n "$missing_constraints" ]]', self.text)
+        self.assertIn('echo "ERROR: Restore is missing required ChatTBM keys or foreign-key constraints:"', self.text)
         self.assertNotIn("count(*) FROM information_schema.tables", self.text)
 
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
