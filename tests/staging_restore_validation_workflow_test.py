@@ -87,6 +87,12 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("missing_checks=$(psql", self.text)
         self.assertIn("jsonb_typeof(payload)", self.text)
         self.assertIn("jsonb_typeof(messages)", self.text)
+        self.assertIn("pg_get_expr(actual.conbin, actual.conrelid)", self.text)
+        self.assertIn("('chattbm_contexts','version >= 1')", self.text)
+        self.assertIn("('chattbm_contexts','jsonb_typeof(payload) = ''object'')", self.text)
+        self.assertIn("('chattbm_chat_history','jsonb_typeof(messages) = ''array'')", self.text)
+        self.assertIn("('chattbm_memories','jsonb_typeof(payload) = ''object'')", self.text)
+        self.assertIn("actual.contype = 'c'", self.text)
         self.assertIn('if [[ -n "$missing_checks" ]]', self.text)
         self.assertNotIn("count(*) FROM information_schema.tables", self.text)
 
