@@ -42,7 +42,8 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
     def test_restore_target_is_disposable_postgres_18(self):
         self.assertIn("image: postgres:18-alpine", self.text)
         self.assertIn("--dbname=restore_validation", self.text)
-        self.assertNotIn("--host=", self.text.split("pg_restore", 1)[1].splitlines()[0])
+        self.assertIn("--host=127.0.0.1", self.text)
+        self.assertNotIn("dpg-dbicflmc6qcc73d97u60-a", self.text)
 
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
         self.assertIn("if: always()", self.text)
