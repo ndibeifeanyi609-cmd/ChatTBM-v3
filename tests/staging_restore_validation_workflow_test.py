@@ -75,6 +75,15 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("'f','foreign key", self.text)
         self.assertIn('if [[ -n "$missing_constraints" ]]', self.text)
         self.assertIn('echo "ERROR: Restore is missing required ChatTBM keys or foreign-key constraints:"', self.text)
+        self.assertIn("missing_indexes=$(psql", self.text)
+        self.assertIn("pg_indexes actual", self.text)
+        self.assertIn("chattbm_contexts_user_created_idx", self.text)
+        self.assertIn("chattbm_memories_user_lifecycle_idx", self.text)
+        self.assertIn('if [[ -n "$missing_indexes" ]]', self.text)
+        self.assertIn("missing_checks=$(psql", self.text)
+        self.assertIn("jsonb_typeof(payload)", self.text)
+        self.assertIn("jsonb_typeof(messages)", self.text)
+        self.assertIn('if [[ -n "$missing_checks" ]]', self.text)
         self.assertNotIn("count(*) FROM information_schema.tables", self.text)
 
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
