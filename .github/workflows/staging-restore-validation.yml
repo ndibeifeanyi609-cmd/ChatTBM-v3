@@ -210,3 +210,7 @@ jobs:
             exit 1
           fi
           echo "RESTORE_VALIDATION_OK: all nine required ChatTBM account, conversation, context, transcript, memory, and OAuth tables restored in disposable PostgreSQL 18."
+
+      - name: Remove local backup artifacts
+        if: always()
+        run: rm -f /tmp/staging-backup.dump.gpg /tmp/staging-backup.dump
