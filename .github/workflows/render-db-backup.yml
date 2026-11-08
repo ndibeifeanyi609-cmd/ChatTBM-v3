@@ -80,8 +80,8 @@ jobs:
           aws s3 cp "s3://${R2_BUCKET_NAME}/${BACKUP_OBJECT_KEY}" "$downloaded" \
             --endpoint-url "$endpoint" --only-show-errors
           test -s "$downloaded"
-          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" \
-            --decrypt "$downloaded" > "$plain"
+          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 \
+            --decrypt "$downloaded" 3<<<"$BACKUP_PASSPHRASE" > "$plain"
           test -s "$plain"
           docker run --rm --network host -e PGPASSWORD=restore_test_password \
             -v "$plain:/backup.dump:ro" postgres:18-alpine sh -c '
