@@ -62,6 +62,11 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertIn('if [[ -n "$missing_tables" ]]', self.text)
         self.assertIn('echo "ERROR: Restore is missing required ChatTBM tables:"', self.text)
         self.assertIn("exit 1", self.text)
+        self.assertIn("missing_columns=$(psql", self.text)
+        self.assertIn("information_schema.columns", self.text)
+        self.assertIn("required.column_name", self.text)
+        self.assertIn('if [[ -n "$missing_columns" ]]', self.text)
+        self.assertIn('echo "ERROR: Restore is missing required ChatTBM columns:"', self.text)
         self.assertNotIn("count(*) FROM information_schema.tables", self.text)
 
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
