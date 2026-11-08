@@ -128,4 +128,44 @@ jobs:
             printf '%s\\n' "$missing_columns" >&2
             exit 1
           fi
+          missing_constraints=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name || ':' || required.constraint_kind || ':' || required.definition FROM (VALUES
+            ('chattbm_users','p','primary key (id)'),
+            ('chattbm_users','u','unique (email_normalized)'),
+            ('chattbm_auth_sessions','p','primary key (id)'),
+            ('chattbm_auth_sessions','u','unique (token_hash)'),
+            ('chattbm_auth_sessions','f','foreign key (user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_conversations','p','primary key (id)'),
+            ('chattbm_conversations','u','unique (user_id, conversation_key)'),
+            ('chattbm_contexts','p','primary key (id)'),
+            ('chattbm_contexts','u','unique (user_id, interaction_id)'),
+            ('chattbm_contexts','f','foreign key (user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_chat_history','p','primary key (user_id, conversation_id)'),
+            ('chattbm_chat_history','f','foreign key (user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_memories','p','primary key (id)'),
+            ('chattbm_memories','u','unique (user_id, memory_type, subject)'),
+            ('chattbm_oauth_identities','p','primary key (id)'),
+            ('chattbm_oauth_identities','u','unique (provider, provider_subject)'),
+            ('chattbm_oauth_identities','u','unique (user_id, provider)'),
+            ('chattbm_oauth_identities','f','foreign key (user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_google_oauth_states','p','primary key (state_hash)'),
+            ('chattbm_google_oauth_states','f','foreign key (link_user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_google_oauth_handoffs','p','primary key (handoff_hash)'),
+            ('chattbm_google_oauth_handoffs','f','foreign key (user_id) references chattbm_users(id) on delete cascade')
+          ) AS required(table_name, constraint_kind, definition)
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM pg_constraint actual
+            JOIN pg_class relation ON relation.oid = actual.conrelid
+            JOIN pg_namespace schema ON schema.oid = relation.relnamespace
+            WHERE schema.nspname = 'public'
+              AND relation.relname = required.table_name
+              AND actual.contype = required.constraint_kind
+              AND lower(regexp_replace(pg_get_constraintdef(actual.oid), '[[:space:]]+', ' ', 'g')) LIKE '%' || required.definition || '%'
+          )
+          ORDER BY required.table_name, required.constraint_kind, required.definition")
+          if [[ -n "$missing_constraints" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM keys or foreign-key constraints:" >&2
+            printf '%s\\n' "$missing_constraints" >&2
+            exit 1
+          fi
           echo "RESTORE_VALIDATION_OK: all nine required ChatTBM account, conversation, context, transcript, memory, and OAuth tables restored in disposable PostgreSQL 18."
