@@ -22,6 +22,7 @@ class StagingBackupTargetTests(unittest.TestCase):
         self.passfile_log = root / "passfile-copy"
         self.mode_log = root / "passfile-mode"
         self.github_output = root / "github-output"
+        self.aws_size_file = root / "aws-size"
         commands = {
             "psql": (
                 '#!/bin/sh\n'
@@ -44,7 +45,19 @@ class StagingBackupTargetTests(unittest.TestCase):
                 'fi; shift; done\n'
                 'exit 1\n'
             ),
-            "aws": "#!/bin/sh\nexit 0\n",
+            "aws": (
+                '#!/bin/sh\\n'
+                'if [ "$1" = "s3" ] && [ "$2" = "cp" ]; then\\n'
+                '  size=$(wc -c < "$3" | tr -d "[:space:]")\\n'
+                '  printf "%s\\\\n" "$size" > "$AWS_SIZE_FILE"\\n'
+                '  exit 0\\n'
+                'fi\\n'
+                'if [ "$1" = "s3api" ] && [ "$2" = "head-object" ]; then\\n'
+                '  cat "$AWS_SIZE_FILE"\\n'
+                '  exit 0\\n'
+                'fi\\n'
+                'exit 1\\n'
+            ),
         }
         for name, body in commands.items():
             path = bin_dir / name
@@ -67,6 +80,7 @@ class StagingBackupTargetTests(unittest.TestCase):
             "GITHUB_RUN_ID": "unit-test",
             "GITHUB_RUN_ATTEMPT": "1",
             "GITHUB_OUTPUT": str(self.github_output),
+            "AWS_SIZE_FILE": str(self.aws_size_file),
         })
 
     def run_backup(self, url):
