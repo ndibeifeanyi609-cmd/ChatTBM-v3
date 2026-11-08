@@ -5,6 +5,7 @@ on:
     paths:
       - "scripts/staging-encrypted-backup.sh"
       - "tests/staging_encrypted_backup_target_test.py"
+      - "tests/staging_restore_validation_workflow_test.py"
       - ".github/workflows/staging-backup-target-tests.yml"
   push:
     branches:
