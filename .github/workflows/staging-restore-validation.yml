@@ -1,0 +1,98 @@
+name: Staging Backup Restore Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_object_key:
+        description: Exact encrypted object key from the approved staging backup
+        required: true
+        type: string
+      expected_sha256:
+        description: SHA-256 checksum recorded by the backup job
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  restore-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      restore-postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: restore_test
+          POSTGRES_PASSWORD: restore_test_password
+          POSTGRES_DB: restore_validation
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U restore_test -d restore_validation"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - name: Validate inputs and required secrets
+        env:
+          BACKUP_OBJECT_KEY: ${{ inputs.backup_object_key }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          [[ "$R2_BUCKET_NAME" == "chattbm-staging-backups" ]]
+          [[ "$BACKUP_OBJECT_KEY" =~ ^chattbm-staging-[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.dump\.gpg$ ]]
+          [[ "$EXPECTED_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          test -n "$R2_READ_ACCESS_KEY_ID"
+          test -n "$R2_READ_SECRET_ACCESS_KEY"
+          test -n "$R2_ACCOUNT_ID"
+          test -n "$BACKUP_ENCRYPTION_PASSPHRASE"
+
+      - name: Install restore validation tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y awscli gnupg ca-certificates postgresql-client-18
+          aws --version
+          pg_restore --version
+
+      - name: Download and verify encrypted backup
+        env:
+          BACKUP_OBJECT_KEY: ${{ inputs.backup_object_key }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          umask 077
+          export AWS_ACCESS_KEY_ID="$R2_READ_ACCESS_KEY_ID"
+          export AWS_SECRET_ACCESS_KEY="$R2_READ_SECRET_ACCESS_KEY"
+          export AWS_DEFAULT_REGION=auto
+          endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          aws s3 cp "s3://chattbm-staging-backups/${BACKUP_OBJECT_KEY}" /tmp/staging-backup.dump.gpg --endpoint-url "$endpoint" --only-show-errors
+          actual_sha256=$(sha256sum /tmp/staging-backup.dump.gpg | awk '{print $1}')
+          if [[ "$actual_sha256" != "$EXPECTED_SHA256" ]]; then
+            echo "ERROR: Downloaded backup checksum does not match the supplied expected checksum." >&2
+            exit 1
+          fi
+
+      - name: Decrypt and restore into disposable PostgreSQL
+        env:
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+          PGPASSWORD: restore_test_password
+        run: |
+          set -euo pipefail
+          plain="/tmp/staging-backup.dump"
+          trap 'rm -f "$plain" /tmp/staging-backup.dump.gpg' EXIT
+          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 --decrypt /tmp/staging-backup.dump.gpg 3<<<"$BACKUP_ENCRYPTION_PASSPHRASE" > "$plain"
+          test -s "$plain"
+          pg_restore --exit-on-error --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --no-owner --no-privileges "$plain"
+          count=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT count(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_type = 'BASE TABLE' AND table_name LIKE 'chattbm_%'")
+          test "$count" -ge 5
+          echo "RESTORE_VALIDATION_OK: core ChatTBM tables restored in disposable PostgreSQL 18."
