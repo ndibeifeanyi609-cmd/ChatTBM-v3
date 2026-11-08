@@ -186,7 +186,10 @@ class StagingBackupTargetTests(unittest.TestCase):
                 self.env["R2_ACCOUNT_ID"] = account_id
                 result = self.run_backup(VALID_URL)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn("Cloudflare R2 account ID", result.stderr)
+                if account_id:
+                    self.assertIn("Cloudflare R2 account ID", result.stderr)
+                else:
+                    self.assertIn("Set Cloudflare account ID", result.stderr)
                 self.assertFalse(self.marker.exists(), "Invalid R2 account ID must be rejected before database access.")
         self.env["R2_ACCOUNT_ID"] = "00000000000000000000000000000000"
 
