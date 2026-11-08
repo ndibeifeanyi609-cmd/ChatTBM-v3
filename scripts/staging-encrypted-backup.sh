@@ -32,7 +32,12 @@ fi
 output_dir="${BACKUP_OUTPUT_DIR:-/tmp}"
 mkdir -p "$output_dir"
 umask 077
-filename="chattbm-staging-$(date -u +%Y%m%dT%H%M%SZ).dump.gpg"
+if [[ -n "${GITHUB_RUN_ID:-}" ]]; then
+  run_suffix="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT:-1}"
+else
+  run_suffix="$(date -u +%Y%m%dT%H%M%SZ)-$"
+fi
+filename="chattbm-staging-$(date -u +%Y%m%dT%H%M%SZ)-${run_suffix}.dump.gpg"
 output="$output_dir/$filename"
 if [[ -e "$output" ]]; then
   echo "ERROR: Backup file already exists." >&2
