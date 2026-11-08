@@ -26,9 +26,10 @@ done
 # Only a password-free URI is passed to psql/pg_dump.
 credential_dir=$(mktemp -d)
 chmod 700 "$credential_dir"
+upload_verified=false
 cleanup() {
   rm -rf "$credential_dir"
-  if [[ -n "${output:-}" && "${BACKUP_KEEP_LOCAL:-false}" != "true" ]]; then
+  if [[ -n "${output:-}" && "$upload_verified" == "true" && "${BACKUP_KEEP_LOCAL:-false}" != "true" ]]; then
     rm -f "$output"
   fi
 }
@@ -130,4 +131,12 @@ endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 aws s3 cp "$output" "s3://${R2_BUCKET_NAME}/${filename}" \
   --endpoint-url "$endpoint" --only-show-errors
 
-echo "Encrypted isolated staging backup uploaded to private R2 bucket: $R2_BUCKET_NAME/$filename"
+remote_size=$(aws s3api head-object --bucket "$R2_BUCKET_NAME" --key "$filename" \
+  --endpoint-url "$endpoint" --query 'ContentLength' --output text)
+if [[ ! "$remote_size" =~ ^[0-9]+$ || "$remote_size" != "$backup_size_bytes" ]]; then
+  echo "ERROR: Uploaded backup verification failed: remote object size does not match." >&2
+  exit 1
+fi
+
+upload_verified=true
+echo "Encrypted isolated staging backup uploaded and size-verified in private R2 bucket: $R2_BUCKET_NAME/$filename"
