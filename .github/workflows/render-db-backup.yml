@@ -49,7 +49,7 @@ jobs:
           sudo apt-get install -y ca-certificates curl gnupg unzip
           curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
           unzip -q /tmp/awscliv2.zip -d /tmp
-          sudo /tmp/aws/install
+          sudo /tmp/aws/install --update
           aws --version
           sudo install -d /usr/share/postgresql-common/pgdg
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor --yes -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
