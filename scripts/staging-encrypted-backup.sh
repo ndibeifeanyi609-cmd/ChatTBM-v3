@@ -115,10 +115,12 @@ fi
 
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  printf 'backup_file=%s\n' "$output" >> "$GITHUB_OUTPUT"
-  printf 'backup_object_key=%s\n' "$filename" >> "$GITHUB_OUTPUT"
-  printf 'backup_sha256=%s\n' "$backup_sha256" >> "$GITHUB_OUTPUT"
-  printf 'backup_size_bytes=%s\n' "$backup_size_bytes" >> "$GITHUB_OUTPUT"
+  {
+    printf 'backup_file=%s\n' "$output"
+    printf 'backup_object_key=%s\n' "$filename"
+    printf 'backup_sha256=%s\n' "$backup_sha256"
+    printf 'backup_size_bytes=%s\n' "$backup_size_bytes"
+  } >> "$GITHUB_OUTPUT"
 fi
 
 export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
