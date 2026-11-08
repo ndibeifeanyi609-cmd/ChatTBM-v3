@@ -1,0 +1,34 @@
+name: Staging Backup Target Tests
+
+on:
+  pull_request:
+    paths:
+      - "scripts/staging-encrypted-backup.sh"
+      - "tests/staging_encrypted_backup_target_test.py"
+      - ".github/workflows/staging-backup-target-tests.yml"
+  push:
+    branches:
+      - main
+      - docs/render-staging-backup-architecture-review
+    paths:
+      - "scripts/staging-encrypted-backup.sh"
+      - "tests/staging_encrypted_backup_target_test.py"
+      - ".github/workflows/staging-backup-target-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  staging-backup-target-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run staging backup target safety tests
+        run: python3 tests/staging_encrypted_backup_target_test.py
