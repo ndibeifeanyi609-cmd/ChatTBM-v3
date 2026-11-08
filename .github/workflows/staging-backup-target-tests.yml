@@ -32,3 +32,6 @@ jobs:
 
       - name: Run staging backup target safety tests
         run: python3 tests/staging_encrypted_backup_target_test.py
+
+      - name: Run staging restore workflow safety tests
+        run: python3 tests/staging_restore_validation_workflow_test.py
