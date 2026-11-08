@@ -15,6 +15,12 @@ if [[ "$R2_BUCKET_NAME" != "chattbm-staging-backups" ]]; then
   exit 1
 fi
 
+# Cloudflare account IDs are exactly 32 hexadecimal characters.
+if [[ ! "$R2_ACCOUNT_ID" =~ ^[[:xdigit:]]{32}$ ]]; then
+  echo "ERROR: Refusing backup: Cloudflare R2 account ID must be 32 hexadecimal characters." >&2
+  exit 1
+fi
+
 for command_name in python3 psql pg_dump gpg aws sha256sum wc; do
   command -v "$command_name" >/dev/null || {
     echo "ERROR: Required command not found: $command_name" >&2
