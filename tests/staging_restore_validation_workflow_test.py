@@ -15,6 +15,7 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("workflow_dispatch:", self.text)
         self.assertIn("backup_object_key:", self.text)
         self.assertIn("expected_sha256:", self.text)
+        self.assertIn("expected_size_bytes:", self.text)
         self.assertIn("required: true", self.text)
 
     def test_only_approved_bucket_and_read_only_named_credentials(self):
@@ -28,11 +29,15 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         for forbidden in ("STAGING_DATABASE_URL", "DATABASE_URL", "STAGING_BACKUP_DATABASE_URL"):
             self.assertNotIn(forbidden, self.text)
 
-    def test_checksum_is_checked_before_decryption(self):
+    def test_size_and_checksum_are_checked_before_decryption(self):
+        size_check = self.text.index("actual_size_bytes=$(wc -c")
         checksum = self.text.index("actual_sha256=$(sha256sum")
-        decrypt = self.text.index("gpg --batch")
+        decrypt = self.text.index("gpg --batch", self.text.index("Decrypt and restore"))
+        self.assertLess(size_check, checksum)
         self.assertLess(checksum, decrypt)
         self.assertIn('[[ "$EXPECTED_SHA256" =~ ^[0-9a-f]{64}$ ]]', self.text)
+        self.assertIn('[[ "$EXPECTED_SIZE_BYTES" =~ ^[1-9][0-9]*$ ]]', self.text)
+        self.assertIn('if [[ "$actual_size_bytes" != "$EXPECTED_SIZE_BYTES" ]]', self.text)
 
     def test_object_key_is_strictly_validated(self):
         self.assertRegex(self.text, re.compile(r"BACKUP_OBJECT_KEY.*"))
@@ -97,9 +102,18 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertIn('if [[ -n "$missing_checks" ]]', self.text)
         self.assertNotIn("count(*) FROM information_schema.tables", self.text)
 
+    def test_passphrase_uses_private_file_and_is_cleaned(self):
+        self.assertIn('passphrase_file="/tmp/staging-backup.passphrase"', self.text)
+        self.assertIn('chmod 600 "$passphrase_file"', self.text)
+        self.assertIn('--passphrase-file "$passphrase_file"', self.text)
+        self.assertNotIn("--passphrase-fd", self.text)
+        self.assertNotIn("<<<", self.text)
+        self.assertIn('"$passphrase_file"', self.text)
+
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
         self.assertIn("if: always()", self.text)
         self.assertIn("rm -f /tmp/staging-backup.dump.gpg /tmp/staging-backup.dump", self.text)
+        self.assertIn('"$passphrase_file"', self.text)
 
 if __name__ == "__main__":
     unittest.main()
