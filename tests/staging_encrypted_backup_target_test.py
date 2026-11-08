@@ -102,7 +102,7 @@ class StagingBackupTargetTests(unittest.TestCase):
                           if line.startswith("backup_object_key="))
 
         import re
-        pattern = r"^chattbm-staging-\\d{8}T\\d{6}Z-[0-9a-f]{32}\\.dump\\.gpg$"
+        pattern = r"^chattbm-staging-\d{8}T\d{6}Z-[0-9a-f]{32}\.dump\.gpg$"
         self.assertRegex(first_key, pattern)
         self.assertRegex(second_key, pattern)
         self.assertNotEqual(first_key, second_key)
