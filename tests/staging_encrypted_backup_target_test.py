@@ -18,10 +18,31 @@ class StagingBackupTargetTests(unittest.TestCase):
         bin_dir = root / "bin"
         bin_dir.mkdir()
         self.marker = root / "psql-called"
+        self.args_log = root / "database-tool-args"
+        self.passfile_log = root / "passfile-copy"
+        self.mode_log = root / "passfile-mode"
         commands = {
-            "psql": '#!/bin/sh\nprintf called >> "$PSQL_MARKER"\nprintf "chattbm_staging_isolated\\n"\n',
-            "pg_dump": "#!/bin/sh\nexit 0\n",
-            "gpg": '#!/bin/sh\nwhile [ "$#" -gt 0 ]; do if [ "$1" = "-o" ]; then shift; printf "fake encrypted test dump" > "$1"; exit 0; fi; shift; done\nexit 1\n',
+            "psql": (
+                '#!/bin/sh\n'
+                'printf called >> "$PSQL_MARKER"\n'
+                'printf "%s\\n" "$@" >> "$DB_ARGS_LOG"\n'
+                'cp "$PGPASSFILE" "$PASSFILE_LOG"\n'
+                'stat -c "%a" "$PGPASSFILE" > "$PASSFILE_MODE_LOG"\n'
+                'printf "chattbm_staging_isolated\\n"\n'
+            ),
+            "pg_dump": (
+                '#!/bin/sh\n'
+                'printf "%s\\n" "$@" >> "$DB_ARGS_LOG"\n'
+                'exit 0\n'
+            ),
+            "gpg": (
+                '#!/bin/sh\n'
+                'while [ "$#" -gt 0 ]; do '
+                'if [ "$1" = "-o" ]; then shift; '
+                'printf "fake encrypted test dump" > "$1"; exit 0; '
+                'fi; shift; done\n'
+                'exit 1\n'
+            ),
             "aws": "#!/bin/sh\nexit 0\n",
         }
         for name, body in commands.items():
@@ -32,6 +53,9 @@ class StagingBackupTargetTests(unittest.TestCase):
         self.env.update({
             "PATH": str(bin_dir) + os.pathsep + self.env.get("PATH", ""),
             "PSQL_MARKER": str(self.marker),
+            "DB_ARGS_LOG": str(self.args_log),
+            "PASSFILE_LOG": str(self.passfile_log),
+            "PASSFILE_MODE_LOG": str(self.mode_log),
             "STAGING_BACKUP_DATABASE_URL": VALID_URL,
             "BACKUP_ENCRYPTION_PASSPHRASE": "test-only-passphrase",
             "R2_ACCESS_KEY_ID": "test-access-key",
@@ -50,10 +74,16 @@ class StagingBackupTargetTests(unittest.TestCase):
             capture_output=True, check=False,
         )
 
-    def test_approved_internal_staging_url_reaches_psql(self):
+    def test_approved_url_uses_private_password_file_not_process_args(self):
         result = self.run_backup(VALID_URL)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(self.marker.exists())
+        args = self.args_log.read_text(encoding="utf-8")
+        self.assertNotIn("dummy-password", args)
+        self.assertIn("backup_user@" + HOST, args)
+        self.assertEqual(self.mode_log.read_text().strip(), "600")
+        self.assertIn("dummy-password", self.passfile_log.read_text(encoding="utf-8"))
+        self.assertFalse(self.env.get("PGPASSWORD"))
 
     def test_rejected_urls_never_reach_psql(self):
         invalid_urls = {
@@ -72,6 +102,7 @@ class StagingBackupTargetTests(unittest.TestCase):
         for label, url in invalid_urls.items():
             with self.subTest(label=label):
                 self.marker.unlink(missing_ok=True)
+                self.args_log.unlink(missing_ok=True)
                 result = self.run_backup(url)
                 self.assertNotEqual(result.returncode, 0, label)
                 self.assertFalse(self.marker.exists(), f"Rejected URL reached psql: {label}")
