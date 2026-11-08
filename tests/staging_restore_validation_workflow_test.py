@@ -98,9 +98,8 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertNotIn("count(*) FROM information_schema.tables", self.text)
 
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
-        self.assertNotIn("trap 'rm -f /tmp/staging-backup.dump.gpg' EXIT", self.text)
-        self.assertIn("trap 'rm -f \"$plain\" /tmp/staging-backup.dump.gpg' EXIT", self.text)
-
+        self.assertIn("if: always()", self.text)
+        self.assertIn("rm -f /tmp/staging-backup.dump.gpg /tmp/staging-backup.dump", self.text)
 
 if __name__ == "__main__":
     unittest.main()
