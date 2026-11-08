@@ -27,7 +27,7 @@ jobs:
             "https://chattbm-staging-db-check.onrender.com/api/internal/staging-db-check",
             {
               headers: { "x-staging-check-token": token },
-              signal: AbortSignal.timeout(20000)
+              signal: AbortSignal.timeout(60000)
             }
           );
           const body = await response.json().catch(() => ({}));
