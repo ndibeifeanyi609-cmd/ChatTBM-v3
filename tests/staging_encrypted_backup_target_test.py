@@ -107,6 +107,20 @@ class StagingBackupTargetTests(unittest.TestCase):
         self.assertRegex(second_key, pattern)
         self.assertNotEqual(first_key, second_key)
 
+    def test_checksum_and_size_outputs_match_encrypted_artifact(self):
+        import hashlib
+
+        result = self.run_backup(VALID_URL)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        values = dict(
+            line.split("=", 1)
+            for line in self.github_output.read_text(encoding="utf-8").splitlines()
+        )
+        expected = b"fake encrypted test dump"
+        self.assertEqual(values["backup_sha256"], hashlib.sha256(expected).hexdigest())
+        self.assertEqual(int(values["backup_size_bytes"]), len(expected))
+        self.assertTrue(values["backup_object_key"].endswith(".dump.gpg"))
+
     def test_rejected_urls_never_reach_psql(self):
         invalid_urls = {
             "external Render hostname": f"postgresql://user:pass@dpg-external.example.com/{DATABASE}",
