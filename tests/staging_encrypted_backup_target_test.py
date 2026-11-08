@@ -48,12 +48,19 @@ class StagingBackupTargetTests(unittest.TestCase):
             "aws": (
                 '#!/bin/sh\n'
                 'if [ "$1" = "s3" ] && [ "$2" = "cp" ]; then\n'
+                '  [ "${AWS_UPLOAD_FAIL:-false}" = "true" ] && exit 9\n'
                 '  size=$(wc -c < "$3" | tr -d "[:space:]")\n'
                 '  echo "$size" > "$AWS_SIZE_FILE"\n'
                 '  exit 0\n'
                 'fi\n'
                 'if [ "$1" = "s3api" ] && [ "$2" = "head-object" ]; then\n'
-                '  cat "$AWS_SIZE_FILE"\n'
+                '  [ "${AWS_REMOTE_MISSING:-false}" = "true" ] && exit 1\n'
+                '  if [ "${AWS_REMOTE_SIZE_MISMATCH:-false}" = "true" ]; then\n'
+                '    size=$(cat "$AWS_SIZE_FILE")\n'
+                '    echo $((size + 1))\n'
+                '  else\n'
+                '    cat "$AWS_SIZE_FILE"\n'
+                '  fi\n'
                 '  exit 0\n'
                 'fi\n'
                 'exit 1\n'
@@ -134,6 +141,27 @@ class StagingBackupTargetTests(unittest.TestCase):
         self.assertEqual(values["backup_sha256"], hashlib.sha256(expected).hexdigest())
         self.assertEqual(int(values["backup_size_bytes"]), len(expected))
         self.assertTrue(values["backup_object_key"].endswith(".dump.gpg"))
+
+    def test_failed_upload_and_remote_verification_retain_local_backup(self):
+        scenarios = {
+            "upload failure": {"AWS_UPLOAD_FAIL": "true"},
+            "missing remote object": {"AWS_REMOTE_MISSING": "true"},
+            "remote size mismatch": {"AWS_REMOTE_SIZE_MISMATCH": "true"},
+        }
+        for label, overrides in scenarios.items():
+            with self.subTest(label=label):
+                self.github_output.unlink(missing_ok=True)
+                self.env.pop("AWS_UPLOAD_FAIL", None)
+                self.env.pop("AWS_REMOTE_MISSING", None)
+                self.env.pop("AWS_REMOTE_SIZE_MISMATCH", None)
+                self.env.update(overrides)
+                result = self.run_backup(VALID_URL)
+                self.assertNotEqual(result.returncode, 0, label)
+                values = dict(
+                    line.split("=", 1)
+                    for line in self.github_output.read_text(encoding="utf-8").splitlines()
+                )
+                self.assertTrue(Path(values["backup_file"]).is_file(), label)
 
     def test_rejected_urls_never_reach_psql(self):
         invalid_urls = {
