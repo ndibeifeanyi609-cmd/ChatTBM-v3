@@ -11,6 +11,10 @@ on:
         description: SHA-256 checksum recorded by the backup job
         required: true
         type: string
+      expected_size_bytes:
+        description: Encrypted object byte size recorded by the backup job
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -38,6 +42,7 @@ jobs:
         env:
           BACKUP_OBJECT_KEY: ${{ inputs.backup_object_key }}
           EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+          EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
           R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
@@ -48,6 +53,7 @@ jobs:
           [[ "$R2_BUCKET_NAME" == "chattbm-staging-backups" ]]
           [[ "$BACKUP_OBJECT_KEY" =~ ^chattbm-staging-[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.dump\.gpg$ ]]
           [[ "$EXPECTED_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$EXPECTED_SIZE_BYTES" =~ ^[1-9][0-9]*$ ]]
           test -n "$R2_READ_ACCESS_KEY_ID"
           test -n "$R2_READ_SECRET_ACCESS_KEY"
           test -n "$R2_ACCOUNT_ID"
@@ -70,6 +76,7 @@ jobs:
         env:
           BACKUP_OBJECT_KEY: ${{ inputs.backup_object_key }}
           EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+          EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
           R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
           R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
@@ -81,6 +88,11 @@ jobs:
           export AWS_DEFAULT_REGION=auto
           endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
           aws s3 cp "s3://chattbm-staging-backups/${BACKUP_OBJECT_KEY}" /tmp/staging-backup.dump.gpg --endpoint-url "$endpoint" --only-show-errors
+          actual_size_bytes=$(wc -c < /tmp/staging-backup.dump.gpg | tr -d '[:space:]')
+          if [[ "$actual_size_bytes" != "$EXPECTED_SIZE_BYTES" ]]; then
+            echo "ERROR: Downloaded backup size does not match the separately supplied expected size." >&2
+            exit 1
+          fi
           actual_sha256=$(sha256sum /tmp/staging-backup.dump.gpg | awk '{print $1}')
           if [[ "$actual_sha256" != "$EXPECTED_SHA256" ]]; then
             echo "ERROR: Downloaded backup checksum does not match the supplied expected checksum." >&2
@@ -94,8 +106,12 @@ jobs:
         run: |
           set -euo pipefail
           plain="/tmp/staging-backup.dump"
-          trap 'rm -f "$plain" /tmp/staging-backup.dump.gpg' EXIT
-          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 --decrypt /tmp/staging-backup.dump.gpg 3<<<"$BACKUP_ENCRYPTION_PASSPHRASE" > "$plain"
+          passphrase_file="/tmp/staging-backup.passphrase"
+          umask 077
+          printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" > "$passphrase_file"
+          chmod 600 "$passphrase_file"
+          trap 'rm -f "$plain" /tmp/staging-backup.dump.gpg "$passphrase_file"' EXIT
+          gpg --batch --yes --pinentry-mode loopback --passphrase-file "$passphrase_file" --decrypt /tmp/staging-backup.dump.gpg > "$plain"
           test -s "$plain"
           pg_restore --exit-on-error --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --no-owner --no-privileges "$plain"
           missing_tables=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name FROM (VALUES ('chattbm_users'), ('chattbm_auth_sessions'), ('chattbm_conversations'), ('chattbm_contexts'), ('chattbm_chat_history'), ('chattbm_memories'), ('chattbm_oauth_identities'), ('chattbm_google_oauth_states'), ('chattbm_google_oauth_handoffs')) AS required(table_name) WHERE to_regclass(format('%I.%I', 'public', required.table_name)) IS NULL ORDER BY required.table_name")
