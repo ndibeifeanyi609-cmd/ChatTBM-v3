@@ -63,6 +63,20 @@ jobs:
           console.log("Indexes: " + schema.indexes.length);
           console.log("Constraints: " + schema.constraints.length);
 
+          // Schema metadata only: never print row contents, credentials, or tokens.
+          console.log("COLUMN DEFINITIONS:");
+          for (const column of schema.columns) {
+            console.log(JSON.stringify(column));
+          }
+          console.log("INDEX DEFINITIONS:");
+          for (const index of schema.indexes) {
+            console.log(JSON.stringify(index));
+          }
+          console.log("CONSTRAINT DEFINITIONS:");
+          for (const constraint of schema.constraints) {
+            console.log(JSON.stringify(constraint));
+          }
+
           if (schema.missingExpectedApplicationTables.length > 0 ||
               schema.missingExpectedTables.length > 0) {
             throw new Error(
