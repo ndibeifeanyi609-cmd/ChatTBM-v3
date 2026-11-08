@@ -40,8 +40,8 @@ pg_dump --dbname="$STAGING_BACKUP_DATABASE_URL" --format=custom --no-owner --no-
 test -s "$output"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  printf 'backup_file=%s\\n' "$output" >> "$GITHUB_OUTPUT"
-  printf 'backup_object_key=%s\\n' "$filename" >> "$GITHUB_OUTPUT"
+  printf 'backup_file=%s\n' "$output" >> "$GITHUB_OUTPUT"
+  printf 'backup_object_key=%s\n' "$filename" >> "$GITHUB_OUTPUT"
 fi
 
 export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
