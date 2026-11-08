@@ -44,8 +44,16 @@ jobs:
 
       - name: Install backup and restore tools
         run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y awscli gnupg postgresql-client
+          sudo apt-get install -y awscli gnupg ca-certificates curl
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          psql --version
+          pg_dump --version
 
       - name: Create encrypted staging backup and upload to private R2
         id: backup
