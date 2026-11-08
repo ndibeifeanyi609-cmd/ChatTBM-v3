@@ -105,4 +105,27 @@ jobs:
             printf '%s\\n' "$missing_tables" >&2
             exit 1
           fi
+          missing_columns=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name || '.' || required.column_name FROM (VALUES
+            ('chattbm_users','id'), ('chattbm_users','email_normalized'), ('chattbm_users','password_hash'), ('chattbm_users','email_verified_at'), ('chattbm_users','created_at'), ('chattbm_users','updated_at'), ('chattbm_users','disabled_at'),
+            ('chattbm_auth_sessions','id'), ('chattbm_auth_sessions','user_id'), ('chattbm_auth_sessions','token_hash'), ('chattbm_auth_sessions','created_at'), ('chattbm_auth_sessions','expires_at'), ('chattbm_auth_sessions','revoked_at'), ('chattbm_auth_sessions','last_seen_at'),
+            ('chattbm_conversations','id'), ('chattbm_conversations','user_id'), ('chattbm_conversations','conversation_key'), ('chattbm_conversations','version'), ('chattbm_conversations','lifecycle'), ('chattbm_conversations','created_at'), ('chattbm_conversations','updated_at'), ('chattbm_conversations','payload'),
+            ('chattbm_contexts','id'), ('chattbm_contexts','user_id'), ('chattbm_contexts','interaction_id'), ('chattbm_contexts','version'), ('chattbm_contexts','schema_version'), ('chattbm_contexts','lifecycle'), ('chattbm_contexts','created_at'), ('chattbm_contexts','updated_at'), ('chattbm_contexts','payload'),
+            ('chattbm_chat_history','user_id'), ('chattbm_chat_history','conversation_id'), ('chattbm_chat_history','messages'), ('chattbm_chat_history','updated_at'),
+            ('chattbm_memories','id'), ('chattbm_memories','user_id'), ('chattbm_memories','memory_type'), ('chattbm_memories','subject'), ('chattbm_memories','lifecycle'), ('chattbm_memories','payload'), ('chattbm_memories','created_at'), ('chattbm_memories','updated_at'),
+            ('chattbm_oauth_identities','id'), ('chattbm_oauth_identities','user_id'), ('chattbm_oauth_identities','provider'), ('chattbm_oauth_identities','provider_subject'), ('chattbm_oauth_identities','created_at'),
+            ('chattbm_google_oauth_states','state_hash'), ('chattbm_google_oauth_states','link_user_id'), ('chattbm_google_oauth_states','expires_at'), ('chattbm_google_oauth_states','created_at'),
+            ('chattbm_google_oauth_handoffs','handoff_hash'), ('chattbm_google_oauth_handoffs','user_id'), ('chattbm_google_oauth_handoffs','expires_at'), ('chattbm_google_oauth_handoffs','created_at')
+          ) AS required(table_name, column_name)
+          WHERE NOT EXISTS (
+            SELECT 1 FROM information_schema.columns actual
+            WHERE actual.table_schema = 'public'
+              AND actual.table_name = required.table_name
+              AND actual.column_name = required.column_name
+          )
+          ORDER BY required.table_name, required.column_name") 
+          if [[ -n "$missing_columns" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM columns:" >&2
+            printf '%s\\n' "$missing_columns" >&2
+            exit 1
+          fi
           echo "RESTORE_VALIDATION_OK: all nine required ChatTBM account, conversation, context, transcript, memory, and OAuth tables restored in disposable PostgreSQL 18."
