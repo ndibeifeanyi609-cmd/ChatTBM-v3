@@ -35,7 +35,7 @@ umask 077
 if [[ -n "${GITHUB_RUN_ID:-}" ]]; then
   run_suffix="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT:-1}"
 else
-  run_suffix="$(date -u +%Y%m%dT%H%M%SZ)-$"
+  run_suffix="$(date -u +%Y%m%dT%H%M%SZ)-${BASHPID}"
 fi
 filename="chattbm-staging-$(date -u +%Y%m%dT%H%M%SZ)-${run_suffix}.dump.gpg"
 output="$output_dir/$filename"
