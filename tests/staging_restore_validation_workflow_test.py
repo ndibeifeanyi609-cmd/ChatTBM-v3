@@ -45,6 +45,20 @@ class StagingRestoreWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("--host=127.0.0.1", self.text)
         self.assertNotIn("dpg-dbicflmc6qcc73d97u60-a", self.text)
 
+    def test_restore_requires_named_core_chat_tbm_tables(self):
+        for table in (
+            "chattbm_users",
+            "chattbm_auth_sessions",
+            "chattbm_conversations",
+            "chattbm_contexts",
+            "chattbm_chat_history",
+            "chattbm_memories",
+        ):
+            self.assertIn(table, self.text)
+        self.assertIn("to_regclass(", self.text)
+        self.assertIn('if [[ -n "$missing_tables" ]]', self.text)
+        self.assertNotIn("count(*) FROM information_schema.tables", self.text)
+
     def test_local_artifacts_are_removed_even_after_failed_steps(self):
         self.assertIn("trap 'rm -f /tmp/staging-backup.dump.gpg' EXIT", self.text)
         self.assertIn("trap 'rm -f \"$plain\" /tmp/staging-backup.dump.gpg' EXIT", self.text)
