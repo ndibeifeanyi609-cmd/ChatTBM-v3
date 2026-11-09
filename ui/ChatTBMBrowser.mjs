@@ -2,7 +2,7 @@
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
 import { createAttachment } from './AttachmentProcessor.mjs';
-import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, confirmEmailVerification, requestEmailVerification, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
+import { API_BASE_URL, transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, confirmEmailVerification, requestEmailVerification, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -307,7 +307,7 @@ class ChatTBMBrowser {
             divider.textContent = 'or';
 
             const googleLink = document.createElement('a');
-            googleLink.href = 'https://chattbm-backend.onrender.com/api/auth/google';
+            googleLink.href = API_BASE_URL + '/api/auth/google';
             googleLink.className = 'ui-auth-google';
             googleLink.textContent = 'Continue with Google';
             googleLink.setAttribute('aria-label', 'Continue with Google');
@@ -811,7 +811,7 @@ class ChatTBMBrowser {
                 button.textContent = 'Opening Google…';
                 try {
                     const token = window.sessionStorage.getItem('chattbm_session_token') || '';
-                    const response = await fetch('https://chattbm-backend.onrender.com/api/auth/google/link', {
+                    const response = await fetch(API_BASE_URL + '/api/auth/google/link', {
                         method: 'POST',
                         credentials: 'include',
                         headers: {
