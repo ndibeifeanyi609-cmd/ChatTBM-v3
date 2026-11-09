@@ -393,6 +393,7 @@ async function transcribeVoice({
 }
 
 export {
+    API_BASE_URL,
     generateReply,
     generateReplyStream,
     transcribeVoice,
