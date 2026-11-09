@@ -2,6 +2,7 @@
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
 import { createAttachment } from './AttachmentProcessor.mjs';
+import { selectSupportedAudioMimeType, snapshotAudioChunks } from './VoiceAudioSupport.mjs';
 import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
@@ -1183,18 +1184,7 @@ class ChatTBMBrowser {
                     audio: true
                 });
 
-            const supportedTypes = [
-                'audio/webm;codecs=opus',
-                'audio/webm',
-                'audio/mp4',
-                'audio/aac',
-                'audio/ogg;codecs=opus'
-            ];
-
-            const type =
-                supportedTypes.find(candidate =>
-                    MediaRecorder.isTypeSupported(candidate)
-                ) || '';
+            const type = selectSupportedAudioMimeType(MediaRecorder);
             const recorder =
                 type
                     ? new MediaRecorder(stream, { mimeType: type })
@@ -1224,7 +1214,7 @@ class ChatTBMBrowser {
                 this.stopVoiceRecorder(button);
             };
             recorder.onstop = async () => {
-                const chunks = this.voiceAudioChunks;
+                const chunks = snapshotAudioChunks(this.voiceAudioChunks);
                 const mimeType =
                     recorder.mimeType || type || 'audio/webm';
 

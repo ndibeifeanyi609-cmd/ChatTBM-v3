@@ -1,0 +1,232 @@
+name: Staging Backup Restore Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_object_key:
+        description: Exact encrypted object key from the approved staging backup
+        required: true
+        type: string
+      expected_sha256:
+        description: SHA-256 checksum recorded by the backup job
+        required: true
+        type: string
+      expected_size_bytes:
+        description: Encrypted object byte size recorded by the backup job
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  restore-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      restore-postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: restore_test
+          POSTGRES_PASSWORD: restore_test_password
+          POSTGRES_DB: restore_validation
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U restore_test -d restore_validation"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - name: Validate inputs and required secrets
+        env:
+          BACKUP_OBJECT_KEY: ${{ inputs.backup_object_key }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+          EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          [[ "$R2_BUCKET_NAME" == "chattbm-staging-backups" ]]
+          [[ "$BACKUP_OBJECT_KEY" =~ ^chattbm-staging-[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.dump\.gpg$ ]]
+          [[ "$EXPECTED_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$EXPECTED_SIZE_BYTES" =~ ^[1-9][0-9]*$ ]]
+          test -n "$R2_READ_ACCESS_KEY_ID"
+          test -n "$R2_READ_SECRET_ACCESS_KEY"
+          test -n "$R2_ACCOUNT_ID"
+          test -n "$BACKUP_ENCRYPTION_PASSPHRASE"
+
+      - name: Install restore validation tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y awscli gnupg ca-certificates curl
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor --yes -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          aws --version
+          pg_restore --version
+
+      - name: Download and verify encrypted backup
+        env:
+          BACKUP_OBJECT_KEY: ${{ inputs.backup_object_key }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+          EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          umask 077
+          export AWS_ACCESS_KEY_ID="$R2_READ_ACCESS_KEY_ID"
+          export AWS_SECRET_ACCESS_KEY="$R2_READ_SECRET_ACCESS_KEY"
+          export AWS_DEFAULT_REGION=auto
+          endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          aws s3 cp "s3://chattbm-staging-backups/${BACKUP_OBJECT_KEY}" /tmp/staging-backup.dump.gpg --endpoint-url "$endpoint" --only-show-errors
+          actual_size_bytes=$(wc -c < /tmp/staging-backup.dump.gpg | tr -d '[:space:]')
+          if [[ "$actual_size_bytes" != "$EXPECTED_SIZE_BYTES" ]]; then
+            echo "ERROR: Downloaded backup size does not match the separately supplied expected size." >&2
+            exit 1
+          fi
+          actual_sha256=$(sha256sum /tmp/staging-backup.dump.gpg | awk '{print $1}')
+          if [[ "$actual_sha256" != "$EXPECTED_SHA256" ]]; then
+            echo "ERROR: Downloaded backup checksum does not match the supplied expected checksum." >&2
+            exit 1
+          fi
+
+      - name: Decrypt and restore into disposable PostgreSQL
+        env:
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+          PGPASSWORD: restore_test_password
+        run: |
+          set -euo pipefail
+          plain="/tmp/staging-backup.dump"
+          passphrase_file="/tmp/staging-backup.passphrase"
+          umask 077
+          printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" > "$passphrase_file"
+          chmod 600 "$passphrase_file"
+          trap 'rm -f "$plain" /tmp/staging-backup.dump.gpg "$passphrase_file"' EXIT
+          gpg --batch --yes --pinentry-mode loopback --passphrase-file "$passphrase_file" --decrypt /tmp/staging-backup.dump.gpg > "$plain"
+          test -s "$plain"
+          pg_restore --exit-on-error --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --no-owner --no-privileges "$plain"
+          missing_tables=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name FROM (VALUES ('chattbm_users'), ('chattbm_auth_sessions'), ('chattbm_conversations'), ('chattbm_contexts'), ('chattbm_chat_history'), ('chattbm_memories'), ('chattbm_oauth_identities'), ('chattbm_google_oauth_states'), ('chattbm_google_oauth_handoffs')) AS required(table_name) WHERE to_regclass(format('%I.%I', 'public', required.table_name)) IS NULL ORDER BY required.table_name")
+          if [[ -n "$missing_tables" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM tables:" >&2
+            printf '%s\\n' "$missing_tables" >&2
+            exit 1
+          fi
+          missing_columns=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name || '.' || required.column_name FROM (VALUES
+            ('chattbm_users','id'), ('chattbm_users','email_normalized'), ('chattbm_users','password_hash'), ('chattbm_users','email_verified_at'), ('chattbm_users','created_at'), ('chattbm_users','updated_at'), ('chattbm_users','disabled_at'),
+            ('chattbm_auth_sessions','id'), ('chattbm_auth_sessions','user_id'), ('chattbm_auth_sessions','token_hash'), ('chattbm_auth_sessions','created_at'), ('chattbm_auth_sessions','expires_at'), ('chattbm_auth_sessions','revoked_at'), ('chattbm_auth_sessions','last_seen_at'),
+            ('chattbm_conversations','id'), ('chattbm_conversations','user_id'), ('chattbm_conversations','conversation_key'), ('chattbm_conversations','version'), ('chattbm_conversations','lifecycle'), ('chattbm_conversations','created_at'), ('chattbm_conversations','updated_at'), ('chattbm_conversations','payload'),
+            ('chattbm_contexts','id'), ('chattbm_contexts','user_id'), ('chattbm_contexts','interaction_id'), ('chattbm_contexts','version'), ('chattbm_contexts','schema_version'), ('chattbm_contexts','lifecycle'), ('chattbm_contexts','created_at'), ('chattbm_contexts','updated_at'), ('chattbm_contexts','payload'),
+            ('chattbm_chat_history','user_id'), ('chattbm_chat_history','conversation_id'), ('chattbm_chat_history','messages'), ('chattbm_chat_history','updated_at'),
+            ('chattbm_memories','id'), ('chattbm_memories','user_id'), ('chattbm_memories','memory_type'), ('chattbm_memories','subject'), ('chattbm_memories','lifecycle'), ('chattbm_memories','payload'), ('chattbm_memories','created_at'), ('chattbm_memories','updated_at'),
+            ('chattbm_oauth_identities','id'), ('chattbm_oauth_identities','user_id'), ('chattbm_oauth_identities','provider'), ('chattbm_oauth_identities','provider_subject'), ('chattbm_oauth_identities','created_at'),
+            ('chattbm_google_oauth_states','state_hash'), ('chattbm_google_oauth_states','link_user_id'), ('chattbm_google_oauth_states','expires_at'), ('chattbm_google_oauth_states','created_at'),
+            ('chattbm_google_oauth_handoffs','handoff_hash'), ('chattbm_google_oauth_handoffs','user_id'), ('chattbm_google_oauth_handoffs','expires_at'), ('chattbm_google_oauth_handoffs','created_at')
+          ) AS required(table_name, column_name)
+          WHERE NOT EXISTS (
+            SELECT 1 FROM information_schema.columns actual
+            WHERE actual.table_schema = 'public'
+              AND actual.table_name = required.table_name
+              AND actual.column_name = required.column_name
+          )
+          ORDER BY required.table_name, required.column_name") 
+          if [[ -n "$missing_columns" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM columns:" >&2
+            printf '%s\\n' "$missing_columns" >&2
+            exit 1
+          fi
+          missing_constraints=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name || ':' || required.constraint_kind || ':' || required.definition FROM (VALUES
+            ('chattbm_users','p','primary key (id)'),
+            ('chattbm_users','u','unique (email_normalized)'),
+            ('chattbm_auth_sessions','p','primary key (id)'),
+            ('chattbm_auth_sessions','u','unique (token_hash)'),
+            ('chattbm_auth_sessions','f','foreign key (user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_conversations','p','primary key (id)'),
+            ('chattbm_conversations','u','unique (user_id, conversation_key)'),
+            ('chattbm_contexts','p','primary key (id)'),
+            ('chattbm_contexts','u','unique (user_id, interaction_id)'),
+            ('chattbm_contexts','f','foreign key (user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_chat_history','p','primary key (user_id, conversation_id)'),
+            ('chattbm_chat_history','f','foreign key (user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_memories','p','primary key (id)'),
+            ('chattbm_memories','u','unique (user_id, memory_type, subject)'),
+            ('chattbm_oauth_identities','p','primary key (id)'),
+            ('chattbm_oauth_identities','u','unique (provider, provider_subject)'),
+            ('chattbm_oauth_identities','u','unique (user_id, provider)'),
+            ('chattbm_oauth_identities','f','foreign key (user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_google_oauth_states','p','primary key (state_hash)'),
+            ('chattbm_google_oauth_states','f','foreign key (link_user_id) references chattbm_users(id) on delete cascade'),
+            ('chattbm_google_oauth_handoffs','p','primary key (handoff_hash)'),
+            ('chattbm_google_oauth_handoffs','f','foreign key (user_id) references chattbm_users(id) on delete cascade')
+          ) AS required(table_name, constraint_kind, definition)
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM pg_constraint actual
+            JOIN pg_class relation ON relation.oid = actual.conrelid
+            JOIN pg_namespace schema ON schema.oid = relation.relnamespace
+            WHERE schema.nspname = 'public'
+              AND relation.relname = required.table_name
+              AND actual.contype = required.constraint_kind
+              AND lower(regexp_replace(pg_get_constraintdef(actual.oid), '[[:space:]]+', ' ', 'g')) LIKE '%' || required.definition || '%'
+          )
+          ORDER BY required.table_name, required.constraint_kind, required.definition")
+          if [[ -n "$missing_constraints" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM keys or foreign-key constraints:" >&2
+            printf '%s\\n' "$missing_constraints" >&2
+            exit 1
+          fi
+          missing_indexes=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.index_name FROM (VALUES
+            ('chattbm_contexts_user_created_idx','on public.chattbm_contexts using btree (user_id, created_at desc)'),
+            ('chattbm_contexts_user_updated_idx','on public.chattbm_contexts using btree (user_id, updated_at desc)'),
+            ('chattbm_google_oauth_states_expires_at_idx','on public.chattbm_google_oauth_states using btree (expires_at)'),
+            ('chattbm_google_oauth_handoffs_expires_at_idx','on public.chattbm_google_oauth_handoffs using btree (expires_at)'),
+            ('chattbm_auth_sessions_user_id_idx','on public.chattbm_auth_sessions using btree (user_id)'),
+            ('chattbm_auth_sessions_expires_at_idx','on public.chattbm_auth_sessions using btree (expires_at)'),
+            ('chattbm_memories_user_lifecycle_idx','on public.chattbm_memories using btree (user_id, lifecycle)')
+          ) AS required(index_name, expected_definition)
+          WHERE NOT EXISTS (
+            SELECT 1 FROM pg_indexes actual
+            WHERE actual.schemaname = 'public'
+              AND actual.indexname = required.index_name
+              AND lower(regexp_replace(actual.indexdef, '[[:space:]]+', ' ', 'g')) LIKE '%' || required.expected_definition || '%'
+          )
+          ORDER BY required.index_name")
+          if [[ -n "$missing_indexes" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM indexes:" >&2
+            printf '%s\\n' "$missing_indexes" >&2
+            exit 1
+          fi
+          missing_checks=$(psql --host=127.0.0.1 --port=5432 --username=restore_test --dbname=restore_validation --tuples-only --no-align --command "SELECT required.table_name || ':' || required.expression_fragment FROM (VALUES
+            ('chattbm_contexts','version >= 1'),
+            ('chattbm_contexts','jsonb_typeof(payload) = ''object'''),
+            ('chattbm_chat_history','jsonb_typeof(messages) = ''array'''),
+            ('chattbm_memories','jsonb_typeof(payload) = ''object''')
+          ) AS required(table_name, expression_fragment)
+          WHERE NOT EXISTS (
+            SELECT 1 FROM pg_constraint actual
+            JOIN pg_class relation ON relation.oid = actual.conrelid
+            JOIN pg_namespace schema ON schema.oid = relation.relnamespace
+            WHERE schema.nspname = 'public'
+              AND relation.relname = required.table_name
+              AND actual.contype = 'c'
+              AND lower(regexp_replace(pg_get_expr(actual.conbin, actual.conrelid), '[[:space:]]+', ' ', 'g')) LIKE '%' || required.expression_fragment || '%'
+          )
+          ORDER BY required.table_name, required.expression_fragment")
+          if [[ -n "$missing_checks" ]]; then
+            echo "ERROR: Restore is missing required ChatTBM data checks:" >&2
+            printf '%s\\n' "$missing_checks" >&2
+            exit 1
+          fi
+          echo "RESTORE_VALIDATION_OK: all nine required ChatTBM account, conversation, context, transcript, memory, and OAuth tables restored in disposable PostgreSQL 18."
+
+      - name: Remove local backup artifacts
+        if: always()
+        run: rm -f /tmp/staging-backup.dump.gpg /tmp/staging-backup.dump
