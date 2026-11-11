@@ -1,0 +1,51 @@
+name: Isolated Migration SQL Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'database/migrations/005_auth_rate_limits.sql'
+      - 'database/migrations/006_email_verification_tokens.sql'
+      - 'tests/sharedAuthRateLimit.integration.test.js'
+      - 'tests/emailVerificationPostgres.integration.test.js'
+      - '.github/workflows/isolated-migration-sql-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-migration-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: chattbm_test
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: chattbm_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U chattbm_test -d chattbm_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://chattbm_test:test_password@localhost:5432/chattbm_test
+      NODE_ENV: test
+      EMAIL_VERIFICATION_ALLOW_DESTRUCTIVE_TESTS: 'true'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Check migration integration test syntax
+        run: node --check tests/sharedAuthRateLimit.integration.test.js && node --check tests/emailVerificationPostgres.integration.test.js
+      - name: Run isolated PostgreSQL migration integration tests
+        run: node --test tests/sharedAuthRateLimit.integration.test.js tests/emailVerificationPostgres.integration.test.js
