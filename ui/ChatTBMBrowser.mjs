@@ -511,15 +511,15 @@ class ChatTBMBrowser {
         const active = Boolean(this.activeChatAbortController);
         const sendButton = this.root.querySelector('.ui-send-button');
         const stopButton = this.root.querySelector('.ui-stop-button');
+        const composer = this.root.querySelector('.ui-composer');
+        if (composer) composer.classList.toggle('is-generating', active);
         if (sendButton) {
-            sendButton.hidden = active;
-            sendButton.style.display = active ? 'none' : '';
             sendButton.disabled = active || !this.app.components.composer.canSubmit();
+            sendButton.setAttribute('aria-hidden', String(active));
         }
         if (stopButton) {
-            stopButton.hidden = !active;
-            stopButton.style.display = active ? 'inline-flex' : 'none';
             stopButton.disabled = !active;
+            stopButton.setAttribute('aria-hidden', String(!active));
         }
     }
 
