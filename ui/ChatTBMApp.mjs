@@ -446,8 +446,15 @@ class ChatTBMApp {
 
             if (!result || result.success !== true) {
                 if (options.signal?.aborted) {
-                    this.state.conversation.messages =
-                        this.state.conversation.messages.filter(item => item.id !== streamMessageId);
+                    const partialMessage = this.state.conversation.messages.find(
+                        item => item.id === streamMessageId
+                    );
+                    if (partialMessage && streamedText.trim()) {
+                        partialMessage.content = `${streamedText.trim()}\\n\\n*Generation stopped.*`;
+                    } else {
+                        this.state.conversation.messages =
+                            this.state.conversation.messages.filter(item => item.id !== streamMessageId);
+                    }
                     this.state.conversation.status = UI_STATUS.SUCCESS;
                     return { success: false, cancelled: true };
                 }
@@ -503,8 +510,15 @@ class ChatTBMApp {
             };
         } catch (error) {
             if (options.signal?.aborted) {
-                this.state.conversation.messages =
-                    this.state.conversation.messages.filter(item => item.id !== streamMessageId);
+                const partialMessage = this.state.conversation.messages.find(
+                    item => item.id === streamMessageId
+                );
+                if (partialMessage && streamedText.trim()) {
+                    partialMessage.content = `${streamedText.trim()}\\n\\n*Generation stopped.*`;
+                } else {
+                    this.state.conversation.messages =
+                        this.state.conversation.messages.filter(item => item.id !== streamMessageId);
+                }
                 this.state.conversation.status = UI_STATUS.SUCCESS;
                 return { success: false, cancelled: true };
             }
