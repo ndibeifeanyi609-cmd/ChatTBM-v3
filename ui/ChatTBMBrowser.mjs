@@ -660,7 +660,7 @@ class ChatTBMBrowser {
         stopButton.textContent = '■';
         stopButton.setAttribute('aria-label', 'Stop generating response');
         stopButton.dataset.action = 'stop-generation';
-        stopButton.hidden = !this.app.state.composer.submitting;
+        stopButton.hidden = !this.activeChatAbortController;
 
         const controls = document.createElement('div');
         controls.className = 'ui-composer-controls';
