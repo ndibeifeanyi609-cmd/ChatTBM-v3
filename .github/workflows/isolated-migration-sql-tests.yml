@@ -4,8 +4,10 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'database/migrations/004_password_reset_tokens.sql'
       - 'database/migrations/005_auth_rate_limits.sql'
       - 'database/migrations/006_email_verification_tokens.sql'
+      - 'tests/passwordResetMigration.integration.test.js'
       - 'tests/sharedAuthRateLimit.integration.test.js'
       - 'tests/emailVerificationPostgres.integration.test.js'
       - '.github/workflows/isolated-migration-sql-tests.yml'
@@ -35,6 +37,7 @@ jobs:
       DATABASE_URL: postgres://chattbm_test:test_password@localhost:5432/chattbm_test
       NODE_ENV: test
       EMAIL_VERIFICATION_ALLOW_DESTRUCTIVE_TESTS: 'true'
+      PASSWORD_RESET_MIGRATION_ALLOW_DESTRUCTIVE_TESTS: 'true'
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -46,6 +49,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Check migration integration test syntax
-        run: node --check tests/sharedAuthRateLimit.integration.test.js && node --check tests/emailVerificationPostgres.integration.test.js
+        run: node --check tests/passwordResetMigration.integration.test.js && node --check tests/sharedAuthRateLimit.integration.test.js && node --check tests/emailVerificationPostgres.integration.test.js
       - name: Run isolated PostgreSQL migration integration tests
-        run: node --test tests/sharedAuthRateLimit.integration.test.js tests/emailVerificationPostgres.integration.test.js
+        run: node --test tests/passwordResetMigration.integration.test.js tests/sharedAuthRateLimit.integration.test.js tests/emailVerificationPostgres.integration.test.js
