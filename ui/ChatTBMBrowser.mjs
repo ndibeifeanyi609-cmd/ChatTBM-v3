@@ -654,6 +654,7 @@ class ChatTBMBrowser {
             'Send message'
         );
         button.disabled = !model.submitAvailable;
+        button.hidden = Boolean(this.activeChatAbortController);
         const stopButton = document.createElement('button');
         stopButton.type = 'button';
         stopButton.className = 'ui-stop-button';
