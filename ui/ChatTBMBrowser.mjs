@@ -511,14 +511,8 @@ class ChatTBMBrowser {
         const active = Boolean(this.activeChatAbortController);
         const sendButton = this.root.querySelector('.ui-send-button');
         const stopButton = this.root.querySelector('.ui-stop-button');
-        if (sendButton) {
-            sendButton.hidden = active;
-            sendButton.style.display = active ? 'none' : '';
-        }
-        if (stopButton) {
-            stopButton.hidden = !active;
-            stopButton.style.display = active ? 'inline-flex' : 'none';
-        }
+        if (sendButton) sendButton.disabled = active || !this.app.components.composer.canSubmit();
+        if (stopButton) stopButton.disabled = !active;
     }
 
     updateStreamingMessage(messageId, content) {
@@ -669,14 +663,13 @@ class ChatTBMBrowser {
             'Send message'
         );
         button.disabled = !model.submitAvailable;
-        button.hidden = Boolean(this.activeChatAbortController);
         const stopButton = document.createElement('button');
         stopButton.type = 'button';
         stopButton.className = 'ui-stop-button';
         stopButton.textContent = '■';
         stopButton.setAttribute('aria-label', 'Stop generating response');
         stopButton.dataset.action = 'stop-generation';
-        stopButton.hidden = !this.activeChatAbortController;
+        stopButton.disabled = !this.activeChatAbortController;
 
         const controls = document.createElement('div');
         controls.className = 'ui-composer-controls';
