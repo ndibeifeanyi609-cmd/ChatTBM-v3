@@ -450,7 +450,7 @@ class ChatTBMApp {
                         item => item.id === streamMessageId
                     );
                     if (partialMessage && streamedText.trim()) {
-                        partialMessage.content = `${streamedText.trim()}\\n\\n*Generation stopped.*`;
+                        partialMessage.content = `${streamedText.trim()}\n\n*Generation stopped.*`;
                     } else {
                         this.state.conversation.messages =
                             this.state.conversation.messages.filter(item => item.id !== streamMessageId);
@@ -514,7 +514,7 @@ class ChatTBMApp {
                     item => item.id === streamMessageId
                 );
                 if (partialMessage && streamedText.trim()) {
-                    partialMessage.content = `${streamedText.trim()}\\n\\n*Generation stopped.*`;
+                    partialMessage.content = `${streamedText.trim()}\n\n*Generation stopped.*`;
                 } else {
                     this.state.conversation.messages =
                         this.state.conversation.messages.filter(item => item.id !== streamMessageId);
