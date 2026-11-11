@@ -507,7 +507,22 @@ class ChatTBMBrowser {
         return element;
     }
 
+    syncComposerActions() {
+        const active = Boolean(this.activeChatAbortController);
+        const sendButton = this.root.querySelector('.ui-send-button');
+        const stopButton = this.root.querySelector('.ui-stop-button');
+        if (sendButton) {
+            sendButton.hidden = active;
+            sendButton.style.display = active ? 'none' : '';
+        }
+        if (stopButton) {
+            stopButton.hidden = !active;
+            stopButton.style.display = active ? 'inline-flex' : 'none';
+        }
+    }
+
     updateStreamingMessage(messageId, content) {
+        this.syncComposerActions();
         const item = Array.from(
             this.root.querySelectorAll('article[data-message-id]')
         ).find(node => node.dataset.messageId === messageId);
@@ -1562,6 +1577,7 @@ class ChatTBMBrowser {
         });
 
         this.render();
+        this.syncComposerActions();
 
         try {
             const result = await pending;
