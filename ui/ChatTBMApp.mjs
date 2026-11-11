@@ -426,6 +426,7 @@ class ChatTBMApp {
             const result = streaming
                 ? await this.generateStreamReply({
                     ...request,
+                    signal: options.signal,
                     onDelta: async delta => {
                         streamedText += delta;
                         const index = this.state.conversation.messages.findIndex(
@@ -444,6 +445,26 @@ class ChatTBMApp {
                 : await this.generateReply(request);
 
             if (!result || result.success !== true) {
+                if (options.signal?.aborted) {
+                    const partialMessage = this.state.conversation.messages.find(
+                        item => item.id === streamMessageId
+                    );
+                    if (partialMessage && streamedText.trim()) {
+                        const index = this.state.conversation.messages.findIndex(
+                            item => item.id === streamMessageId
+                        );
+                        this.state.conversation.messages[index] = createMessage({
+                            id: streamMessageId,
+                            role: 'assistant',
+                            content: `${streamedText.trim()}\n\n*Generation stopped.*`
+                        });
+                    } else {
+                        this.state.conversation.messages =
+                            this.state.conversation.messages.filter(item => item.id !== streamMessageId);
+                    }
+                    this.state.conversation.status = UI_STATUS.SUCCESS;
+                    return { success: false, cancelled: true };
+                }
                 if (streaming && !streamedText.trim()) {
                     this.state.conversation.messages =
                         this.state.conversation.messages.filter(
@@ -495,6 +516,26 @@ class ChatTBMApp {
                 response: result.response
             };
         } catch (error) {
+            if (options.signal?.aborted) {
+                const partialMessage = this.state.conversation.messages.find(
+                    item => item.id === streamMessageId
+                );
+                if (partialMessage && streamedText.trim()) {
+                    const index = this.state.conversation.messages.findIndex(
+                            item => item.id === streamMessageId
+                        );
+                        this.state.conversation.messages[index] = createMessage({
+                            id: streamMessageId,
+                            role: 'assistant',
+                            content: `${streamedText.trim()}\n\n*Generation stopped.*`
+                        });
+                } else {
+                    this.state.conversation.messages =
+                        this.state.conversation.messages.filter(item => item.id !== streamMessageId);
+                }
+                this.state.conversation.status = UI_STATUS.SUCCESS;
+                return { success: false, cancelled: true };
+            }
             const normalizedError = {
                 code:
                     error?.code ||

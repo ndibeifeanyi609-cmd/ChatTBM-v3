@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; connect-src 'self' https://chattbm-backend.onrender.com; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>Verify your ChatTBM email</title>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#090909;color:#f5f5f5;font:16px system-ui,sans-serif}
+main{width:min(90%,420px);padding:28px;box-sizing:border-box;border:1px solid #333;border-radius:16px;background:#111}
+h1{font-size:1.35rem}p{line-height:1.5;color:#ccc}a{color:#fff}
+</style>
+</head>
+<body>
+<main>
+<h1>Email verification</h1>
+<p id="status" role="status" aria-live="polite">Checking your verification link…</p>
+<p><a href="/">Return to ChatTBM</a></p>
+</main>
+<script>
+(async () => {
+    const status = document.getElementById('status');
+    const token = new URLSearchParams(window.location.hash.slice(1)).get('verify_email_token') || '';
+    if (window.location.hash) {
+        window.history.replaceState({}, '', window.location.pathname + window.location.search);
+    }
+    if (!token || token.length < 32 || token.length > 256) {
+        status.textContent = 'This verification link is invalid or expired. Request a new link from ChatTBM.';
+        return;
+    }
+    const apiBase = ['localhost', '127.0.0.1', 'chattbm-password-reset-staging.onrender.com'].includes(window.location.hostname)
+        ? ''
+        : 'https://chattbm-backend.onrender.com';
+    try {
+        const response = await fetch(apiBase + '/api/auth/email-verification/confirm', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+        });
+        const result = await response.json();
+        status.textContent = response.ok && result && result.success === true
+            ? 'Your email has been verified. You can now sign in to ChatTBM.'
+            : 'This verification link is invalid or expired. Request a new link from ChatTBM.';
+    } catch (_) {
+        status.textContent = 'Unable to verify your email right now. Please try again later.';
+    }
+})();
+</script>
+</body>
+</html>

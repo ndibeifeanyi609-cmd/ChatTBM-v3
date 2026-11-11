@@ -19,12 +19,16 @@ const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const HANDOFF_TTL_MS = 2 * 60 * 1000;
 
+function missingGoogleConfig() {
+    return [
+        'GOOGLE_CLIENT_ID',
+        'GOOGLE_CLIENT_SECRET',
+        'GOOGLE_REDIRECT_URI'
+    ].filter(name => !process.env[name]);
+}
+
 function configured() {
-    return Boolean(
-        process.env.GOOGLE_CLIENT_ID &&
-        process.env.GOOGLE_CLIENT_SECRET &&
-        process.env.GOOGLE_REDIRECT_URI
-    );
+    return missingGoogleConfig().length === 0;
 }
 
 function client() {
@@ -57,7 +61,10 @@ async function createOAuthState(linkUserId = null) {
 
 router.get('/', async (req, res, next) => {
     if (!configured()) {
-        return res.status(503).send('Google sign-in is not configured yet.');
+        return res.status(503).send(
+            'Google sign-in is not configured yet. Missing environment variables: ' +
+            missingGoogleConfig().join(', ')
+        );
     }
     try {
         const state = await createOAuthState();
@@ -102,7 +109,15 @@ router.post('/link', async (req, res, next) => {
             return res.status(503).send('Google sign-in is not configured yet.');
         }
         const origin = req.get('origin');
-        if (origin && origin !== 'https://chattbm.com' && origin !== 'https://www.chattbm.com') {
+        const allowedLinkOrigins = new Set([
+            'https://chattbm.com',
+            'https://www.chattbm.com',
+            ...((process.env.FRONTEND_ORIGINS || '')
+                .split(',')
+                .map(value => value.trim())
+                .filter(Boolean))
+        ]);
+        if (origin && !allowedLinkOrigins.has(origin)) {
             return res.status(403).send('This request origin is not allowed.');
         }
         const token = req.body && req.body.sessionToken;

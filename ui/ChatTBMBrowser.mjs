@@ -2,7 +2,7 @@
 
 import { ChatTBMApp } from './ChatTBMApp.mjs';
 import { createAttachment } from './AttachmentProcessor.mjs';
-import { transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
+import { API_BASE_URL, transcribeVoice, registerAccount, loginAccount, getCurrentUser, logoutAccount, requestPasswordReset, confirmPasswordReset, confirmEmailVerification, requestEmailVerification, getConversationHistory, getSavedMemories, deleteSavedMemory } from './ChatAPI.mjs';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.esm.js';
 import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.6/+esm';
 
@@ -25,13 +25,26 @@ class ChatTBMBrowser {
         this.voiceAudioChunks = [];
         this.voiceFallbackActive = false;
         this.selectedFile = null;
+        this.activeChatAbortController = null;
         this.authUser = null;
         this.resetToken = '';
+        this.verifyToken = '';
+        this.verificationLinkPending = false;
         this.authMode = 'closed';
         this.authMessage = '';
         try {
             const resetUrl = new URL(window.location.href);
             this.resetToken = resetUrl.searchParams.get('token') || '';
+            this.verifyToken = resetUrl.hash.startsWith('#verify_email_token=')
+                ? new URLSearchParams(resetUrl.hash.slice(1)).get('verify_email_token') || ''
+                : '';
+            this.verificationLinkPending = Boolean(this.verifyToken);
+            if (this.verifyToken) {
+                this.authMode = 'verify-confirm';
+                resetUrl.searchParams.delete('verify_email_token');
+                resetUrl.hash = '';
+                window.history.replaceState({}, '', resetUrl.pathname + resetUrl.search + resetUrl.hash);
+            }
             if (this.resetToken) {
                 this.authMode = 'reset-confirm';
                 resetUrl.searchParams.delete('token');
@@ -47,7 +60,18 @@ class ChatTBMBrowser {
         this.showMemories = false;
         this.savedMemories = [];
         this.memoryMessage = '';
-        if (!this.resetToken) {
+        if (this.verifyToken) {
+            const token = this.verifyToken;
+            this.verifyToken = '';
+            confirmEmailVerification(token).then(result => {
+                this.authMode = 'login';
+                this.authMessage = result.success
+                    ? 'Email verified successfully. You can now sign in.'
+                    : (result.error?.message || 'This verification link is invalid or expired.');
+                this.render();
+            });
+        }
+        if (!this.resetToken && !this.verificationLinkPending) {
             getCurrentUser().then(async result => {
                 if (result.success && result.user) {
                     await this.switchAccount(result.user);
@@ -284,7 +308,7 @@ class ChatTBMBrowser {
             divider.textContent = 'or';
 
             const googleLink = document.createElement('a');
-            googleLink.href = 'https://chattbm-backend.onrender.com/api/auth/google';
+            googleLink.href = API_BASE_URL + '/api/auth/google';
             googleLink.className = 'ui-auth-google';
             googleLink.textContent = 'Continue with Google';
             googleLink.setAttribute('aria-label', 'Continue with Google');
@@ -296,6 +320,11 @@ class ChatTBMBrowser {
                 forgot.textContent = 'Forgot password?';
                 forgot.dataset.action = 'reset-open';
                 panel.appendChild(forgot);
+                const resendVerification = document.createElement('button');
+                resendVerification.type = 'button';
+                resendVerification.textContent = 'Resend verification email';
+                resendVerification.dataset.action = 'verification-resend';
+                panel.appendChild(resendVerification);
             }
         }
         if (this.authMessage) {
@@ -478,7 +507,21 @@ class ChatTBMBrowser {
         return element;
     }
 
+    syncComposerActions() {
+        const active = Boolean(this.activeChatAbortController);
+        const actionButton = this.root.querySelector('.ui-send-button');
+        const composer = this.root.querySelector('.ui-composer');
+        if (composer) composer.classList.toggle('is-generating', active);
+        if (actionButton) {
+            actionButton.textContent = active ? '■' : '↑';
+            actionButton.setAttribute('aria-label', active ? 'Stop generating response' : 'Send message');
+            actionButton.classList.toggle('is-stop', active);
+            actionButton.disabled = !active && !this.app.components.composer.canSubmit();
+        }
+    }
+
     updateStreamingMessage(messageId, content) {
+        this.syncComposerActions();
         const item = Array.from(
             this.root.querySelectorAll('article[data-message-id]')
         ).find(node => node.dataset.messageId === messageId);
@@ -617,14 +660,18 @@ class ChatTBMBrowser {
         voice.dataset.action = 'voice-input';
 
         const button = document.createElement('button');
-        button.type = 'submit';
+        button.type = 'button';
         button.className = 'ui-send-button';
         button.textContent = '↑';
-        button.setAttribute(
-            'aria-label',
-            'Send message'
-        );
+        button.setAttribute('aria-label', 'Send message');
         button.disabled = !model.submitAvailable;
+        button.addEventListener('click', () => {
+            if (this.activeChatAbortController) {
+                this.activeChatAbortController.abort();
+            } else {
+                this.submit();
+            }
+        });
 
         const controls = document.createElement('div');
         controls.className = 'ui-composer-controls';
@@ -701,7 +748,7 @@ class ChatTBMBrowser {
                 }
                 if (this.authMode === 'register') {
                     this.authMode = 'login';
-                    this.authMessage = 'Account created. Please sign in.';
+                    this.authMessage = result.message || 'Account created. Check your email for a verification link.';
                     this.render();
                     return;
                 }
@@ -711,6 +758,23 @@ class ChatTBMBrowser {
                 this.render();
             });
         }
+        root.querySelectorAll('[data-action="verification-resend"]').forEach(button => {
+            button.addEventListener('click', async () => {
+                const emailInput = root.querySelector('[data-role="auth-form"] input[name="email"]');
+                const email = emailInput ? emailInput.value.trim() : '';
+                if (!email) {
+                    this.authMessage = 'Enter your email address first.';
+                    this.render();
+                    return;
+                }
+                button.disabled = true;
+                const result = await requestEmailVerification(email);
+                this.authMessage = result.success
+                    ? 'If an unverified account matches that email, a verification link will be sent.'
+                    : (result.error?.message || 'Unable to request a verification email.');
+                this.render();
+            });
+        });
         root.querySelectorAll('[data-action="auth-open"]').forEach(button => {
             button.addEventListener('click', () => {
                 this.authMode = 'login';
@@ -766,7 +830,7 @@ class ChatTBMBrowser {
                 button.textContent = 'Opening Google…';
                 try {
                     const token = window.sessionStorage.getItem('chattbm_session_token') || '';
-                    const response = await fetch('https://chattbm-backend.onrender.com/api/auth/google/link', {
+                    const response = await fetch(API_BASE_URL + '/api/auth/google/link', {
                         method: 'POST',
                         credentials: 'include',
                         headers: {
@@ -848,6 +912,15 @@ class ChatTBMBrowser {
                 }
             });
         }
+
+        root.querySelectorAll('[data-action="stop-generation"]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (this.activeChatAbortController) {
+                    button.disabled = true;
+                    this.activeChatAbortController.abort();
+                }
+            });
+        });
 
         const fileButton =
             root.querySelector('[data-action="file-attachment"]');
@@ -1487,24 +1560,29 @@ class ChatTBMBrowser {
             }
         }
 
-        const pending =
-            this.app.submitMessage(message, {
-                attachment,
-                onDelta: (_delta, fullText, messageId) =>
-                    this.updateStreamingMessage(messageId, fullText)
-            });
+        if (this.app.state.composer.submitting) return;
+        const controller = new AbortController();
+        this.activeChatAbortController = controller;
+        const pending = this.app.submitMessage(message, {
+            attachment,
+            signal: controller.signal,
+            onDelta: (_delta, fullText, messageId) =>
+                this.updateStreamingMessage(messageId, fullText)
+        });
 
         this.render();
+        this.syncComposerActions();
 
-        const result = await pending;
-
-        if (result?.success === true) {
-            this.selectedFile = null;
+        try {
+            const result = await pending;
+            if (result?.success === true) this.selectedFile = null;
+            return result;
+        } finally {
+            if (this.activeChatAbortController === controller) {
+                this.activeChatAbortController = null;
+            }
+            this.render();
         }
-
-        this.render();
-
-        return result;
     }
 
     async retry() {
