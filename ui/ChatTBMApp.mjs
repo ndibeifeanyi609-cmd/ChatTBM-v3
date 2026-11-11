@@ -426,6 +426,7 @@ class ChatTBMApp {
             const result = streaming
                 ? await this.generateStreamReply({
                     ...request,
+                    signal: options.signal,
                     onDelta: async delta => {
                         streamedText += delta;
                         const index = this.state.conversation.messages.findIndex(
@@ -444,6 +445,12 @@ class ChatTBMApp {
                 : await this.generateReply(request);
 
             if (!result || result.success !== true) {
+                if (options.signal?.aborted) {
+                    this.state.conversation.messages =
+                        this.state.conversation.messages.filter(item => item.id !== streamMessageId);
+                    this.state.conversation.status = UI_STATUS.SUCCESS;
+                    return { success: false, cancelled: true };
+                }
                 if (streaming && !streamedText.trim()) {
                     this.state.conversation.messages =
                         this.state.conversation.messages.filter(
@@ -495,6 +502,12 @@ class ChatTBMApp {
                 response: result.response
             };
         } catch (error) {
+            if (options.signal?.aborted) {
+                this.state.conversation.messages =
+                    this.state.conversation.messages.filter(item => item.id !== streamMessageId);
+                this.state.conversation.status = UI_STATUS.SUCCESS;
+                return { success: false, cancelled: true };
+            }
             const normalizedError = {
                 code:
                     error?.code ||

@@ -25,6 +25,7 @@ class ChatTBMBrowser {
         this.voiceAudioChunks = [];
         this.voiceFallbackActive = false;
         this.selectedFile = null;
+        this.activeChatAbortController = null;
         this.authUser = null;
         this.resetToken = '';
         this.verifyToken = '';
@@ -653,6 +654,13 @@ class ChatTBMBrowser {
             'Send message'
         );
         button.disabled = !model.submitAvailable;
+        const stopButton = document.createElement('button');
+        stopButton.type = 'button';
+        stopButton.className = 'ui-stop-button';
+        stopButton.textContent = '■';
+        stopButton.setAttribute('aria-label', 'Stop generating response');
+        stopButton.dataset.action = 'stop-generation';
+        stopButton.hidden = !this.app.state.composer.submitting;
 
         const controls = document.createElement('div');
         controls.className = 'ui-composer-controls';
@@ -662,6 +670,7 @@ class ChatTBMBrowser {
         controls.appendChild(textarea);
         controls.appendChild(voice);
         controls.appendChild(button);
+        controls.appendChild(stopButton);
 
         form.appendChild(attachmentPreview);
         form.appendChild(controls);
@@ -893,6 +902,15 @@ class ChatTBMBrowser {
                 }
             });
         }
+
+        root.querySelectorAll('[data-action="stop-generation"]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (this.activeChatAbortController) {
+                    button.disabled = true;
+                    this.activeChatAbortController.abort();
+                }
+            });
+        });
 
         const fileButton =
             root.querySelector('[data-action="file-attachment"]');
@@ -1532,24 +1550,28 @@ class ChatTBMBrowser {
             }
         }
 
-        const pending =
-            this.app.submitMessage(message, {
-                attachment,
-                onDelta: (_delta, fullText, messageId) =>
-                    this.updateStreamingMessage(messageId, fullText)
-            });
+        if (this.app.state.composer.submitting) return;
+        const controller = new AbortController();
+        this.activeChatAbortController = controller;
+        const pending = this.app.submitMessage(message, {
+            attachment,
+            signal: controller.signal,
+            onDelta: (_delta, fullText, messageId) =>
+                this.updateStreamingMessage(messageId, fullText)
+        });
 
         this.render();
 
-        const result = await pending;
-
-        if (result?.success === true) {
-            this.selectedFile = null;
+        try {
+            const result = await pending;
+            if (result?.success === true) this.selectedFile = null;
+            return result;
+        } finally {
+            if (this.activeChatAbortController === controller) {
+                this.activeChatAbortController = null;
+            }
+            this.render();
         }
-
-        this.render();
-
-        return result;
     }
 
     async retry() {

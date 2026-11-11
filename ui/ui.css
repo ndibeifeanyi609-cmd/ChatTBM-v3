@@ -1375,3 +1375,16 @@ body {
         width: 100%;
     }
 }
+
+/* Stop streaming response */
+.ui-stop-button {
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--ui-border-strong);
+    border-radius: 15px;
+    background: var(--ui-surface-raised);
+    color: var(--ui-text);
+    cursor: pointer;
+}
+.ui-stop-button[hidden] { display: none; }
+.ui-stop-button:disabled { opacity: .5; }
