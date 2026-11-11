@@ -511,8 +511,16 @@ class ChatTBMBrowser {
         const active = Boolean(this.activeChatAbortController);
         const sendButton = this.root.querySelector('.ui-send-button');
         const stopButton = this.root.querySelector('.ui-stop-button');
-        if (sendButton) sendButton.disabled = active || !this.app.components.composer.canSubmit();
-        if (stopButton) stopButton.disabled = !active;
+        if (sendButton) {
+            sendButton.hidden = active;
+            sendButton.style.display = active ? 'none' : '';
+            sendButton.disabled = active || !this.app.components.composer.canSubmit();
+        }
+        if (stopButton) {
+            stopButton.hidden = !active;
+            stopButton.style.display = active ? 'inline-flex' : 'none';
+            stopButton.disabled = !active;
+        }
     }
 
     updateStreamingMessage(messageId, content) {
