@@ -509,21 +509,14 @@ class ChatTBMBrowser {
 
     syncComposerActions() {
         const active = Boolean(this.activeChatAbortController);
-        const sendButton = this.root.querySelector('.ui-send-button');
-        const stopButton = this.root.querySelector('.ui-stop-button');
+        const actionButton = this.root.querySelector('.ui-send-button');
         const composer = this.root.querySelector('.ui-composer');
         if (composer) composer.classList.toggle('is-generating', active);
-        if (sendButton) {
-            sendButton.hidden = active;
-            sendButton.style.setProperty('display', active ? 'none' : '', 'important');
-            sendButton.disabled = active || !this.app.components.composer.canSubmit();
-            sendButton.setAttribute('aria-hidden', String(active));
-        }
-        if (stopButton) {
-            stopButton.hidden = !active;
-            stopButton.style.setProperty('display', active ? 'inline-flex' : 'none', 'important');
-            stopButton.disabled = !active;
-            stopButton.setAttribute('aria-hidden', String(!active));
+        if (actionButton) {
+            actionButton.textContent = active ? '■' : '↑';
+            actionButton.setAttribute('aria-label', active ? 'Stop generating response' : 'Send message');
+            actionButton.classList.toggle('is-stop', active);
+            actionButton.disabled = !active && !this.app.components.composer.canSubmit();
         }
     }
 
@@ -667,21 +660,18 @@ class ChatTBMBrowser {
         voice.dataset.action = 'voice-input';
 
         const button = document.createElement('button');
-        button.type = 'submit';
+        button.type = 'button';
         button.className = 'ui-send-button';
         button.textContent = '↑';
-        button.setAttribute(
-            'aria-label',
-            'Send message'
-        );
+        button.setAttribute('aria-label', 'Send message');
         button.disabled = !model.submitAvailable;
-        const stopButton = document.createElement('button');
-        stopButton.type = 'button';
-        stopButton.className = 'ui-stop-button';
-        stopButton.textContent = '■';
-        stopButton.setAttribute('aria-label', 'Stop generating response');
-        stopButton.dataset.action = 'stop-generation';
-        stopButton.disabled = !this.activeChatAbortController;
+        button.addEventListener('click', () => {
+            if (this.activeChatAbortController) {
+                this.activeChatAbortController.abort();
+            } else {
+                this.submit();
+            }
+        });
 
         const controls = document.createElement('div');
         controls.className = 'ui-composer-controls';
@@ -691,7 +681,6 @@ class ChatTBMBrowser {
         controls.appendChild(textarea);
         controls.appendChild(voice);
         controls.appendChild(button);
-        controls.appendChild(stopButton);
 
         form.appendChild(attachmentPreview);
         form.appendChild(controls);
