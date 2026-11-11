@@ -109,7 +109,15 @@ router.post('/link', async (req, res, next) => {
             return res.status(503).send('Google sign-in is not configured yet.');
         }
         const origin = req.get('origin');
-        if (origin && origin !== 'https://chattbm.com' && origin !== 'https://www.chattbm.com') {
+        const allowedLinkOrigins = new Set([
+            'https://chattbm.com',
+            'https://www.chattbm.com',
+            ...((process.env.FRONTEND_ORIGINS || '')
+                .split(',')
+                .map(value => value.trim())
+                .filter(Boolean))
+        ]);
+        if (origin && !allowedLinkOrigins.has(origin)) {
             return res.status(403).send('This request origin is not allowed.');
         }
         const token = req.body && req.body.sessionToken;
