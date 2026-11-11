@@ -514,10 +514,14 @@ class ChatTBMBrowser {
         const composer = this.root.querySelector('.ui-composer');
         if (composer) composer.classList.toggle('is-generating', active);
         if (sendButton) {
+            sendButton.hidden = active;
+            sendButton.style.setProperty('display', active ? 'none' : '', 'important');
             sendButton.disabled = active || !this.app.components.composer.canSubmit();
             sendButton.setAttribute('aria-hidden', String(active));
         }
         if (stopButton) {
+            stopButton.hidden = !active;
+            stopButton.style.setProperty('display', active ? 'inline-flex' : 'none', 'important');
             stopButton.disabled = !active;
             stopButton.setAttribute('aria-hidden', String(!active));
         }
