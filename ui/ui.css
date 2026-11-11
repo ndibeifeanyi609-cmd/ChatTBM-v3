@@ -1388,14 +1388,9 @@ body {
 }
 .ui-stop-button[hidden] { display: none; }
 
-.ui-composer.is-generating .ui-send-button {
-    display: none !important;
-}
-.ui-composer:not(.is-generating) .ui-stop-button {
-    display: none !important;
-}
-.ui-composer.is-generating .ui-stop-button {
-    display: inline-flex !important;
+.ui-send-button.is-stop {
+    background: var(--ui-surface-raised);
+    color: var(--ui-text);
 }
 
 .ui-stop-button:disabled { opacity: .5; }
