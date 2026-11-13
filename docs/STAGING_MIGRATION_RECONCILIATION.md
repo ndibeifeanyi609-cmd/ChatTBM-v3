@@ -225,3 +225,25 @@ This confirms the inventory log contains enough column and index detail to build
 **Metadata limitation:** the inventory's constraint output records foreign-key constraint names and local columns, but does not reliably expose the referenced table/column pair for those rows. The 100 records also include generated not-null checks, so that number must not be interpreted as 100 independent business constraints. A future manifest must derive FK targets and full check expressions from reviewed SQL/source definitions or improve the read-only inventory query. Do not fill those fields by guessing.
 
 No database operation was performed while recovering or reviewing this log. The schema remains incomplete: the two expected migration tables are absent, and the chat-history index mismatch remains unresolved.
+
+
+
+## 3D. Inventory endpoint ownership and constraint-metadata blocker
+
+The read-only GitHub Actions workflow in `.github/workflows/staging-connection-check.yml` calls the Render diagnostic endpoint at `/api/internal/staging-db-check` and prints the returned `schema.columns`, `schema.indexes`, and `schema.constraints` arrays. PR #78 changes retry behavior and logging in that workflow; it does not implement the database metadata query itself.
+
+A repository code search for the endpoint path, its schema response fields, and the staging diagnostic token found only workflow callers, not the deployed diagnostic service's route/query implementation. Therefore, the complete FK target and check-expression metadata cannot safely be added by editing the caller workflow alone.
+
+### Required next step
+
+Locate and inspect the source repository/service that deploys `chattbm-staging-db-check.onrender.com`. In that service, review the read-only SQL used to construct `schema.constraints` and extend it to return, at minimum:
+
+- constraint type and name;
+- ordered local column list;
+- referenced schema, table, and ordered referenced column list for foreign keys;
+- full check expression from PostgreSQL's catalog definition;
+- deferrability and validation status where applicable.
+
+Use PostgreSQL catalog joins (including `pg_constraint`, `pg_class`, `pg_namespace`, `pg_attribute`, and `pg_get_constraintdef`) with deterministic ordering. Keep the endpoint read-only and return metadata only; do not include row values or secrets. Add tests against a disposable PostgreSQL instance that includes composite foreign keys and check constraints before deploying any diagnostic-service change.
+
+Until that service source is located and reviewed, do not claim that the inventory contains complete constraint definitions and do not generate a constraint validator from the incomplete array. No Render configuration, staging database, or production resource was changed by this review.
