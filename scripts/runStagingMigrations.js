@@ -95,8 +95,28 @@ async function main() {
       `);
     }
 
+    if (ledgerExists.rows[0].present) {
+      const ledgerColumns = await client.query(`
+        SELECT column_name, data_type, is_nullable
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'chattbm_schema_migrations'
+        ORDER BY ordinal_position
+      `);
+      const expectedColumns = [
+        ["migration_id", "text", "NO"],
+        ["checksum_sha256", "text", "NO"],
+        ["applied_at", "timestamp with time zone", "NO"]
+      ];
+      const actualColumns = ledgerColumns.rows.map(row => [
+        row.column_name, row.data_type, row.is_nullable
+      ]);
+      if (JSON.stringify(actualColumns) !== JSON.stringify(expectedColumns)) {
+        throw new Error("Migration ledger has an invalid structure.");
+      }
+    }
+
     const applied = ledgerExists.rows[0].present
-      ? await client.query("SELECT migration_id, checksum_sha256 FROM public.chattbm_schema_migrations ORDER BY migration_id")
+      ? await client.query("SELECT migration_id, checksum_sha256 FROM public.chattbm_schema_migrations ORDER BY applied_at, migration_id")
       : { rows: [] };
     const manifestIds = new Set(plan.map(migration => migration.id));
     const unknownLedgerIds = applied.rows
@@ -106,6 +126,12 @@ async function main() {
       throw new Error("Migration ledger contains IDs absent from the manifest: " + unknownLedgerIds.join(", "));
     }
     const appliedMap = new Map(applied.rows.map(row => [row.migration_id, row.checksum_sha256]));
+    const recordedIds = applied.rows.map(row => row.migration_id);
+    const expectedPrefix = plan.slice(0, recordedIds.length).map(migration => migration.id);
+    if (recordedIds.length > plan.length ||
+        recordedIds.some((id, index) => id !== expectedPrefix[index])) {
+      throw new Error("Migration ledger is not a contiguous manifest prefix.");
+    }
 
     for (const migration of plan) {
       const recorded = appliedMap.get(migration.id);
