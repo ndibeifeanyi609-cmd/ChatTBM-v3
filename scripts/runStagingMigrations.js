@@ -87,6 +87,37 @@ const migration001Constraints = {
   ]
 };
 
+const migration001Indexes = {
+  chattbm_auth_sessions: [
+    ["chattbm_auth_sessions_user_id_idx", "CREATE INDEX chattbm_auth_sessions_user_id_idx ON public.chattbm_auth_sessions USING btree (user_id)"],
+    ["chattbm_auth_sessions_expires_at_idx", "CREATE INDEX chattbm_auth_sessions_expires_at_idx ON public.chattbm_auth_sessions USING btree (expires_at)"]
+  ]
+};
+
+async function verifyMigration001Indexes(client) {
+  const mismatches = [];
+  for (const [tableName, expectedIndexes] of Object.entries(migration001Indexes)) {
+    for (const [indexName, expectedDefinition] of expectedIndexes) {
+      const result = await client.query(`
+        SELECT pg_get_indexdef(index_row.indexrelid) AS definition
+        FROM pg_class AS index_row
+        JOIN pg_namespace AS namespace_row ON namespace_row.oid = index_row.relnamespace
+        JOIN pg_index AS index_meta ON index_meta.indexrelid = index_row.oid
+        JOIN pg_class AS table_row ON table_row.oid = index_meta.indrelid
+        WHERE namespace_row.nspname = 'public'
+          AND index_row.relname = $1 AND table_row.relname = $2
+      `, [indexName, tableName]);
+      const normalize = value => value.toLowerCase().replace(/\\s+/g, " ").trim();
+      if (result.rows.length !== 1 || normalize(result.rows[0].definition) !== normalize(expectedDefinition)) {
+        mismatches.push(indexName + " definition differs from migration 001");
+      }
+    }
+  }
+  if (mismatches.length) {
+    throw new Error("Recorded migration schema mismatch: " + mismatches.join("; ") + ". Refusing to continue.");
+  }
+}
+
 async function verifyMigration001Constraints(client) {
   const mismatches = [];
   for (const [tableName, expected] of Object.entries(migration001Constraints)) {
@@ -145,6 +176,7 @@ async function verifyRecordedObjectPresence(client, plan, appliedMap) {
   if (appliedMap.has("001_auth_accounts_sessions.sql")) {
     await verifyMigration001Columns(client);
     await verifyMigration001Constraints(client);
+    await verifyMigration001Indexes(client);
   }
 }
 
