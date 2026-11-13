@@ -22,6 +22,9 @@ for command_name in psql pg_dump gpg aws; do
   }
 done
 
+# Render PostgreSQL requires TLS for external connections from GitHub-hosted runners.
+# Force libpq to use TLS for both the preflight query and pg_dump.
+export PGSSLMODE=require
 export PGOPTIONS="-c default_transaction_read_only=on"
 database_name=$(psql "$STAGING_BACKUP_DATABASE_URL" -X -A -t -v ON_ERROR_STOP=1 -c 'SELECT current_database()')
 if [[ "$database_name" != "chattbm_staging_isolated" ]]; then
