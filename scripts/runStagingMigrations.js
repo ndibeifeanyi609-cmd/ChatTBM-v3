@@ -118,6 +118,14 @@ async function main() {
     const applied = ledgerExists.rows[0].present
       ? await client.query("SELECT migration_id, checksum_sha256 FROM public.chattbm_schema_migrations ORDER BY applied_at, migration_id")
       : { rows: [] };
+    if (ledgerExists.rows[0].present && applied.rows.length === 0) {
+      const existing = await client.query(
+        "SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' AND table_name LIKE 'chattbm_%' AND table_name <> 'chattbm_schema_migrations'"
+      );
+      if (existing.rows[0].count > 0) {
+        throw new Error("Empty migration ledger found beside existing ChatTBM tables. Baseline verification is required; refusing to treat the schema as clean.");
+      }
+    }
     const manifestIds = new Set(plan.map(migration => migration.id));
     const unknownLedgerIds = applied.rows
       .map(row => row.migration_id)
