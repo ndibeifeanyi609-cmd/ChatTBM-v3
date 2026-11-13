@@ -50,6 +50,11 @@ async function main() {
   if (decodeURIComponent(parsed.pathname.replace(/^\//, "")) !== "chattbm_staging_isolated") {
     throw new Error("Refusing migration target: database name must be exactly chattbm_staging_isolated.");
   }
+  const allowedHosts = (process.env.STAGING_MIGRATION_ALLOWED_HOSTS || "")
+    .split(",").map(host => host.trim().toLowerCase()).filter(Boolean);
+  if (!allowedHosts.length || !allowedHosts.includes(parsed.hostname.toLowerCase())) {
+    throw new Error("Refusing migration target: database host is not in STAGING_MIGRATION_ALLOWED_HOSTS.");
+  }
   if (apply && process.env.STAGING_MIGRATION_APPROVAL !== approvalPhrase) {
     throw new Error("Apply refused. Set the explicit staging-only approval phrase after review.");
   }
@@ -93,6 +98,13 @@ async function main() {
     const applied = ledgerExists.rows[0].present
       ? await client.query("SELECT migration_id, checksum_sha256 FROM public.chattbm_schema_migrations ORDER BY migration_id")
       : { rows: [] };
+    const manifestIds = new Set(plan.map(migration => migration.id));
+    const unknownLedgerIds = applied.rows
+      .map(row => row.migration_id)
+      .filter(id => !manifestIds.has(id));
+    if (unknownLedgerIds.length) {
+      throw new Error("Migration ledger contains IDs absent from the manifest: " + unknownLedgerIds.join(", "));
+    }
     const appliedMap = new Map(applied.rows.map(row => [row.migration_id, row.checksum_sha256]));
 
     for (const migration of plan) {
