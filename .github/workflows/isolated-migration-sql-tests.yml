@@ -32,6 +32,7 @@ jobs:
     env:
       STAGING_MIGRATION_DATABASE_URL: postgres://chattbm_test:test_password@localhost:5432/chattbm_staging_isolated
       STAGING_MIGRATION_APPROVAL: APPLY_TO_ISOLATED_STAGING_ONLY
+      STAGING_MIGRATION_ALLOWED_HOSTS: localhost
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
