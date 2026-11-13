@@ -16,14 +16,11 @@ if (databaseName !== 'chattbm_test' || !['localhost', '127.0.0.1'].includes(pars
 }
 
 function parsePgTextArray(value) {
-    if (Array.isArray(value)) return value;
     if (value === null || value === undefined) return null;
-    if (typeof value !== 'string' || value[0] !== '{' || value[value.length - 1] !== '}') {
-        throw new Error(`Unexpected PostgreSQL text-array value: ${String(value)}`);
+    if (!Array.isArray(value)) {
+        throw new Error(`Expected PostgreSQL text[] to be parsed as an array; received: ${String(value)}`);
     }
-    const body = value.slice(1, -1);
-    if (!body) return [];
-    return body.split(',').map(item => item.replace(/^"(.*)"$/, '$1').replace(/\\\\(.)/g, '$1'));
+    return value;
 }
 
 async function main() {
