@@ -85,9 +85,9 @@ jobs:
           console.log("Missing expected migration tables: " + JSON.stringify(schema.missingExpectedTables));
           console.log("Unexpected application tables: " + JSON.stringify(schema.unexpectedApplicationTables));
           console.log("User row count: " + schema.userRowCount);
-          console.log("Columns: " + schema.columns.length);
-          console.log("Indexes: " + schema.indexes.length);
-          console.log("Constraints: " + schema.constraints.length);
+          console.log("Column definitions (schema metadata only): " + JSON.stringify(schema.columns));
+          console.log("Index definitions (schema metadata only): " + JSON.stringify(schema.indexes));
+          console.log("Constraint definitions (schema metadata only): " + JSON.stringify(schema.constraints));
 
           if (schema.missingExpectedApplicationTables.length > 0 ||
               schema.missingExpectedTables.length > 0) {
