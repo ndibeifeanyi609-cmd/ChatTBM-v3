@@ -99,7 +99,7 @@ async function verifyMigration001Indexes(client) {
   for (const [tableName, expectedIndexes] of Object.entries(migration001Indexes)) {
     for (const [indexName, expectedDefinition] of expectedIndexes) {
       const result = await client.query(`
-        SELECT pg_get_indexdef(index_row.indexrelid) AS definition
+        SELECT pg_get_indexdef(index_meta.indexrelid) AS definition
         FROM pg_class AS index_row
         JOIN pg_namespace AS namespace_row ON namespace_row.oid = index_row.relnamespace
         JOIN pg_index AS index_meta ON index_meta.indexrelid = index_row.oid
