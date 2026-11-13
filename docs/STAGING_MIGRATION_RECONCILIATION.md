@@ -6,7 +6,7 @@
 
 ## 1. Evidence reviewed
 
-The report compares the read-only staging inventory from GitHub Actions run `42478802644` (job `128726001394`) with the repository migration files:
+The report compares the read-only staging inventory from GitHub Actions Run #34 (`43486507387`, job `132096265797`, commit `46e7e36ee064c119f6a31089db0812d315b8199b`) with the repository migration files. Run #34 completed its read-only inspection but correctly exited non-zero because required schema objects are missing:
 
 - `database/migrations/001_auth_accounts_sessions.sql`
 - `database/migrations/002_chat_history.sql`
@@ -16,7 +16,7 @@ The report compares the read-only staging inventory from GitHub Actions run `424
 - `database/migrations/004_password_reset_tokens.sql`
 - `database/migrations/005_auth_rate_limits.sql`
 
-The inventory connected to the isolated staging database in read-only mode. It reported nine existing application tables, two missing expected tables, no unexpected application tables, and zero rows in the users table. The inventory did not execute DDL or change database contents.
+The inventory connected to `chattbm_staging_isolated` in read-only mode. It reported nine existing application tables, two missing expected tables, no unexpected application tables, and **one row** in `chattbm_users` at the time of Run #34. This supersedes the earlier inventory's zero-user-row observation. The inventory did not execute DDL or change database contents. Complete column, index, and constraint metadata was emitted in the Run #34 job log.
 
 ## 2. Observed staging schema
 
@@ -37,14 +37,29 @@ Missing expected tables:
 - `chattbm_auth_rate_limits`
 - `chattbm_password_reset_tokens`
 
-No unexpected application tables were reported. The users table row count was zero at the time of the inventory.
+No unexpected application tables were reported. The users table row count was **one** at the time of Run #34. Do not assume this count remains current.
+
+
+## 2A. Latest read-only inventory evidence (Run #34)
+
+Run #34 (`43486507387`) successfully connected to `chattbm_staging_isolated` with the read-only diagnostic. The workflow's final schema gate failed because expected schema objects are absent; this is a schema finding, not a connection timeout.
+
+- Present application tables: the nine names listed in Section 2.
+- Missing application tables: `chattbm_password_reset_tokens` and `chattbm_auth_rate_limits`.
+- Missing expected migration tables: the same two tables.
+- Unexpected application tables: none.
+- `chattbm_users` row count: 1 (as of this inventory only).
+- `chattbm_chat_history` indexes: only the primary-key index was reported; `chattbm_chat_history_updated_at_idx` from migration 002 was absent.
+- Run #34 emitted full column, index, and constraint metadata. The metadata should be used for the next exact-definition comparison; the workflow did not write to the database.
+
+The Run #34 workflow intentionally exits non-zero when required tables are absent. Do not rerun it expecting green until the schema differences have been reconciled and a separately approved staging change is completed.
 
 ## 3. Migration comparison
 
 | Migration file | Observation | Assessment |
 |---|---|---|
 | `001_auth_accounts_sessions.sql` | Users and sessions tables, expected key relationships and session indexes were present in the inspected metadata. | Structurally consistent with the inspected definitions. This does not prove when or how the schema was created. |
-| `002_chat_history.sql` | Chat history table and primary key were present, but `chattbm_chat_history_updated_at_idx` was absent. | Confirmed schema mismatch requiring a reviewed reconciliation plan. |
+| `002_chat_history.sql` | Chat history table and primary key were present, but `chattbm_chat_history_updated_at_idx` was absent from the complete Run #34 index definitions. | Confirmed schema mismatch requiring a reviewed reconciliation plan. The migration defines `(user_id, updated_at DESC)`; no equivalent index was reported under another name. |
 | `002_google_oauth_identities.sql` | OAuth identities table, uniqueness constraints and user relationship were present. | Structurally consistent with inspected definitions; execution history remains unproven. |
 | `003_context_records.sql` | Context table, primary key, user/interaction uniqueness and expected indexes/checks were present. | Structurally consistent with inspected definitions; execution history remains unproven. |
 | `003_google_oauth_states.sql` | Google OAuth states table, primary key and expiry index were present. | Structurally consistent with inspected definitions; execution history remains unproven. |
@@ -68,7 +83,7 @@ Do not retroactively populate a migration ledger by assuming that present tables
 
 ## 5. Required work before any staging write
 
-1. **Resolve the chat-history index mismatch.** Prepare a narrowly scoped, reviewed reconciliation for the absent `chattbm_chat_history_updated_at_idx`. Verify the exact intended index definition and confirm whether an equivalent index exists under another name before proposing SQL.
+1. **Resolve the chat-history index mismatch.** Run #34's complete index definitions show only `chattbm_chat_history_pkey` for `chattbm_chat_history`; the migration's `chattbm_chat_history_updated_at_idx` on `(user_id, updated_at DESC)` is absent and no equivalent index was reported. Prepare a narrowly scoped, reviewed reconciliation plan, including an existence check and impact assessment, before proposing SQL.
 2. **Stabilize migration identity.** Assign each migration a unique immutable identifier independent of its numeric filename prefix. Record the exact filename and SHA-256 checksum.
 3. **Reconcile existing schema history.** Establish the provenance of all existing application tables, especially the three tables not represented in the inspected migration set. Do not infer migration history from table existence.
 4. **Review runner and ledger behavior.** Require checksum mismatch to stop execution; use an advisory lock; write migration and ledger record atomically; and independently verify schema before marking a migration applied.
@@ -99,7 +114,7 @@ Do not broaden the staging database IP allowlist to `0.0.0.0/0`. Keep backup cre
 At the time of this report:
 
 - No staging migration has been run.
-- No staging schema or data has been changed.
+- No staging schema or data has been changed. Run #34 was read-only; it observed one existing user row and did not modify it.
 - The encrypted backup/restore gate has passed for the artifact and scope recorded in Section 6; broader schema/data-integrity verification remains outstanding.
 - No production database or production service has been touched.
 - No draft pull request has been merged or marked ready for review.
