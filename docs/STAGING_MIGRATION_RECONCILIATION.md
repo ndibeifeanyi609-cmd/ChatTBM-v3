@@ -123,3 +123,29 @@ At the time of this report:
 ## 8. Decision
 
 **Do not run migrations yet.** The basic encrypted backup/restore gate now passes, but schema reconciliation, migration identity/history, the chat-history index mismatch, and migration 004/005 preconditions remain unresolved. Complete those reviews and a stronger schema-specific restore check before submitting a separate staging-only migration plan for explicit approval.
+
+
+## 3A. Repository initialization provenance review (read-only)
+
+The repository source was inspected to identify the origin of the three present tables not represented in migration files 001–005:
+
+| Table | Repository initializer | Finding |
+|---|---|---|
+| `chattbm_conversations` | `database/Postgres.js`, `initializeDatabase()` | Created by application startup SQL; primary key and unique `(user_id, conversation_key)` match the inventory. No user foreign key is declared by this initializer. |
+| `chattbm_google_oauth_handoffs` | `database/Postgres.js`, `initializeDatabase()` | Created by application startup SQL; primary key on `handoff_hash`, user foreign key, and expiry index are represented in the inventory. |
+| `chattbm_memories` | `memory/PostgresMemoryPersistence.js`, `initialize()` | Created by Memory persistence initialization; primary key, unique `(user_id, memory_type, subject)`, JSON object check, and `(user_id, lifecycle)` index are represented in the inventory. The initializer does not declare a user foreign key. |
+
+The same `database/Postgres.js` initializer also creates users, contexts, chat history, OAuth identities, Google OAuth states, and auth sessions. Those definitions align with the corresponding present tables at the column/index/constraint level reviewed in Run #34, subject to the explicit chat-history index difference below.
+
+### Exact initialization-versus-inventory differences
+
+1. `chattbm_chat_history`: the runtime initializer in `database/Postgres.js` creates the table and primary key but does not create `chattbm_chat_history_updated_at_idx`. Migration `002_chat_history.sql` does define that index. Run #34 reports only the primary-key index. This is a real difference between the migration definition and the runtime initializer, not evidence that the index exists under another name.
+2. `chattbm_conversations`: application initializer creates it outside the migration set. The observed primary key and unique user/conversation key match. The initializer intentionally has no declared FK to users.
+3. `chattbm_memories`: application initializer creates it outside the migration set. Its observed uniqueness and lifecycle index match the initializer. The initializer has no declared FK to users.
+4. `chattbm_google_oauth_handoffs`: application initializer creates it outside the migration set, including the expiry index; observed metadata matches.
+
+This source review establishes where the current application code declares these tables. It does **not** prove when the live staging objects were created, which historical code version created them, or whether the live schema has never drifted. Runtime initialization is also not a substitute for a migration ledger.
+
+### Baseline decision
+
+Do not add the three initializer-owned tables to the migration ledger as though historical migration execution were proven. A future baseline must explicitly record their source as application-initializer-managed (with the exact reviewed source revision), separately from migration-managed objects, and must only be created after a fresh read-only inventory and independent definition comparison. Do not change the initializers or staging database as part of this reconciliation review.
