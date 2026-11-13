@@ -75,6 +75,41 @@ const migration001Columns = {
   ]
 };
 
+const migration001Constraints = {
+  chattbm_users: [
+    "primary key (id)",
+    "unique (email_normalized)"
+  ],
+  chattbm_auth_sessions: [
+    "primary key (id)",
+    "unique (token_hash)",
+    "foreign key (user_id) references chattbm_users(id) on delete cascade"
+  ]
+};
+
+async function verifyMigration001Constraints(client) {
+  const mismatches = [];
+  for (const [tableName, expected] of Object.entries(migration001Constraints)) {
+    const result = await client.query(`
+      SELECT lower(pg_get_constraintdef(constraint_row.oid)) AS definition
+      FROM pg_constraint AS constraint_row
+      JOIN pg_class AS table_row ON table_row.oid = constraint_row.conrelid
+      JOIN pg_namespace AS namespace_row ON namespace_row.oid = table_row.relnamespace
+      WHERE namespace_row.nspname = 'public' AND table_row.relname = $1
+        AND constraint_row.contype IN ('p', 'u', 'f')
+      ORDER BY definition
+    `, [tableName]);
+    const actual = result.rows.map(row => row.definition.replace(/\\s+/g, " ").trim()).sort();
+    const wanted = expected.slice().sort();
+    if (JSON.stringify(actual) !== JSON.stringify(wanted)) {
+      mismatches.push(tableName + " primary/unique/foreign-key constraints differ from migration 001 definition");
+    }
+  }
+  if (mismatches.length) {
+    throw new Error("Recorded migration schema mismatch: " + mismatches.join("; ") + ". Refusing to continue.");
+  }
+}
+
 async function verifyMigration001Columns(client) {
   const mismatches = [];
   for (const [tableName, expected] of Object.entries(migration001Columns)) {
@@ -109,6 +144,7 @@ async function verifyRecordedObjectPresence(client, plan, appliedMap) {
   }
   if (appliedMap.has("001_auth_accounts_sessions.sql")) {
     await verifyMigration001Columns(client);
+    await verifyMigration001Constraints(client);
   }
 }
 
