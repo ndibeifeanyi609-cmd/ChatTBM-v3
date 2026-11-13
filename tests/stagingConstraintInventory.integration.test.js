@@ -14,6 +14,17 @@ if (databaseName !== 'chattbm_test' || !['localhost', '127.0.0.1'].includes(pars
     throw new Error('Refusing to run constraint tests outside the local chattbm_test database.');
 }
 
+function parsePgTextArray(value) {
+    if (Array.isArray(value)) return value;
+    if (value === null || value === undefined) return null;
+    if (typeof value !== 'string' || value[0] !== '{' || value[value.length - 1] !== '}') {
+        throw new Error(`Unexpected PostgreSQL text-array value: ${String(value)}`);
+    }
+    const body = value.slice(1, -1);
+    if (!body) return [];
+    return body.split(',').map(item => item.replace(/^"(.*)"$/, '$1').replace(/\\\\(.)/g, '$1'));
+}
+
 async function main() {
     const client = new Client({ connectionString });
     await client.connect();
@@ -43,9 +54,17 @@ async function main() {
             ADD CONSTRAINT chattbm_constraint_child_amount_ck CHECK (amount > 0) NOT VALID`);
 
         const result = await client.query(constraintQuery);
-        const rows = result.rows.filter(row =>
-            ['chattbm_constraint_parent', 'chattbm_constraint_child'].includes(row.table_name)
-        );
+        const rows = result.rows
+            .filter(row =>
+                ['chattbm_constraint_parent', 'chattbm_constraint_child'].includes(row.table_name)
+            )
+            .map(row => ({
+                ...row,
+                columns: parsePgTextArray(row.columns),
+                foreign_columns: row.foreign_columns === null
+                    ? null
+                    : parsePgTextArray(row.foreign_columns)
+            }));
         const byName = Object.fromEntries(rows.map(row => [row.constraint_name, row]));
 
         assert.ok(byName.chattbm_constraint_parent_pk, 'primary key is inventoried');
