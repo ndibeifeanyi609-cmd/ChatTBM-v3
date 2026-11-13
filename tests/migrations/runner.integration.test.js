@@ -4,23 +4,25 @@ import { spawnSync } from "node:child_process";
 import pg from "pg";
 
 const connectionString = process.env.STAGING_MIGRATION_DATABASE_URL;
-assert.ok(connectionString, "CI must provide STAGING_MIGRATION_DATABASE_URL");
-const parsed = new URL(connectionString);
-assert.equal(decodeURIComponent(parsed.pathname.slice(1)), "chattbm_staging_isolated");
 
-function run(args = []) {
-  const result = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", ...args], {
-    encoding: "utf8",
-    env: {
-      ...process.env,
-      STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY"
-    }
-  });
-  if (result.status !== 0) throw new Error(result.stderr || result.stdout);
-  return result.stdout;
-}
+test("isolated PostgreSQL migrations apply once, record checksums, and rerun safely", {
+  skip: !connectionString && "Requires the disposable PostgreSQL service in the isolated migration workflow."
+}, async () => {
+  const parsed = new URL(connectionString);
+  assert.equal(decodeURIComponent(parsed.pathname.slice(1)), "chattbm_staging_isolated");
 
-test("isolated PostgreSQL migrations apply once, record checksums, and rerun safely", async () => {
+  function run(args = []) {
+    const result = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", ...args], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY"
+      }
+    });
+    if (result.status !== 0) throw new Error(result.stderr || result.stdout);
+    return result.stdout;
+  }
+
   const pool = new pg.Pool({ connectionString });
   try {
     const before = await pool.query("SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'chattbm_%'");
