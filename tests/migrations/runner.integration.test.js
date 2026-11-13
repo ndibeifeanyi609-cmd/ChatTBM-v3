@@ -154,6 +154,49 @@ test("refuses a recorded migration when a required column is missing", testOptio
   });
 });
 
+test("refuses a recorded migration when its cascading user foreign key is missing", testOptions, async () => {
+  await withDatabase(async pool => {
+    const sql = await readFile(new URL("../../database/migrations/001_auth_accounts_sessions.sql", import.meta.url), "utf8");
+    const checksum = createHash("sha256").update(sql).digest("hex");
+    await pool.query(sql);
+    const fk = await pool.query(`
+      SELECT constraint_row.conname
+      FROM pg_constraint AS constraint_row
+      JOIN pg_class AS table_row ON table_row.oid = constraint_row.conrelid
+      WHERE table_row.relname = 'chattbm_auth_sessions'
+        AND constraint_row.contype = 'f'
+    `);
+    assert.equal(fk.rows.length, 1);
+    await pool.query("ALTER TABLE public.chattbm_auth_sessions DROP CONSTRAINT " + '"' + fk.rows[0].conname.replaceAll('"', '""') + '"');
+    await pool.query(`
+      CREATE TABLE public.chattbm_schema_migrations (
+        migration_id TEXT PRIMARY KEY,
+        checksum_sha256 TEXT NOT NULL,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await pool.query(
+      "INSERT INTO public.chattbm_schema_migrations (migration_id, checksum_sha256) VALUES ($1, $2)",
+      ["001_auth_accounts_sessions.sql", checksum]
+    );
+
+    const result = run(["--apply"]);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Recorded migration schema mismatch/);
+    assert.match(result.stderr, /primary\/unique\/foreign-key constraints differ/);
+    const remaining = await pool.query(`
+      SELECT count(*)::int AS count
+      FROM pg_constraint AS constraint_row
+      JOIN pg_class AS table_row ON table_row.oid = constraint_row.conrelid
+      WHERE table_row.relname = 'chattbm_auth_sessions'
+        AND constraint_row.contype = 'f'
+    `);
+    assert.equal(remaining.rows[0].count, 0);
+    const ledger = await pool.query("SELECT count(*)::int AS count FROM public.chattbm_schema_migrations");
+    assert.equal(ledger.rows[0].count, 1);
+  });
+});
+
 test("refuses a ledger that skips an earlier manifest migration", testOptions, async () => {
   await withDatabase(async pool => {
     await pool.query(`
