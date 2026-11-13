@@ -108,8 +108,8 @@ test("applies all migrations once and safely reruns without duplicates", testOpt
 
     const second = run(["--apply"]);
     assert.equal(second.status, 0, second.stderr || second.stdout);
-    assert.match(second.stdout, /ALREADY APPLIED 004_password_reset_tokens\\.sql/);
-    assert.match(second.stdout, /ALREADY APPLIED 005_auth_rate_limits\\.sql/);
+    assert.match(second.stdout, /ALREADY APPLIED 004_password_reset_tokens\.sql/);
+    assert.match(second.stdout, /ALREADY APPLIED 005_auth_rate_limits\.sql/);
     const again = await pool.query("SELECT count(*)::int AS count FROM public.chattbm_schema_migrations");
     assert.equal(again.rows[0].count, 7);
     const required = await pool.query(
