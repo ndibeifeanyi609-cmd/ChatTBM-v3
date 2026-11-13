@@ -260,8 +260,8 @@ test("refuses a recorded migration when a required session index is missing", te
 
     const result = run(["--apply"]);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /Recorded migration schema mismatch/);
-    assert.match(result.stderr, /chattbm_auth_sessions_expires_at_idx definition differs/);
+    assert.match(result.stderr, /Recorded migrations are missing declared schema objects/);
+    assert.match(result.stderr, /chattbm_auth_sessions_expires_at_idx/);
     const remaining = await pool.query(
       "SELECT to_regclass('public.chattbm_auth_sessions_expires_at_idx') IS NULL AS missing"
     );
