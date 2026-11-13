@@ -29,6 +29,44 @@ test("isolated PostgreSQL migrations apply once, record checksums, and rerun saf
     const before = await pool.query("SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'chattbm_%'");
     assert.equal(before.rows[0].count, 0, "integration database must start empty");
 
+    // Reject a ledger table whose columns do not match the runner contract.
+    await pool.query("CREATE TABLE public.chattbm_schema_migrations (migration_id TEXT PRIMARY KEY)");
+    const malformedLedger = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", "--apply"], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY",
+        STAGING_MIGRATION_ALLOWED_HOSTS: "localhost"
+      }
+    });
+    assert.notEqual(malformedLedger.status, 0);
+    assert.match(malformedLedger.stderr, /Migration ledger has an invalid structure/);
+    await pool.query("DROP TABLE public.chattbm_schema_migrations");
+
+    // A later migration cannot be recorded while an earlier migration is pending.
+    await pool.query(`
+      CREATE TABLE public.chattbm_schema_migrations (
+        migration_id TEXT PRIMARY KEY,
+        checksum_sha256 TEXT NOT NULL,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await pool.query(
+      "INSERT INTO public.chattbm_schema_migrations (migration_id, checksum_sha256) VALUES ($1, $2)",
+      ["002_chat_history.sql", "0".repeat(64)]
+    );
+    const outOfOrderLedger = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", "--apply"], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY",
+        STAGING_MIGRATION_ALLOWED_HOSTS: "localhost"
+      }
+    });
+    assert.notEqual(outOfOrderLedger.status, 0);
+    assert.match(outOfOrderLedger.stderr, /Migration ledger is not a contiguous manifest prefix/);
+    await pool.query("DROP TABLE public.chattbm_schema_migrations");
+
     // An existing application schema without a ledger must never be silently baselined.
     await pool.query(`
       CREATE TABLE public.chattbm_users (
