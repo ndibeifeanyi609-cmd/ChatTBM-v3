@@ -132,7 +132,7 @@ test("refuses a ledger that skips an earlier manifest migration", testOptions, a
     );
     const result = run(["--apply"]);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /Migration ledger is not a contiguous manifest prefix/);
+    assert.match(result.stderr, /Recorded migrations are missing declared schema objects/);
   });
 });
 
