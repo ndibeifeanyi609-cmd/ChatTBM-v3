@@ -1,4 +1,4 @@
-name: Encrypted Isolated Staging Database Backup
+name: Encrypted Isolated Staging Backup Restore Validation
 
 on:
   workflow_dispatch:
@@ -27,7 +27,6 @@ jobs:
     steps:
       - name: Verify required secrets and approved bucket
         env:
-          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -35,7 +34,6 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
           set -euo pipefail
-          test -n "$STAGING_DATABASE_URL"
           test -n "$BACKUP_PASSPHRASE"
           test -n "$R2_ACCESS_KEY_ID"
           test -n "$R2_SECRET_ACCESS_KEY"
@@ -59,33 +57,42 @@ jobs:
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
           sudo apt-get update
           sudo apt-get install -y postgresql-client-18
-      - name: Create encrypted staging backup and upload to R2
-        id: backup
-        env:
-          STAGING_BACKUP_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
-          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          BACKUP_KEEP_LOCAL: "true"
-        run: bash scripts/staging-encrypted-backup.sh
-      - name: Download encrypted backup from R2
+      - name: Select and download latest encrypted staging backup from R2
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          BACKUP_OBJECT_KEY: ${{ steps.backup.outputs.backup_object_key }}
         run: |
           set -euo pipefail
-          test -n "$BACKUP_OBJECT_KEY"
           export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
           export AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
           export AWS_DEFAULT_REGION=auto
           endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-          aws s3 cp "s3://${R2_BUCKET_NAME}/${BACKUP_OBJECT_KEY}" /tmp/restore-test.dump.gpg --endpoint-url "$endpoint" --only-show-errors
+          aws s3api list-objects-v2 --bucket "$R2_BUCKET_NAME" --prefix "chattbm-staging-" --endpoint-url "$endpoint" --output json > /tmp/r2-objects.json
+          object_key="$(python3 - <<'PY'
+          import json
+          with open("/tmp/r2-objects.json", encoding="utf-8") as source:
+              payload = json.load(source)
+          objects = [
+              item for item in payload.get("Contents", [])
+              if item.get("Key", "").endswith(".dump.gpg")
+          ]
+          if not objects:
+              raise SystemExit("No encrypted staging backup was found in the approved R2 bucket.")
+          latest = max(objects, key=lambda item: item["LastModified"])
+          print(latest["Key"])
+          PY
+          )"
+          case "$object_key" in
+            chattbm-staging-*.dump.gpg) ;;
+            *) echo "Unexpected backup object key." >&2; exit 1 ;;
+          esac
+          echo "Selected encrypted staging backup: $object_key"
+          echo "backup_object_key=$object_key" >> "$GITHUB_OUTPUT"
+          aws s3 cp "s3://${R2_BUCKET_NAME}/${object_key}" /tmp/restore-test.dump.gpg --endpoint-url "$endpoint" --only-show-errors
           test -s /tmp/restore-test.dump.gpg
+        id: backup
       - name: Decrypt and restore into disposable PostgreSQL
         env:
           BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
@@ -104,4 +111,4 @@ jobs:
           '
       - name: Remove local encrypted backup
         if: always()
-        run: rm -f /tmp/chattbm-staging-*.dump.gpg /tmp/restore-test.dump.gpg /tmp/chattbm-restore-test.dump
+        run: rm -f /tmp/chattbm-staging-*.dump.gpg /tmp/restore-test.dump.gpg /tmp/chattbm-restore-test.dump /tmp/r2-objects.json
