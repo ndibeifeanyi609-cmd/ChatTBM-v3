@@ -126,10 +126,11 @@ async function main() {
       throw new Error("Migration ledger contains IDs absent from the manifest: " + unknownLedgerIds.join(", "));
     }
     const appliedMap = new Map(applied.rows.map(row => [row.migration_id, row.checksum_sha256]));
-    const recordedIds = applied.rows.map(row => row.migration_id);
-    const expectedPrefix = plan.slice(0, recordedIds.length).map(migration => migration.id);
-    if (recordedIds.length > plan.length ||
-        recordedIds.some((id, index) => id !== expectedPrefix[index])) {
+    const manifestOrder = new Map(plan.map((migration, index) => [migration.id, index]));
+    const recordedPositions = [...appliedMap.keys()]
+      .map(id => manifestOrder.get(id))
+      .sort((a, b) => a - b);
+    if (recordedPositions.some((position, index) => position !== index)) {
       throw new Error("Migration ledger is not a contiguous manifest prefix.");
     }
 
