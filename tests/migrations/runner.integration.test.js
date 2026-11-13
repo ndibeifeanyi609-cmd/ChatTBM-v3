@@ -46,6 +46,47 @@ test("refuses a malformed migration ledger", testOptions, async () => {
   });
 });
 
+test("refuses an empty ledger beside existing ChatTBM tables and preserves user data", testOptions, async () => {
+  await withDatabase(async pool => {
+    await pool.query(`
+      CREATE TABLE public.chattbm_schema_migrations (
+        migration_id TEXT PRIMARY KEY,
+        checksum_sha256 TEXT NOT NULL,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await pool.query(`
+      CREATE TABLE public.chattbm_users (
+        id TEXT PRIMARY KEY,
+        email_normalized TEXT NOT NULL UNIQUE
+      )
+    `);
+    await pool.query(
+      "INSERT INTO public.chattbm_users (id, email_normalized) VALUES ($1, $2)",
+      ["preserved-user", "preserved@example.test"]
+    );
+
+    const result = run(["--apply"]);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Empty migration ledger found beside existing ChatTBM tables/);
+
+    const ledger = await pool.query("SELECT count(*)::int AS count FROM public.chattbm_schema_migrations");
+    assert.equal(ledger.rows[0].count, 0);
+    const preserved = await pool.query(
+      "SELECT id, email_normalized FROM public.chattbm_users WHERE id = $1",
+      ["preserved-user"]
+    );
+    assert.deepEqual(preserved.rows, [{
+      id: "preserved-user",
+      email_normalized: "preserved@example.test"
+    }]);
+    const untouched = await pool.query(
+      "SELECT to_regclass('public.chattbm_password_reset_tokens') IS NULL AND to_regclass('public.chattbm_auth_rate_limits') IS NULL AS clean"
+    );
+    assert.equal(untouched.rows[0].clean, true);
+  });
+});
+
 test("refuses a ledger that skips an earlier manifest migration", testOptions, async () => {
   await withDatabase(async pool => {
     await pool.query(`
