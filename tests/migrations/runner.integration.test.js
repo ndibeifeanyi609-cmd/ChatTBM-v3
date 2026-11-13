@@ -16,7 +16,8 @@ test("isolated PostgreSQL migrations apply once, record checksums, and rerun saf
       encoding: "utf8",
       env: {
         ...process.env,
-        STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY"
+        STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY",
+        STAGING_MIGRATION_ALLOWED_HOSTS: "localhost"
       }
     });
     if (result.status !== 0) throw new Error(result.stderr || result.stdout);
@@ -41,6 +42,37 @@ test("isolated PostgreSQL migrations apply once, record checksums, and rerun saf
     assert.equal(again.rows[0].count, 7);
     const required = await pool.query("SELECT to_regclass('public.chattbm_password_reset_tokens') IS NOT NULL AND to_regclass('public.chattbm_auth_rate_limits') IS NOT NULL AS present");
     assert.equal(required.rows[0].present, true);
+
+    const noApproval = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", "--apply"], {
+      encoding: "utf8",
+      env: { ...process.env, STAGING_MIGRATION_APPROVAL: "", STAGING_MIGRATION_ALLOWED_HOSTS: "localhost" }
+    });
+    assert.notEqual(noApproval.status, 0);
+    assert.match(noApproval.stderr, /Apply refused/);
+
+    const wrongHost = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", "--apply"], {
+      encoding: "utf8",
+      env: { ...process.env, STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY", STAGING_MIGRATION_ALLOWED_HOSTS: "not-localhost" }
+    });
+    assert.notEqual(wrongHost.status, 0);
+    assert.match(wrongHost.stderr, /host is not in STAGING_MIGRATION_ALLOWED_HOSTS/);
+
+    await pool.query("INSERT INTO public.chattbm_schema_migrations (migration_id, checksum_sha256) VALUES ('999_unknown.sql', $1)", ["0".repeat(64)]);
+    const unknownResult = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", "--apply"], {
+      encoding: "utf8", env: { ...process.env, STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY", STAGING_MIGRATION_ALLOWED_HOSTS: "localhost" }
+    });
+    assert.notEqual(unknownResult.status, 0);
+    assert.match(unknownResult.stderr, /IDs absent from the manifest/);
+    await pool.query("DELETE FROM public.chattbm_schema_migrations WHERE migration_id = '999_unknown.sql'");
+
+    const original = ledger.rows.find(row => row.migration_id === "001_auth_accounts_sessions.sql");
+    await pool.query("UPDATE public.chattbm_schema_migrations SET checksum_sha256 = $1 WHERE migration_id = $2", ["f".repeat(64), original.migration_id]);
+    const mismatch = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", "--apply"], {
+      encoding: "utf8", env: { ...process.env, STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY", STAGING_MIGRATION_ALLOWED_HOSTS: "localhost" }
+    });
+    assert.notEqual(mismatch.status, 0);
+    assert.match(mismatch.stderr, /Checksum mismatch/);
+    await pool.query("UPDATE public.chattbm_schema_migrations SET checksum_sha256 = $1 WHERE migration_id = $2", [original.checksum_sha256, original.migration_id]);
   } finally {
     await pool.end();
   }
