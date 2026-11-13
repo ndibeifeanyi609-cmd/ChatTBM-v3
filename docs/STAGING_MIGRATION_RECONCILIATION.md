@@ -72,15 +72,27 @@ Do not retroactively populate a migration ledger by assuming that present tables
 2. **Stabilize migration identity.** Assign each migration a unique immutable identifier independent of its numeric filename prefix. Record the exact filename and SHA-256 checksum.
 3. **Reconcile existing schema history.** Establish the provenance of all existing application tables, especially the three tables not represented in the inspected migration set. Do not infer migration history from table existence.
 4. **Review runner and ledger behavior.** Require checksum mismatch to stop execution; use an advisory lock; write migration and ledger record atomically; and independently verify schema before marking a migration applied.
-5. **Verify backup and restore.** The prior GitHub-runner backup attempt failed during the external PostgreSQL connection with `SSL connection has been closed unexpectedly`. No dump, object-storage upload/download, or restore verification was completed. A verified backup/restore is therefore still a blocking gate.
+5. **Verify backup and restore.** This gate has now passed for the tested encrypted staging artifact: Render created and uploaded the dump, and GitHub Actions Run #13 downloaded it from the approved R2 bucket, decrypted it, and restored it into a disposable PostgreSQL 18 instance. The restore check confirmed at least five `chattbm_` tables. This proves basic archive recoverability for that artifact; it does not replace the separate schema, migration-history, constraint, index, or data-integrity reviews.
 6. **Review migration 004 and 005 preconditions.** Confirm exact table, constraint, index and foreign-key definitions against the current staging schema and runner behavior before proposing execution.
 7. **Request separate explicit approval.** Any staging database write requires a separate approval after the above evidence is reviewed. Production remains prohibited.
 
 ## 6. Backup status
 
-The manual-only encrypted staging backup workflow has been merged, but the attempted run did not complete. It did not produce a verified backup artifact or a successful restore. Workflow existence and successful code checks are not evidence of a completed backup.
+**Verified staging backup artifact:**
 
-Do not broaden the staging database IP allowlist to `0.0.0.0/0` to work around the connection failure. Prefer a controlled staging-side execution path using the Render private network, subject to separate review and approval.
+- R2 bucket: `chattbm-staging-backups` (private)
+- Object: `chattbm-staging-20261113T130743Z-00e2145951d2170412bc0c7408dc9f1e.dump.gpg`
+- SHA-256: `87161d32d15ac5c2027e61489561f99e9e7147d4bab2f8c7ea7a3ac556d80f33`
+- Encrypted size: `25799` bytes
+- Render Cron Job: completed successfully; upload and size verification reported successful
+- GitHub Actions Run #13: completed successfully; selected this exact object, downloaded it, decrypted it, and restored it into disposable PostgreSQL 18
+- Restore log: `RESTORE_VALIDATION_OK: core ChatTBM tables restored in disposable PostgreSQL.`
+
+The earlier GitHub-runner attempt to connect directly to Render PostgreSQL failed with `SSL connection has been closed unexpectedly`. The workflow was changed so GitHub no longer connects to the staging database; it validates a backup produced by the Render-side job instead.
+
+**Scope limitation:** Run #13's restore assertion checks for at least five `chattbm_` tables. It does not independently prove every expected table, column, constraint, index, row count, or application-level invariant. A stronger schema-specific restore validation remains desirable before migrations.
+
+Do not broaden the staging database IP allowlist to `0.0.0.0/0`. Keep backup creation on the controlled Render staging-side path.
 
 ## 7. Explicit non-actions
 
@@ -88,11 +100,11 @@ At the time of this report:
 
 - No staging migration has been run.
 - No staging schema or data has been changed.
-- No verified backup/restore has been completed.
+- The encrypted backup/restore gate has passed for the artifact and scope recorded in Section 6; broader schema/data-integrity verification remains outstanding.
 - No production database or production service has been touched.
 - No draft pull request has been merged or marked ready for review.
 - No database allowlist has been widened.
 
 ## 8. Decision
 
-**Do not run migrations yet.** The next safe engineering task is to finish the schema reconciliation and migration-history design, then establish a verified staging backup/restore path. Only after those gates pass should a separate staging-only migration plan be submitted for approval.
+**Do not run migrations yet.** The basic encrypted backup/restore gate now passes, but schema reconciliation, migration identity/history, the chat-history index mismatch, and migration 004/005 preconditions remain unresolved. Complete those reviews and a stronger schema-specific restore check before submitting a separate staging-only migration plan for explicit approval.
