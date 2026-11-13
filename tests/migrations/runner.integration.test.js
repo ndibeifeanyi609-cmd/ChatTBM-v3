@@ -29,6 +29,41 @@ test("isolated PostgreSQL migrations apply once, record checksums, and rerun saf
     const before = await pool.query("SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'chattbm_%'");
     assert.equal(before.rows[0].count, 0, "integration database must start empty");
 
+    // An existing application schema without a ledger must never be silently baselined.
+    await pool.query(`
+      CREATE TABLE public.chattbm_users (
+        id TEXT PRIMARY KEY,
+        email_normalized TEXT NOT NULL UNIQUE
+      )
+    `);
+    await pool.query(
+      "INSERT INTO public.chattbm_users (id, email_normalized) VALUES ($1, $2)",
+      ["preserved-user", "preserved@example.test"]
+    );
+    const baselineRefusal = spawnSync(process.execPath, ["scripts/runStagingMigrations.js", "--apply"], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        STAGING_MIGRATION_APPROVAL: "APPLY_TO_ISOLATED_STAGING_ONLY",
+        STAGING_MIGRATION_ALLOWED_HOSTS: "localhost"
+      }
+    });
+    assert.notEqual(baselineRefusal.status, 0);
+    assert.match(baselineRefusal.stderr, /Existing ChatTBM tables found without a migration ledger/);
+    const ledgerAfterRefusal = await pool.query(
+      "SELECT to_regclass('public.chattbm_schema_migrations') IS NOT NULL AS present"
+    );
+    assert.equal(ledgerAfterRefusal.rows[0].present, false);
+    const preserved = await pool.query(
+      "SELECT id, email_normalized FROM public.chattbm_users WHERE id = $1",
+      ["preserved-user"]
+    );
+    assert.deepEqual(preserved.rows, [{
+      id: "preserved-user",
+      email_normalized: "preserved@example.test"
+    }]);
+    await pool.query("DROP TABLE public.chattbm_users");
+
     const first = run(["--apply"]);
     assert.match(first, /MIGRATION_RUN_COMPLETE/);
     const ledger = await pool.query("SELECT migration_id, checksum_sha256 FROM public.chattbm_schema_migrations ORDER BY migration_id");
