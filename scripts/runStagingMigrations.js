@@ -45,8 +45,8 @@ export async function buildMigrationPlan(manifest, readSql = (file) => readFile(
 function declaredObjects(sql) {
   const objects = [];
   const patterns = [
-    /CREATE\\s+TABLE\\s+IF\\s+NOT\\s+EXISTS\\s+([a-z0-9_]+)/gi,
-    /CREATE\\s+INDEX\\s+IF\\s+NOT\\s+EXISTS\\s+([a-z0-9_]+)/gi
+    /CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+([a-z0-9_]+)/gi,
+    /CREATE\s+INDEX\s+IF\s+NOT\s+EXISTS\s+([a-z0-9_]+)/gi
   ];
   for (const pattern of patterns) {
     for (const match of sql.matchAll(pattern)) objects.push(match[1]);
