@@ -20,7 +20,7 @@ module.exports = `SELECT
           ON att.attrelid = con.conrelid
          AND att.attnum = key_col.attnum
         ORDER BY key_col.ord
-    ) AS columns,
+    )::text[] AS columns,
     CASE WHEN con.contype = 'f' THEN ref_ns.nspname ELSE NULL END
         AS foreign_table_schema,
     CASE WHEN con.contype = 'f' THEN ref_tbl.relname ELSE NULL END
@@ -32,7 +32,7 @@ module.exports = `SELECT
           ON att.attrelid = con.confrelid
          AND att.attnum = ref_col.attnum
         ORDER BY ref_col.ord
-    ) ELSE NULL END AS foreign_columns,
+    )::text[] ELSE NULL END AS foreign_columns,
     pg_get_constraintdef(con.oid, true) AS definition,
     con.condeferrable AS is_deferrable,
     con.condeferred AS is_initially_deferred,
