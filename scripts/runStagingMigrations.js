@@ -42,6 +42,32 @@ export async function buildMigrationPlan(manifest, readSql = (file) => readFile(
   return plan;
 }
 
+function declaredObjects(sql) {
+  const objects = [];
+  const patterns = [
+    /CREATE\\s+TABLE\\s+IF\\s+NOT\\s+EXISTS\\s+([a-z0-9_]+)/gi,
+    /CREATE\\s+INDEX\\s+IF\\s+NOT\\s+EXISTS\\s+([a-z0-9_]+)/gi
+  ];
+  for (const pattern of patterns) {
+    for (const match of sql.matchAll(pattern)) objects.push(match[1]);
+  }
+  return objects;
+}
+
+async function verifyRecordedObjectPresence(client, plan, appliedMap) {
+  const missing = [];
+  for (const migration of plan) {
+    if (!appliedMap.has(migration.id)) continue;
+    for (const objectName of declaredObjects(migration.sql)) {
+      const result = await client.query("SELECT to_regclass($1) IS NOT NULL AS present", ["public." + objectName]);
+      if (!result.rows[0].present) missing.push(migration.id + ": " + objectName);
+    }
+  }
+  if (missing.length) {
+    throw new Error("Recorded migrations are missing declared schema objects: " + missing.join(", ") + ". Refusing to continue.");
+  }
+}
+
 async function main() {
   const apply = process.argv.includes("--apply");
   const connectionString = process.env.STAGING_MIGRATION_DATABASE_URL;
@@ -134,6 +160,7 @@ async function main() {
       throw new Error("Migration ledger contains IDs absent from the manifest: " + unknownLedgerIds.join(", "));
     }
     const appliedMap = new Map(applied.rows.map(row => [row.migration_id, row.checksum_sha256]));
+    await verifyRecordedObjectPresence(client, plan, appliedMap);
     const manifestOrder = new Map(plan.map((migration, index) => [migration.id, index]));
     const recordedPositions = [...appliedMap.keys()]
       .map(id => manifestOrder.get(id))
