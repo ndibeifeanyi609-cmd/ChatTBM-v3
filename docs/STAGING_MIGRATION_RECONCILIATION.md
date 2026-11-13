@@ -209,3 +209,19 @@ A separately reviewed workflow change should validate the restored disposable da
 6. Keep all restore operations confined to the disposable PostgreSQL service. Do not connect the restore validator to Render staging or production.
 
 Until that enhanced validation passes, treat the existing backup as recoverable at the archive/basic-restore level only. Do not run staging migrations on the strength of Run #13 alone.
+
+
+
+## 3C. Recovered Run #34 metadata detail (read-only)
+
+The complete Run #34 job log was recovered and parsed again during this review. It contains:
+
+- **56 column records** across the nine present application tables, including PostgreSQL data types and nullability.
+- **23 index definitions** across those tables.
+- **100 constraint metadata records**, including primary-key, unique, foreign-key, check, and catalog-derived not-null entries.
+
+This confirms the inventory log contains enough column and index detail to build a more exact restore comparison for the objects that were present in the staging snapshot. It also independently confirms that `chattbm_chat_history` has only `chattbm_chat_history_pkey`; the expected `chattbm_chat_history_updated_at_idx` is absent.
+
+**Metadata limitation:** the inventory's constraint output records foreign-key constraint names and local columns, but does not reliably expose the referenced table/column pair for those rows. The 100 records also include generated not-null checks, so that number must not be interpreted as 100 independent business constraints. A future manifest must derive FK targets and full check expressions from reviewed SQL/source definitions or improve the read-only inventory query. Do not fill those fields by guessing.
+
+No database operation was performed while recovering or reviewing this log. The schema remains incomplete: the two expected migration tables are absent, and the chat-history index mismatch remains unresolved.
