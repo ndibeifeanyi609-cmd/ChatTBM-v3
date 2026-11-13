@@ -149,3 +149,37 @@ This source review establishes where the current application code declares these
 ### Baseline decision
 
 Do not add the three initializer-owned tables to the migration ledger as though historical migration execution were proven. A future baseline must explicitly record their source as application-initializer-managed (with the exact reviewed source revision), separately from migration-managed objects, and must only be created after a fresh read-only inventory and independent definition comparison. Do not change the initializers or staging database as part of this reconciliation review.
+
+
+## 3B. Missing-table application contract review (read-only)
+
+The application consumers and their SQL were inspected alongside migrations 004 and 005.
+
+### `chattbm_password_reset_tokens` — migration 004
+
+Application consumer: `auth/PasswordResetService.js`.
+
+The service requires:
+- `id` as a text identifier.
+- `user_id` as text referencing `chattbm_users(id)), with cascade deletion consistent with the migration.
+- A unique `token_hash`; the service stores a SHA-256 digest, not the raw reset token.
+- `created_at` defaulting to `NOW()`, `expires_at`, and nullable `used_at`.
+- Indexes on `(user_id, created_at DESC)` and `expires_at` as supplied by migration 004.
+
+The migration's columns and constraints support the observed service SQL: create/reset invalidation, token lookup under row lock, one-time consumption, expiry check, and invalidation of remaining tokens. The users table is present and uses a text primary key, matching the migration's FK type. This is a source-level compatibility review, not proof of staging execution readiness or data state.
+
+### `chattbm_auth_rate_limits` — migration 005
+
+Application consumer: `auth/PostgresRateLimitStore.js`.
+
+The adapter requires:
+- `bucket_key` as text primary key (an HMAC-SHA-256 hex digest).
+- `window_started_at`, `request_count`, `expires_at`, and `updated_at`.
+- The `request_count >= 1` check.
+- The expiry index used by bounded cleanup.
+
+Its atomic upsert increments or resets counters based on expiry; cleanup selects expired buckets with `FOR UPDATE SKIP LOCKED` and deletes them. Migration 005 supplies the required columns, check, and index. The integration test `tests/sharedAuthRateLimit.integration.test.js` is explicitly gated to a local disposable database named `chattbm_test`; its setup executes migration 005 twice and tests the adapter there. That test is not evidence that migration 005 has run in staging.
+
+### Review conclusion
+
+At source level, migrations 004 and 005 appear compatible with their current application consumers and with the existing text primary key on `chattbm_users`. Run #34 reports both target tables absent, so there is no existing target-table definition to compare in staging. The migrations' `IF NOT EXISTS` clauses do not remove the need for fresh preflight checks, database identity verification, backup validation, and the guarded runner/ledger. No staging SQL was executed.
