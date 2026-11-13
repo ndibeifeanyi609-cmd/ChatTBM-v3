@@ -36,11 +36,11 @@ async function main() {
                 CONSTRAINT chattbm_constraint_child_fk
                     FOREIGN KEY (tenant_id, record_id)
                     REFERENCES public.chattbm_constraint_parent (tenant_id, record_id)
-                    DEFERRABLE INITIALLY DEFERRED,
-                CONSTRAINT chattbm_constraint_child_amount_ck
-                    CHECK (amount > 0) NOT VALID
+                    DEFERRABLE INITIALLY DEFERRED
             )
         `);
+        await client.query(`ALTER TABLE public.chattbm_constraint_child
+            ADD CONSTRAINT chattbm_constraint_child_amount_ck CHECK (amount > 0) NOT VALID`);
 
         const result = await client.query(constraintQuery);
         const rows = result.rows.filter(row =>
