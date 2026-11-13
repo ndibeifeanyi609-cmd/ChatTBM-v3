@@ -117,6 +117,43 @@ test("refuses a recorded migration whose required table is missing", testOptions
   });
 });
 
+test("refuses a recorded migration when a required column is missing", testOptions, async () => {
+  await withDatabase(async pool => {
+    const sql = await readFile(new URL("../../database/migrations/001_auth_accounts_sessions.sql", import.meta.url), "utf8");
+    const checksum = createHash("sha256").update(sql).digest("hex");
+    await pool.query(sql);
+    await pool.query("ALTER TABLE public.chattbm_users DROP COLUMN password_hash");
+    await pool.query(`
+      CREATE TABLE public.chattbm_schema_migrations (
+        migration_id TEXT PRIMARY KEY,
+        checksum_sha256 TEXT NOT NULL,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await pool.query(
+      "INSERT INTO public.chattbm_schema_migrations (migration_id, checksum_sha256) VALUES ($1, $2)",
+      ["001_auth_accounts_sessions.sql", checksum]
+    );
+
+    const result = run(["--apply"]);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Recorded migration schema mismatch/);
+    assert.match(result.stderr, /chattbm_users columns differ/);
+    const preserved = await pool.query(
+      "SELECT to_regclass('public.chattbm_users') IS NOT NULL AS present"
+    );
+    assert.equal(preserved.rows[0].present, true);
+    const stillMissing = await pool.query(`
+      SELECT NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'chattbm_users'
+          AND column_name = 'password_hash'
+      ) AS missing
+    `);
+    assert.equal(stillMissing.rows[0].missing, true);
+  });
+});
+
 test("refuses a ledger that skips an earlier manifest migration", testOptions, async () => {
   await withDatabase(async pool => {
     await pool.query(`
