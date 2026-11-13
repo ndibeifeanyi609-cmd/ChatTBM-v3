@@ -54,6 +54,47 @@ function declaredObjects(sql) {
   return objects;
 }
 
+const migration001Columns = {
+  chattbm_users: [
+    ["id", "text", "NO"],
+    ["email_normalized", "text", "NO"],
+    ["password_hash", "text", "NO"],
+    ["email_verified_at", "timestamp with time zone", "YES"],
+    ["created_at", "timestamp with time zone", "NO"],
+    ["updated_at", "timestamp with time zone", "NO"],
+    ["disabled_at", "timestamp with time zone", "YES"]
+  ],
+  chattbm_auth_sessions: [
+    ["id", "text", "NO"],
+    ["user_id", "text", "NO"],
+    ["token_hash", "text", "NO"],
+    ["created_at", "timestamp with time zone", "NO"],
+    ["expires_at", "timestamp with time zone", "NO"],
+    ["revoked_at", "timestamp with time zone", "YES"],
+    ["last_seen_at", "timestamp with time zone", "YES"]
+  ]
+};
+
+async function verifyMigration001Columns(client) {
+  const mismatches = [];
+  for (const [tableName, expected] of Object.entries(migration001Columns)) {
+    const result = await client.query(
+      `SELECT column_name, data_type, is_nullable
+       FROM information_schema.columns
+       WHERE table_schema = 'public' AND table_name = $1
+       ORDER BY ordinal_position`,
+      [tableName]
+    );
+    const actual = result.rows.map(row => [row.column_name, row.data_type, row.is_nullable]);
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      mismatches.push(tableName + " columns differ from migration 001 definition");
+    }
+  }
+  if (mismatches.length) {
+    throw new Error("Recorded migration schema mismatch: " + mismatches.join("; ") + ". Refusing to continue.");
+  }
+}
+
 async function verifyRecordedObjectPresence(client, plan, appliedMap) {
   const missing = [];
   for (const migration of plan) {
@@ -65,6 +106,9 @@ async function verifyRecordedObjectPresence(client, plan, appliedMap) {
   }
   if (missing.length) {
     throw new Error("Recorded migrations are missing declared schema objects: " + missing.join(", ") + ". Refusing to continue.");
+  }
+  if (appliedMap.has("001_auth_accounts_sessions.sql")) {
+    await verifyMigration001Columns(client);
   }
 }
 
