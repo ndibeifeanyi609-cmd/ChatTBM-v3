@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "migrations": [
+    { "id": "001_auth_accounts_sessions.sql", "file": "001_auth_accounts_sessions.sql" },
+    { "id": "002_chat_history.sql", "file": "002_chat_history.sql" },
+    { "id": "002_google_oauth_identities.sql", "file": "002_google_oauth_identities.sql" },
+    { "id": "003_context_records.sql", "file": "003_context_records.sql" },
+    { "id": "003_google_oauth_states.sql", "file": "003_google_oauth_states.sql" },
+    { "id": "004_password_reset_tokens.sql", "file": "004_password_reset_tokens.sql" },
+    { "id": "005_auth_rate_limits.sql", "file": "005_auth_rate_limits.sql" }
+  ]
+}
