@@ -183,3 +183,29 @@ Its atomic upsert increments or resets counters based on expiry; cleanup selects
 ### Review conclusion
 
 At source level, migrations 004 and 005 appear compatible with their current application consumers and with the existing text primary key on `chattbm_users`. Run #34 reports both target tables absent, so there is no existing target-table definition to compare in staging. The migrations' `IF NOT EXISTS` clauses do not remove the need for fresh preflight checks, database identity verification, backup validation, and the guarded runner/ledger. No staging SQL was executed.
+
+
+## 6A. Restore-validation coverage audit (Run #13, read-only)
+
+The successful restore workflow was inspected at the exact job-log level (Run #13, job `132078771489`) and compared with its workflow patch in PR #77.
+
+Verified by Run #13:
+- The workflow selected the encrypted staging dump from the approved private R2 bucket.
+- It decrypted the selected artifact successfully.
+- `pg_restore --exit-on-error` restored the archive into a disposable PostgreSQL 18 database.
+- The post-restore assertion counted public base tables whose names begin with `chattbm_` and required only that the count be at least five.
+- The job completed successfully and emitted `RESTORE_VALIDATION_OK`.
+
+**Coverage limitation:** this assertion does not check the exact expected table set, columns and types, nullability/defaults, primary/foreign/unique/check constraints, indexes, or representative data invariants/row counts. Therefore, Run #13 proves encrypted archive decryption and basic restore execution, but does not yet satisfy the stronger schema-specific restore gate required before migration work.
+
+### Required next restore-validation enhancement
+
+A separately reviewed workflow change should validate the restored disposable database against an explicit, version-controlled expected schema manifest. At minimum it should:
+1. Assert the exact expected application table names, including the two currently missing tables only if the backup is expected to contain them; do not silently assume they exist.
+2. Compare each restored table's columns, PostgreSQL types, nullability and defaults against the reviewed source definitions.
+3. Compare primary keys, foreign keys, unique constraints, check constraints and indexes, including the missing chat-history updated-at index as an explicit expected mismatch rather than weakening the assertion.
+4. Record non-sensitive row counts and validate selected referential/data invariants without printing user data.
+5. Fail closed on unexpected or missing objects and emit a concise redacted diff.
+6. Keep all restore operations confined to the disposable PostgreSQL service. Do not connect the restore validator to Render staging or production.
+
+Until that enhanced validation passes, treat the existing backup as recoverable at the archive/basic-restore level only. Do not run staging migrations on the strength of Run #13 alone.
